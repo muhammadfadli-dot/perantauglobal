@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" fill="none">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8B0000"/>
+      <stop offset="50%" stop-color="#C8102E"/>
+      <stop offset="100%" stop-color="#1A1A1A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Globe icon -->
+  <g transform="translate(530, 180)">
+    <circle cx="70" cy="70" r="55" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none"/>
+    <ellipse cx="70" cy="70" rx="55" ry="28" stroke="rgba(255,255,255,0.2)" stroke-width="2" fill="none"/>
+    <ellipse cx="70" cy="70" rx="28" ry="55" stroke="rgba(255,255,255,0.2)" stroke-width="2" fill="none"/>
+    <line x1="15" y1="70" x2="125" y2="70" stroke="rgba(255,255,255,0.2)" stroke-width="2"/>
+    <path d="M100 30L115 18L115 42" stroke="rgba(255,255,255,0.4)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="80" y1="50" x2="115" y2="18" stroke="rgba(255,255,255,0.4)" stroke-width="3.5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Brand text -->
+  <text x="600" y="400" text-anchor="middle" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="56" font-weight="800" letter-spacing="2" fill="white">PERANTAU GLOBAL</text>
+  <text x="600" y="450" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="22" font-weight="400" letter-spacing="1" fill="rgba(255,255,255,0.7)">Your Best Gateway to Global Career Opportunities</text>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="590" width="1200" height="40" fill="rgba(0,0,0,0.3)"/>
+  <text x="600" y="616" text-anchor="middle" font-family="'Inter', system-ui, sans-serif" font-size="14" font-weight="500" fill="rgba(255,255,255,0.6)">perantauglobal.com • PT Daya Talenta Global</text>
+</svg>

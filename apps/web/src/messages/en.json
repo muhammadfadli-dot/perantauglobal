@@ -1,0 +1,234 @@
+{
+  "navbar": {
+    "brand": "Perantau Global",
+    "sipBadge": "Licensed P3MI",
+    "menu": {
+      "home": "Home",
+      "services": "Services",
+      "about": "About",
+      "contact": "Contact"
+    }
+  },
+  "hero": {
+    "employer": {
+      "title": "Access Indonesia's Best Talent",
+      "subtitle": "PT Daya Talenta Global is a government-licensed Indonesian recruitment agency (P3MI) delivering pre-screened, trained workers to employers across Japan, Saudi Arabia, UAE, Qatar, and Kuwait.",
+      "cta": "Inquire Now",
+      "ctaSecondary": "Contact via WhatsApp",
+      "ctaWhatsapp": "Contact via WhatsApp",
+      "badge": {
+        "licensed": "Licensed P3MI",
+        "zeroFees": "Zero Recruitment Fees",
+        "compliance": "Full Regulatory Compliance",
+        "destinations": "5+ Destination Countries"
+      },
+      "stats": {
+        "workers": "Active Programs & Vacancies",
+        "countries": "Destination Countries",
+        "licensed": "Licensed Since"
+      }
+    },
+    "headline": "Access Indonesia's Best Talent",
+    "subheadline": "PT Daya Talenta Global is a government-licensed Indonesian recruitment agency (P3MI) delivering pre-screened, trained workers to employers across Japan, Saudi Arabia, UAE, Qatar, and Kuwait.",
+    "cta": "Inquire Now",
+    "ctaSecondary": "Contact via WhatsApp",
+    "trustBadge": "Licensed P3MI — SIP No. 1810240237512"
+  },
+  "stats": {
+    "workersPlaced": "Active Programs & Vacancies",
+    "countries": "Destination Countries",
+    "yearsExperience": "Process Stages",
+    "placementCost": "Recruitment Fees"
+  },
+  "trustBar": {
+    "title": "Trusted by International Employers",
+    "credentials": {
+      "bp2mi": "Registered with Ministry of P2MI",
+      "kemnaker": "Official SIP3MI License",
+      "siskotkln": "Verified on SISKOP2MI",
+      "zeroCost": "Zero Recruitment Fees",
+      "dayalima": "Part of Dayalima Group"
+    },
+    "verifyLink": "Verify License"
+  },
+  "services": {
+    "title": "Recruitment Solutions",
+    "subtitle": "End-to-end workforce solutions — from sourcing and screening to training, compliance, and placement.",
+    "pageTitle": "Our Recruitment Solutions",
+    "pageSubtitle": "PT Daya Talenta Global provides comprehensive recruitment services for international employers seeking qualified Indonesian workers.",
+    "processPreview": {
+      "title": "How It Works",
+      "description": "Our structured 9-step process ensures every candidate is thoroughly screened, trained, and compliant before placement.",
+      "cta": "Contact Us"
+    },
+    "viewDetail": "Learn More",
+    "backToServices": "Back to Services"
+  },
+  "whyChooseUs": {
+    "title": "Why Partner With Perantau Global?",
+    "items": {
+      "noFees": {
+        "title": "Zero Recruitment Fees",
+        "description": "We operate on an employer-funded model — candidates are never charged, ensuring ethical recruitment and higher quality applicants."
+      },
+      "legalProcess": {
+        "title": "Full Regulatory Compliance",
+        "description": "Licensed P3MI under Indonesian law. All placements comply with both Indonesian and destination country labor regulations."
+      },
+      "competencyDevelopment": {
+        "title": "Pre-Trained Workforce",
+        "description": "Every candidate undergoes language training, technical skills development, and cultural orientation before deployment."
+      },
+      "migrantCommunity": {
+        "title": "End-to-End Support",
+        "description": "From initial screening through post-placement support, we manage the entire recruitment lifecycle for your peace of mind."
+      }
+    }
+  },
+  "servicesOverview": {
+    "items": {
+      "japan": {
+        "title": "Japan Workforce Solutions",
+        "description": "Tokutei Ginou (SSW) qualified workers for manufacturing, food processing, hospitality, and caregiving sectors.",
+        "slug": "japan-placement"
+      },
+      "middleEast": {
+        "title": "Middle East Workforce Solutions",
+        "description": "Qualified workers for Saudi Arabia, UAE, Qatar, and Kuwait across healthcare, hospitality, and construction sectors.",
+        "slug": "middle-east-placement"
+      },
+      "recruitment": {
+        "title": "Recruitment & Screening",
+        "description": "Rigorous multi-stage candidate selection including skills assessment, background checks, and competency testing.",
+        "slug": "recruitment-selection"
+      },
+      "development": {
+        "title": "Training & Development",
+        "description": "Comprehensive pre-deployment programs: language certification, technical upskilling, and cultural orientation.",
+        "slug": "candidate-development"
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to Build Your Indonesian Workforce?",
+    "subtitle": "Contact us today for a no-obligation consultation. Our team will help you find the right talent for your needs.",
+    "button": "Get in Touch"
+  },
+  "footer": {
+    "companyInfo": {
+      "name": "PT Daya Talenta Global",
+      "brand": "Perantau Global",
+      "description": "A government-licensed Indonesian recruitment agency (P3MI) providing end-to-end workforce solutions for international employers.",
+      "address": "Kantor Taman E3.3 Unit B3-3A, Kawasan Mega Kuningan, Setiabudi, South Jakarta 12950"
+    },
+    "links": {
+      "title": "Links",
+      "home": "Home",
+      "services": "Services",
+      "about": "About Us",
+      "contact": "Contact"
+    },
+    "copyright": "© {year} PT Daya Talenta Global. All rights reserved."
+  },
+  "about": {
+    "title": "About Perantau Global",
+    "subtitle": "Learn about PT Daya Talenta Global and why leading employers trust us for their Indonesian workforce needs.",
+    "companyIntro": {
+      "title": "Perantau Global",
+      "description": "Perantau Global is the international recruitment brand of PT Daya Talenta Global, a government-licensed P3MI specializing in sourcing, training, and placing qualified Indonesian workers with employers across Asia and the Middle East.",
+      "established": "P3MI license issued November 18, 2024",
+      "type": "Licensed Indonesian Migrant Worker Placement Company (P3MI)",
+      "license": "P3MI License No: 1810240237512",
+      "registration": "Business Registration No: 1810240237512",
+      "ministry": "Under the Ministry of Protection of Indonesian Migrant Workers (P2MI)"
+    },
+    "parentCompany": {
+      "title": "Part of Dayalima Group",
+      "description": "PT Daya Talenta Global is part of Dayalima Group, a leading Indonesian HR consulting ecosystem serving corporations and state-owned enterprises since 1998.",
+      "experience": "Dayalima Group founded",
+      "clients": "organizational clients served",
+      "experts": "executives placed",
+      "since": "DTG registered as P3MI"
+    },
+    "vision": {
+      "title": "Vision & Mission",
+      "visionTitle": "Vision",
+      "visionText": "To become the most trusted Indonesian recruitment partner for international employers, connecting global opportunities with Indonesia's talented workforce.",
+      "missionTitle": "Mission",
+      "missions": {
+        "m1": "Deliver qualified, pre-trained Indonesian workers who meet international employer standards.",
+        "m2": "Ensure full regulatory compliance across all recruitment and placement processes.",
+        "m3": "Provide comprehensive training and competency development to maximize candidate readiness.",
+        "m4": "Build long-term partnerships with employers through consistent quality and reliable service.",
+        "m5": "Maintain ethical recruitment practices that protect both employer interests and worker welfare."
+      }
+    },
+    "credentials": {
+      "title": "Credentials & Compliance",
+      "items": {
+        "p3mi": "Official P3MI license from the Ministry of P2MI",
+        "registration": "Registered with Indonesia's Ministry of Investment",
+        "dayalima": "Part of Dayalima Group — since 1998",
+        "ethical": "Committed to ILO fair recruitment principles",
+        "verify": "License verifiable on SISKOP2MI (Ministry of P2MI)"
+      }
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Interested in hiring Indonesian workers? Get in touch with our team to discuss your workforce needs.",
+    "info": {
+      "title": "Contact Information",
+      "address": {
+        "label": "Office Address",
+        "value": "Kantor Taman E3.3 Unit B3-3A, Kawasan Mega Kuningan, Setiabudi, South Jakarta 12950"
+      },
+      "phone": {
+        "label": "Phone",
+        "value": "(021) 5764455"
+      },
+      "whatsapp": {
+        "label": "WhatsApp",
+        "value": "+62 852-1141-5104"
+      },
+      "email": {
+        "label": "Email",
+        "value": "info@dayatalentaglobal.id"
+      },
+      "hours": {
+        "label": "Office Hours",
+        "value": "Monday - Friday: 08:00 - 17:00 WIB (GMT+7)"
+      }
+    },
+    "social": {
+      "title": "Social Media",
+      "linkedin": "Daya Talenta Global",
+      "instagram": "@perantauglobal"
+    },
+    "form": {
+      "title": "Send a Message",
+      "name": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "subject": "Subject",
+      "message": "Message",
+      "submit": "Send Message",
+      "success": "Your message has been sent. We will get back to you shortly.",
+      "subjects": {
+        "general": "General Inquiry",
+        "japan": "Japan Workforce",
+        "middleEast": "Middle East Workforce",
+        "partnership": "Partnership",
+        "other": "Other"
+      }
+    }
+  },
+  "common": {
+    "contactWhatsApp": "Contact via WhatsApp",
+    "whatsAppUrl": "https://wa.me/6285211415104?text=Hello%2C%20I%27m%20interested%20in%20hiring%20Indonesian%20workers%20through%20Perantau%20Global.",
+    "learnMore": "Learn More",
+    "backToHome": "Back to Home",
+    "register": "Inquire Now",
+    "contactUs": "Contact Us"
+  }
+}
