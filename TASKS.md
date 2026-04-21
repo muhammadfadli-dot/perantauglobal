@@ -30,14 +30,9 @@ Focus: working dev env + bridge apps/web to new Supabase + build apps/platform M
   2. `.env.local` copied from legacy `~/Developer/perantauglobal.com/.env.local` (still points at `gt-tools` until Task 6)
 - Dev: `pnpm exec next dev --port 3100` (legacy server was on 3000) → homepage HTTP 200, title correct.
 
-### TASK 2: Create GitHub repo + push monorepo
-```bash
-cd ~/Developer/perantauglobal
-git init
-git add .
-git commit -m "feat: initial monorepo scaffold + apps/web port"
-gh repo create panji-firmansyah/perantauglobal --private --source=. --push
-```
+### TASK 2: Create GitHub repo + push monorepo ✅ DONE (2026-04-21)
+- Repo: https://github.com/panji-firmansyah/perantauglobal (private)
+- 217 files, initial commit on `main`. Only `.env.example` committed (no secrets).
 
 ### TASK 3: Link 2 Vercel projects in Dayalima Group Pro team
 - Create Vercel project `perantauglobal-web` → root `apps/web`, team: Dayalima Group
@@ -45,33 +40,17 @@ gh repo create panji-firmansyah/perantauglobal --private --source=. --push
 - Copy env vars from old `dtg-website` Vercel project → new `perantauglobal-web`
 - Don't point DNS yet — preview deployments only until cutover
 
-### TASK 4: `packages/db` client + types
-File structure:
-```
-packages/db/src/
-├── index.ts           # exports
-├── client.ts          # browser/edge anon-key client
-├── server.ts          # server-only anon client (per-request) + service-role helpers
-├── types.ts           # generated types (run `generate_typescript_types` via MCP)
-└── schemas/
-    └── positions/
-        ├── index.ts
-        ├── truck-driver-jepang.ts    # Zod schema for requirements + answers
-        ├── kaigo-jepang.ts
-        ├── perawat-saudi-arabia.ts
-        ├── barista-saudi-arabia.ts
-        ├── waiter-saudi-arabia.ts
-        ├── food-service-jepang.ts
-        ├── dental-nurse-saudi-arabia.ts
-        ├── spa-therapist-saudi-arabia.ts
-        ├── caregiver-taiwan.ts
-        └── (plus SPG, GTH if still relevant as "positions")
-```
-
-Generate types via MCP:
-```
-mcp__supabase__generate_typescript_types { project_id: "jeadtvxgxmqnsqwxjmhj" }
-```
+### TASK 4: `packages/db` client + types ✅ DONE (2026-04-21)
+- `src/types.ts` — generated Supabase types via MCP
+- `src/client.ts` — `createBrowserClient(url, anonKey)` browser/edge anon
+- `src/server.ts` — `createServerClient` (per-request anon, optional user JWT) + `createServiceRoleClient` (edge fn / CLI only)
+- `src/index.ts` — re-exports
+- `schemas/positions/common.ts` — `sharedCandidateSchema`, `definePosition()` helper
+- `schemas/positions/*.ts` — 6 lowongan + GTH (barista/waiter-SA, perawat-SA, kaigo/food-service/truck-driver-JP, global-talent-hub)
+- `schemas/positions/index.ts` — `positions` registry + `getPosition(slug)`
+- Skipped for now: dental-nurse, spa-therapist, caregiver-taiwan (not yet on apps/web), SPG (custom scoring — add when needed)
+- `apps/web` deps: added `@perantauglobal/db` (workspace:*) + `zod`
+- Typecheck + build both green.
 
 ### TASK 5: Seed 16 positions — `migrations/0002_seed_positions.sql`
 Port existing position list from `~/Developer/perantauglobal.com/src/app/[locale]/lowongan/` + `program/`. Format each with:
