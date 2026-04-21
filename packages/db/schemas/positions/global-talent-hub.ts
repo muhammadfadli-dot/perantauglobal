@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { definePosition } from "./common.js";
+import { definePosition } from "./common";
 
 /**
  * Global Talent Hub is a broad-intake program — candidate indicates interest

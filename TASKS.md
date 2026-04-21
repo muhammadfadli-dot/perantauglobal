@@ -58,17 +58,21 @@ Focus: working dev env + bridge apps/web to new Supabase + build apps/platform M
 - 7 positions active (6 lowongan + GTH). Requirement keys verified 1:1 against Zod.
 - Dental nurse, spa therapist, caregiver-taiwan NOT seeded (not yet on apps/web; add when pages ported)
 
-### TASK 6: Refactor `apps/web` forms → new Supabase + RLS pattern
-Current: forms POST `/api/program/[slug]` or `/api/lowongan/[slug]` → service_role_key → insert to old tables.
+### TASK 6: Refactor `apps/web` forms → new Supabase + RLS pattern 🚧 PHASE 1 DONE (2026-04-22)
+**Dual-write shadow** (risk-adjusted: legacy gt-tools remains source of truth; new Supabase accumulates shadow data for shape/volume verification before cutover):
+- `apps/web/src/lib/supabase-v2.ts` — server anon client to new project (SUPABASE_URL_V2 + SUPABASE_ANON_KEY_V2)
+- `apps/web/src/lib/shadow-write.ts` — `shadowPendingSubmission()` helper. Client-generated UUID (avoids SELECT policy requirement), inserts `pending_submissions` + linked `consents` via anon key / RLS.
+- Wired into:
+  - `/api/lowongan/[slug]/route.ts` — after legacy insert, `waitUntil(shadowPendingSubmission(...))` for all 6 lowongan
+  - `/api/program/[slug]/route.ts` — same, mapped via `PROGRAM_TO_POSITION_SLUG` (truck-driver → truck-driver-jepang, global-talent-hub → global-talent-hub)
+- **Not yet wired**: SPG (`/api/program/spg`), generic register (`/api/register`), contact/employer-inquiry (intentional — not position-specific)
+- Verified end-to-end: POST /api/lowongan/perawat-saudi-arabia → row in `pending_submissions` (Supabase) with role_data JSONB + 1 linked consent (`application_processing`, version 2026-04-22).
 
-Target flow (anon + RLS):
-1. Form POST → `/api/apply` (single endpoint, takes `position_slug` in body)
-2. Insert to `pending_submissions` (anon key + RLS insert policy)
-3. Insert related `consents` entries (PDP log)
-4. Call Supabase Auth `signInWithOtp` via edge function or API → triggers magic link email
-5. Return success response
-
-Remove: all references to `SUPABASE_SERVICE_ROLE_KEY` in `apps/web/`. Only `SUPABASE_ANON_KEY`.
+**Phase 2 (needs Task 7 edge function + Supabase Auth SMTP)** — convert to magic-link-primary flow:
+- Remove `shadow` nomenclature; `/api/apply` becomes canonical
+- Add `signInWithOtp` call after pending_submission insert
+- Edge function `handle-magic-link-verify` materializes candidate + application on click
+- Delete legacy routes + `SUPABASE_SERVICE_ROLE_KEY` from apps/web entirely
 
 ### TASK 7: Edge Function — `handle-magic-link-verify`
 Triggered when user clicks magic link + verifies.

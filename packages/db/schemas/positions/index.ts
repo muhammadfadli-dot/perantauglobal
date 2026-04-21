@@ -1,19 +1,19 @@
-import { baristaSaudiArabia } from "./barista-saudi-arabia.js";
-import { foodServiceJepang } from "./food-service-jepang.js";
-import { globalTalentHub } from "./global-talent-hub.js";
-import { kaigoJepang } from "./kaigo-jepang.js";
-import { perawatSaudiArabia } from "./perawat-saudi-arabia.js";
-import { truckDriverJepang } from "./truck-driver-jepang.js";
-import { waiterSaudiArabia } from "./waiter-saudi-arabia.js";
+import { baristaSaudiArabia } from "./barista-saudi-arabia";
+import { foodServiceJepang } from "./food-service-jepang";
+import { globalTalentHub } from "./global-talent-hub";
+import { kaigoJepang } from "./kaigo-jepang";
+import { perawatSaudiArabia } from "./perawat-saudi-arabia";
+import { truckDriverJepang } from "./truck-driver-jepang";
+import { waiterSaudiArabia } from "./waiter-saudi-arabia";
 
-export * from "./common.js";
-export { baristaSaudiArabia } from "./barista-saudi-arabia.js";
-export { foodServiceJepang } from "./food-service-jepang.js";
-export { globalTalentHub } from "./global-talent-hub.js";
-export { kaigoJepang } from "./kaigo-jepang.js";
-export { perawatSaudiArabia } from "./perawat-saudi-arabia.js";
-export { truckDriverJepang } from "./truck-driver-jepang.js";
-export { waiterSaudiArabia } from "./waiter-saudi-arabia.js";
+export * from "./common";
+export { baristaSaudiArabia } from "./barista-saudi-arabia";
+export { foodServiceJepang } from "./food-service-jepang";
+export { globalTalentHub } from "./global-talent-hub";
+export { kaigoJepang } from "./kaigo-jepang";
+export { perawatSaudiArabia } from "./perawat-saudi-arabia";
+export { truckDriverJepang } from "./truck-driver-jepang";
+export { waiterSaudiArabia } from "./waiter-saudi-arabia";
 
 /**
  * Registry of all positions keyed by slug. Used by:

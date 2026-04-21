@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { definePosition } from "./common.js";
+import { definePosition } from "./common";
 
 const roleDataSchema = z.object({
   experience_type: z.enum([

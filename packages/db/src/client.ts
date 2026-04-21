@@ -1,5 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "./types.js";
+import type { Database } from "./types";
 
 /**
  * Browser / edge-safe Supabase client with anon key.

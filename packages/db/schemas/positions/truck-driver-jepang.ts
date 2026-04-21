@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { definePosition } from "./common.js";
+import { definePosition } from "./common";
 
 const roleDataSchema = z.object({
   sim_type: z.enum(["sim_a", "sim_b1", "sim_b2", "sim_internasional"]),

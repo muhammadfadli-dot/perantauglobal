@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
 import { supabase } from "@/lib/supabase";
 import { sendMetaEvent } from "@/lib/meta-capi";
+import { shadowPendingSubmission } from "@/lib/shadow-write";
 
 // Map slug → role + country
 const SLUG_MAP: Record<string, { role: string; country: string }> = {
@@ -90,6 +91,41 @@ export async function POST(
         { status: 500 }
       );
     }
+
+    // Dual-write shadow: mirror into new Supabase pending_submissions.
+    // Fire-and-forget; never blocks the user-facing response.
+    waitUntil(
+      shadowPendingSubmission(
+        {
+          position_slug: slug,
+          email: body.email,
+          phone: body.whatsapp,
+          form_data: {
+            full_name: body.full_name,
+            whatsapp: body.whatsapp,
+            email: body.email,
+            city: body.city,
+            birth_date: body.birth_date ?? null,
+            gender: body.gender ?? null,
+            education: body.education,
+            role: mapping.role,
+            country: mapping.country,
+            role_data: body.role_data ?? {},
+            source_url: body.source_url ?? null,
+          },
+          consents: [
+            {
+              purpose: "application_processing",
+              purpose_text:
+                "Memproses lamaran kerja (verifikasi data, komunikasi via WhatsApp/email, pencocokan lowongan).",
+              version: "2026-04-22",
+              granted: true,
+            },
+          ],
+        },
+        request,
+      ),
+    );
 
     if (body.eventId) {
       waitUntil(

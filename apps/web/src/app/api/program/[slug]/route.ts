@@ -6,6 +6,14 @@ import {
   insertToSupabase,
 } from "@/lib/form-utils";
 import { sendMetaEvent } from "@/lib/meta-capi";
+import { shadowPendingSubmission } from "@/lib/shadow-write";
+
+// Legacy program slugs → new positions.slug.
+// Legacy program routes use short aliases; new schema uses canonical slugs.
+const PROGRAM_TO_POSITION_SLUG: Record<string, string> = {
+  "truck-driver": "truck-driver-jepang",
+  "global-talent-hub": "global-talent-hub",
+};
 
 // ---------------------------------------------------------------------------
 // Program Registry — each entry defines table, required fields, and transform
@@ -127,6 +135,32 @@ export async function POST(
       row,
       `${slug} Registration`
     );
+
+    // 4.5 Dual-write shadow: mirror into new Supabase pending_submissions if
+    // this program maps to a seeded position. Fire-and-forget.
+    const positionSlug = PROGRAM_TO_POSITION_SLUG[slug];
+    if (result.status === 200 && positionSlug) {
+      waitUntil(
+        shadowPendingSubmission(
+          {
+            position_slug: positionSlug,
+            email: body.email as string,
+            phone: (body.whatsapp || body.phone) as string | undefined,
+            form_data: body,
+            consents: [
+              {
+                purpose: "application_processing",
+                purpose_text:
+                  "Memproses pendaftaran program (verifikasi data, komunikasi via WhatsApp/email, pencocokan lowongan).",
+                version: "2026-04-22",
+                granted: true,
+              },
+            ],
+          },
+          request,
+        ),
+      );
+    }
 
     // 5. Send to Meta CAPI (non-blocking)
     const eventId = body.eventId as string | undefined;

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { definePosition } from "./common.js";
+import { definePosition } from "./common";
 
 const roleDataSchema = z.object({
   jlpt_level: z.enum(["n5", "n4", "n3", "n2", "no_cert"]),
