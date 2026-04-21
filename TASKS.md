@@ -119,8 +119,25 @@ Next.js 16 + @supabase/ssr + route groups.
 - Typecheck + build green (4 routes: `/`, `/admin`, `/dashboard`, `/_not-found`)
 - **Not wired yet**: admin role elevation (need Supabase Auth hook to set `app_metadata.role = 'admin'` for seeded admin emails)
 
-### TASK 9: Backfill script `packages/db/scripts/backfill.ts`
-Connects to both Supabase projects (old `gt-tools` via service role, new `perantauglobal` via service role — CLI only). Reads 4 old tables, dedupes by (email, phone), maps to new schema, inserts. Dry-run flag mandatory.
+### TASK 9: Backfill script ✅ DONE (2026-04-22) — ready to run
+- `packages/db/scripts/backfill.ts` — tsx-runnable CLI
+- Reads 3 legacy tables: `candidate_applications` (lowongan), `tdp_registrations` (truck-driver), `gth_registrations` (GTH)
+- Transforms → dedupes by lowercased email → merges applications per candidate
+- Inserts into `candidates` + `applications` + synthetic `consents` (backfill version marker) via target service role
+- Idempotent: `source = 'backfill_gt_tools'` marks imported rows; re-run skips (override with `--force`)
+- Flags: `--dry-run` (default), `--apply`, `--force`, `--table=<X>`, `--limit=<N>`
+- Not imported: `spg_applicants` (custom scoring, port via Task 10), `registrations` (schema unclear — revisit if needed)
+
+**To run** (when ready — needs both service role keys):
+```bash
+cd ~/Developer/perantauglobal
+GT_TOOLS_URL=https://piopuidmmzvewjeeezfv.supabase.co \
+GT_TOOLS_SERVICE_ROLE_KEY=<legacy_key> \
+SUPABASE_URL=https://jeadtvxgxmqnsqwxjmhj.supabase.co \
+SUPABASE_SERVICE_ROLE_KEY=<new_key_from_supabase_dashboard> \
+pnpm --filter @perantauglobal/db backfill -- --dry-run --limit=10
+```
+Inspect output → if happy, swap `--dry-run` for `--apply`. Drop `--limit` for full run.
 
 ### TASK 10: apps/platform admin — port from legacy dashboard
 Source: `~/Developer/dashboard.perantauglobal.com/`. Copy to `apps/platform/app/(admin)/`. Refactor config-driven `programs.ts` to query new schema (applications + positions + candidates).

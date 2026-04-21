@@ -16,13 +16,15 @@
     "migrate": "echo 'Run via Supabase MCP or CLI — see migrations/README.md'",
     "types": "echo 'Run via Supabase MCP generate_typescript_types'",
     "lint": "echo 'TODO'",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "backfill": "tsx scripts/backfill.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "tsx": "^4.19.0",
     "typescript": "^5.6.0"
   }
 }
