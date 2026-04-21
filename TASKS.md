@@ -104,15 +104,20 @@ Implemented as a **PostgreSQL trigger on auth.users INSERT** (simpler than edge 
 - Test with real PMI email providers (Gmail Indonesia, Yahoo) for deliverability
 - Once apps/platform exists: point `emailRedirectTo` at `app.perantauglobal.com/dashboard` not localhost callback
 
-### TASK 8: `apps/platform` scaffold
-```bash
-cd apps && npx create-next-app@latest platform --typescript --tailwind --app --no-src-dir --import-alias "@/*"
-```
-Then:
-- Add route groups: `app/(candidate)/` + `app/(admin)/`
-- Add `middleware.ts` checking Supabase session + role
-- Add `@perantauglobal/db` as workspace dep
-- Minimal pages: `/dashboard` (candidate), `/admin` (admin)
+### TASK 8: `apps/platform` scaffold ✅ DONE (2026-04-22)
+Next.js 16 + @supabase/ssr + route groups.
+
+- `apps/platform/package.json` — `@perantauglobal/platform`, dev on `:3200` (web is 3000, legacy 3100)
+- Route groups:
+  - `app/(candidate)/dashboard/page.tsx` — candidate portal shell. Queries `candidates` by `auth_user_id` + lists `applications` with joined `positions`. Redirects admin → `/admin`, anon → `/`.
+  - `app/(admin)/admin/page.tsx` — CRM overview with 3 stats (kandidat, applications, pending). Redirects non-admin → `/dashboard`.
+- `app/page.tsx` — root router: no session → perantauglobal.com/lowongan, admin → /admin, candidate → /dashboard
+- `src/lib/supabase-server.ts` — `createServerClient()` via @supabase/ssr with cookie-based PKCE, `getSessionAndRole()` reads JWT `app_metadata.role` (defaults to candidate)
+- `src/middleware.ts` — refreshes session cookies on every request so server components see auth reliably
+- `tsconfig.json` extends base, `noUncheckedIndexedAccess: false` (consistent with web for pragmatic DX)
+- `.env.local` seeded, `.env.example` committed
+- Typecheck + build green (4 routes: `/`, `/admin`, `/dashboard`, `/_not-found`)
+- **Not wired yet**: admin role elevation (need Supabase Auth hook to set `app_metadata.role = 'admin'` for seeded admin emails)
 
 ### TASK 9: Backfill script `packages/db/scripts/backfill.ts`
 Connects to both Supabase projects (old `gt-tools` via service role, new `perantauglobal` via service role — CLI only). Reads 4 old tables, dedupes by (email, phone), maps to new schema, inserts. Dry-run flag mandatory.

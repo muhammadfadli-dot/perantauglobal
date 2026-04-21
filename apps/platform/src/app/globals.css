@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  /* DTG brand palette — keep in sync with DESIGN.md / apps/web/globals.css */
+  --color-dtg-red: #c8102e;
+  --color-dtg-red-dark: #8b0000;
+  --color-dtg-ink: #1a1a1a;
+  --color-dtg-cream: #f7f2e7;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: "Source Sans 3", system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  background: var(--color-dtg-cream);
+  color: var(--color-dtg-ink);
+  font-family: var(--font-body);
+}
