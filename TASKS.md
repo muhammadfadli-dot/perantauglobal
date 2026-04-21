@@ -52,15 +52,11 @@ Focus: working dev env + bridge apps/web to new Supabase + build apps/platform M
 - `apps/web` deps: added `@perantauglobal/db` (workspace:*) + `zod`
 - Typecheck + build both green.
 
-### TASK 5: Seed 16 positions — `migrations/0002_seed_positions.sql`
-Port existing position list from `~/Developer/perantauglobal.com/src/app/[locale]/lowongan/` + `program/`. Format each with:
-- `slug` (match URL)
-- `role`, `country`, `name`, `description`
-- `requirements` JSONB: keys yang harus ada di `candidates.profile_data` biar ready
-- `scoring` JSONB: optional weights
-- `pipeline` JSONB: stages spesifik posisi
-
-Apply via MCP `apply_migration`.
+### TASK 5: Seed positions ✅ DONE (2026-04-21)
+- Migration `0002_seed_positions.sql` — idempotent upsert by slug
+- Applied via MCP `apply_migration`
+- 7 positions active (6 lowongan + GTH). Requirement keys verified 1:1 against Zod.
+- Dental nurse, spa therapist, caregiver-taiwan NOT seeded (not yet on apps/web; add when pages ported)
 
 ### TASK 6: Refactor `apps/web` forms → new Supabase + RLS pattern
 Current: forms POST `/api/program/[slug]` or `/api/lowongan/[slug]` → service_role_key → insert to old tables.
