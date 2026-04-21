@@ -10,6 +10,7 @@ import {
   SectionTag,
 } from "@/components/editorial";
 import { trackEvent, generateEventId, getMetaCookies } from "@/lib/tracking";
+import { supabaseBrowserV2 } from "@/lib/supabase-browser-v2";
 
 export interface FormFieldConfig {
   name: string;
@@ -121,6 +122,25 @@ export default function LowonganForm({
           { form_name: `lowongan_${role}`, form_location: window.location.pathname },
           eventId,
         );
+        // Fire magic-link email. Non-blocking: shadow flow — if env missing
+        // or rate-limited, success state still renders from legacy path.
+        try {
+          const sb = supabaseBrowserV2();
+          const redirectTo = `${window.location.origin}/auth/callback`;
+          sb.auth
+            .signInWithOtp({
+              email: sharedData.email,
+              options: {
+                shouldCreateUser: true,
+                emailRedirectTo: redirectTo,
+              },
+            })
+            .then(({ error }) => {
+              if (error) console.warn("[magic-link]", error.message);
+            });
+        } catch (err) {
+          console.warn("[magic-link] skipped:", err);
+        }
         form.reset();
         setCheckboxSelections({});
       } else {
@@ -154,6 +174,11 @@ export default function LowonganForm({
             )}
           </DisplayHeadline>
           <p className="mt-6 text-lg leading-[1.5] opacity-80">{body}</p>
+          <p className="mt-4 border-l-2 border-[var(--color-dtg-red)] bg-[var(--color-dtg-red)]/5 px-4 py-3 text-left text-sm leading-[1.5]">
+            📩 Kami juga kirim <strong>tautan verifikasi</strong> ke email
+            kamu. Klik tautan itu supaya akun kandidat kamu aktif dan data
+            tersimpan di sistem kami.
+          </p>
           <p className="mt-4 font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.1em] opacity-60">
             {refPrefix}
             {refNumber} · {new Date().toLocaleDateString("id-ID")}

@@ -92,39 +92,40 @@ export async function POST(
       );
     }
 
-    // Dual-write shadow: mirror into new Supabase pending_submissions.
-    // Fire-and-forget; never blocks the user-facing response.
-    waitUntil(
-      shadowPendingSubmission(
-        {
-          position_slug: slug,
+    // Dual-write shadow: mirror into new Supabase pending_submissions + consents.
+    // MUST complete before the response so that the client-side
+    // `signInWithOtp` call below has a fully-committed pending row for the
+    // auth.users trigger to materialize from. Errors are logged but not
+    // propagated — legacy path remains source of truth.
+    await shadowPendingSubmission(
+      {
+        position_slug: slug,
+        email: body.email,
+        phone: body.whatsapp,
+        form_data: {
+          full_name: body.full_name,
+          whatsapp: body.whatsapp,
           email: body.email,
-          phone: body.whatsapp,
-          form_data: {
-            full_name: body.full_name,
-            whatsapp: body.whatsapp,
-            email: body.email,
-            city: body.city,
-            birth_date: body.birth_date ?? null,
-            gender: body.gender ?? null,
-            education: body.education,
-            role: mapping.role,
-            country: mapping.country,
-            role_data: body.role_data ?? {},
-            source_url: body.source_url ?? null,
-          },
-          consents: [
-            {
-              purpose: "application_processing",
-              purpose_text:
-                "Memproses lamaran kerja (verifikasi data, komunikasi via WhatsApp/email, pencocokan lowongan).",
-              version: "2026-04-22",
-              granted: true,
-            },
-          ],
+          city: body.city,
+          birth_date: body.birth_date ?? null,
+          gender: body.gender ?? null,
+          education: body.education,
+          role: mapping.role,
+          country: mapping.country,
+          role_data: body.role_data ?? {},
+          source_url: body.source_url ?? null,
         },
-        request,
-      ),
+        consents: [
+          {
+            purpose: "application_processing",
+            purpose_text:
+              "Memproses lamaran kerja (verifikasi data, komunikasi via WhatsApp/email, pencocokan lowongan).",
+            version: "2026-04-22",
+            granted: true,
+          },
+        ],
+      },
+      request,
     );
 
     if (body.eventId) {

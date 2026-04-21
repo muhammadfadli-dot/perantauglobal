@@ -83,12 +83,14 @@ export async function shadowPendingSubmission(
 
     const grantedConsents = args.consents.filter((c) => c.granted);
     if (grantedConsents.length > 0) {
+      const nowIso = new Date().toISOString();
       const { error: consentErr } = await db.from("consents").insert(
         grantedConsents.map((c) => ({
           pending_id: pendingId,
           purpose: c.purpose,
           purpose_text: c.purpose_text,
           version: c.version,
+          granted_at: nowIso,
           ip_address: ip ?? undefined,
           user_agent: userAgent,
         })),

@@ -140,25 +140,23 @@ export async function POST(
     // this program maps to a seeded position. Fire-and-forget.
     const positionSlug = PROGRAM_TO_POSITION_SLUG[slug];
     if (result.status === 200 && positionSlug) {
-      waitUntil(
-        shadowPendingSubmission(
-          {
-            position_slug: positionSlug,
-            email: body.email as string,
-            phone: (body.whatsapp || body.phone) as string | undefined,
-            form_data: body,
-            consents: [
-              {
-                purpose: "application_processing",
-                purpose_text:
-                  "Memproses pendaftaran program (verifikasi data, komunikasi via WhatsApp/email, pencocokan lowongan).",
-                version: "2026-04-22",
-                granted: true,
-              },
-            ],
-          },
-          request,
-        ),
+      await shadowPendingSubmission(
+        {
+          position_slug: positionSlug,
+          email: body.email as string,
+          phone: (body.whatsapp || body.phone) as string | undefined,
+          form_data: body,
+          consents: [
+            {
+              purpose: "application_processing",
+              purpose_text:
+                "Memproses pendaftaran program (verifikasi data, komunikasi via WhatsApp/email, pencocokan lowongan).",
+              version: "2026-04-22",
+              granted: true,
+            },
+          ],
+        },
+        request,
       );
     }
 

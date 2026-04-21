@@ -74,14 +74,35 @@ Focus: working dev env + bridge apps/web to new Supabase + build apps/platform M
 - Edge function `handle-magic-link-verify` materializes candidate + application on click
 - Delete legacy routes + `SUPABASE_SERVICE_ROLE_KEY` from apps/web entirely
 
-### TASK 7: Edge Function — `handle-magic-link-verify`
-Triggered when user clicks magic link + verifies.
-- Find matching `pending_submissions` by email
-- Materialize `candidates` row (from `form_data`)
-- Materialize `applications` row (position_slug + answers)
-- Link consent rows (update `candidate_id` from `pending_id`)
-- Mark `consumed_at` on pending
-- Return redirect to `app.perantauglobal.com/dashboard`
+### TASK 7: Magic-link materialization ✅ DONE (2026-04-22)
+Implemented as a **PostgreSQL trigger on auth.users INSERT** (simpler than edge function — no deploy, no cold start, transactional).
+
+**Infra:**
+- Resend account + API key (sender: `noreply@perantauglobal.com`, Vercel DNS auto-config)
+- Supabase Auth → Custom SMTP: smtp.resend.com:465, user `resend`, password = Resend API key
+- URL Configuration: localhost:3000 + `/**` redirect allowlist for dev
+
+**DB (migration 0003):** `handle_new_auth_user()` rewrites the stub from 0001:
+- Finds most recent unconsumed `pending_submissions` for email
+- Upserts `candidates` (new insert OR additive merge on existing), sets `auth_user_id`, source = 'magic_link'
+- Loops all unconsumed pendings for email → inserts `applications` (unique candidate+position dedupes), links `consents.candidate_id`, merges `profile_data` additively, marks `consumed_at`
+- Fallback: no pendings → legacy email-link path
+
+**apps/web:**
+- `src/lib/supabase-browser-v2.ts` — singleton browser client (PKCE state stays coherent)
+- `LowonganForm.tsx` calls `signInWithOtp` after successful form POST; shadow-write switched from `waitUntil` to `await` (fixes race: consent must commit before trigger reads it)
+- `src/lib/shadow-write.ts` explicitly sets `consents.granted_at = NOW()` (col had no default)
+- `src/app/[locale]/auth/callback/page.tsx` + `CallbackClient.tsx` — handles PKCE `?code=` and implicit `#access_token` flows; renders "Verifikasi berhasil" on success
+- Success screen copy updated: "📩 Kami juga kirim tautan verifikasi ke email kamu..."
+
+**E2E verified (2026-04-22):** form submit → email arrives via Resend → click link → auth.users INSERT → candidates + applications + linked consents all materialized in one transaction.
+
+**Open items (Phase 2):**
+- Wire `signInWithOtp` into program forms (`/api/program/[slug]`) — currently only lowongan
+- Wire SPG (`/api/program/spg`)
+- Customize Supabase magic-link email template (DTG branding)
+- Test with real PMI email providers (Gmail Indonesia, Yahoo) for deliverability
+- Once apps/platform exists: point `emailRedirectTo` at `app.perantauglobal.com/dashboard` not localhost callback
 
 ### TASK 8: `apps/platform` scaffold
 ```bash
