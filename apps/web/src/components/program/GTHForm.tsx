@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { trackEvent, generateEventId, getMetaCookies } from "@/lib/tracking";
+import { supabaseBrowserV2 } from "@/lib/supabase-browser-v2";
 import {
   Accent,
   DisplayHeadline,
@@ -48,6 +49,20 @@ export default function GTHForm() {
       if (res.ok) {
         setStatus("success");
         trackEvent("form_submission", { form_name: "global_talent_hub", form_location: "/program/global-talent-hub" }, eventId);
+        try {
+          const sb = supabaseBrowserV2();
+          const redirectTo = `${window.location.origin}/auth/callback`;
+          sb.auth
+            .signInWithOtp({
+              email: data.email,
+              options: { shouldCreateUser: true, emailRedirectTo: redirectTo },
+            })
+            .then(({ error }) => {
+              if (error) console.warn("[magic-link]", error.message);
+            });
+        } catch (err) {
+          console.warn("[magic-link] skipped:", err);
+        }
         form.reset();
       } else {
         setStatus("error");
