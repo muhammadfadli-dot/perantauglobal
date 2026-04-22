@@ -25,8 +25,8 @@ export const baristaSaudiArabia = definePosition(
     description:
       "Lowongan barista untuk coffee shop & hotel chains di Saudi Arabia.",
     requirements: {
-      experience_type: { required: true, label: "Jenis pengalaman kerja" },
-      english_level: { required: true, label: "Bahasa Inggris" },
+      experience_type: { type: "soft", label: "Jenis pengalaman kerja" },
+      english_level: { type: "soft", label: "Bahasa Inggris" },
     },
   },
   roleDataSchema,

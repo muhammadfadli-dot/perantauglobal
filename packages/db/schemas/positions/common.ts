@@ -29,6 +29,20 @@ export const trackingSchema = z.object({
 export type Tracking = z.infer<typeof trackingSchema>;
 
 /**
+ * Requirement spec v2 (migration 0005+).
+ * `hard` requirements must be satisfied for candidate to apply (blocks UI).
+ * `soft` requirements improve match % but don't block.
+ * `allowed_values` narrows the accepted set for hard constraints.
+ */
+export interface RequirementSpec {
+  type: "hard" | "soft";
+  label: string;
+  allowed_values?: readonly string[];
+}
+
+export type PositionRequirements = Record<string, RequirementSpec>;
+
+/**
  * Position metadata — defines position identity + requirements for readiness
  * computation. Matches `positions` table (slug, role, country, name,
  * requirements, scoring).
@@ -40,10 +54,10 @@ export interface PositionMeta {
   name: string;
   description?: string;
   /**
-   * JSONB blob matching `positions.requirements`. Used by `compute_readiness`
-   * SQL function to compare against `candidates.profile_data`.
+   * Matches `positions.requirements` JSONB. Used by `compute_readiness`
+   * SQL function to compare against `candidates.profile_data.credentials`.
    */
-  requirements: Record<string, unknown>;
+  requirements: PositionRequirements;
   scoring?: Record<string, unknown>;
 }
 

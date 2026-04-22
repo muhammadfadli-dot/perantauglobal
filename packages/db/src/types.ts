@@ -413,8 +413,10 @@ export type Database = {
           candidate_id: string | null
           completion_pct: number | null
           country: string | null
+          hard_pass: boolean | null
           position_name: string | null
           position_slug: string | null
+          readiness: Json | null
         }
         Relationships: []
       }
@@ -422,7 +424,7 @@ export type Database = {
     Functions: {
       compute_readiness: {
         Args: { profile: Json; requirements: Json }
-        Returns: number
+        Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
     }
@@ -605,3 +607,43 @@ export const Constants = {
     },
   },
 } as const
+
+// =========================================================================
+// Requirements v2 helper types (migration 0005 + handwritten, kept in sync
+// with the SQL compute_readiness() function signature).
+// =========================================================================
+
+export interface RequirementSpec {
+  type: "hard" | "soft"
+  label: string
+  allowed_values?: readonly string[]
+}
+
+export type PositionRequirements = Record<string, RequirementSpec>
+
+export interface ReadinessPerField {
+  passed: boolean
+  type: "hard" | "soft"
+  label: string
+}
+
+export interface ReadinessResult {
+  per_field: Record<string, ReadinessPerField>
+  hard_pass: boolean
+  score_pct: number
+}
+
+/**
+ * profile_data JSONB shape (v2, post-migration 0005).
+ * v1 (pre-0005) was flat — compute_readiness handles both via COALESCE.
+ */
+export interface CandidateProfileDataV2 {
+  schema_version: 1
+  credentials: Record<string, unknown>
+  onboarding?: {
+    started_at?: string
+    completed_at?: string | null
+    skipped?: boolean
+    last_step?: number
+  }
+}

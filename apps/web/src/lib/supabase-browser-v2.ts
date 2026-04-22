@@ -1,22 +1,25 @@
 "use client";
 
-import { createBrowserClient } from "@perantauglobal/db";
-import type { SupabaseClient } from "@perantauglobal/db";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@perantauglobal/db";
 
-let _client: SupabaseClient | null = null;
+let _client: SupabaseClient<Database> | null = null;
 
 /**
- * Browser Supabase client for the NEW perantauglobal project.
+ * Browser Supabase client for the NEW perantauglobal project (web side).
  *
- * Singleton — only one client per browser tab so auth state (PKCE verifier
- * in localStorage) stays coherent between `signInWithOtp` and the callback
- * page.
+ * Configured with `flowType: 'implicit'` because magic-link emailRedirectTo
+ * points at `app.perantauglobal.com/auth/confirm` — cross-subdomain. PKCE
+ * would break because the code_verifier stored in www localStorage is not
+ * readable from app.*. Implicit flow puts tokens directly in the URL hash
+ * fragment, which the platform confirm page captures and sets as session.
+ *
+ * Singleton — only one client per browser tab.
  *
  * Called from:
- * - LowonganForm.tsx after successful pending_submission (sends magic link)
- * - /auth/callback page (exchanges code / detects session from URL)
+ * - LowonganForm.tsx / GTHForm.tsx after pending_submission POST (sends magic-link)
  */
-export function supabaseBrowserV2(): SupabaseClient {
+export function supabaseBrowserV2(): SupabaseClient<Database> {
   if (_client) return _client;
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL_V2;
@@ -28,6 +31,13 @@ export function supabaseBrowserV2(): SupabaseClient {
     );
   }
 
-  _client = createBrowserClient(url, anonKey);
+  _client = createClient<Database>(url, anonKey, {
+    auth: {
+      flowType: "implicit",
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+    },
+  });
   return _client;
 }

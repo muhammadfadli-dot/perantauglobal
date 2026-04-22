@@ -16,9 +16,13 @@ export const truckDriverJepang = definePosition(
     description:
       "Lowongan sopir truk untuk perusahaan logistik di Jepang (jalur Tokutei Ginou).",
     requirements: {
-      sim_type: { required: true, label: "Jenis SIM" },
-      driving_years: { required: true, label: "Pengalaman mengemudi" },
-      jlpt_level: { required: true, label: "Level JLPT" },
+      sim_type: {
+        type: "hard",
+        label: "Jenis SIM",
+        allowed_values: ["sim_b1", "sim_b2", "sim_internasional"],
+      },
+      driving_years: { type: "soft", label: "Pengalaman mengemudi" },
+      jlpt_level: { type: "soft", label: "Level JLPT" },
     },
   },
   roleDataSchema,

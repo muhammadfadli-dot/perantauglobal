@@ -23,9 +23,9 @@ export default function SignOutButton() {
       type="button"
       onClick={signOut}
       disabled={busy}
-      className="mt-2 font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] text-[var(--color-dtg-red)] hover:underline disabled:opacity-50"
+      className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] text-[var(--color-dtg-red)] hover:underline disabled:opacity-50"
     >
-      {busy ? "Keluar…" : "Sign out →"}
+      {busy ? "Keluar…" : "Keluar →"}
     </button>
   );
 }

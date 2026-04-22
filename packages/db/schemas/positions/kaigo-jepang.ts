@@ -22,9 +22,13 @@ export const kaigoJepang = definePosition(
     description:
       "Lowongan kaigo untuk panti jompo & fasilitas perawatan di Jepang (jalur SSW Kaigo).",
     requirements: {
-      jlpt_level: { required: true, label: "Level JLPT" },
-      care_certification: { required: true, label: "Sertifikasi perawatan" },
-      experience_years: { required: true, label: "Pengalaman kerja" },
+      jlpt_level: {
+        type: "hard",
+        label: "Level JLPT",
+        allowed_values: ["n4", "n3", "n2"],
+      },
+      care_certification: { type: "soft", label: "Sertifikasi perawatan" },
+      experience_years: { type: "soft", label: "Pengalaman kerja" },
     },
   },
   roleDataSchema,

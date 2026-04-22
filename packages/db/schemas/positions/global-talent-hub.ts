@@ -21,8 +21,8 @@ export const globalTalentHub = definePosition(
     description:
       "Program penyaluran umum. Calon mendaftar minat lalu dicocokkan ke lowongan spesifik.",
     requirements: {
-      interested_country: { required: true, label: "Negara tujuan minat" },
-      current_status: { required: true, label: "Status saat ini" },
+      interested_country: { type: "soft", label: "Negara tujuan minat" },
+      current_status: { type: "soft", label: "Status saat ini" },
     },
   },
   roleDataSchema,

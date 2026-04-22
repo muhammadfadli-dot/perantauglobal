@@ -27,9 +27,13 @@ export const foodServiceJepang = definePosition(
     description:
       "Lowongan food service untuk restoran & hotel di Jepang (jalur SSW Food Service).",
     requirements: {
-      jlpt_level: { required: true, label: "Level JLPT" },
-      food_certification: { required: true, label: "Sertifikasi food service" },
-      experience_type: { required: true, label: "Jenis pengalaman kerja" },
+      jlpt_level: {
+        type: "hard",
+        label: "Level JLPT",
+        allowed_values: ["n4", "n3", "n2"],
+      },
+      food_certification: { type: "soft", label: "Sertifikasi food service" },
+      experience_type: { type: "soft", label: "Jenis pengalaman kerja" },
     },
   },
   roleDataSchema,

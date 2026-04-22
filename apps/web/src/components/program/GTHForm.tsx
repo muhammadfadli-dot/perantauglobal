@@ -51,7 +51,9 @@ export default function GTHForm() {
         trackEvent("form_submission", { form_name: "global_talent_hub", form_location: "/program/global-talent-hub" }, eventId);
         try {
           const sb = supabaseBrowserV2();
-          const redirectTo = `${window.location.origin}/auth/callback`;
+          const platformBase =
+            process.env.NEXT_PUBLIC_PLATFORM_URL || window.location.origin;
+          const redirectTo = `${platformBase}/auth/confirm`;
           sb.auth
             .signInWithOtp({
               email: data.email,

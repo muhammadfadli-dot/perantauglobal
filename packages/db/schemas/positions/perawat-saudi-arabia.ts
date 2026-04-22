@@ -16,9 +16,13 @@ export const perawatSaudiArabia = definePosition(
     description:
       "Lowongan perawat Indonesia untuk rumah sakit & klinik di Saudi Arabia.",
     requirements: {
-      str_active: { required: true, label: "STR aktif" },
-      experience_years: { required: true, label: "Pengalaman kerja" },
-      english_level: { required: true, label: "Bahasa Inggris" },
+      str_active: {
+        type: "hard",
+        label: "STR aktif",
+        allowed_values: ["yes", "inProgress"],
+      },
+      experience_years: { type: "soft", label: "Pengalaman kerja" },
+      english_level: { type: "soft", label: "Bahasa Inggris" },
     },
   },
   roleDataSchema,

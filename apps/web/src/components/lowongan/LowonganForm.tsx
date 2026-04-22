@@ -126,7 +126,9 @@ export default function LowonganForm({
         // or rate-limited, success state still renders from legacy path.
         try {
           const sb = supabaseBrowserV2();
-          const redirectTo = `${window.location.origin}/auth/callback`;
+          const platformBase =
+            process.env.NEXT_PUBLIC_PLATFORM_URL || window.location.origin;
+          const redirectTo = `${platformBase}/auth/confirm`;
           sb.auth
             .signInWithOtp({
               email: sharedData.email,

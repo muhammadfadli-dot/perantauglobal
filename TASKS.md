@@ -2,7 +2,7 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-04-22 (Phase 1.5: GTH form wired to magic-link, both builds green)
+**Last updated:** 2026-04-22 (Phase 1.5: app.perantauglobal.com live on new platform; dashboard.* retired; apex cutover in progress)
 
 ---
 
@@ -37,15 +37,15 @@ Finishing wiring + user-action items before flipping DNS to the new stack.
   - First platform preview: `perantauglobal-platform-d7e73abxt-dayalima-group.vercel.app`
   - Future pushes to `main` → prod deployments (no DNS yet)
   - Future branch pushes → preview deployments
-- [ ] **Production cutover** (do in order):
-  1. Deploy Vercel `perantauglobal-platform` → test preview URL returns 200
-  2. Point DNS `app.perantauglobal.com` → Vercel
-  3. Point DNS `perantauglobal.com` → new Vercel web project
-  4. **Then** change Supabase Auth Site URL: `http://localhost:3000` → `https://app.perantauglobal.com`
-  5. Update email templates if they reference `{{ .SiteURL }}`
-  6. Delete `SUPABASE_SERVICE_ROLE_KEY` from `apps/web/.env.local` + Vercel env
-  7. Remove legacy `/api/lowongan/[slug]` + `/api/program/[slug]` legacy write paths → keep magic-link-only
-  8. Archive `gt-tools` Supabase project (read-only, keep 3 months)
+- [x] **Production cutover — partial** (2026-04-22):
+  1. [x] `app.perantauglobal.com` → NEW platform (live, returning `/auth/sign-in`)
+  2. [x] `dashboard.perantauglobal.com` → retired (returns 404; legacy admin sunset, new admin at `app.*/admin`)
+  3. [ ] `perantauglobal.com` + `www.perantauglobal.com` → NEW web (pending: remove from legacy `perantauglobal-com` in personal team, then add to `perantauglobal-web` in Dayalima Group)
+  4. [ ] Change Supabase Auth Site URL: `http://localhost:3000` → `https://app.perantauglobal.com`
+  5. [ ] Update email templates if they reference `{{ .SiteURL }}`
+  6. [ ] Delete `SUPABASE_SERVICE_ROLE_KEY` from `apps/web/.env.local` + Vercel env
+  7. [ ] Remove legacy `/api/lowongan/[slug]` + `/api/program/[slug]` legacy write paths → keep magic-link-only
+  8. [ ] Archive `gt-tools` Supabase project (read-only, keep 3 months)
 
 ---
 
@@ -130,7 +130,7 @@ Implemented as a **PostgreSQL trigger on auth.users INSERT** (simpler than edge 
 - Wire SPG (`/api/program/spg`)
 - Customize Supabase magic-link email template (DTG branding)
 - Test with real PMI email providers (Gmail Indonesia, Yahoo) for deliverability
-- Once apps/platform exists: point `emailRedirectTo` at `app.perantauglobal.com/dashboard` not localhost callback
+- **Cross-subdomain session sharing**: Post-cutover, forms on `www.*` trigger `signInWithOtp` with PKCE. Code verifier stored in localStorage on www, so pointing `emailRedirectTo` at `app.*` breaks exchange. Current workaround: redirect stays on `www.*/auth/callback` (same origin), session established on www only — user must re-sign-in on `app.*`. Real fix: switch web browser client to `@supabase/ssr` with cookie `Domain=.perantauglobal.com`, OR trigger magic-link server-side via `admin.generateLink` from `/api/lowongan` (no PKCE).
 
 ### TASK 8: `apps/platform` scaffold ✅ DONE (2026-04-22)
 Next.js 16 + @supabase/ssr + route groups.

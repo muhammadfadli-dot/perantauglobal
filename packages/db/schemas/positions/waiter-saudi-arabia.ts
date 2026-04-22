@@ -21,8 +21,8 @@ export const waiterSaudiArabia = definePosition(
     description:
       "Lowongan waiter untuk restoran & hotel di Saudi Arabia.",
     requirements: {
-      experience_type: { required: true, label: "Jenis pengalaman kerja" },
-      english_level: { required: true, label: "Bahasa Inggris" },
+      experience_type: { type: "soft", label: "Jenis pengalaman kerja" },
+      english_level: { type: "soft", label: "Bahasa Inggris" },
     },
   },
   roleDataSchema,
