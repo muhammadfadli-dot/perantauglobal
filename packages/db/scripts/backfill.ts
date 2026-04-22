@@ -162,6 +162,21 @@ interface LegacyGth {
 }
 
 // ---------------------------------------------------------------------------
+// Sanitize phone to match DB check constraint: ^\+?[0-9]{8,15}$
+// Strips spaces, dashes, parens. Preserves leading `+`. Returns null if
+// the result doesn't fit the 8-15 digit window (keeps DB insert clean).
+// ---------------------------------------------------------------------------
+
+function sanitizePhone(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  const hasPlus = trimmed.startsWith("+");
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.length < 8 || digits.length > 15) return null;
+  return hasPlus ? `+${digits}` : digits;
+}
+
+// ---------------------------------------------------------------------------
 // Transform — shared output shape
 // ---------------------------------------------------------------------------
 
@@ -189,7 +204,7 @@ function transformLowongan(row: LegacyCandidateApp): CandidateImport | null {
   return {
     email: row.email.toLowerCase().trim(),
     full_name: row.full_name,
-    phone: row.whatsapp ?? null,
+    phone: sanitizePhone(row.whatsapp),
     city: row.city,
     birth_date: row.birth_date,
     gender: row.gender,
@@ -212,7 +227,7 @@ function transformTdp(row: LegacyTdp): CandidateImport {
   return {
     email: row.email.toLowerCase().trim(),
     full_name: row.full_name,
-    phone: row.whatsapp ?? null,
+    phone: sanitizePhone(row.whatsapp),
     city: row.city,
     birth_date: null,
     gender: null,
@@ -233,7 +248,7 @@ function transformGth(row: LegacyGth): CandidateImport {
   return {
     email: row.email.toLowerCase().trim(),
     full_name: row.full_name,
-    phone: row.whatsapp ?? null,
+    phone: sanitizePhone(row.whatsapp),
     city: row.city,
     birth_date: null,
     gender: null,
@@ -316,10 +331,18 @@ async function insertOne(c: CandidateImport): Promise<
     return { ok: false, reason: candErr?.message ?? "unknown candidates insert err" };
   }
 
-  const appRows = c.applications.map((a) => ({
+  // Dedupe applications by position_slug — legacy allowed multiple applies
+  // to the same position; new schema enforces uniq_candidate_position. Merge
+  // answers (later entries win on overlapping keys).
+  const byPosition = new Map<string, Record<string, unknown>>();
+  for (const a of c.applications) {
+    const prev = byPosition.get(a.position_slug) ?? {};
+    byPosition.set(a.position_slug, { ...prev, ...a.answers });
+  }
+  const appRows = [...byPosition.entries()].map(([position_slug, answers]) => ({
     candidate_id: candRow.id,
-    position_slug: a.position_slug,
-    answers: a.answers as unknown as Json,
+    position_slug,
+    answers: answers as unknown as Json,
     pipeline_stage: "applied" as const,
     created_at: c.legacy_created_at,
   }));

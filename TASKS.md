@@ -2,7 +2,7 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-04-21 (dev env verified)
+**Last updated:** 2026-04-22 (Phase 1.5: GTH form wired to magic-link, both builds green)
 
 ---
 
@@ -18,6 +18,34 @@ Session handoff. Next Claude Code session yang baca file ini harus tau exactly w
 
 **Phase 1 — Platform Core** 🚧 IN PROGRESS
 Focus: working dev env + bridge apps/web to new Supabase + build apps/platform MVP.
+
+**Phase 1.5 — Cutover prep** 🚧 IN PROGRESS
+Finishing wiring + user-action items before flipping DNS to the new stack.
+- [x] GTH form → `signInWithOtp` (2026-04-22, `GTHForm.tsx`)
+- [x] Truck-driver — already wired via `LowonganForm` (lives under `/lowongan/truck-driver-jepang`, not `/program/truck-driver`)
+- [x] SPG — deferred (legacy-only until SPG position seeded w/ custom scoring; Task 10 Phase 2)
+- [x] **USER ACTION**: Supabase Auth → URL Configuration → Redirect URLs added (2026-04-22):
+  - `http://localhost:3000/**`, `http://localhost:3100/**`, `http://localhost:3200/**`, `https://app.perantauglobal.com/**`
+- [ ] Run backfill (Task 9) — `--dry-run` first, inspect, then `--apply`
+- [ ] Customize Supabase magic-link email template (DTG branding)
+- [x] Vercel projects (2026-04-22): `perantauglobal-web` + `perantauglobal-platform` created in Dayalima Group team
+  - Both linked to `panji-firmansyah/perantauglobal` GitHub repo, rootDirectory set, framework=nextjs
+  - Env vars pushed (sensitive = sensitive type, rest encrypted)
+  - `turbo.json` updated with `globalEnv` so Turbo passes env vars through to builds
+  - Preview deployments: both READY (web + platform), behind Vercel SSO protection
+  - First web preview: `perantauglobal-m77gtdstd-dayalima-group.vercel.app`
+  - First platform preview: `perantauglobal-platform-d7e73abxt-dayalima-group.vercel.app`
+  - Future pushes to `main` → prod deployments (no DNS yet)
+  - Future branch pushes → preview deployments
+- [ ] **Production cutover** (do in order):
+  1. Deploy Vercel `perantauglobal-platform` → test preview URL returns 200
+  2. Point DNS `app.perantauglobal.com` → Vercel
+  3. Point DNS `perantauglobal.com` → new Vercel web project
+  4. **Then** change Supabase Auth Site URL: `http://localhost:3000` → `https://app.perantauglobal.com`
+  5. Update email templates if they reference `{{ .SiteURL }}`
+  6. Delete `SUPABASE_SERVICE_ROLE_KEY` from `apps/web/.env.local` + Vercel env
+  7. Remove legacy `/api/lowongan/[slug]` + `/api/program/[slug]` legacy write paths → keep magic-link-only
+  8. Archive `gt-tools` Supabase project (read-only, keep 3 months)
 
 ---
 
