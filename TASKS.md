@@ -28,7 +28,15 @@ Finishing wiring + user-action items before flipping DNS to the new stack.
   - `http://localhost:3000/**`, `http://localhost:3100/**`, `http://localhost:3200/**`, `https://app.perantauglobal.com/**`
 - [ ] Run backfill (Task 9) — `--dry-run` first, inspect, then `--apply`
 - [ ] Customize Supabase magic-link email template (DTG branding)
-- [ ] Vercel projects: `perantauglobal-web` (apps/web) + `perantauglobal-platform` (apps/platform) in Dayalima Group team, preview only
+- [x] Vercel projects (2026-04-22): `perantauglobal-web` + `perantauglobal-platform` created in Dayalima Group team
+  - Both linked to `panji-firmansyah/perantauglobal` GitHub repo, rootDirectory set, framework=nextjs
+  - Env vars pushed (sensitive = sensitive type, rest encrypted)
+  - `turbo.json` updated with `globalEnv` so Turbo passes env vars through to builds
+  - Preview deployments: both READY (web + platform), behind Vercel SSO protection
+  - First web preview: `perantauglobal-m77gtdstd-dayalima-group.vercel.app`
+  - First platform preview: `perantauglobal-platform-d7e73abxt-dayalima-group.vercel.app`
+  - Future pushes to `main` → prod deployments (no DNS yet)
+  - Future branch pushes → preview deployments
 - [ ] **Production cutover** (do in order):
   1. Deploy Vercel `perantauglobal-platform` → test preview URL returns 200
   2. Point DNS `app.perantauglobal.com` → Vercel
