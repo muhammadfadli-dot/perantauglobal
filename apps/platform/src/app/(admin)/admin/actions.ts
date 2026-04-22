@@ -8,7 +8,8 @@ async function assertAdmin() {
   if (!session || role !== "admin") {
     throw new Error("Unauthorized");
   }
-  return { reviewedBy: session.email ?? "admin" };
+  // applications.reviewed_by is UUID, so pass the auth_user_id not the email.
+  return { reviewedBy: session.userId };
 }
 
 export async function updateApplicationStage(

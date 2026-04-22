@@ -26,9 +26,12 @@ export default function SignInForm() {
     const sb = createSSRBrowserClient(url, key);
 
     const redirectTo = `${window.location.origin}/auth/callback`;
+    // shouldCreateUser: true — allows first-time signin to also materialize
+    // the auth.users row. For admins, the admin_users allowlist still gates
+    // access via is_admin(), so random signups can't reach /admin.
     const { error } = await sb.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: redirectTo, shouldCreateUser: false },
+      options: { emailRedirectTo: redirectTo, shouldCreateUser: true },
     });
 
     if (error) {
