@@ -12,7 +12,7 @@ export default async function RootPage() {
   const { session, role } = await getSessionAndRole();
 
   if (!session) {
-    redirect("https://perantauglobal.com/lowongan");
+    redirect("/auth/sign-in");
   }
   if (role === "admin") {
     redirect("/admin");

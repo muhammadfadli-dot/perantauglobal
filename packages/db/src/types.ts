@@ -16,6 +16,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          added_at: string | null
+          added_by: string | null
+          email: string
+          notes: string | null
+        }
+        Insert: {
+          added_at?: string | null
+          added_by?: string | null
+          email: string
+          notes?: string | null
+        }
+        Update: {
+          added_at?: string | null
+          added_by?: string | null
+          email?: string
+          notes?: string | null
+        }
+        Relationships: []
+      }
       applications: {
         Row: {
           answers: Json
@@ -403,6 +424,7 @@ export type Database = {
         Args: { profile: Json; requirements: Json }
         Returns: number
       }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       doc_type:

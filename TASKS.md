@@ -139,8 +139,37 @@ pnpm --filter @perantauglobal/db backfill -- --dry-run --limit=10
 ```
 Inspect output → if happy, swap `--dry-run` for `--apply`. Drop `--limit` for full run.
 
-### TASK 10: apps/platform admin — port from legacy dashboard
-Source: `~/Developer/dashboard.perantauglobal.com/`. Copy to `apps/platform/app/(admin)/`. Refactor config-driven `programs.ts` to query new schema (applications + positions + candidates).
+### TASK 10: Admin CRM ✅ DONE (2026-04-22) — Option A (thin rebuild, native schema)
+Chose Option A after survey (not full port with adapter — avoids tech debt). Legacy had ~3.5k LOC + hardcoded admin auth + per-program tables, all incompatible with new unified schema.
+
+**DB (migration 0004):**
+- `admin_users` table (email-keyed) + seed for panji
+- `is_admin()` SQL function (JWT role OR admin_users match)
+- All protected RLS policies swapped from hardcoded `auth.jwt() ->> 'role' = 'admin'` to `is_admin()`
+- Generated types regenerated
+
+**apps/platform routes:**
+- `/auth/sign-in` + `SignInForm` — magic-link OTP entry
+- `/auth/callback` (route handler) — PKCE code exchange, sets cookies, redirects to `/`
+- `/admin` (layout-enforced) — overview stats (kandidat, applications, pending)
+- `/admin/candidates` — search + paginated list (ilike name/email/phone, 25/page)
+- `/admin/candidates/[id]` — bio + profile_data JSONB + applications list with inline stage editor, notes, outreach toggle
+- `/admin/applications` — pipeline list filter by stage + position, 40/page
+- `(admin)/layout.tsx` — enforces `role=admin` redirect; anon → `/auth/sign-in`, candidate → `/dashboard`
+
+**Shared components:** Sidebar, SignOutButton, CandidateFilters, ApplicationFilters, ApplicationCard, StageSelector, NotesEditor, ReachOutToggle
+
+**Server actions:** `updateApplicationStage`, `updateApplicationNotes`, `toggleReachedOut` — all assertAdmin + revalidate
+
+**`getSessionAndRole()` updated:** Calls `is_admin()` RPC under user JWT → boolean → role
+
+**Phase 2 TODO:**
+- Add platform callback URL (`http://localhost:3200/**` + prod) to Supabase redirect allowlist
+- Port SPG scoring logic (7 dimensions) — defer until SPG form re-wired into new positions system
+- Kanban/board view across stages (currently just filtered list)
+- CSV export
+- Bulk stage update
+- Audit timeline (who changed stage, when, from → to)
 
 ---
 

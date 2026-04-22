@@ -42,9 +42,15 @@ export async function createServerClient() {
 }
 
 /**
- * Returns current session + role claim. Role comes from the JWT's custom
- * `role` claim (see Supabase Auth hooks in Phase 2 for admin elevation).
- * For now, everyone is a candidate by default.
+ * Returns current session + elevated role.
+ *
+ * Role elevation sources (checked in order):
+ *   1. `app_metadata.role = 'admin'` on the JWT (set via Supabase Auth hook —
+ *      not yet wired; forward-compatible)
+ *   2. Email listed in `admin_users` table (source of truth at MVP —
+ *      checked via `is_admin()` RPC which combines both signals)
+ *
+ * Defaults to `candidate` for any signed-in user without admin elevation.
  */
 export async function getSessionAndRole(): Promise<{
   session: { userId: string; email: string | null } | null;
@@ -55,13 +61,13 @@ export async function getSessionAndRole(): Promise<{
   if (error || !data.user) {
     return { session: null, role: null };
   }
-  const role =
-    ((data.user.app_metadata as Record<string, unknown> | null)?.role as
-      | "admin"
-      | "candidate"
-      | undefined) ?? "candidate";
+
+  // Call the is_admin() DB function. Runs under the user's JWT context so it
+  // compares against their own email in admin_users (or JWT role claim).
+  const { data: isAdmin } = await supabase.rpc("is_admin");
+
   return {
     session: { userId: data.user.id, email: data.user.email ?? null },
-    role,
+    role: isAdmin === true ? "admin" : "candidate",
   };
 }
