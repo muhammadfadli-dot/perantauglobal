@@ -7,7 +7,8 @@ export type IconName =
   | "id_card" | "passport" | "camera" | "globe" | "sparkle" | "info" | "warn"
   | "stethoscope" | "coffee" | "truck" | "bowl" | "heart" | "sparkle_dot"
   | "plus" | "compass" | "phone" | "location" | "trash" | "edit" | "grip"
-  | "filter" | "sort" | "share" | "star" | "users" | "doc_check" | "zoom" | "download";
+  | "filter" | "sort" | "share" | "star" | "users" | "doc_check" | "zoom" | "download"
+  | "lock" | "eye" | "eye_off";
 
 const PATHS: Record<IconName, React.ReactElement> = {
   menu: <><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></>,
@@ -57,6 +58,9 @@ const PATHS: Record<IconName, React.ReactElement> = {
   doc_check: <><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h4"/><path d="M10 14l2 2 4-4"/></>,
   zoom: <><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/><path d="M8 11h6M11 8v6"/></>,
   download: <><path d="M12 4v12"/><path d="M7 11l5 5 5-5"/><path d="M4 20h16"/></>,
+  lock: <><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></>,
+  eye: <><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></>,
+  eye_off: <><path d="M3 3l18 18"/><path d="M10.6 6.1A10 10 0 0112 6c6.5 0 10 6 10 6a19 19 0 01-3 3.8M6 6a19 19 0 00-4 6s3.5 6 10 6a9 9 0 003.9-.9"/><path d="M9.5 9.5a3 3 0 004.2 4.2"/></>,
 };
 
 export function Icon({

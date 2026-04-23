@@ -4,6 +4,7 @@ import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import ProfileForm from "./ProfileForm";
 import DocUploader, { type DocItem } from "./DocUploader";
+import SecurityCard from "./SecurityCard";
 
 export const dynamic = "force-dynamic";
 
@@ -166,6 +167,12 @@ export default async function ProfilePage() {
         <Section title="Kualifikasi">
           <ProfileForm initialCredentials={credentials} candidateId={candidate.id} />
         </Section>
+
+        {candidate.email && (
+          <Section title="Keamanan">
+            <SecurityCard email={candidate.email} />
+          </Section>
+        )}
 
         <section className="px-5 pt-6">
           <a
