@@ -12,16 +12,9 @@ import {
   LowonganForm,
   LowonganFinalCTA,
 } from "@/components/lowongan";
-import type { FormFieldConfig } from "@/components/lowongan";
 import { Footer, MobileStickyCTA, Nav, type FooterColumn, type NavAnchor } from "@/components/editorial";
 
 const NS = "lowongan.food-service-jepang";
-
-const roleFields: FormFieldConfig[] = [
-  { name: "jlpt_level", type: "select", required: true, options: ["n5", "n4", "n3", "n2", "no_cert"] },
-  { name: "food_certification", type: "select", required: true, options: ["ssw_food_service", "food_safety", "hospitality_cert", "none"] },
-  { name: "experience_type", type: "select", required: true, options: ["restaurant", "hotel", "cafe", "catering", "none"] },
-];
 
 export default function FoodServiceJepangContent() {
   const t = useTranslations(NS);
@@ -41,7 +34,8 @@ export default function FoodServiceJepangContent() {
         <LowonganProcess namespace={NS} />
         <LowonganRequirements namespace={NS} />
         <LowonganFAQ namespace={NS} />
-        <LowonganForm namespace={NS} apiEndpoint="/api/lowongan/food-service-jepang" roleFields={roleFields} role="food_service" country="japan" />
+        <LowonganForm namespace={NS} apiEndpoint="/api/lowongan/food-service-jepang"
+ role="food_service" country="japan" />
         <LowonganFinalCTA namespace={NS} />
       </main>
       <Footer

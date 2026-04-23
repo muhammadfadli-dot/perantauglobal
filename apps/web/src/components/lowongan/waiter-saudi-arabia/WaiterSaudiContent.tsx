@@ -12,15 +12,9 @@ import {
   LowonganForm,
   LowonganFinalCTA,
 } from "@/components/lowongan";
-import type { FormFieldConfig } from "@/components/lowongan";
 import { Footer, MobileStickyCTA, Nav, type FooterColumn, type NavAnchor } from "@/components/editorial";
 
 const NS = "lowongan.waiter-saudi-arabia";
-
-const roleFields: FormFieldConfig[] = [
-  { name: "experience_type", type: "select", required: true, options: ["restaurant", "hotel", "cafe", "catering", "other"] },
-  { name: "english_level", type: "select", required: true, options: ["basic", "intermediate", "fluent"] },
-];
 
 export default function WaiterSaudiContent() {
   const t = useTranslations(NS);
@@ -40,7 +34,8 @@ export default function WaiterSaudiContent() {
         <LowonganProcess namespace={NS} />
         <LowonganRequirements namespace={NS} />
         <LowonganFAQ namespace={NS} />
-        <LowonganForm namespace={NS} apiEndpoint="/api/lowongan/waiter-saudi-arabia" roleFields={roleFields} role="waiter" country="saudi_arabia" />
+        <LowonganForm namespace={NS} apiEndpoint="/api/lowongan/waiter-saudi-arabia"
+ role="waiter" country="saudi_arabia" />
         <LowonganFinalCTA namespace={NS} />
       </main>
       <Footer

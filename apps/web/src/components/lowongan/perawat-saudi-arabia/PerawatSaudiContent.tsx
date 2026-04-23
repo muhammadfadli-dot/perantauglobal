@@ -12,16 +12,9 @@ import {
   LowonganForm,
   LowonganFinalCTA,
 } from "@/components/lowongan";
-import type { FormFieldConfig } from "@/components/lowongan";
 import { Footer, MobileStickyCTA, Nav, type FooterColumn, type NavAnchor } from "@/components/editorial";
 
 const NS = "lowongan.perawat-saudi-arabia";
-
-const roleFields: FormFieldConfig[] = [
-  { name: "str_active", type: "select", required: true, options: ["yes", "no", "inProgress"] },
-  { name: "experience_years", type: "select", required: true, options: ["1-2", "3-5", "5+"] },
-  { name: "english_level", type: "select", required: true, options: ["basic", "intermediate", "fluent"] },
-];
 
 export default function PerawatSaudiContent() {
   const t = useTranslations(NS);
@@ -60,7 +53,6 @@ export default function PerawatSaudiContent() {
         <LowonganForm
           namespace={NS}
           apiEndpoint="/api/lowongan/perawat-saudi-arabia"
-          roleFields={roleFields}
           role="nurse"
           country="saudi_arabia"
         />

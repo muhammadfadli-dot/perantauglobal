@@ -12,16 +12,9 @@ import {
   LowonganForm,
   LowonganFinalCTA,
 } from "@/components/lowongan";
-import type { FormFieldConfig } from "@/components/lowongan";
 import { Footer, MobileStickyCTA, Nav, type FooterColumn, type NavAnchor } from "@/components/editorial";
 
 const NS = "lowongan.kaigo-jepang";
-
-const roleFields: FormFieldConfig[] = [
-  { name: "jlpt_level", type: "select", required: true, options: ["n5", "n4", "n3", "n2", "no_cert"] },
-  { name: "care_certification", type: "select", required: true, options: ["ssw_kaigo", "nursing_d3", "nursing_s1", "caregiver_training", "none"] },
-  { name: "experience_years", type: "select", required: true, options: ["none", "less_than_1", "1-3", "3+"] },
-];
 
 export default function KaigoJepangContent() {
   const t = useTranslations(NS);
@@ -41,7 +34,8 @@ export default function KaigoJepangContent() {
         <LowonganProcess namespace={NS} />
         <LowonganRequirements namespace={NS} />
         <LowonganFAQ namespace={NS} />
-        <LowonganForm namespace={NS} apiEndpoint="/api/lowongan/kaigo-jepang" roleFields={roleFields} role="caregiver" country="japan" />
+        <LowonganForm namespace={NS} apiEndpoint="/api/lowongan/kaigo-jepang"
+ role="caregiver" country="japan" />
         <LowonganFinalCTA namespace={NS} />
       </main>
       <Footer

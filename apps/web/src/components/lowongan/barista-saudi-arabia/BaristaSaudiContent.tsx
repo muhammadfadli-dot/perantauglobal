@@ -12,16 +12,9 @@ import {
   LowonganForm,
   LowonganFinalCTA,
 } from "@/components/lowongan";
-import type { FormFieldConfig } from "@/components/lowongan";
 import { Footer, MobileStickyCTA, Nav, type FooterColumn, type NavAnchor } from "@/components/editorial";
 
 const NS = "lowongan.barista-saudi-arabia";
-
-const roleFields: FormFieldConfig[] = [
-  { name: "experience_type", type: "select", required: true, options: ["coffee_shop", "restaurant", "hotel", "cafe", "other"] },
-  { name: "english_level", type: "select", required: true, options: ["basic", "intermediate", "fluent"] },
-  { name: "coffee_skills", type: "checkbox-group", required: false, options: ["espresso", "latte_art", "manual_brew", "roasting"] },
-];
 
 export default function BaristaSaudiContent() {
   const t = useTranslations(NS);
@@ -42,7 +35,8 @@ export default function BaristaSaudiContent() {
         <LowonganProcess namespace={NS} />
         <LowonganRequirements namespace={NS} />
         <LowonganFAQ namespace={NS} />
-        <LowonganForm namespace={NS} apiEndpoint="/api/lowongan/barista-saudi-arabia" roleFields={roleFields} role="barista" country="saudi_arabia" />
+        <LowonganForm namespace={NS} apiEndpoint="/api/lowongan/barista-saudi-arabia"
+ role="barista" country="saudi_arabia" />
         <LowonganFinalCTA namespace={NS} />
       </main>
       <Footer

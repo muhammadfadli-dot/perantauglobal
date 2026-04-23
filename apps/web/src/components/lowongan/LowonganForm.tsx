@@ -12,28 +12,24 @@ import {
 import { trackEvent, generateEventId, getMetaCookies } from "@/lib/tracking";
 import { supabaseBrowserV2 } from "@/lib/supabase-browser-v2";
 
-export interface FormFieldConfig {
-  name: string;
-  type: "text" | "email" | "tel" | "select" | "checkbox-group" | "number" | "date";
-  required: boolean;
-  options?: string[];
-}
-
 interface LowonganFormProps {
   /** Role-level namespace, e.g. "lowongan.perawat-saudi-arabia". */
   namespace: string;
   apiEndpoint: string;
-  roleFields: FormFieldConfig[];
   role: string;
   country: string;
 }
 
 type Headline = { lead: string; accent?: string };
 
+/**
+ * Bio-only registration form (Phase C+). Candidates enter the talent pool
+ * with minimal fields; they complete per-position credentials on
+ * app.perantauglobal.com/profile after verifying the magic-link.
+ */
 export default function LowonganForm({
   namespace,
   apiEndpoint,
-  roleFields,
   role,
   country,
 }: LowonganFormProps) {
@@ -43,7 +39,6 @@ export default function LowonganForm({
   const [submittedName, setSubmittedName] = useState("");
   const [submittedPhone, setSubmittedPhone] = useState("");
   const [refNumber, setRefNumber] = useState("");
-  const [checkboxSelections, setCheckboxSelections] = useState<Record<string, string[]>>({});
 
   const editTag = t("editorial.form.tag");
   const editHeadline = t.raw("editorial.form.headline") as Headline;
@@ -52,18 +47,6 @@ export default function LowonganForm({
   const successHeadline = t.raw("editorial.form.successHeadline") as Headline;
   const successBodyTemplate = t.raw("editorial.form.successBody") as string;
   const refPrefix = t("editorial.form.refPrefix");
-
-  function toggleCheckbox(fieldName: string, value: string) {
-    setCheckboxSelections((prev) => {
-      const current = prev[fieldName] || [];
-      return {
-        ...prev,
-        [fieldName]: current.includes(value)
-          ? current.filter((v) => v !== value)
-          : [...current, value],
-      };
-    });
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -82,24 +65,17 @@ export default function LowonganForm({
       education: formData.get("education") as string,
     };
 
-    const roleData: Record<string, string | string[] | null> = {};
-    for (const field of roleFields) {
-      if (field.type === "checkbox-group") {
-        roleData[field.name] = checkboxSelections[field.name] || [];
-      } else {
-        roleData[field.name] = (formData.get(field.name) as string) || null;
-      }
-    }
-
     const eventId = generateEventId(`lowongan_${role}`);
     const { fbp, fbc } = getMetaCookies();
 
+    // Bio-only payload. Per-position credentials collected in the portal
+    // at app.perantauglobal.com/profile after magic-link verification.
     const payload = {
       ...sharedData,
       role,
       country,
       source_url: window.location.href,
-      role_data: roleData,
+      role_data: {},
       eventId,
       fbp,
       fbc,
@@ -144,7 +120,6 @@ export default function LowonganForm({
           console.warn("[magic-link] skipped:", err);
         }
         form.reset();
-        setCheckboxSelections({});
       } else {
         setStatus("error");
       }
@@ -293,76 +268,6 @@ export default function LowonganForm({
               </label>
             </div>
 
-            {roleFields.map((field) => (
-              <div key={field.name}>
-                <FieldLabel required={field.required}>
-                  {tForm(`roleFields.${field.name}.label`)}
-                </FieldLabel>
-
-                {field.type === "select" && field.options && (
-                  <select
-                    name={field.name}
-                    required={field.required}
-                    defaultValue=""
-                    className={inputClass}
-                  >
-                    <option value="" disabled={field.required}>
-                      {field.required ? "— Pilih —" : "— Pilih (opsional) —"}
-                    </option>
-                    {field.options.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {tForm(`roleFields.${field.name}.options.${opt}`)}
-                      </option>
-                    ))}
-                  </select>
-                )}
-
-                {field.type === "checkbox-group" && field.options && (
-                  <div className="mt-1 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {field.options.map((opt) => {
-                      const selected = (checkboxSelections[field.name] || []).includes(opt);
-                      return (
-                        <label
-                          key={opt}
-                          className={
-                            "flex cursor-pointer items-center gap-2 border px-3 py-2.5 text-sm transition-colors " +
-                            (selected
-                              ? "border-[var(--color-dtg-red)] bg-[var(--color-dtg-red)]/5 text-[var(--color-dtg-red)] font-semibold"
-                              : "border-[var(--color-dtg-ink)] text-[var(--color-dtg-ink)] hover:bg-[var(--color-dtg-cream)]")
-                          }
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selected}
-                            onChange={() => toggleCheckbox(field.name, opt)}
-                            className="sr-only"
-                          />
-                          {tForm(`roleFields.${field.name}.options.${opt}`)}
-                        </label>
-                      );
-                    })}
-                  </div>
-                )}
-
-                {(field.type === "text" || field.type === "number") && (
-                  <input
-                    type={field.type}
-                    name={field.name}
-                    required={field.required}
-                    className={inputClass}
-                  />
-                )}
-
-                {field.type === "date" && (
-                  <input
-                    type="date"
-                    name={field.name}
-                    required={field.required}
-                    className={inputClass}
-                  />
-                )}
-              </div>
-            ))}
           </div>
 
           {status === "error" && (

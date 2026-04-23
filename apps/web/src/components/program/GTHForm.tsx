@@ -15,10 +15,12 @@ import {
 } from "@/components/editorial";
 
 const educationOptions = ["sma", "d3", "s1", "s2", "other"] as const;
-const currentStatusOptions = ["fresh_grad", "working", "lpk_student", "job_seeker"] as const;
-const interestedCountryOptions = ["japan", "saudi", "taiwan", "undecided"] as const;
-const hasLPKOptions = ["yes", "no"] as const;
 
+/**
+ * Bio-only registration for Global Talent Hub (Phase C+). Candidates
+ * express interest at www; they complete interest country / LPK status /
+ * current status as credentials on app.perantauglobal.com/profile.
+ */
 export default function GTHForm() {
   const t = useTranslations("program.gth.form");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -34,9 +36,6 @@ export default function GTHForm() {
       email: formData.get("email") as string,
       city: formData.get("city") as string,
       education: formData.get("education") as string,
-      currentStatus: formData.get("currentStatus") as string,
-      interestedCountry: formData.get("interestedCountry") as string,
-      hasLPK: formData.get("hasLPK") as string,
     };
     const eventId = generateEventId("global_talent_hub");
     const { fbp, fbc } = getMetaCookies();
@@ -146,46 +145,15 @@ export default function GTHForm() {
               <input type="text" name="city" required className={input} />
             </label>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <label className="block">
-              <span className={label}>{t("education")} <span className="text-[var(--color-dtg-red)]">*</span></span>
-              <select name="education" required defaultValue="" className={input}>
-                <option value="" disabled>— Pilih —</option>
-                {educationOptions.map((opt) => (
-                  <option key={opt} value={opt}>{t(`educationOptions.${opt}`)}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className={label}>{t("currentStatus")} <span className="text-[var(--color-dtg-red)]">*</span></span>
-              <select name="currentStatus" required defaultValue="" className={input}>
-                <option value="" disabled>— Pilih —</option>
-                {currentStatusOptions.map((opt) => (
-                  <option key={opt} value={opt}>{t(`currentStatusOptions.${opt}`)}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-          <div className="grid gap-5 sm:grid-cols-2">
-            <label className="block">
-              <span className={label}>{t("interestedCountry")} <span className="text-[var(--color-dtg-red)]">*</span></span>
-              <select name="interestedCountry" required defaultValue="" className={input}>
-                <option value="" disabled>— Pilih —</option>
-                {interestedCountryOptions.map((opt) => (
-                  <option key={opt} value={opt}>{t(`interestedCountryOptions.${opt}`)}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className={label}>{t("hasLPK")} <span className="text-[var(--color-dtg-red)]">*</span></span>
-              <select name="hasLPK" required defaultValue="" className={input}>
-                <option value="" disabled>— Pilih —</option>
-                {hasLPKOptions.map((opt) => (
-                  <option key={opt} value={opt}>{t(`hasLPKOptions.${opt}`)}</option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <label className="block">
+            <span className={label}>{t("education")} <span className="text-[var(--color-dtg-red)]">*</span></span>
+            <select name="education" required defaultValue="" className={input}>
+              <option value="" disabled>— Pilih —</option>
+              {educationOptions.map((opt) => (
+                <option key={opt} value={opt}>{t(`educationOptions.${opt}`)}</option>
+              ))}
+            </select>
+          </label>
 
           {status === "error" && (
             <p className="font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.1em] text-[var(--color-dtg-red)]">

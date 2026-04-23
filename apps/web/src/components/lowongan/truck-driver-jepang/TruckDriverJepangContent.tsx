@@ -12,16 +12,9 @@ import {
   LowonganForm,
   LowonganFinalCTA,
 } from "@/components/lowongan";
-import type { FormFieldConfig } from "@/components/lowongan";
 import { Footer, MobileStickyCTA, Nav, type FooterColumn, type NavAnchor } from "@/components/editorial";
 
 const NS = "lowongan.truck-driver-jepang";
-
-const roleFields: FormFieldConfig[] = [
-  { name: "sim_type", type: "select", required: true, options: ["sim_a", "sim_b1", "sim_b2", "sim_internasional"] },
-  { name: "driving_years", type: "select", required: true, options: ["1-2", "3-5", "5+"] },
-  { name: "jlpt_level", type: "select", required: true, options: ["n5", "n4", "n3", "n2", "no_cert"] },
-];
 
 export default function TruckDriverJepangContent() {
   const t = useTranslations(NS);
@@ -44,7 +37,6 @@ export default function TruckDriverJepangContent() {
         <LowonganForm
           namespace={NS}
           apiEndpoint="/api/lowongan/truck-driver-jepang"
-          roleFields={roleFields}
           role="truck_driver"
           country="japan"
         />
