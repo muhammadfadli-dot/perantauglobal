@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Icon } from "@/components/pg/Icon";
 import { toggleReachedOut } from "@/app/(admin)/admin/actions";
 
 export default function ReachOutToggle({
@@ -35,22 +36,16 @@ export default function ReachOutToggle({
       type="button"
       onClick={toggle}
       disabled={pending}
-      className={
-        "flex items-center gap-2 border px-3 py-1.5 font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] transition-colors disabled:opacity-60 " +
-        (value
-          ? "border-[var(--color-dtg-ink)] bg-[var(--color-dtg-ink)] text-white"
-          : "border-[var(--color-dtg-ink)]/30 hover:border-[var(--color-dtg-ink)]")
-      }
+      className={`inline-flex items-center gap-2 min-h-[36px] px-3 text-[12px] font-bold tracking-wide uppercase rounded-lg border-[1.5px] transition-colors disabled:opacity-60 ${
+        value
+          ? "bg-pg-red-600 text-white border-pg-red-600"
+          : "bg-pg-white text-pg-ink-700 border-pg-ink-200 hover:border-pg-ink-300"
+      }`}
     >
-      <span
-        className={
-          "inline-block h-2 w-2 rounded-full " +
-          (value ? "bg-white" : "bg-[var(--color-dtg-ink)]/30")
-        }
-      />
+      <Icon name={value ? "check" : "phone"} size={12} stroke={2.4} />
       {value
-        ? `Di-outreach ${at ? new Date(at).toLocaleDateString("id-ID") : ""}`
-        : "Belum di-outreach"}
+        ? `Outreach ${at ? new Date(at).toLocaleDateString("id-ID") : ""}`
+        : "Belum outreach"}
     </button>
   );
 }

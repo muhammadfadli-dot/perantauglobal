@@ -1,22 +1,104 @@
 @import "tailwindcss";
 
-@theme {
-  /* DTG brand palette — keep in sync with DESIGN.md / apps/web/globals.css */
-  --color-dtg-red: #c8102e;
-  --color-dtg-red-dark: #8b0000;
-  --color-dtg-ink: #1a1a1a;
-  --color-dtg-cream: #f7f2e7;
+@theme inline {
+  /* === Perantau Global v2 design tokens (Apr 2026) === */
+  --color-pg-red-50: var(--pg-red-50);
+  --color-pg-red-100: var(--pg-red-100);
+  --color-pg-red-200: var(--pg-red-200);
+  --color-pg-red-500: var(--pg-red-500);
+  --color-pg-red-600: var(--pg-red-600);
+  --color-pg-red-700: var(--pg-red-700);
+  --color-pg-red-800: var(--pg-red-800);
+
+  --color-pg-ink-900: var(--pg-ink-900);
+  --color-pg-ink-700: var(--pg-ink-700);
+  --color-pg-ink-500: var(--pg-ink-500);
+  --color-pg-ink-400: var(--pg-ink-400);
+  --color-pg-ink-300: var(--pg-ink-300);
+  --color-pg-ink-200: var(--pg-ink-200);
+  --color-pg-ink-100: var(--pg-ink-100);
+  --color-pg-ink-50: var(--pg-ink-50);
+  --color-pg-paper: var(--pg-paper);
+  --color-pg-white: var(--pg-white);
+
+  --color-pg-ok: var(--pg-ok);
+  --color-pg-ok-bg: var(--pg-ok-bg);
+  --color-pg-warn: var(--pg-warn);
+  --color-pg-warn-bg: var(--pg-warn-bg);
+  --color-pg-err: var(--pg-err);
+  --color-pg-err-bg: var(--pg-err-bg);
+  --color-pg-info: var(--pg-info);
+  --color-pg-info-bg: var(--pg-info-bg);
+
+  /* Legacy aliases */
+  --color-dtg-red: #d7262f;
+  --color-dtg-red-dark: #b91d24;
+  --color-dtg-ink: #141414;
+  --color-dtg-cream: #fafaf8;
+
   --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-body: "Source Sans 3", system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --shadow-sm: 0 1px 2px rgba(20, 20, 20, 0.06), 0 0 0 1px rgba(20, 20, 20, 0.04);
+  --shadow-md: 0 4px 16px rgba(20, 20, 20, 0.08), 0 0 0 1px rgba(20, 20, 20, 0.04);
+  --shadow-lg: 0 8px 24px rgba(20, 20, 20, 0.10), 0 0 0 1px rgba(20, 20, 20, 0.04);
 }
 
 :root {
   color-scheme: light;
+
+  --pg-red-50: #fff4f4;
+  --pg-red-100: #ffe3e3;
+  --pg-red-200: #ffc9c9;
+  --pg-red-500: #e23b3b;
+  --pg-red-600: #d7262f;
+  --pg-red-700: #b91d24;
+  --pg-red-800: #8f1319;
+
+  --pg-ink-900: #141414;
+  --pg-ink-700: #2a2a2a;
+  --pg-ink-500: #5a5a5a;
+  --pg-ink-400: #7a7a7a;
+  --pg-ink-300: #b3b3b3;
+  --pg-ink-200: #dedede;
+  --pg-ink-100: #ededed;
+  --pg-ink-50: #f6f6f5;
+
+  --pg-paper: #fafaf8;
+  --pg-white: #ffffff;
+
+  --pg-ok: #0f8a4a;
+  --pg-ok-bg: #e6f4ec;
+  --pg-warn: #a66500;
+  --pg-warn-bg: #fbf0d9;
+  --pg-err: #b91d24;
+  --pg-err-bg: #fde5e7;
+  --pg-info: #1e5aa8;
+  --pg-info-bg: #e4edf8;
 }
 
 html,
 body {
-  background: var(--color-dtg-cream);
-  color: var(--color-dtg-ink);
-  font-family: var(--font-body);
+  background: var(--pg-paper);
+  color: var(--pg-ink-900);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  text-wrap: balance;
+  letter-spacing: -0.02em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--pg-red-600);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

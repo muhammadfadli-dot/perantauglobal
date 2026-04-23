@@ -17,25 +17,86 @@ export type Database = {
   public: {
     Tables: {
       admin_users: {
+        Row: { added_at: string | null; added_by: string | null; email: string; notes: string | null }
+        Insert: { added_at?: string | null; added_by?: string | null; email: string; notes?: string | null }
+        Update: { added_at?: string | null; added_by?: string | null; email?: string; notes?: string | null }
+        Relationships: []
+      }
+      application_status_history: {
         Row: {
-          added_at: string | null
-          added_by: string | null
-          email: string
-          notes: string | null
+          application_id: string
+          changed_at: string
+          changed_by: string | null
+          from_stage: Database["public"]["Enums"]["pipeline_stage"] | null
+          id: string
+          internal_note: string | null
+          public_note: string | null
+          to_stage: Database["public"]["Enums"]["pipeline_stage"]
         }
         Insert: {
-          added_at?: string | null
-          added_by?: string | null
-          email: string
-          notes?: string | null
+          application_id: string
+          changed_at?: string
+          changed_by?: string | null
+          from_stage?: Database["public"]["Enums"]["pipeline_stage"] | null
+          id?: string
+          internal_note?: string | null
+          public_note?: string | null
+          to_stage: Database["public"]["Enums"]["pipeline_stage"]
         }
         Update: {
-          added_at?: string | null
-          added_by?: string | null
-          email?: string
-          notes?: string | null
+          application_id?: string
+          changed_at?: string
+          changed_by?: string | null
+          from_stage?: Database["public"]["Enums"]["pipeline_stage"] | null
+          id?: string
+          internal_note?: string | null
+          public_note?: string | null
+          to_stage?: Database["public"]["Enums"]["pipeline_stage"]
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "application_status_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_tiers: {
+        Row: {
+          application_id: string
+          assigned_at: string
+          assigned_by: string | null
+          notes: string | null
+          score: number | null
+          tier: Database["public"]["Enums"]["tier_label"]
+        }
+        Insert: {
+          application_id: string
+          assigned_at?: string
+          assigned_by?: string | null
+          notes?: string | null
+          score?: number | null
+          tier: Database["public"]["Enums"]["tier_label"]
+        }
+        Update: {
+          application_id?: string
+          assigned_at?: string
+          assigned_by?: string | null
+          notes?: string | null
+          score?: number | null
+          tier?: Database["public"]["Enums"]["tier_label"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_tiers_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: true
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       applications: {
         Row: {
@@ -43,6 +104,7 @@ export type Database = {
           candidate_id: string
           created_at: string
           id: string
+          job_order_id: string | null
           pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
           po_notes: string | null
           position_slug: string
@@ -61,6 +123,7 @@ export type Database = {
           candidate_id: string
           created_at?: string
           id?: string
+          job_order_id?: string | null
           pipeline_stage?: Database["public"]["Enums"]["pipeline_stage"]
           po_notes?: string | null
           position_slug: string
@@ -79,6 +142,7 @@ export type Database = {
           candidate_id?: string
           created_at?: string
           id?: string
+          job_order_id?: string | null
           pipeline_stage?: Database["public"]["Enums"]["pipeline_stage"]
           po_notes?: string | null
           position_slug?: string
@@ -101,11 +165,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "applications_candidate_id_fkey"
-            columns: ["candidate_id"]
+            foreignKeyName: "applications_job_order_id_fkey"
+            columns: ["job_order_id"]
             isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["candidate_id"]
+            referencedRelation: "job_orders"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "applications_position_slug_fkey"
@@ -113,13 +177,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["slug"]
-          },
-          {
-            foreignKeyName: "applications_position_slug_fkey"
-            columns: ["position_slug"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["position_slug"]
           },
         ]
       }
@@ -132,6 +189,9 @@ export type Database = {
           id: string
           mime_type: string | null
           notes: string | null
+          rejected_at: string | null
+          rejected_by: string | null
+          rejected_reason: string | null
           uploaded_at: string
           verified: boolean
           verified_at: string | null
@@ -145,6 +205,9 @@ export type Database = {
           id?: string
           mime_type?: string | null
           notes?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejected_reason?: string | null
           uploaded_at?: string
           verified?: boolean
           verified_at?: string | null
@@ -158,6 +221,9 @@ export type Database = {
           id?: string
           mime_type?: string | null
           notes?: string | null
+          rejected_at?: string | null
+          rejected_by?: string | null
+          rejected_reason?: string | null
           uploaded_at?: string
           verified?: boolean
           verified_at?: string | null
@@ -170,13 +236,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidates"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "candidate_documents_candidate_id_fkey"
-            columns: ["candidate_id"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["candidate_id"]
           },
         ]
       }
@@ -280,29 +339,7 @@ export type Database = {
           version?: string
           withdrawn_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "consents_candidate_id_fkey"
-            columns: ["candidate_id"]
-            isOneToOne: false
-            referencedRelation: "candidates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "consents_candidate_id_fkey"
-            columns: ["candidate_id"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["candidate_id"]
-          },
-          {
-            foreignKeyName: "consents_pending_id_fkey"
-            columns: ["pending_id"]
-            isOneToOne: false
-            referencedRelation: "pending_submissions"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       contact_submissions: {
         Row: {
@@ -388,6 +425,68 @@ export type Database = {
         }
         Relationships: []
       }
+      job_orders: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          deadline: string | null
+          employer_city: string | null
+          id: string
+          intake_label: string
+          internal_employer_name: string
+          notes: string | null
+          position_slug: string
+          public_description: string | null
+          public_employer_name: string | null
+          slot_count: number
+          slot_filled: number
+          status: Database["public"]["Enums"]["job_order_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          employer_city?: string | null
+          id?: string
+          intake_label: string
+          internal_employer_name: string
+          notes?: string | null
+          position_slug: string
+          public_description?: string | null
+          public_employer_name?: string | null
+          slot_count: number
+          slot_filled?: number
+          status?: Database["public"]["Enums"]["job_order_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          deadline?: string | null
+          employer_city?: string | null
+          id?: string
+          intake_label?: string
+          internal_employer_name?: string
+          notes?: string | null
+          position_slug?: string
+          public_description?: string | null
+          public_employer_name?: string | null
+          slot_count?: number
+          slot_filled?: number
+          status?: Database["public"]["Enums"]["job_order_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_orders_position_slug_fkey"
+            columns: ["position_slug"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       pending_submissions: {
         Row: {
           consent_ids: string[] | null
@@ -431,20 +530,58 @@ export type Database = {
           position_slug?: string
           user_agent?: string | null
         }
+        Relationships: []
+      }
+      position_form_fields: {
+        Row: {
+          created_at: string
+          field_help: string | null
+          field_key: string
+          field_label: string
+          field_type: Database["public"]["Enums"]["form_field_type"]
+          id: string
+          options: Json | null
+          position_slug: string
+          required: boolean
+          sort_order: number
+          tier_weight: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          field_help?: string | null
+          field_key: string
+          field_label: string
+          field_type: Database["public"]["Enums"]["form_field_type"]
+          id?: string
+          options?: Json | null
+          position_slug: string
+          required?: boolean
+          sort_order?: number
+          tier_weight?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          field_help?: string | null
+          field_key?: string
+          field_label?: string
+          field_type?: Database["public"]["Enums"]["form_field_type"]
+          id?: string
+          options?: Json | null
+          position_slug?: string
+          required?: boolean
+          sort_order?: number
+          tier_weight?: number
+          updated_at?: string
+        }
         Relationships: [
           {
-            foreignKeyName: "pending_submissions_position_slug_fkey"
+            foreignKeyName: "position_form_fields_position_slug_fkey"
             columns: ["position_slug"]
             isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["slug"]
-          },
-          {
-            foreignKeyName: "pending_submissions_position_slug_fkey"
-            columns: ["position_slug"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["position_slug"]
           },
         ]
       }
@@ -514,180 +651,17 @@ export type Database = {
     }
     Enums: {
       doc_type:
-        | "ktp"
-        | "passport"
-        | "cv"
-        | "certificate"
-        | "medical"
-        | "photo"
-        | "other"
+        | "ktp" | "passport" | "cv" | "certificate" | "medical" | "photo" | "other"
+      form_field_type:
+        | "select" | "radio" | "number" | "text" | "textarea" | "file" | "multiselect"
+      job_order_status: "open" | "closed" | "filled" | "cancelled"
       pipeline_stage:
-        | "applied"
-        | "screening"
-        | "voice_screen"
-        | "interview"
-        | "document_check"
-        | "briefing"
-        | "trial"
-        | "selected"
-        | "training"
-        | "deployed"
-        | "active"
-        | "rejected"
-        | "exit"
+        | "applied" | "screening" | "voice_screen" | "interview" | "document_check"
+        | "briefing" | "trial" | "selected" | "training" | "deployed" | "active"
+        | "rejected" | "exit"
+      tier_label: "A" | "B" | "C" | "D" | "rejected"
       user_role: "candidate" | "admin" | "recruiter"
     }
-    CompositeTypes: {
-      [_ in never]: never
-    }
+    CompositeTypes: { [_ in never]: never }
   }
 }
-
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
-
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {
-      doc_type: [
-        "ktp",
-        "passport",
-        "cv",
-        "certificate",
-        "medical",
-        "photo",
-        "other",
-      ],
-      pipeline_stage: [
-        "applied",
-        "screening",
-        "voice_screen",
-        "interview",
-        "document_check",
-        "briefing",
-        "trial",
-        "selected",
-        "training",
-        "deployed",
-        "active",
-        "rejected",
-        "exit",
-      ],
-      user_role: ["candidate", "admin", "recruiter"],
-    },
-  },
-} as const

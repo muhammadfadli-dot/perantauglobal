@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { createBrowserClient as createSSRBrowserClient } from "@supabase/ssr";
+import { Icon } from "@/components/pg/Icon";
+import { Button } from "@/components/pg/primitives";
 
 type State =
   | { kind: "idle" }
@@ -26,9 +28,6 @@ export default function SignInForm() {
     const sb = createSSRBrowserClient(url, key);
 
     const redirectTo = `${window.location.origin}/auth/callback`;
-    // shouldCreateUser: true — allows first-time signin to also materialize
-    // the auth.users row. For admins, the admin_users allowlist still gates
-    // access via is_admin(), so random signups can't reach /admin.
     const { error } = await sb.auth.signInWithOtp({
       email,
       options: { emailRedirectTo: redirectTo, shouldCreateUser: true },
@@ -43,57 +42,98 @@ export default function SignInForm() {
 
   if (state.kind === "sent") {
     return (
-      <div className="border border-[var(--color-dtg-ink)] bg-white p-6">
-        <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.12em] opacity-60">
-          Terkirim
+      <div className="text-center py-6">
+        <div className="relative mx-auto w-[120px] h-[120px]">
+          <div
+            className="absolute inset-0 rounded-full"
+            style={{ background: "var(--pg-red-50)" }}
+          />
+          <div
+            className="absolute inset-[18px] rounded-full"
+            style={{ background: "var(--pg-red-100)" }}
+          />
+          <div
+            className="absolute inset-[34px] rounded-full grid place-items-center text-white"
+            style={{ background: "var(--pg-red-600)" }}
+          >
+            <Icon name="mail" size={28} stroke={2.2} />
+          </div>
+        </div>
+        <h2 className="text-2xl font-extrabold tracking-tight mt-7">Cek email kamu.</h2>
+        <p className="text-base text-pg-ink-700 mt-3">Kami kirim link masuk ke</p>
+        <div className="text-[17px] font-extrabold text-pg-red-600 mt-1">{state.email}</div>
+        <p className="text-sm text-pg-ink-500 mt-4 max-w-xs mx-auto leading-relaxed">
+          Link berlaku 15 menit. Tinggal klik tombol di email untuk masuk ke Talent Hub.
         </p>
-        <h2 className="mt-3 font-[family-name:var(--font-display)] text-xl">
-          Cek email kamu.
-        </h2>
-        <p className="mt-3 text-sm leading-[1.5] opacity-80">
-          Kami kirim tautan masuk ke <strong>{state.email}</strong>. Klik
-          tautannya untuk masuk ke portal.
-        </p>
-        <p className="mt-4 font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] opacity-60">
-          Link valid ~1 jam · cek juga folder spam/promosi
-        </p>
+
+        <div className="bg-pg-white border border-pg-ink-100 rounded-2xl p-4 mt-6 text-left">
+          <div className="text-[13px] font-bold">Belum ada email masuk?</div>
+          <ul className="text-[13px] text-pg-ink-500 mt-2 space-y-1 leading-relaxed list-disc pl-5">
+            <li>Cek folder Spam atau Promosi</li>
+            <li>Tunggu 1–2 menit, kadang sedikit delay</li>
+            <li>Pastikan email kamu benar</li>
+          </ul>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setState({ kind: "idle" })}
+          className="mt-5 text-sm text-pg-ink-500 font-semibold underline"
+        >
+          Ganti email
+        </button>
       </div>
     );
   }
 
   return (
-    <form onSubmit={submit} className="border border-[var(--color-dtg-ink)] bg-white p-6">
-      <label className="font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase tracking-[0.1em]">
-        Email
-      </label>
-      <input
-        type="email"
-        required
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="kamu@email.com"
-        className="mt-2 w-full border border-[var(--color-dtg-ink)]/20 bg-white px-3 py-3 text-base outline-none focus:border-[var(--color-dtg-red)]"
-      />
-      <button
-        type="submit"
-        disabled={state.kind === "sending"}
-        className="mt-5 w-full border border-[var(--color-dtg-ink)] bg-[var(--color-dtg-ink)] px-4 py-3 font-[family-name:var(--font-mono)] text-xs font-bold uppercase tracking-[0.12em] text-white hover:bg-[var(--color-dtg-red)] disabled:opacity-60"
+    <form onSubmit={submit} className="space-y-4">
+      <div>
+        <label className="text-[13px] font-bold text-pg-ink-500 mb-1.5 block">Email</label>
+        <div
+          className={`flex items-center gap-2.5 bg-pg-white border-[1.5px] rounded-lg px-3.5 py-3 transition-colors ${
+            email ? "border-pg-red-600" : "border-pg-ink-200"
+          }`}
+        >
+          <Icon name="mail" size={18} className={email ? "text-pg-red-600" : "text-pg-ink-400"} />
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="kamu@email.com"
+            className="flex-1 text-base text-pg-ink-900 font-semibold outline-none bg-transparent placeholder:font-medium placeholder:text-pg-ink-400"
+          />
+        </div>
+      </div>
+
+      <div
+        className="flex gap-2.5 items-start px-3.5 py-3 rounded-lg"
+        style={{ background: "var(--pg-info-bg)", color: "var(--pg-info)" }}
       >
-        {state.kind === "sending" ? "Mengirim…" : "Kirim tautan masuk →"}
-      </button>
+        <Icon name="info" size={16} className="shrink-0 mt-0.5" />
+        <div className="text-[12px] leading-relaxed">
+          Kami tidak akan pernah kirim spam atau bagikan data kamu ke pihak ketiga.
+        </div>
+      </div>
 
       {state.kind === "error" && (
-        <p className="mt-3 text-[12px] text-[var(--color-dtg-red)]">
-          {state.message}
-        </p>
+        <div
+          className="px-3.5 py-3 rounded-lg flex items-start gap-2 text-sm"
+          style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
+        >
+          <Icon name="warn" size={16} />
+          <span>{state.message}</span>
+        </div>
       )}
 
-      <p className="mt-5 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.1em] opacity-50">
-        Belum punya akun? Daftar lewat{" "}
-        <a href="https://perantauglobal.com/lowongan" className="underline">
-          perantauglobal.com
-        </a>
-      </p>
+      <Button type="submit" variant="primary" block disabled={state.kind === "sending"}>
+        {state.kind === "sending" ? "Mengirim…" : (
+          <>
+            Kirim link ke email <Icon name="arrow_right" size={18} />
+          </>
+        )}
+      </Button>
     </form>
   );
 }

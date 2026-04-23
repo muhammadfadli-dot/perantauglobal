@@ -2,12 +2,9 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { Icon } from "@/components/pg/Icon";
 
-export default function CandidateFilters({
-  initialQuery,
-}: {
-  initialQuery: string;
-}) {
+export default function CandidateFilters({ initialQuery }: { initialQuery: string }) {
   const router = useRouter();
   const params = useSearchParams();
   const [q, setQ] = useState(initialQuery);
@@ -28,16 +25,19 @@ export default function CandidateFilters({
 
   return (
     <form onSubmit={submit} className="flex flex-wrap items-center gap-3">
-      <input
-        type="search"
-        placeholder="Cari nama, email, atau WhatsApp…"
-        value={q}
-        onChange={(e) => setQ(e.target.value)}
-        className="flex-1 min-w-[260px] border border-[var(--color-dtg-ink)]/20 bg-white px-4 py-2 text-sm outline-none focus:border-[var(--color-dtg-red)]"
-      />
+      <div className="flex-1 min-w-[260px] flex items-center gap-2.5 bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3.5 py-2.5 focus-within:border-pg-red-600 transition-colors">
+        <Icon name="search" size={18} className="text-pg-ink-400" />
+        <input
+          type="search"
+          placeholder="Cari nama, email, atau nomor HP…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="flex-1 text-sm text-pg-ink-900 outline-none bg-transparent placeholder:text-pg-ink-400"
+        />
+      </div>
       <button
         type="submit"
-        className="border border-[var(--color-dtg-ink)] bg-[var(--color-dtg-ink)] px-4 py-2 font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase tracking-[0.12em] text-white hover:bg-[var(--color-dtg-red)]"
+        className="inline-flex items-center justify-center min-h-[42px] px-4 text-sm font-semibold rounded-xl bg-pg-red-600 text-white hover:bg-pg-red-700"
       >
         Cari
       </button>
@@ -45,7 +45,7 @@ export default function CandidateFilters({
         <button
           type="button"
           onClick={clear}
-          className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] opacity-60 hover:opacity-100"
+          className="text-[12px] font-bold tracking-wide uppercase text-pg-ink-500 hover:text-pg-ink-900"
         >
           Reset
         </button>

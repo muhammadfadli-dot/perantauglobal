@@ -16,10 +16,10 @@ export default async function AdminLayout({
   if (role !== "admin") redirect("/dashboard");
 
   return (
-    <div className="min-h-screen bg-[var(--color-dtg-cream)]">
+    <div className="min-h-screen" style={{ background: "var(--pg-paper)" }}>
       <div className="flex min-h-screen">
         <AdminSidebar email={session.email} />
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 min-w-0">{children}</div>
       </div>
     </div>
   );

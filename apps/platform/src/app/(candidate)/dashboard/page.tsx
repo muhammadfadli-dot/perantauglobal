@@ -1,6 +1,9 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
-import SignOutButton from "@/components/SignOutButton";
+import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
+import { Badge } from "@/components/pg/primitives";
+import { Icon } from "@/components/pg/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -36,21 +39,33 @@ type MatchRow = {
   hard_pass: boolean | null;
 };
 
-const STAGE_LABELS: Record<string, string> = {
-  applied: "Didaftarkan",
-  screening: "Sedang diseleksi",
-  voice_screen: "Voice screening",
-  interview: "Wawancara",
-  document_check: "Cek dokumen",
-  briefing: "Briefing",
-  trial: "Trial",
-  selected: "Lolos seleksi",
-  training: "Pelatihan",
-  deployed: "Diberangkatkan",
-  active: "Aktif bekerja",
-  rejected: "Tidak lolos",
-  exit: "Kontrak selesai",
-};
+/**
+ * Internal pipeline stage → user-visible 4-stage label.
+ * Sourced from SPEC.md §3.8.
+ */
+function userStage(internal: string): { label: string; variant: "warn" | "info" | "ok" | "err" | "mute" } {
+  switch (internal) {
+    case "applied":
+    case "screening":
+    case "voice_screen":
+    case "document_check":
+      return { label: "Sedang diseleksi", variant: "warn" };
+    case "interview":
+    case "briefing":
+    case "trial":
+      return { label: "Wawancara & dokumen", variant: "info" };
+    case "selected":
+    case "training":
+    case "deployed":
+    case "active":
+      return { label: "Diterima", variant: "ok" };
+    case "rejected":
+    case "exit":
+      return { label: "Tidak lolos", variant: "err" };
+    default:
+      return { label: "Diproses", variant: "mute" };
+  }
+}
 
 export default async function DashboardPage() {
   const { session, role } = await getSessionAndRole();
@@ -67,47 +82,25 @@ export default async function DashboardPage() {
 
   const { data: appsData } = await supabase
     .from("applications")
-    .select(
-      "id, position_slug, pipeline_stage, created_at, positions (name, country)",
-    )
+    .select("id, position_slug, pipeline_stage, created_at, positions (name, country)")
     .eq("candidate_id", candidate?.id ?? "")
     .order("created_at", { ascending: false });
-  const applications = (appsData ?? []) as ApplicationRow[];
+  const applications = (appsData ?? []) as unknown as ApplicationRow[];
 
-  // Fetch readiness for all applied positions in a single query.
-  const appliedSlugs = applications.map((a) => a.position_slug);
-  let readinessMap: Record<string, ReadinessRow> = {};
-  if (candidate && appliedSlugs.length > 0) {
-    const { data: readinessData } = await supabase
-      .from("readiness_view")
-      .select("candidate_id, position_slug, completion_pct, hard_pass")
-      .eq("candidate_id", candidate.id)
-      .in("position_slug", appliedSlugs);
-    readinessMap = Object.fromEntries(
-      (readinessData ?? []).map((row) => [
-        (row as ReadinessRow).position_slug ?? "",
-        row as ReadinessRow,
-      ]),
-    );
-  }
-
-  // Profile completion check: has credentials been populated?
   const profileData = (candidate?.profile_data ?? {}) as Record<string, unknown>;
   const credentials = (profileData.credentials ?? {}) as Record<string, unknown>;
   const credentialCount = Object.keys(credentials).length;
   const onboarding = (profileData.onboarding ?? {}) as Record<string, unknown>;
   const profileCompleted = Boolean(onboarding.completed_at) || credentialCount >= 4;
+  const profilePct = Math.min(100, Math.round((credentialCount / 5) * 100));
 
-  // Top-3 matched positions not yet applied to — preview for /explore.
   let topMatches: MatchRow[] = [];
   if (candidate) {
     const { data: matchData } = await supabase
       .from("readiness_view")
-      .select(
-        "position_slug, position_name, country, completion_pct, hard_pass",
-      )
+      .select("position_slug, position_name, country, completion_pct, hard_pass")
       .eq("candidate_id", candidate.id);
-    const appliedSet = new Set(appliedSlugs);
+    const appliedSet = new Set(applications.map((a) => a.position_slug));
     topMatches = ((matchData ?? []) as MatchRow[])
       .filter((r) => r.position_slug && !appliedSet.has(r.position_slug))
       .sort((a, b) => {
@@ -118,186 +111,164 @@ export default async function DashboardPage() {
       .slice(0, 3);
   }
 
+  const firstName = (candidate?.full_name ?? session.email ?? "kandidat").split(" ")[0];
+
   return (
-    <main className="mx-auto max-w-[640px] px-6 py-8 pb-24">
-      <header className="flex items-baseline justify-between">
-        <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.14em] opacity-60">
-          Portal Kandidat
-        </p>
-        <SignOutButton />
-      </header>
-      <h1 className="mt-3 font-[family-name:var(--font-display)] text-2xl leading-[1.2]">
-        Halo, {candidate?.full_name ?? session.email ?? "kandidat"}.
-      </h1>
-      {candidate?.email && (
-        <p className="mt-1 text-xs opacity-60">{candidate.email}</p>
-      )}
+    <div className="min-h-screen flex flex-col">
+      <TopBarApp title="Beranda" bell />
 
-      {!profileCompleted && (
-        <section className="mt-6 border border-[var(--color-dtg-ink)] bg-[var(--color-dtg-ink)] p-5 text-white">
-          <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.14em] opacity-70">
-            Langkah berikutnya
-          </p>
-          <h2 className="mt-2 font-[family-name:var(--font-display)] text-xl leading-[1.2]">
-            Lengkapi profil kamu
-          </h2>
-          <p className="mt-2 text-sm leading-[1.5] opacity-90">
-            Makin lengkap profil, makin tinggi peluang kamu dihubungi
-            recruiter. Cuma 3 menit.
-          </p>
-          <a
-            href="/profile"
-            className="mt-4 inline-block bg-white px-5 py-3 text-sm font-semibold text-[var(--color-dtg-ink)] hover:opacity-90"
-          >
-            Mulai isi profil →
-          </a>
+      <main className="flex-1">
+        <section className="px-5 pt-5">
+          <div className="text-[15px] text-pg-ink-500">Halo,</div>
+          <div className="text-2xl font-extrabold tracking-tight mt-0.5">{firstName}</div>
         </section>
-      )}
 
-      <section className="mt-8">
-        <h2 className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.14em] opacity-60">
-          Lamaran Kamu
-        </h2>
-        {applications.length === 0 ? (
-          <p className="mt-4 text-sm opacity-70">Belum ada lamaran aktif.</p>
-        ) : (
-          <ul className="mt-4 space-y-3">
-            {applications.map((a) => {
-              const position = a.positions;
-              const readiness = readinessMap[a.position_slug];
-              const pct = readiness?.completion_pct ?? 0;
-              const hardPass = readiness?.hard_pass ?? false;
-              return (
-                <li key={a.id}>
-                  <a
-                    href={`/applications/${a.id}`}
-                    className="block border border-[var(--color-dtg-ink)] bg-white p-4 transition hover:bg-[var(--color-dtg-cream,#faf8f1)]"
-                  >
-                    <div className="flex items-baseline justify-between gap-3">
-                      <h3 className="font-semibold text-[15px] leading-[1.3]">
-                        {position?.name ?? a.position_slug}
-                      </h3>
-                      <span className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.08em] opacity-60">
-                        {STAGE_LABELS[a.pipeline_stage] ?? a.pipeline_stage}
-                      </span>
-                    </div>
-                    <div className="mt-3 flex items-center gap-3">
-                      <div className="flex-1">
-                        <div className="h-2 w-full bg-[var(--color-dtg-ink)]/10">
-                          <div
-                            className={`h-full ${
-                              hardPass
-                                ? "bg-green-600"
-                                : "bg-[var(--color-dtg-ink)]/60"
-                            }`}
-                            style={{ width: `${Math.max(pct, 4)}%` }}
-                          />
-                        </div>
-                      </div>
-                      <span className="font-[family-name:var(--font-mono)] text-xs font-semibold">
-                        {pct}%
-                      </span>
-                    </div>
-                    <div className="mt-2 flex items-center justify-between text-[11px]">
-                      <span className="opacity-60">
-                        Didaftarkan {new Date(a.created_at).toLocaleDateString("id-ID")}
-                      </span>
-                      {!hardPass && (
-                        <span className="font-[family-name:var(--font-mono)] uppercase tracking-[0.08em] text-red-700">
-                          syarat wajib kurang
-                        </span>
-                      )}
-                    </div>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
-
-      {topMatches.length > 0 && (
-        <section className="mt-10">
-          <div className="flex items-baseline justify-between">
-            <h2 className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.14em] opacity-60">
-              Posisi lain yang cocok
-            </h2>
-            <a
-              href="/explore"
-              className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.12em] hover:underline"
+        {!profileCompleted && (
+          <section className="px-5 pt-4">
+            <Link
+              href="/profile"
+              className="flex items-center gap-3.5 rounded-2xl px-4 py-4 text-white no-underline relative overflow-hidden"
+              style={{ background: "var(--pg-red-600)" }}
             >
-              Lihat semua →
-            </a>
+              <ProfileRing pct={profilePct} />
+              <div className="flex-1">
+                <div className="text-[15px] font-bold">Profil kamu {profilePct}% lengkap</div>
+                <div className="text-[13px] opacity-85 mt-0.5">
+                  Lengkapi data untuk lamar lebih cepat
+                </div>
+              </div>
+              <Icon name="chevron_right" size={20} />
+            </Link>
+          </section>
+        )}
+
+        <section className="px-5 pt-6">
+          <div className="flex justify-between items-center mb-3">
+            <h2 className="text-lg font-bold tracking-tight">Lamaran kamu</h2>
+            <div className="text-[13px] text-pg-ink-500">{applications.length} aktif</div>
           </div>
-          <ul className="mt-4 space-y-3">
-            {topMatches.map((m) => {
-              const slug = m.position_slug ?? "";
-              const pct = m.completion_pct ?? 0;
-              const hardPass = m.hard_pass ?? false;
-              return (
-                <li key={slug}>
-                  <a
-                    href="/explore"
-                    className="block border border-[var(--color-dtg-ink)] bg-white p-4 transition hover:bg-[var(--color-dtg-cream,#faf8f1)]"
+          {applications.length === 0 ? (
+            <div className="bg-pg-white border border-pg-ink-100 rounded-2xl p-6 text-center">
+              <div className="text-base font-bold">Belum ada lamaran</div>
+              <div className="text-sm text-pg-ink-500 mt-1.5 leading-relaxed">
+                Mulai jelajahi posisi yang cocok untuk kamu.
+              </div>
+              <Link
+                href="/explore"
+                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 mt-4 text-sm font-semibold rounded-xl bg-pg-red-600 text-white no-underline"
+              >
+                Cari lowongan <Icon name="arrow_right" size={16} />
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {applications.map((a) => {
+                const stage = userStage(a.pipeline_stage);
+                const position = a.positions;
+                return (
+                  <Link
+                    key={a.id}
+                    href={`/applications/${a.id}`}
+                    className="block bg-pg-white border border-pg-ink-100 rounded-2xl px-4 py-4 no-underline text-pg-ink-900"
                   >
-                    <div className="flex items-baseline justify-between gap-3">
-                      <h3 className="font-semibold text-[15px] leading-[1.3]">
-                        {m.position_name ?? slug}
-                      </h3>
-                      <span className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.08em] opacity-60">
-                        {m.country}
-                      </span>
-                    </div>
-                    <div className="mt-3 flex items-center gap-3">
-                      <div className="flex-1">
-                        <div className="h-2 w-full bg-[var(--color-dtg-ink)]/10">
-                          <div
-                            className={`h-full ${
-                              hardPass
-                                ? "bg-green-600"
-                                : "bg-[var(--color-dtg-ink)]/60"
-                            }`}
-                            style={{ width: `${Math.max(pct, 4)}%` }}
-                          />
+                    <div className="flex justify-between items-start gap-3">
+                      <div>
+                        <div className="text-[12px] tracking-[0.08em] uppercase text-pg-ink-400">
+                          {position?.country ?? "—"}
+                        </div>
+                        <div className="text-lg font-extrabold tracking-tight mt-0.5">
+                          {position?.name ?? a.position_slug}
                         </div>
                       </div>
-                      <span className="font-[family-name:var(--font-mono)] text-xs font-semibold">
-                        {pct}%
-                      </span>
+                      <Badge variant={stage.variant}>{stage.label}</Badge>
                     </div>
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
+                    <div className="flex justify-between items-center mt-3.5 pt-3.5 border-t border-pg-ink-100">
+                      <div className="text-sm text-pg-ink-500">
+                        Dilamar {new Date(a.created_at).toLocaleDateString("id-ID")}
+                      </div>
+                      <div className="flex items-center gap-1 text-pg-red-600 font-bold text-sm">
+                        Lihat detail <Icon name="chevron_right" size={16} />
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </section>
-      )}
 
-      <nav
-        aria-label="Navigasi"
-        className="fixed inset-x-0 bottom-0 z-20 border-t border-[var(--color-dtg-ink)] bg-white"
-      >
-        <div className="mx-auto grid max-w-[640px] grid-cols-3">
-          <a
-            href="/dashboard"
-            className="flex flex-col items-center gap-1 py-3 text-[11px] uppercase tracking-[0.1em]"
-          >
-            <span className="font-[family-name:var(--font-mono)] font-bold">Home</span>
-          </a>
-          <a
-            href="/profile"
-            className="flex flex-col items-center gap-1 py-3 text-[11px] uppercase tracking-[0.1em]"
-          >
-            <span className="font-[family-name:var(--font-mono)]">Profil</span>
-          </a>
-          <a
-            href="/explore"
-            className="flex flex-col items-center gap-1 py-3 text-[11px] uppercase tracking-[0.1em]"
-          >
-            <span className="font-[family-name:var(--font-mono)]">Jelajah</span>
-          </a>
-        </div>
-      </nav>
-    </main>
+        {topMatches.length > 0 && (
+          <section className="px-5 pt-6 pb-8">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-lg font-bold tracking-tight">Cocok buat kamu</h2>
+              <Link
+                href="/explore"
+                className="text-pg-red-600 font-bold text-[13px] no-underline"
+              >
+                Lihat semua
+              </Link>
+            </div>
+            <div className="flex gap-3 overflow-x-auto -mr-5 pr-5">
+              {topMatches.map((m) => (
+                <Link
+                  key={m.position_slug ?? ""}
+                  href="/explore"
+                  className="block min-w-[200px] bg-pg-white border border-pg-ink-100 rounded-2xl overflow-hidden shrink-0 no-underline text-pg-ink-900"
+                >
+                  <div
+                    className="px-3.5 pt-3.5 pb-3 text-white min-h-[80px]"
+                    style={{
+                      background:
+                        "radial-gradient(ellipse at 80% 10%, rgba(255,255,255,.18), transparent 60%), var(--pg-red-600)",
+                    }}
+                  >
+                    <div className="text-[10px] font-bold tracking-[0.14em] uppercase opacity-85">
+                      {m.country}
+                    </div>
+                    <div className="text-xl font-extrabold tracking-tight mt-1">
+                      {m.position_name}
+                    </div>
+                  </div>
+                  <div className="px-3.5 py-3">
+                    <Badge variant="ok" icon="sparkle_dot">
+                      {m.completion_pct ?? 0}% cocok
+                    </Badge>
+                    <div className="flex items-center gap-1 text-pg-red-600 font-bold text-[13px] mt-2.5">
+                      Lihat <Icon name="chevron_right" size={14} />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+      </main>
+
+      <BottomNav />
+    </div>
+  );
+}
+
+function ProfileRing({ pct }: { pct: number }) {
+  const r = 22;
+  const c = 2 * Math.PI * r;
+  return (
+    <div className="relative w-[52px] h-[52px] shrink-0">
+      <svg width="52" height="52" viewBox="0 0 52 52">
+        <circle cx="26" cy="26" r={r} fill="none" stroke="rgba(255,255,255,.2)" strokeWidth="5" />
+        <circle
+          cx="26"
+          cy="26"
+          r={r}
+          fill="none"
+          stroke="#fff"
+          strokeWidth="5"
+          strokeDasharray={`${(pct / 100) * c} ${c}`}
+          strokeLinecap="round"
+          transform="rotate(-90 26 26)"
+        />
+      </svg>
+      <div className="absolute inset-0 grid place-items-center text-sm font-extrabold">{pct}%</div>
+    </div>
   );
 }

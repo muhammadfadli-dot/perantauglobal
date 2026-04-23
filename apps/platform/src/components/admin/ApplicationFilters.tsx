@@ -2,6 +2,9 @@
 
 import { useRouter } from "next/navigation";
 
+const SELECT_CLASS =
+  "bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3 py-2 text-sm text-pg-ink-900 outline-none focus:border-pg-red-600 transition-colors";
+
 export default function ApplicationFilters({
   positions,
   stages,
@@ -30,7 +33,7 @@ export default function ApplicationFilters({
       <select
         value={initialStage}
         onChange={(e) => apply({ stage: e.target.value })}
-        className="border border-[var(--color-dtg-ink)]/20 bg-white px-3 py-2 text-sm outline-none focus:border-[var(--color-dtg-red)]"
+        className={SELECT_CLASS}
       >
         <option value="">Semua stage</option>
         {stages.map((s) => (
@@ -43,7 +46,7 @@ export default function ApplicationFilters({
       <select
         value={initialPosition}
         onChange={(e) => apply({ position: e.target.value })}
-        className="border border-[var(--color-dtg-ink)]/20 bg-white px-3 py-2 text-sm outline-none focus:border-[var(--color-dtg-red)]"
+        className={SELECT_CLASS}
       >
         <option value="">Semua posisi</option>
         {positions.map((p) => (
@@ -57,7 +60,7 @@ export default function ApplicationFilters({
         <button
           type="button"
           onClick={() => router.push("/admin/applications")}
-          className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] opacity-60 hover:opacity-100"
+          className="text-[12px] font-bold tracking-wide uppercase text-pg-ink-500 hover:text-pg-ink-900"
         >
           Reset
         </button>

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServerClient } from "@/lib/supabase-server";
 import ApplicationCard from "@/components/admin/ApplicationCard";
+import { Badge } from "@/components/pg/primitives";
+import { Icon } from "@/components/pg/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +40,7 @@ type ApplicationWithPosition = {
     country: string;
     requirements: Record<string, unknown> | null;
   } | null;
+  application_tiers: { tier: "A" | "B" | "C" | "D" | "rejected" } | null;
 };
 
 export default async function CandidateDetailPage({
@@ -51,62 +54,89 @@ export default async function CandidateDetailPage({
   const { data: candidate, error } = await supabase
     .from("candidates")
     .select(
-      "id, full_name, email, phone, city, province, birth_date, gender, education, profile_data, source, utm_source, utm_campaign, created_at, auth_user_id",
+      "id, full_name, email, phone, city, province, birth_date, gender, education, profile_data, source, utm_source, utm_campaign, created_at, auth_user_id"
     )
     .eq("id", id)
     .maybeSingle();
 
   if (error || !candidate) return notFound();
-
   const cand = candidate as Candidate;
 
   const { data: apps } = await supabase
     .from("applications")
     .select(
-      "id, position_slug, pipeline_stage, answers, po_notes, reached_out, reached_out_at, score, created_at, positions (name, country, requirements)",
+      "id, position_slug, pipeline_stage, answers, po_notes, reached_out, reached_out_at, score, created_at, positions (name, country, requirements), application_tiers (tier)"
     )
     .eq("candidate_id", id)
     .order("created_at", { ascending: false });
-
   const applications = (apps ?? []) as unknown as ApplicationWithPosition[];
 
+  const initials = cand.full_name
+    .split(" ")
+    .slice(0, 2)
+    .map((s) => s[0])
+    .join("")
+    .toUpperCase();
+
   return (
-    <main className="p-6 lg:p-10">
+    <main className="p-6 lg:p-10 max-w-6xl">
       <Link
         href="/admin/candidates"
-        className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] opacity-60 hover:opacity-100"
+        className="inline-flex items-center gap-1 text-[12px] font-bold tracking-wide uppercase text-pg-ink-500 hover:text-pg-red-600 no-underline"
       >
-        ← Kembali ke daftar
+        <Icon name="arrow_left" size={14} /> Kembali ke daftar
       </Link>
 
-      <header className="mt-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <p className="font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.12em] opacity-60">
-            Kandidat
-          </p>
-          <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl leading-[1.1]">
-            {cand.full_name}
-          </h1>
-          <p className="mt-2 text-sm opacity-70">
-            {cand.email ?? "—"}
-            {cand.phone ? ` · ${cand.phone}` : ""}
-          </p>
+      <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div
+            className="w-14 h-14 rounded-full grid place-items-center text-white text-xl font-extrabold tracking-tight shrink-0"
+            style={{ background: "var(--pg-red-600)" }}
+          >
+            {initials || "PG"}
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight">{cand.full_name}</h1>
+            <div className="text-sm text-pg-ink-500 mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
+              {cand.email && (
+                <span className="inline-flex items-center gap-1">
+                  <Icon name="mail" size={14} /> {cand.email}
+                </span>
+              )}
+              {cand.phone && (
+                <span className="inline-flex items-center gap-1">
+                  <Icon name="phone" size={14} /> {cand.phone}
+                </span>
+              )}
+              {cand.city && (
+                <span className="inline-flex items-center gap-1">
+                  <Icon name="location" size={14} /> {cand.city}
+                </span>
+              )}
+            </div>
+          </div>
         </div>
-        <div className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] opacity-60">
-          ID {cand.id.slice(0, 8)}…
-          <br />
-          Sumber: {cand.source ?? "unknown"}
-          <br />
-          {cand.auth_user_id ? "Auth: ✓ linked" : "Auth: unlinked"}
+        <div className="flex flex-col items-end gap-1.5">
+          {cand.auth_user_id ? (
+            <Badge variant="ok" icon="check">Auth linked</Badge>
+          ) : (
+            <Badge variant="mute">Auth unlinked</Badge>
+          )}
+          <div className="text-[11px] text-pg-ink-500 font-mono">
+            ID {cand.id.slice(0, 8)}…
+          </div>
+          {cand.source && (
+            <div className="text-[11px] text-pg-ink-500 font-mono">
+              Sumber: {cand.source}
+            </div>
+          )}
         </div>
-      </header>
+      </div>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[320px_1fr]">
-        <aside className="border border-[var(--color-dtg-ink)]/10 bg-white p-5">
-          <h2 className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] opacity-60">
-            Bio
-          </h2>
-          <dl className="mt-4 space-y-3 text-sm">
+      <div className="mt-8 grid gap-5 lg:grid-cols-[320px_1fr]">
+        <aside className="bg-pg-white border border-pg-ink-100 rounded-2xl p-5 self-start">
+          <div className="text-[11px] font-bold tracking-[0.1em] uppercase text-pg-ink-500">Bio</div>
+          <dl className="mt-3 space-y-2.5 text-sm">
             <Row label="Kota" value={cand.city} />
             <Row label="Provinsi" value={cand.province} />
             <Row label="Tgl lahir" value={cand.birth_date} />
@@ -114,27 +144,28 @@ export default async function CandidateDetailPage({
             <Row label="Pendidikan" value={cand.education} />
             <Row label="UTM source" value={cand.utm_source} />
             <Row label="UTM campaign" value={cand.utm_campaign} />
-            <Row
-              label="Masuk"
-              value={new Date(cand.created_at).toLocaleDateString("id-ID")}
-            />
+            <Row label="Masuk" value={new Date(cand.created_at).toLocaleDateString("id-ID")} />
           </dl>
 
-          <h2 className="mt-6 font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] opacity-60">
-            Profile data
-          </h2>
-          <pre className="mt-3 overflow-x-auto rounded bg-[var(--color-dtg-cream)]/50 p-3 font-[family-name:var(--font-mono)] text-[11px] leading-[1.5]">
-            {JSON.stringify(cand.profile_data ?? {}, null, 2)}
-          </pre>
+          <div className="mt-5 pt-5 border-t border-pg-ink-100">
+            <div className="text-[11px] font-bold tracking-[0.1em] uppercase text-pg-ink-500">
+              Profile data
+            </div>
+            <pre className="mt-2 overflow-x-auto rounded-lg bg-pg-ink-50 p-3 text-[11px] leading-[1.5] font-mono">
+              {JSON.stringify(cand.profile_data ?? {}, null, 2)}
+            </pre>
+          </div>
         </aside>
 
         <section>
-          <h2 className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] opacity-60">
+          <div className="text-[11px] font-bold tracking-[0.1em] uppercase text-pg-ink-500">
             Lamaran ({applications.length})
-          </h2>
-          <div className="mt-4 space-y-4">
+          </div>
+          <div className="mt-3 grid gap-4">
             {applications.length === 0 && (
-              <p className="text-sm opacity-60">Belum ada lamaran aktif.</p>
+              <div className="bg-pg-white border border-pg-ink-100 rounded-2xl p-5 text-center text-sm text-pg-ink-500">
+                Belum ada lamaran aktif.
+              </div>
             )}
             {applications.map((a) => (
               <ApplicationCard key={a.id} application={a} />
@@ -149,10 +180,12 @@ export default async function CandidateDetailPage({
 function Row({ label, value }: { label: string; value: string | null | undefined }) {
   return (
     <div className="flex justify-between gap-4">
-      <dt className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.08em] opacity-60">
+      <dt className="text-[11px] font-bold tracking-[0.08em] uppercase text-pg-ink-500 shrink-0">
         {label}
       </dt>
-      <dd className="text-right">{value ?? <span className="opacity-30">—</span>}</dd>
+      <dd className="text-right text-pg-ink-700">
+        {value ?? <span className="text-pg-ink-300">—</span>}
+      </dd>
     </div>
   );
 }

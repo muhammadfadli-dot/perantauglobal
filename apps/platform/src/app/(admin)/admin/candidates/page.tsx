@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import CandidateFilters from "@/components/admin/CandidateFilters";
+import { Badge } from "@/components/pg/primitives";
+import { Icon } from "@/components/pg/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +32,6 @@ export default async function CandidatesListPage({
 
   const supabase = await createServerClient();
 
-  // Main list query. ilike search across name/email/phone if q present.
   let query = supabase
     .from("candidates")
     .select("id, email, full_name, phone, city, created_at", { count: "exact" })
@@ -39,9 +40,7 @@ export default async function CandidatesListPage({
 
   if (q && q.trim().length > 0) {
     const needle = `%${q.trim()}%`;
-    query = query.or(
-      `full_name.ilike.${needle},email.ilike.${needle},phone.ilike.${needle}`,
-    );
+    query = query.or(`full_name.ilike.${needle},email.ilike.${needle},phone.ilike.${needle}`);
   }
 
   const { data: candidatesData, count, error } = await query;
@@ -57,14 +56,11 @@ export default async function CandidatesListPage({
   if (error) {
     return (
       <main className="p-10">
-        <p className="text-sm text-[var(--color-dtg-red)]">
-          Query gagal: {error.message}
-        </p>
+        <p className="text-sm text-pg-err">Query gagal: {error.message}</p>
       </main>
     );
   }
 
-  // Hydrate each candidate with application count + latest stage.
   const ids = candidates.map((c) => c.id);
   const appsByCandidate = new Map<
     string,
@@ -114,29 +110,27 @@ export default async function CandidatesListPage({
   const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
 
   return (
-    <main className="p-6 lg:p-10">
-      <header className="flex items-baseline justify-between gap-4">
+    <main className="p-6 lg:p-10 max-w-6xl">
+      <div className="flex items-baseline justify-between gap-4">
         <div>
-          <p className="font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.12em] opacity-60">
+          <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-red-600">
             Admin / Kandidat
-          </p>
-          <h1 className="mt-2 font-[family-name:var(--font-display)] text-3xl leading-[1.1]">
-            Kandidat
-          </h1>
+          </div>
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-1.5">Kandidat</h1>
         </div>
-        <p className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] opacity-60">
-          {count ?? 0} total · page {page} / {totalPages}
-        </p>
-      </header>
+        <div className="text-[12px] font-bold tracking-[0.1em] uppercase text-pg-ink-500">
+          {count ?? 0} total · halaman {page} / {totalPages}
+        </div>
+      </div>
 
       <div className="mt-6">
         <CandidateFilters initialQuery={q ?? ""} />
       </div>
 
-      <div className="mt-6 overflow-x-auto border border-[var(--color-dtg-ink)]/10 bg-white">
+      <div className="mt-6 bg-pg-white border border-pg-ink-100 rounded-2xl overflow-hidden">
         <table className="min-w-full text-sm">
-          <thead className="border-b border-[var(--color-dtg-ink)]/10 bg-[var(--color-dtg-cream)]/50">
-            <tr className="text-left font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.1em] opacity-60">
+          <thead className="border-b border-pg-ink-100 bg-pg-ink-50">
+            <tr className="text-left text-[11px] font-bold tracking-[0.1em] uppercase text-pg-ink-500">
               <th className="px-4 py-3">Nama</th>
               <th className="px-4 py-3">Kontak</th>
               <th className="px-4 py-3">Kota</th>
@@ -148,51 +142,40 @@ export default async function CandidatesListPage({
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center opacity-60">
+                <td colSpan={6} className="px-4 py-8 text-center text-pg-ink-500">
                   Tidak ada kandidat yang cocok.
                 </td>
               </tr>
             )}
             {rows.map((r) => (
-              <tr
-                key={r.id}
-                className="border-b border-[var(--color-dtg-ink)]/5 hover:bg-[var(--color-dtg-cream)]/30"
-              >
+              <tr key={r.id} className="border-b border-pg-ink-100 last:border-b-0 hover:bg-pg-ink-50">
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/candidates/${r.id}`}
-                    className="font-medium hover:underline"
+                    className="font-bold text-pg-ink-900 hover:text-pg-red-600 no-underline"
                   >
                     {r.full_name}
                   </Link>
                 </td>
                 <td className="px-4 py-3">
-                  <div className="text-[13px]">{r.email ?? "—"}</div>
-                  <div className="font-[family-name:var(--font-mono)] text-[11px] opacity-60">
-                    {r.phone ?? "—"}
-                  </div>
+                  <div className="text-[13px] text-pg-ink-700">{r.email ?? "—"}</div>
+                  <div className="text-[11px] text-pg-ink-500 font-mono">{r.phone ?? "—"}</div>
                 </td>
                 <td className="px-4 py-3 text-[13px]">{r.city ?? "—"}</td>
                 <td className="px-4 py-3 text-[13px]">
                   {r.applications_count > 0 ? (
                     <span>
-                      {r.applications_count} ·{" "}
-                      <span className="opacity-60">{r.latest_position}</span>
+                      <b>{r.applications_count}</b>
+                      <span className="text-pg-ink-500"> · {r.latest_position}</span>
                     </span>
                   ) : (
-                    <span className="opacity-40">—</span>
+                    <span className="text-pg-ink-400">—</span>
                   )}
                 </td>
                 <td className="px-4 py-3">
-                  {r.latest_stage ? (
-                    <span className="inline-block border border-[var(--color-dtg-ink)]/20 px-2 py-0.5 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.08em]">
-                      {r.latest_stage}
-                    </span>
-                  ) : (
-                    <span className="opacity-40">—</span>
-                  )}
+                  {r.latest_stage ? <Badge variant="mute">{r.latest_stage}</Badge> : <span className="text-pg-ink-400">—</span>}
                 </td>
-                <td className="px-4 py-3 font-[family-name:var(--font-mono)] text-[11px] opacity-70">
+                <td className="px-4 py-3 text-[12px] text-pg-ink-500 font-mono">
                   {new Date(r.created_at).toLocaleDateString("id-ID")}
                 </td>
               </tr>
@@ -220,32 +203,33 @@ function Pagination({
   const prev = page > 1 ? buildUrl(base, { q, page: page - 1 }) : null;
   const next = page < totalPages ? buildUrl(base, { q, page: page + 1 }) : null;
   return (
-    <nav className="mt-6 flex items-center justify-between font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em]">
+    <nav className="mt-6 flex items-center justify-between text-[13px] font-semibold">
       {prev ? (
-        <Link href={prev} className="hover:underline">
-          ← Prev
+        <Link href={prev} className="inline-flex items-center gap-1 text-pg-ink-700 no-underline hover:text-pg-red-600">
+          <Icon name="arrow_left" size={16} /> Prev
         </Link>
       ) : (
-        <span className="opacity-30">← Prev</span>
+        <span className="text-pg-ink-300 inline-flex items-center gap-1">
+          <Icon name="arrow_left" size={16} /> Prev
+        </span>
       )}
-      <span className="opacity-60">
+      <span className="text-pg-ink-500">
         {page} / {totalPages}
       </span>
       {next ? (
-        <Link href={next} className="hover:underline">
-          Next →
+        <Link href={next} className="inline-flex items-center gap-1 text-pg-ink-700 no-underline hover:text-pg-red-600">
+          Next <Icon name="arrow_right" size={16} />
         </Link>
       ) : (
-        <span className="opacity-30">Next →</span>
+        <span className="text-pg-ink-300 inline-flex items-center gap-1">
+          Next <Icon name="arrow_right" size={16} />
+        </span>
       )}
     </nav>
   );
 }
 
-function buildUrl(
-  base: string,
-  params: { q?: string; page?: number },
-): string {
+function buildUrl(base: string, params: { q?: string; page?: number }): string {
   const sp = new URLSearchParams();
   if (params.q) sp.set("q", params.q);
   if (params.page) sp.set("page", String(params.page));

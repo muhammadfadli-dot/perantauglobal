@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition, useState } from "react";
+import { Icon } from "@/components/pg/Icon";
 import { updateApplicationStage } from "@/app/(admin)/admin/actions";
 
 const STAGES = [
@@ -50,7 +51,7 @@ export default function StageSelector({
         value={value}
         onChange={onChange}
         disabled={pending}
-        className="w-full border border-[var(--color-dtg-ink)]/20 bg-white px-3 py-2 text-sm outline-none focus:border-[var(--color-dtg-red)] disabled:opacity-60"
+        className="w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-pg-red-600 disabled:opacity-60"
       >
         {STAGES.map((s) => (
           <option key={s} value={s}>
@@ -59,12 +60,14 @@ export default function StageSelector({
         ))}
       </select>
       {pending && (
-        <p className="mt-1 font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.1em] opacity-60">
+        <p className="mt-1 text-[11px] font-bold tracking-wide uppercase text-pg-ink-500">
           Menyimpan…
         </p>
       )}
       {error && (
-        <p className="mt-1 text-[11px] text-[var(--color-dtg-red)]">{error}</p>
+        <p className="mt-1 text-[11px] flex items-center gap-1 text-pg-err">
+          <Icon name="warn" size={12} /> {error}
+        </p>
       )}
     </div>
   );

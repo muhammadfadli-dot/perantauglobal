@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Icon } from "@/components/pg/Icon";
+import { Button } from "@/components/pg/primitives";
 import { updateProfile } from "./actions";
 
 interface FieldOption {
@@ -18,31 +20,31 @@ interface FieldSpec {
 
 const FIELDS: FieldSpec[] = [
   {
+    key: "english_level",
+    label: "Bahasa Inggris",
+    help: "Penting untuk lamaran Saudi Arabia.",
+    options: [
+      { value: "fluent", label: "Fasih" },
+      { value: "intermediate", label: "Menengah (B1)" },
+      { value: "basic", label: "Dasar" },
+    ],
+  },
+  {
     key: "jlpt_level",
-    label: "Level JLPT (bahasa Jepang)",
-    help: "Untuk lamaran Kaigo, Food Service, Truck Driver.",
+    label: "JLPT (bahasa Jepang)",
+    help: "Wajib untuk lamaran Jepang.",
     options: [
       { value: "n2", label: "N2 (mahir)" },
       { value: "n3", label: "N3 (menengah atas)" },
       { value: "n4", label: "N4 (menengah)" },
       { value: "n5", label: "N5 (pemula)" },
-      { value: "no_cert", label: "Belum punya sertifikat" },
-    ],
-  },
-  {
-    key: "english_level",
-    label: "Level Bahasa Inggris",
-    help: "Untuk lamaran ke Saudi Arabia + program internasional.",
-    options: [
-      { value: "fluent", label: "Fasih (fluent)" },
-      { value: "intermediate", label: "Menengah" },
-      { value: "basic", label: "Dasar" },
+      { value: "no_cert", label: "Belum punya" },
     ],
   },
   {
     key: "str_active",
-    label: "Status STR (Surat Tanda Registrasi perawat)",
-    help: "Wajib untuk lamaran Perawat Saudi Arabia.",
+    label: "STR (perawat)",
+    help: "Wajib untuk Perawat Saudi Arabia.",
     options: [
       { value: "yes", label: "Aktif" },
       { value: "inProgress", label: "Sedang diurus" },
@@ -50,29 +52,8 @@ const FIELDS: FieldSpec[] = [
     ],
   },
   {
-    key: "sim_type",
-    label: "Jenis SIM (Surat Izin Mengemudi)",
-    help: "SIM B1/B2/Internasional wajib untuk Truck Driver Jepang.",
-    options: [
-      { value: "sim_internasional", label: "SIM Internasional" },
-      { value: "sim_b2", label: "SIM B2 (truk besar)" },
-      { value: "sim_b1", label: "SIM B1 (truk kecil)" },
-      { value: "sim_a", label: "SIM A (mobil pribadi)" },
-    ],
-  },
-  {
-    key: "driving_years",
-    label: "Pengalaman mengemudi (tahun)",
-    help: "Untuk lamaran Truck Driver.",
-    options: [
-      { value: "5+", label: "Lebih dari 5 tahun" },
-      { value: "3-5", label: "3–5 tahun" },
-      { value: "1-2", label: "1–2 tahun" },
-    ],
-  },
-  {
     key: "experience_years",
-    label: "Pengalaman kerja relevan (tahun)",
+    label: "Pengalaman kerja relevan",
     options: [
       { value: "3+", label: "Lebih dari 3 tahun" },
       { value: "1-3", label: "1–3 tahun" },
@@ -81,46 +62,25 @@ const FIELDS: FieldSpec[] = [
     ],
   },
   {
+    key: "sim_type",
+    label: "SIM (untuk Truck Driver Jepang)",
+    options: [
+      { value: "sim_internasional", label: "SIM Internasional" },
+      { value: "sim_b2", label: "SIM B2 (truk besar)" },
+      { value: "sim_b1", label: "SIM B1 (truk kecil)" },
+      { value: "sim_a", label: "SIM A (mobil pribadi)" },
+    ],
+  },
+  {
     key: "care_certification",
-    label: "Sertifikasi perawatan / caregiver",
-    help: "Untuk lamaran Kaigo Jepang.",
+    label: "Sertifikasi caregiver",
+    help: "Untuk Kaigo Jepang & Caregiver Taiwan.",
     options: [
       { value: "ssw_kaigo", label: "SSW Kaigo" },
       { value: "nursing_s1", label: "S1 Keperawatan" },
       { value: "nursing_d3", label: "D3 Keperawatan" },
       { value: "caregiver_training", label: "Pelatihan caregiver" },
       { value: "none", label: "Belum ada" },
-    ],
-  },
-  {
-    key: "food_certification",
-    label: "Sertifikasi food service / hospitality",
-    help: "Untuk lamaran Food Service Jepang.",
-    options: [
-      { value: "ssw_food_service", label: "SSW Food Service" },
-      { value: "hospitality_cert", label: "Sertifikat hospitality" },
-      { value: "food_safety", label: "Food safety / hygiene" },
-      { value: "none", label: "Belum ada" },
-    ],
-  },
-  {
-    key: "experience_type",
-    label: "Latar belakang pengalaman kerja",
-    options: [
-      { value: "restaurant", label: "Restoran" },
-      { value: "hotel", label: "Hotel" },
-      { value: "cafe", label: "Kafe" },
-      { value: "coffee_shop", label: "Coffee shop / barista" },
-      { value: "catering", label: "Katering" },
-      { value: "other", label: "Lainnya" },
-    ],
-  },
-  {
-    key: "has_lpk",
-    label: "Sudah pernah / sedang LPK (Lembaga Pelatihan Kerja)?",
-    options: [
-      { value: "yes", label: "Ya" },
-      { value: "no", label: "Belum" },
     ],
   },
 ];
@@ -157,28 +117,26 @@ export default function ProfileForm({ initialCredentials }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-3">
       {FIELDS.map((field) => (
-        <section
+        <div
           key={field.key}
-          className="border border-[var(--color-dtg-ink)] bg-white p-5"
+          className="bg-pg-white border border-pg-ink-100 rounded-2xl p-4 md:p-5"
         >
-          <label className="block font-semibold text-[15px] leading-[1.35]">
-            {field.label}
-          </label>
+          <div className="text-[15px] font-bold">{field.label}</div>
           {field.help && (
-            <p className="mt-1 text-xs opacity-60">{field.help}</p>
+            <div className="text-[13px] text-pg-ink-500 mt-1">{field.help}</div>
           )}
-          <div className="mt-4 grid gap-2">
+          <div className="mt-3 grid gap-2">
             {field.options.map((opt) => {
               const selected = values[field.key] === opt.value;
               return (
                 <label
                   key={opt.value}
-                  className={`flex cursor-pointer items-center gap-3 border p-3 text-sm transition ${
+                  className={`flex items-center gap-3 px-3.5 py-3 min-h-[48px] rounded-xl border-[1.5px] cursor-pointer transition ${
                     selected
-                      ? "border-[var(--color-dtg-ink)] bg-[var(--color-dtg-ink)] text-white"
-                      : "border-[var(--color-dtg-ink)]/30 hover:border-[var(--color-dtg-ink)]"
+                      ? "border-pg-red-600 bg-pg-red-50"
+                      : "border-pg-ink-200 bg-pg-white hover:border-pg-ink-300"
                   }`}
                 >
                   <input
@@ -189,12 +147,18 @@ export default function ProfileForm({ initialCredentials }: Props) {
                     onChange={() => setField(field.key, opt.value)}
                     className="sr-only"
                   />
-                  <span className="flex-1">{opt.label}</span>
-                  {selected && (
-                    <span className="font-[family-name:var(--font-mono)] text-xs uppercase tracking-[0.1em]">
-                      ✓
-                    </span>
-                  )}
+                  <div
+                    className={`w-5 h-5 rounded-full border-2 grid place-items-center shrink-0 ${
+                      selected ? "border-pg-red-600" : "border-pg-ink-300"
+                    }`}
+                  >
+                    {selected && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-pg-red-600" />
+                    )}
+                  </div>
+                  <span className={`text-[15px] flex-1 ${selected ? "font-bold" : "font-medium"}`}>
+                    {opt.label}
+                  </span>
                 </label>
               );
             })}
@@ -202,33 +166,41 @@ export default function ProfileForm({ initialCredentials }: Props) {
               <button
                 type="button"
                 onClick={() => setField(field.key, "")}
-                className="mt-1 self-start font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] opacity-60 hover:opacity-100"
+                className="self-start text-[12px] text-pg-ink-500 underline mt-1"
               >
                 Kosongkan
               </button>
             )}
           </div>
-        </section>
+        </div>
       ))}
 
-      <div className="sticky bottom-4 z-10 flex flex-col gap-2 pt-2">
+      <div className="sticky bottom-[68px] z-10 pt-3 bg-pg-paper">
         {toast?.kind === "error" && (
-          <div className="border border-red-500 bg-white p-3 text-sm text-red-700">
-            Gagal menyimpan: {toast.message}
+          <div
+            className="px-4 py-3 mb-2 rounded-lg text-sm flex items-start gap-2"
+            style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
+          >
+            <Icon name="warn" size={16} />
+            <span>Gagal menyimpan: {toast.message}</span>
           </div>
         )}
         {toast?.kind === "ok" && (
-          <div className="border border-green-600 bg-white p-3 text-sm text-green-700">
-            Profil disimpan. Mengalihkan ke dashboard...
+          <div
+            className="px-4 py-3 mb-2 rounded-lg text-sm flex items-start gap-2"
+            style={{ background: "var(--pg-ok-bg)", color: "var(--pg-ok)" }}
+          >
+            <Icon name="check" size={16} />
+            <span>Tersimpan! Mengalihkan ke beranda…</span>
           </div>
         )}
-        <button
-          type="submit"
-          disabled={isPending}
-          className="w-full bg-[var(--color-dtg-ink)] px-6 py-4 text-center text-base font-semibold text-white transition hover:opacity-90 disabled:opacity-50"
-        >
-          {isPending ? "Menyimpan..." : "Simpan profil"}
-        </button>
+        <Button type="submit" variant="primary" block disabled={isPending}>
+          {isPending ? "Menyimpan…" : (
+            <>
+              Simpan profil <Icon name="check" size={18} stroke={2.6} />
+            </>
+          )}
+        </Button>
       </div>
     </form>
   );

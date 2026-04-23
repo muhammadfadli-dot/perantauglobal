@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getSessionAndRole } from "@/lib/supabase-server";
 
+export const dynamic = "force-dynamic";
+
 /**
  * Root landing. Routes to the right surface based on session + role:
  * - no session → /sign-in (marketing site handles magic-link issuance, so

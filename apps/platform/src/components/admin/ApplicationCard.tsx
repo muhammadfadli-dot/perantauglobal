@@ -1,6 +1,8 @@
+import { Badge } from "@/components/pg/primitives";
 import StageSelector from "./StageSelector";
 import NotesEditor from "./NotesEditor";
 import ReachOutToggle from "./ReachOutToggle";
+import TierPicker from "./TierPicker";
 
 export interface ApplicationCardProps {
   application: {
@@ -18,21 +20,45 @@ export interface ApplicationCardProps {
       country: string;
       requirements: Record<string, unknown> | null;
     } | null;
+    application_tiers?: { tier: "A" | "B" | "C" | "D" | "rejected" } | null;
   };
 }
 
+const TIER_VARIANT: Record<"A" | "B" | "C" | "D" | "rejected", "ok" | "info" | "warn" | "mute" | "err"> = {
+  A: "ok",
+  B: "info",
+  C: "warn",
+  D: "mute",
+  rejected: "err",
+};
+
 export default function ApplicationCard({ application: a }: ApplicationCardProps) {
+  const tier = a.application_tiers?.tier ?? null;
   return (
-    <article className="border border-[var(--color-dtg-ink)]/15 bg-white p-5">
-      <header className="flex flex-wrap items-baseline justify-between gap-3">
+    <article className="bg-pg-white border border-pg-ink-100 rounded-2xl p-5">
+      <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="font-semibold">
+          <div className="text-[11px] font-bold tracking-[0.1em] uppercase text-pg-ink-400">
+            {a.positions?.country ?? "—"}
+          </div>
+          <h3 className="text-lg font-extrabold tracking-tight mt-0.5">
             {a.positions?.name ?? a.position_slug}
           </h3>
-          <p className="mt-0.5 font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.08em] opacity-60">
-            {a.positions?.country ?? "—"} · didaftarkan{" "}
-            {new Date(a.created_at).toLocaleDateString("id-ID")}
-          </p>
+          <div className="text-[12px] text-pg-ink-500 mt-1 flex items-center gap-2 flex-wrap">
+            <span>Didaftarkan {new Date(a.created_at).toLocaleDateString("id-ID")}</span>
+            {tier && (
+              <>
+                <span>·</span>
+                <Badge variant={TIER_VARIANT[tier]}>Tier {tier}</Badge>
+              </>
+            )}
+            {typeof a.score === "number" && (
+              <>
+                <span>·</span>
+                <Badge variant="info">Score {a.score}</Badge>
+              </>
+            )}
+          </div>
         </div>
         <ReachOutToggle
           applicationId={a.id}
@@ -41,31 +67,29 @@ export default function ApplicationCard({ application: a }: ApplicationCardProps
         />
       </header>
 
-      <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_200px]">
+      <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_220px]">
         <div>
-          <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.1em] opacity-60">
+          <div className="text-[11px] font-bold tracking-[0.1em] uppercase text-pg-ink-500">
             Jawaban
-          </p>
-          <pre className="mt-2 overflow-x-auto rounded bg-[var(--color-dtg-cream)]/50 p-3 font-[family-name:var(--font-mono)] text-[11px] leading-[1.5]">
+          </div>
+          <pre className="mt-2 overflow-x-auto rounded-lg bg-pg-ink-50 p-3 text-[11px] leading-[1.5] font-mono">
             {JSON.stringify(a.answers ?? {}, null, 2)}
           </pre>
         </div>
-        <div>
-          <p className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.1em] opacity-60">
-            Pipeline stage
-          </p>
-          <div className="mt-2">
-            <StageSelector applicationId={a.id} current={a.pipeline_stage} />
+        <div className="grid gap-4">
+          <div>
+            <div className="text-[11px] font-bold tracking-[0.1em] uppercase text-pg-ink-500">
+              Pipeline stage
+            </div>
+            <div className="mt-2">
+              <StageSelector applicationId={a.id} current={a.pipeline_stage} />
+            </div>
           </div>
-          {typeof a.score === "number" && (
-            <p className="mt-3 font-[family-name:var(--font-mono)] text-[11px] opacity-60">
-              Score: {a.score}
-            </p>
-          )}
+          <TierPicker applicationId={a.id} current={tier} />
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 pt-4 border-t border-pg-ink-100">
         <NotesEditor applicationId={a.id} initialNotes={a.po_notes ?? ""} />
       </div>
     </article>

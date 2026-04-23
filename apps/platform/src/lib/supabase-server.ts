@@ -3,6 +3,7 @@ import {
   createServerClient as createSSRClient,
   type CookieOptions,
 } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@perantauglobal/db";
 
 type CookieSetter = Array<{ name: string; value: string; options?: CookieOptions }>;
@@ -70,4 +71,22 @@ export async function getSessionAndRole(): Promise<{
     session: { userId: data.user.id, email: data.user.email ?? null },
     role: isAdmin === true ? "admin" : "candidate",
   };
+}
+
+/**
+ * Service-role client — bypasses RLS. Use only for admin server actions
+ * that need to do things RLS forbids (e.g. generate signed URLs for storage,
+ * elevate file access). Caller MUST authenticate the admin first.
+ */
+export function createServiceRoleClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !serviceKey) {
+    throw new Error(
+      "supabase-server: NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing",
+    );
+  }
+  return createClient<Database>(url, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }

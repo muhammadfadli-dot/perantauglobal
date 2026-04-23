@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Perantau Global — Mobile Redesign</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  html, body { margin: 0; padding: 0; font-family: "Plus Jakarta Sans", system-ui, sans-serif; background: #f1efec; }
+  * { box-sizing: border-box; }
+  /* Canvas titles override */
+  .dc-section-title { font-family: "Plus Jakarta Sans", sans-serif !important; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="pg-ui.jsx"></script>
+<script type="text/babel" src="pg-www.jsx"></script>
+<script type="text/babel" src="pg-app.jsx"></script>
+<script type="text/babel" src="pg-app2.jsx"></script>
+<script type="text/babel" src="pg-admin.jsx"></script>
+<script type="text/babel" src="pg-admin2.jsx"></script>
+<script type="text/babel" src="pg-admin-mobile.jsx"></script>
+<script type="text/babel" src="pg-desk-www.jsx"></script>
+<script type="text/babel" src="pg-desk-app.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+const { DesignCanvas, DCSection, DCArtboard, IOSDevice } = window;
+
+// Mobile artboard — iPhone frame
+const MFrame = ({ children, title }) => (
+  <IOSDevice width={390} height={788} title={title}>
+    {children}
+  </IOSDevice>
+);
+
+const CANVAS_W = 430;
+const CANVAS_H = 860;
+const DESK_W = 1440;
+const DESK_H = 960;
+
+function App() {
+  return (
+    <DesignCanvas title="Perantau Global — Mobile Redesign" subtitle="Red-dominant DTG · mobile-first untuk PMI · low complexity, high clarity">
+
+      <DCSection id="intro" title="Sistem desain" subtitle="Warna, type, dan prinsip sebelum screen">
+        <DCArtboard id="system" label="Design language" width={860} height={CANVAS_H}>
+          <SystemBoard/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="www" title="Website publik (www)" subtitle="Visitor baru → paham → lamar">
+        <DCArtboard id="home" label="01 · Homepage" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenHome/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="lowongan" label="02 · /lowongan (index)" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenLowongan/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="detail" label="03 · /lowongan/[slug] — detail + apply" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenDetail/></MFrame>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="auth" title="Masuk / daftar (magic link)" subtitle="Form bio singkat → email link → landing di Talent Hub">
+        <DCArtboard id="signin" label="Sign-in · form bio" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenSignIn/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="check-email" label="Cek email" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenCheckEmail/></MFrame>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="portal" title="Candidate portal (app)" subtitle="Setelah login · dashboard, profil, jelajah, timeline">
+        <DCArtboard id="dash" label="04 · Dashboard" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenDashboard/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="explore" label="05 · Jelajah (ranking by readiness)" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenExplore/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="profile" label="06 · Profil kandidat" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenProfile/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="timeline" label="07 · Status lamaran (4-stage)" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenTimeline/></MFrame>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="apply" title="Apply flow — kontekstual 5 langkah" subtitle="Low-skilled worker friendly · 1 fokus per screen, jelas kenapa diminta">
+        <DCArtboard id="s1" label="Step 1 · Konfirmasi posisi" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenApplyStep1/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="s2" label="Step 2 · Cek syarat" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenApplyStep2/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="s3" label="Step 3 · Dokumen" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenApplyStep3/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="s4" label="Step 4 · Pertanyaan tambahan" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenApplyStep4/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="s5" label="Step 5 · Periksa & kirim" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenApplyStep5/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="success" label="Success · Lamaran terkirim" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><ScreenApplySuccess/></MFrame>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="www-desktop" title="Website publik · desktop" subtitle="Layout 1440w — hero lebar, grid lowongan dense">
+        <DCArtboard id="desk-home" label="D01 · Homepage" width={DESK_W} height={1600}>
+          <DeskHome/>
+        </DCArtboard>
+        <DCArtboard id="desk-lowongan" label="D02 · Lowongan · filter + grid" width={DESK_W} height={1600}>
+          <DeskLowongan/>
+        </DCArtboard>
+        <DCArtboard id="desk-detail" label="D03 · Detail lowongan" width={DESK_W} height={1800}>
+          <DeskDetail/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="portal-desktop" title="Candidate portal · desktop" subtitle="Talent Hub untuk kandidat yang buka laptop">
+        <DCArtboard id="desk-dash" label="D04 · Dashboard" width={DESK_W} height={1200}>
+          <DeskDashboard/>
+        </DCArtboard>
+        <DCArtboard id="desk-explore" label="D05 · Jelajah (tiered)" width={DESK_W} height={1600}>
+          <DeskExplore/>
+        </DCArtboard>
+        <DCArtboard id="desk-profile" label="D06 · Profil + dokumen" width={DESK_W} height={1200}>
+          <DeskProfile/>
+        </DCArtboard>
+        <DCArtboard id="desk-timeline" label="D07 · Status lamaran" width={DESK_W} height={1200}>
+          <DeskTimeline/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="admin" title="Admin CRM · desktop" subtitle="Internal tool — job orders, pipeline kanban, review dokumen, tier assignment">
+        <DCArtboard id="admin-overview" label="A1 · Overview dashboard" width={1280} height={820}>
+          <AdminOverview/>
+        </DCArtboard>
+        <DCArtboard id="admin-jo" label="A2 · Job Orders (list)" width={1280} height={820}>
+          <AdminJobOrders/>
+        </DCArtboard>
+        <DCArtboard id="admin-kanban" label="A3 · Pipeline kanban (per job order)" width={1280} height={820}>
+          <AdminKanban/>
+        </DCArtboard>
+        <DCArtboard id="admin-doc" label="A4 · Review dokumen (queue + viewer)" width={1280} height={820}>
+          <AdminDocReview/>
+        </DCArtboard>
+        <DCArtboard id="admin-tier" label="A5 · Tier assignment" width={1280} height={820}>
+          <AdminTier/>
+        </DCArtboard>
+        <DCArtboard id="admin-jo-create" label="A6 · Buat JO · Pertanyaan + scoring" width={1280} height={960}>
+          <AdminJOCreate/>
+        </DCArtboard>
+        <DCArtboard id="admin-cand" label="A7 · Detail kandidat" width={1280} height={960}>
+          <AdminCandidateDetail/>
+        </DCArtboard>
+      </DCSection>
+
+      <DCSection id="admin-mobile" title="Admin CRM · mobile" subtitle="Recruiter on-the-go — review & approve dari HP di antara wawancara">
+        <DCArtboard id="adm-home" label="M1 · Beranda recruiter" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><AdminMOverview/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="adm-jo" label="M2 · Job Orders" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><AdminMJobOrders/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="adm-kanban" label="M3 · Pipeline (per tahap)" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><AdminMKanban/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="adm-doc" label="M4 · Review dokumen" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><AdminMDocReview/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="adm-tier" label="M5 · Assign tier" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><AdminMTier/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="adm-jo-create" label="M6 · Buat JO · pertanyaan" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><AdminMJOCreate/></MFrame>
+        </DCArtboard>
+        <DCArtboard id="adm-cand" label="M7 · Detail kandidat" width={CANVAS_W} height={CANVAS_H}>
+          <MFrame><AdminMCandidateDetail/></MFrame>
+        </DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+// ───────── System board (type + color + principles)
+function SystemBoard() {
+  const box = { background: "#fff", border: "1px solid var(--pg-ink-100)", borderRadius: 16, padding: 24, display: "flex", flexDirection: "column", gap: 14 };
+  const swatch = (c, name, hex) => (
+    <div key={name} style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ width: 56, height: 56, background: c, borderRadius: 12, border: "1px solid rgba(0,0,0,.06)" }}/>
+      <div>
+        <div style={{ fontSize: 14, fontWeight: 700 }}>{name}</div>
+        <div style={{ fontSize: 12, color: "var(--pg-ink-500)", fontFamily: "'IBM Plex Mono', monospace" }}>{hex}</div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{ height: "100%", width: "100%", padding: 32, fontFamily: "'Plus Jakarta Sans', sans-serif", background: "var(--pg-paper)", overflowY: "auto", display: "grid", gap: 20, gridTemplateColumns: "1fr 1fr" }}>
+
+      <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "space-between", alignItems: "flex-end", padding: "4px 4px 8px" }}>
+        <div>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: "var(--pg-red-600)" }}>Design language</div>
+          <div style={{ fontSize: 30, fontWeight: 800, letterSpacing: "-0.02em", marginTop: 6 }}>Jelas, dipandu, satu fokus per layar.</div>
+          <div style={{ fontSize: 14, color: "var(--pg-ink-500)", marginTop: 6, maxWidth: 520 }}>
+            Didesain untuk low-skilled worker di HP. Tujuan utama: kecepatan pemahaman. Tidak ada yang membuat user harus berpikir.
+          </div>
+        </div>
+      </div>
+
+      {/* Colors */}
+      <div style={box}>
+        <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--pg-ink-400)" }}>Warna</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {swatch("var(--pg-red-600)", "Red 600 · Primary DTG", "#D7262F")}
+          {swatch("var(--pg-red-700)", "Red 700 · Hover/tekan", "#B91D24")}
+          {swatch("var(--pg-red-50)",  "Red 50 · Latar lembut", "#FFF4F4")}
+          {swatch("var(--pg-ink-900)", "Ink 900 · Teks utama", "#141414")}
+          {swatch("var(--pg-ink-500)", "Ink 500 · Teks sekunder", "#5A5A5A")}
+          {swatch("var(--pg-paper)",   "Paper · Background", "#FAFAF8")}
+        </div>
+        <div style={{ fontSize: 12, color: "var(--pg-ink-500)", marginTop: 4, lineHeight: 1.5 }}>
+          Merah cuma untuk <b>aksi & penekanan</b> — button, CTA, badge progress, section breaker. Putih tetap dominan 80%+.
+        </div>
+      </div>
+
+      {/* Type */}
+      <div style={box}>
+        <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--pg-ink-400)" }}>Tipografi</div>
+        <div>
+          <div style={{ fontSize: 11, color: "var(--pg-ink-500)", fontFamily: "'IBM Plex Mono', monospace" }}>Plus Jakarta Sans · 34/800</div>
+          <div style={{ fontSize: 34, fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.1 }}>Kerja luar negeri<br/>yang sah & terjamin.</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 11, color: "var(--pg-ink-500)", fontFamily: "'IBM Plex Mono', monospace" }}>22/800 · Section heading</div>
+          <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: "-0.015em" }}>Cek syarat posisi.</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 11, color: "var(--pg-ink-500)", fontFamily: "'IBM Plex Mono', monospace" }}>16/500 · Body (min di mobile)</div>
+          <div style={{ fontSize: 16, lineHeight: 1.55, color: "var(--pg-ink-700)" }}>Kami bandingkan profil kamu dengan syarat posisi. Yang kurang, kita lengkapi sekarang.</div>
+        </div>
+        <div>
+          <div style={{ fontSize: 11, color: "var(--pg-ink-500)", fontFamily: "'IBM Plex Mono', monospace" }}>12/700 · Eyebrow</div>
+          <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: "var(--pg-red-600)" }}>Langkah 2 dari 5</div>
+        </div>
+      </div>
+
+      {/* Primitives */}
+      <div style={box}>
+        <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--pg-ink-400)" }}>Button & chip</div>
+        <button className="pg-btn pg-btn--primary">Lamar posisi ini</button>
+        <button className="pg-btn pg-btn--ghost">Lihat detail</button>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <div className="pg-chip pg-chip--active">Semua</div>
+          <div className="pg-chip">Saudi</div>
+          <div className="pg-chip">Jepang</div>
+        </div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <span className="pg-badge pg-badge--ok">Lagi buka</span>
+          <span className="pg-badge pg-badge--warn">Sedang diseleksi</span>
+          <span className="pg-badge pg-badge--err">Tidak lolos</span>
+          <span className="pg-badge pg-badge--mute">Daftar antrian</span>
+        </div>
+        <div style={{ fontSize: 12, color: "var(--pg-ink-500)", lineHeight: 1.5 }}>
+          Hit target min <b>48px</b>. Tombol utama selalu merah penuh; ghost untuk aksi sekunder. Badge selalu kata utuh (bukan emoji).
+        </div>
+      </div>
+
+      {/* Principles */}
+      <div style={{ ...box, background: "var(--pg-ink-900)", color: "#fff", border: 0 }}>
+        <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--pg-red-500)" }}>Prinsip</div>
+        {[
+          ["Satu tujuan per layar", "Maksimal 1 pertanyaan atau aksi utama. Kalau ada 5 hal, pecah jadi 5 langkah."],
+          ["Jelaskan “kenapa”", "Setiap field punya alasan. “Butuh passport karena ini syarat visa.”"],
+          ["Bahasa santai-informatif", "Seperti WA ke keluarga. Hindari jargon (“STR” → “kartu putih dari MTKI”)."],
+          ["Foto → typografi", "Tidak ada foto stock. Posisi & negara ditulis besar di blok merah DTG."],
+          ["Anti-slop", "Tanpa gradient aneh, glassmorphism, neon, emoji-sprinkle, atau progress palsu."],
+          ["Tap > scroll", "Hit target ≥48px. Sticky CTA di halaman panjang. Bottom nav untuk portal."],
+        ].map(([t, d]) => (
+          <div key={t} style={{ borderTop: "1px solid rgba(255,255,255,.1)", paddingTop: 10 }}>
+            <div style={{ fontSize: 14, fontWeight: 700 }}>{t}</div>
+            <div style={{ fontSize: 13, color: "rgba(255,255,255,.66)", marginTop: 2, lineHeight: 1.5 }}>{d}</div>
+          </div>
+        ))}
+      </div>
+
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

@@ -4,17 +4,24 @@ import { sendMetaEvent } from "@/lib/meta-capi";
 import { writePendingSubmission } from "@/lib/pending-write";
 
 // Map slug → role + country. Kept as a whitelist so we reject unknown slugs
-// before touching the DB.
+// before touching the DB. Kept in sync with src/lib/positions.ts.
 const SLUG_MAP: Record<string, { role: string; country: string }> = {
+  // Saudi Arabia
   "perawat-saudi-arabia": { role: "nurse", country: "saudi_arabia" },
-  "dental-nurse-saudi-arabia": { role: "dental_nurse", country: "saudi_arabia" },
   "barista-saudi-arabia": { role: "barista", country: "saudi_arabia" },
   "waiter-saudi-arabia": { role: "waiter", country: "saudi_arabia" },
+  "waitress-saudi-arabia": { role: "waitress", country: "saudi_arabia" },
+  "chef-bakery-saudi-arabia": { role: "chef_bakery", country: "saudi_arabia" },
   "spa-therapist-saudi-arabia": { role: "spa_therapist", country: "saudi_arabia" },
-  "kaigo-jepang": { role: "kaigo", country: "japan" },
-  "food-service-jepang": { role: "food_service", country: "japan" },
+  "laundry-worker-saudi-arabia": { role: "laundry_worker", country: "saudi_arabia" },
+  // Jepang
   "truck-driver-jepang": { role: "truck_driver", country: "japan" },
+  "food-service-jepang": { role: "food_service", country: "japan" },
+  "kaigo-jepang": { role: "kaigo", country: "japan" },
+  "pengolahan-makanan-jepang": { role: "pengolahan_makanan", country: "japan" },
+  // Lainnya
   "caregiver-taiwan": { role: "caregiver", country: "taiwan" },
+  "spg-indonesia": { role: "spg", country: "indonesia" },
 };
 
 interface CandidatePayload {
@@ -88,8 +95,8 @@ export async function POST(
           {
             purpose: "application_processing",
             purpose_text:
-              "Memproses lamaran kerja (verifikasi data, komunikasi via WhatsApp/email, pencocokan lowongan).",
-            version: "2026-04-22",
+              "Memproses lamaran kerja (verifikasi data, komunikasi via email, pencocokan lowongan).",
+            version: "2026-04-23",
             granted: true,
           },
         ],

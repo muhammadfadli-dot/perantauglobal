@@ -3,8 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient as createSSRBrowserClient } from "@supabase/ssr";
+import { Icon } from "@/components/pg/Icon";
 
-export default function SignOutButton() {
+export default function SignOutButton({ variant = "subtle" }: { variant?: "subtle" | "ghost" }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -18,14 +19,35 @@ export default function SignOutButton() {
     router.refresh();
   }
 
+  if (variant === "ghost") {
+    return (
+      <button
+        type="button"
+        onClick={signOut}
+        disabled={busy}
+        className="inline-flex items-center justify-center gap-2 w-full min-h-[40px] px-4 text-sm font-semibold rounded-xl border-[1.5px] border-pg-ink-200 text-pg-ink-900 disabled:opacity-50 hover:bg-pg-ink-50"
+      >
+        {busy ? "Keluar…" : (
+          <>
+            Keluar <Icon name="arrow_right" size={14} />
+          </>
+        )}
+      </button>
+    );
+  }
+
   return (
     <button
       type="button"
       onClick={signOut}
       disabled={busy}
-      className="font-[family-name:var(--font-mono)] text-[11px] uppercase tracking-[0.1em] text-[var(--color-dtg-red)] hover:underline disabled:opacity-50"
+      className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-wide uppercase text-white/80 hover:text-white disabled:opacity-50"
     >
-      {busy ? "Keluar…" : "Keluar →"}
+      {busy ? "Keluar…" : (
+        <>
+          Keluar <Icon name="arrow_right" size={12} />
+        </>
+      )}
     </button>
   );
 }

@@ -71,3 +71,37 @@ export async function toggleReachedOut(
   revalidatePath("/admin/candidates", "layout");
   revalidatePath("/admin/applications", "layout");
 }
+
+export async function assignTier(
+  applicationId: string,
+  tier: "A" | "B" | "C" | "D" | "rejected",
+  notes?: string,
+) {
+  const { reviewedBy } = await assertAdmin();
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("application_tiers")
+    .upsert({
+      application_id: applicationId,
+      tier,
+      notes: notes ?? null,
+      assigned_by: reviewedBy,
+      assigned_at: new Date().toISOString(),
+    } as never);
+  void notes;
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/candidates", "layout");
+  revalidatePath("/admin/applications", "layout");
+}
+
+export async function clearTier(applicationId: string) {
+  await assertAdmin();
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("application_tiers")
+    .delete()
+    .eq("application_id", applicationId);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/candidates", "layout");
+  revalidatePath("/admin/applications", "layout");
+}

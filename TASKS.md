@@ -2,7 +2,118 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-04-23 (Phase A–D + 2A+2B shipped — talent-pool flow live, service_role retired from apps/web)
+**Last updated:** 2026-04-23 (Phase R — Big Redesign: pg-* design system + new copy + new IA shipped)
+
+## Phase 2 — Job Orders + Admin CRM essentials (2026-04-23) ✅ DONE
+
+**Migrations applied to production Supabase:**
+- `0009_job_orders_and_phase2_tables`: 4 new tables (`job_orders`, `position_form_fields`, `application_tiers`, `application_status_history`) + auto-history trigger + auto-slot-counter trigger + RLS for each
+- `0010_candidate_documents_storage`: Supabase Storage bucket `candidate-documents` (5MB cap, jpg/png/heic/webp/pdf) + RLS path-based + `rejected_*` columns on `candidate_documents`
+- `0011_reseed_positions_2026_04`: 13 positions seeded per FEEDBACK PDF (6 new posisi: waitress, chef-bakery, spa-therapist, laundry, pengolahan-makanan, caregiver-taiwan, spg-indonesia). Deactivated `global-talent-hub` (now THE app, not a position).
+- TS types regenerated via Supabase MCP into `packages/db/src/types.ts`.
+
+**Admin CRM new pages (apps/platform):**
+- `/admin/positions` — read-only list of 13 positions + open job_order count + total apps. Per-row "Buat JO" CTA.
+- `/admin/positions/[slug]` — detail with requirements list, custom form fields list, job orders for this position. CRUD UI for positions catalog deferred (do via SQL for now).
+- `/admin/job-orders` — list with status filter chips (open/filled/closed/cancelled), slot progress bar per row.
+- `/admin/job-orders/new` — create wizard with all fields: position picker, internal+public employer name, city, intake label, slot count, deadline, public description override, internal notes.
+- `/admin/job-orders/[id]` — detail with slot meter, employer info, applicants list (filtered by `job_order_id`), status controls (radio), internal notes editor.
+- `/admin/documents` — review queue with filter chips (pending/verified/rejected) + counts. Per-row: signed-URL viewer (60s TTL via service-role server action), Verify, Tolak (with reason).
+
+**Tier scoring:**
+- `TierPicker` component (A/B/C/D/rejected) added to `ApplicationCard` — shown wherever admin sees applications (candidate detail page).
+- `assignTier` + `clearTier` server actions in `/admin/actions.ts`. Upserts into `application_tiers`.
+- Candidate detail query joins `application_tiers (tier)` so the picker shows current state.
+
+**Status history (real backing):**
+- `log_application_stage_change()` trigger auto-writes to `application_status_history` on every `pipeline_stage` UPDATE.
+- Existing 192 applications backfilled with one "applied" entry from `created_at`.
+- Candidate `/applications/[id]` timeline now reads from `application_status_history` (real data) with `public_note` shown as "Dari recruiter" callout.
+
+**Document upload (candidate side):**
+- `DocUploader` client component in `/profile`. Uploads via `supabase.storage.from('candidate-documents').upload()` to path `<candidate_id>/<doc_type>/<filename>`, then INSERTs row to `candidate_documents`.
+- Status per doc_type (KTP, Passport, Foto, CV) computed server-side: missing/pending/verified/rejected (with reason).
+- 5MB cap, accepts jpg/png/heic/webp/pdf.
+
+**www ↔ DB live overlay:**
+- `apps/web/src/lib/positions-db.ts` — `fetchOpenJobOrders()` + `mergePositionsWithJobOrders()` server-side helpers.
+- Homepage, `/lowongan` index, `/lowongan/[slug]` now overlay live `job_orders.status='open'` data on the static catalog. ISR 60s.
+- Position detail shows real batch label, slot_filled/slot_count, deadline when JO open.
+
+**Admin sidebar nav updated:** Overview · Job Orders · Posisi · Kandidat · Lamaran · Review Dokumen.
+**Admin overview** shows 5 stat cards (kandidat, lamaran, JO buka, doc pending, pending verifikasi) + 6 quick action cards.
+
+**Verified:**
+- `pnpm --filter @perantauglobal/web build` ✅ — 13 SSG lowongan slugs with ISR
+- `pnpm --filter @perantauglobal/platform build` ✅ — 18 routes incl. 6 new admin
+- TypeScript clean
+
+**Not in scope (Phase 3+):**
+- Position catalog CRUD UI (currently SQL-only)
+- Custom form field editor UI (currently SQL-only)
+- Pipeline kanban view (drag-drop) — listed in design but list view sudah cukup operate-able
+- Apply flow Step 1-5 wizard (currently still one-click)
+- Admin team management UI
+- Email broadcast on job order close
+- Analytics dashboard
+- WhatsApp integration (Meta Cloud API)
+
+---
+
+## Phase R — Big Redesign (2026-04-23) ✅ DONE
+
+Source: SPEC.md + Claude Design handoff (`design/perantauglobal-v2/`).
+
+**Design system (red-dominant, anti-editorial, mobile-first low-skilled-worker UX):**
+- New token set in both apps: `pg-red-{50,100,200,500,600,700,800}` + `pg-ink-*` + `pg-ok/warn/err/info` + `pg-paper`
+- Plus Jakarta Sans 400-800 jadi font primary (was Source Sans)
+- Shared UI primitives: `Icon` (43 inline-SVG Phosphor-style), `Button/ButtonLink` (primary/ghost/dark, block, 52px tap target), `Badge` (5 variants), `Chip`, `Card`, `RedHero` (typographic position header)
+- Located: `apps/{web,platform}/src/components/pg/`
+
+**apps/web — full content rebuild:**
+- `(main)/layout.tsx` → `TopBarWWW` + new `Footer` (no WhatsApp anywhere)
+- Homepage (`/`) — red-accent hero, lowongan grid pulled from `lib/positions.ts`, "Cara kerja 4-step" black block, FAQ
+- `/lowongan` index — NEW route, 13 positions, country chips, badge "Lagi buka" vs "Daftar antrian"
+- `/lowongan/[slug]` — dynamic route w/ generateStaticParams (13 SSG pages), data from `lib/positions.ts` + `lib/positionDetails.ts`. Apply form sticky CTA + sidebar form on desktop. **Copy fixed per Mas Martin feedback**: "Saudi Arabia" general (bukan Riyadh-specific), "diterima setiap bulan" bukan "tanggal 27", "bebas biaya sebelum offering letter" bukan "tanpa biaya kandidat", no training claims, no fake testimonials/slot/deadline.
+- `/talent-hub` — NEW (renamed from `/program/global-talent-hub`). Position GTH as THE app, not a program. Includes "training Global Talent Ready (coming soon)" callout
+- `/lowongan/spg-indonesia` — SPG re-treated as domestic lowongan (not separate program)
+- Secondary pages rebuilt: `tentang`, `tim`, `proses` (5-step generic), `layanan`, `faq` (3-group accordion), `kontak` (email-only ContactForm)
+- **DELETED:** `/destinasi/*` (info merged into lowongan), `/blog/*` (no content strategy yet), `/cerita-sukses` (testimonials need real ones), `/program/*` (replaced by `/lowongan` + `/talent-hub`), `/design-system`, all old editorial component packages (`components/{editorial,home,destinasi,blog,layanan,faq,kontak,proses,tentang,tim,program,mdx}`), `lib/{mdx,form-utils}`, `apps/web/content/`, `messages/{id,en}.json` no longer used
+- **Redirects added** in `next.config.ts`: `/program/* → /lowongan/* | /talent-hub`, `/destinasi/* → /lowongan`, `/blog/* → /`, `/cerita-sukses → /`
+- Sitemap rewritten — no more MDX content discovery; static pages + 13 lowongan slugs
+- API: `/api/lowongan/[slug]` SLUG_MAP expanded to all 13 positions, consent text de-WhatsApp'd. `/api/program` removed.
+
+**apps/platform — full UI rebuild (data layer untouched):**
+- Globals.css with same pg-* tokens, Plus Jakarta Sans loaded via Next font
+- `TopBarApp` + `BottomNav` (4-item: Beranda/Jelajah/Lamaran/Profil) + `ApplyHeader` + `StickyCTA`
+- Candidate `/dashboard` — profile completion ring, 4-stage user-visible application badges (mapped from 13 internal stages per SPEC.md §3.8), top-3 cocok carousel
+- Candidate `/profile` — header w/ initials, Data diri table, Dokumen placeholders ("Coming soon"), `ProfileForm` with 6 credential fields (was 10) styled with new radio cards
+- Candidate `/explore` — pill tab "Semua / Lolos syarat", top-match red hero card + smaller cards, profile-empty warning callout
+- Candidate `/applications` — NEW list route (bottom-nav target)
+- Candidate `/applications/[id]` — 4-stage progress bar + timeline + redesigned `AnswersForm`
+- `/auth/sign-in` — full redesign: red top ribbon, large heading, mail-icon input, info banner, success state with red-circle envelope motif + "Cek email" copy
+- Admin sidebar — dark slate w/ white text, red-accent active state
+- Admin `/admin` overview — 3 stat cards + quick action cards + "coming soon" callout for SPEC §6 features (Job Orders, Kanban, Doc Review, Tier, Analytics, Team)
+- Admin `/admin/candidates` list + `/admin/applications` list — restyled tables with new tokens, search/filter components rebuilt
+- Admin candidate detail — initials avatar header, badge for auth status, 2-col layout (bio aside + applications)
+- Admin action components: `StageSelector`, `NotesEditor`, `ReachOutToggle`, `ApplicationCard`, `ApplicationFilters`, `CandidateFilters` — all rebuilt with pg-* tokens
+
+**Design source stashed:** `design/` folder at repo root contains the full Claude Design export (README, chats, project JSX/CSS/HTML) for future reference.
+
+**Verified:**
+- `pnpm --filter @perantauglobal/web build` ✅ — 33 routes generated incl. 13 SSG lowongan slugs
+- `pnpm --filter @perantauglobal/platform build` ✅ — 14 routes
+- TypeScript clean in both apps
+
+**Known gaps (Phase 2+ per SPEC.md):**
+- DB migration for `job_orders`, `position_form_fields`, `application_tiers`, `application_status_history`, `candidate_documents` UI
+- Admin CRUD UI for positions + job orders + custom form fields + document review queue + tier assignment + analytics + team management
+- Apply flow Step 1-5 wizard (currently still goes via `applyToPosition` server action from /explore)
+- Document upload (Supabase Storage)
+- Notifications inbox
+- Cleanup of deprecated DB columns (e.g. `applications.role_data`)
+
+---
 
 ## Where we are (handoff snapshot)
 
