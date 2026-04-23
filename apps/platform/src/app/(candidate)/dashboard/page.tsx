@@ -28,6 +28,14 @@ type ReadinessRow = {
   hard_pass: boolean | null;
 };
 
+type MatchRow = {
+  position_slug: string | null;
+  position_name: string | null;
+  country: string | null;
+  completion_pct: number | null;
+  hard_pass: boolean | null;
+};
+
 const STAGE_LABELS: Record<string, string> = {
   applied: "Didaftarkan",
   screening: "Sedang diseleksi",
@@ -89,6 +97,26 @@ export default async function DashboardPage() {
   const credentialCount = Object.keys(credentials).length;
   const onboarding = (profileData.onboarding ?? {}) as Record<string, unknown>;
   const profileCompleted = Boolean(onboarding.completed_at) || credentialCount >= 4;
+
+  // Top-3 matched positions not yet applied to — preview for /explore.
+  let topMatches: MatchRow[] = [];
+  if (candidate) {
+    const { data: matchData } = await supabase
+      .from("readiness_view")
+      .select(
+        "position_slug, position_name, country, completion_pct, hard_pass",
+      )
+      .eq("candidate_id", candidate.id);
+    const appliedSet = new Set(appliedSlugs);
+    topMatches = ((matchData ?? []) as MatchRow[])
+      .filter((r) => r.position_slug && !appliedSet.has(r.position_slug))
+      .sort((a, b) => {
+        const hp = Number(b.hard_pass ?? false) - Number(a.hard_pass ?? false);
+        if (hp !== 0) return hp;
+        return (b.completion_pct ?? 0) - (a.completion_pct ?? 0);
+      })
+      .slice(0, 3);
+  }
 
   return (
     <main className="mx-auto max-w-[640px] px-6 py-8 pb-24">
@@ -187,6 +215,63 @@ export default async function DashboardPage() {
           </ul>
         )}
       </section>
+
+      {topMatches.length > 0 && (
+        <section className="mt-10">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.14em] opacity-60">
+              Posisi lain yang cocok
+            </h2>
+            <a
+              href="/explore"
+              className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.12em] hover:underline"
+            >
+              Lihat semua →
+            </a>
+          </div>
+          <ul className="mt-4 space-y-3">
+            {topMatches.map((m) => {
+              const slug = m.position_slug ?? "";
+              const pct = m.completion_pct ?? 0;
+              const hardPass = m.hard_pass ?? false;
+              return (
+                <li key={slug}>
+                  <a
+                    href="/explore"
+                    className="block border border-[var(--color-dtg-ink)] bg-white p-4 transition hover:bg-[var(--color-dtg-cream,#faf8f1)]"
+                  >
+                    <div className="flex items-baseline justify-between gap-3">
+                      <h3 className="font-semibold text-[15px] leading-[1.3]">
+                        {m.position_name ?? slug}
+                      </h3>
+                      <span className="font-[family-name:var(--font-mono)] text-[10px] uppercase tracking-[0.08em] opacity-60">
+                        {m.country}
+                      </span>
+                    </div>
+                    <div className="mt-3 flex items-center gap-3">
+                      <div className="flex-1">
+                        <div className="h-2 w-full bg-[var(--color-dtg-ink)]/10">
+                          <div
+                            className={`h-full ${
+                              hardPass
+                                ? "bg-green-600"
+                                : "bg-[var(--color-dtg-ink)]/60"
+                            }`}
+                            style={{ width: `${Math.max(pct, 4)}%` }}
+                          />
+                        </div>
+                      </div>
+                      <span className="font-[family-name:var(--font-mono)] text-xs font-semibold">
+                        {pct}%
+                      </span>
+                    </div>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
 
       <nav
         aria-label="Navigasi"
