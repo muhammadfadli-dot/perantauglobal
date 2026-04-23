@@ -107,12 +107,30 @@ export async function requireCandidate(): Promise<{
     .maybeSingle();
   if (existing) return { session, candidateId: (existing as { id: string }).id };
 
-  // Self-heal via service role (RLS would block anon INSERT with a server-chosen
-  // auth_user_id, and link-by-email requires bypassing UNIQUE email contention).
-  const admin = createServiceRoleClient();
+  // Self-insert via user's own JWT — allowed by RLS `candidates_self_insert`
+  // (migration 0014). No service role needed for the common path.
   const email = session.email ?? "";
+  const prefix = email ? email.split("@")[0]!.slice(0, 200) : "";
+  const placeholderName = prefix.length >= 2 ? prefix : "Kandidat baru";
 
-  if (email) {
+  const { data: created, error: insertError } = await supabase
+    .from("candidates")
+    .insert({
+      auth_user_id: session.userId,
+      email: email ? email.toLowerCase() : null,
+      full_name: placeholderName,
+      profile_data: { schema_version: 1, credentials: {}, onboarding: {} },
+      source: "direct_signup",
+    } as never)
+    .select("id")
+    .single();
+  if (created) return { session, candidateId: (created as { id: string }).id };
+
+  // INSERT failed — most likely UNIQUE email collision with a backfilled
+  // candidate (auth_user_id IS NULL). Fallback: service-role link-by-email,
+  // iff the key is available. Otherwise surface the original error.
+  if (email && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    const admin = createServiceRoleClient();
     const { data: linked } = await admin
       .from("candidates")
       .update({ auth_user_id: session.userId, updated_at: new Date().toISOString() })
@@ -123,24 +141,9 @@ export async function requireCandidate(): Promise<{
     if (linked) return { session, candidateId: (linked as { id: string }).id };
   }
 
-  const placeholderName = email ? email.split("@")[0]!.slice(0, 200) : "Kandidat baru";
-  const { data: created, error } = await admin
-    .from("candidates")
-    .insert({
-      auth_user_id: session.userId,
-      email: email ? email.toLowerCase() : null,
-      full_name: placeholderName.length >= 2 ? placeholderName : "Kandidat baru",
-      profile_data: { schema_version: 1, credentials: {}, onboarding: {} },
-      source: "direct_signup",
-    })
-    .select("id")
-    .single();
-  if (error || !created) {
-    throw new Error(
-      `requireCandidate: failed to self-heal candidate for auth_user ${session.userId}: ${error?.message ?? "unknown"}`,
-    );
-  }
-  return { session, candidateId: (created as { id: string }).id };
+  throw new Error(
+    `requireCandidate: could not materialize candidate for auth_user ${session.userId}: ${insertError?.message ?? "unknown"}`,
+  );
 }
 
 /**
