@@ -1018,52 +1018,6 @@
       "agreement": "Dengan mengirim formulir ini, saya menyetujui bahwa data saya akan diproses oleh PT Daya Talenta Global untuk keperluan rekrutmen."
     }
   },
-  "partners": {
-    "title": "Kemitraan",
-    "subtitle": "Bermitra dengan Perantau Global untuk mendapatkan tenaga kerja Indonesia yang terlatih dan berkualitas.",
-    "whyPartner": {
-      "title": "Mengapa Bermitra dengan Kami?",
-      "items": {
-        "talent": {
-          "title": "Talent Pool Berkualitas",
-          "description": "Akses ke ribuan kandidat Indonesia yang telah melalui proses seleksi ketat dan pelatihan intensif."
-        },
-        "compliance": {
-          "title": "Fully Compliant",
-          "description": "Seluruh proses rekrutmen dan penempatan sesuai regulasi kedua negara. Lisensi P3MI resmi."
-        },
-        "training": {
-          "title": "Pre-trained Workers",
-          "description": "Kandidat sudah dilatih bahasa, keterampilan teknis, dan orientasi budaya sebelum penempatan."
-        },
-        "support": {
-          "title": "End-to-End Support",
-          "description": "Dari rekrutmen, pelatihan, pengurusan dokumen, hingga after-placement support."
-        }
-      }
-    },
-    "form": {
-      "title": "Inquiry Kemitraan",
-      "companyName": "Nama Perusahaan",
-      "country": "Negara",
-      "contactPerson": "Nama Contact Person",
-      "email": "Email Perusahaan",
-      "phone": "Nomor Telepon",
-      "industry": "Bidang Industri",
-      "industryOptions": {
-        "hospitality": "Hospitality",
-        "manufacturing": "Manufacturing",
-        "construction": "Construction",
-        "healthcare": "Healthcare",
-        "retail": "Retail & Services",
-        "other": "Lainnya"
-      },
-      "workersNeeded": "Estimasi Jumlah Pekerja yang Dibutuhkan",
-      "message": "Informasi Tambahan (opsional)",
-      "submit": "Kirim Inquiry",
-      "success": "Inquiry Anda telah terkirim. Tim business development kami akan menghubungi Anda dalam 1-2 hari kerja."
-    }
-  },
   "faq": {
     "title": "Pertanyaan Umum (FAQ)",
     "subtitle": "Temukan jawaban untuk pertanyaan yang sering diajukan seputar bekerja di luar negeri bersama Perantau Global.",

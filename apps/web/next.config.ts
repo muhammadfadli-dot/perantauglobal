@@ -6,18 +6,14 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const nextConfig: NextConfig = {
   async redirects() {
     return [
-      // Removed EN pages → redirect to closest equivalent
-      { source: "/en/register", destination: "/en/contact", permanent: true },
-      { source: "/en/process", destination: "/en", permanent: true },
-      { source: "/en/faq", destination: "/en", permanent: true },
-      { source: "/en/success-stories", destination: "/en", permanent: true },
-      { source: "/en/partners", destination: "/en", permanent: true },
-      { source: "/en/team", destination: "/en/about", permanent: true },
-      { source: "/en/destinations", destination: "/en", permanent: true },
-      { source: "/en/destinations/:slug", destination: "/en", permanent: true },
-      { source: "/en/blog", destination: "/en", permanent: true },
-      { source: "/en/blog/:slug", destination: "/en", permanent: true },
-      { source: "/en/services/:slug", destination: "/en/services", permanent: true },
+      // EN locale retired — all /en/* → homepage. Site is now ID-only,
+      // focused on PMI (Indonesian worker) audience. Employer/mitra
+      // portal deferred; restore when employer re-entry is planned.
+      { source: "/en", destination: "/", permanent: true },
+      { source: "/en/:path*", destination: "/", permanent: true },
+      // ID-only: /mitra retired (employer portal deferred)
+      { source: "/mitra", destination: "/", permanent: true },
+      { source: "/id/mitra", destination: "/", permanent: true },
       // Taxonomy restructure: program → lowongan
       { source: "/program/truck-driver", destination: "/lowongan/truck-driver-jepang", permanent: true },
       { source: "/id/program/truck-driver", destination: "/lowongan/truck-driver-jepang", permanent: true },
