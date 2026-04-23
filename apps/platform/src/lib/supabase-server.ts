@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import {
   createServerClient as createSSRClient,
   type CookieOptions,
@@ -71,6 +72,75 @@ export async function getSessionAndRole(): Promise<{
     session: { userId: data.user.id, email: data.user.email ?? null },
     role: isAdmin === true ? "admin" : "candidate",
   };
+}
+
+/**
+ * Returns `candidates.id` for the current session, self-healing if missing.
+ *
+ * Why this exists: the DB trigger `handle_new_auth_user()` only materializes a
+ * candidate row when there's a matching `pending_submissions` entry (the
+ * legacy "fill form → magic link" flow). Users who sign up directly via
+ * email+password (PR #11) verify their email but never get a candidate row,
+ * causing /explore, /applications, /profile to silently redirect home —
+ * classic "dead-end redirect" anti-pattern.
+ *
+ * This helper is belt-and-braces with the trigger: idempotent, safe to call
+ * on every request. It first tries to link-by-email (in case a candidate was
+ * imported/backfilled with null auth_user_id), then inserts a skeleton row.
+ *
+ * Returns:
+ *   { session, role, candidateId } on success (redirects internally otherwise)
+ */
+export async function requireCandidate(): Promise<{
+  session: { userId: string; email: string | null };
+  candidateId: string;
+}> {
+  const { session, role } = await getSessionAndRole();
+  if (!session) redirect("/auth/sign-in");
+  if (role === "admin") redirect("/admin");
+
+  const supabase = await createServerClient();
+  const { data: existing } = await supabase
+    .from("candidates")
+    .select("id")
+    .eq("auth_user_id", session.userId)
+    .maybeSingle();
+  if (existing) return { session, candidateId: (existing as { id: string }).id };
+
+  // Self-heal via service role (RLS would block anon INSERT with a server-chosen
+  // auth_user_id, and link-by-email requires bypassing UNIQUE email contention).
+  const admin = createServiceRoleClient();
+  const email = session.email ?? "";
+
+  if (email) {
+    const { data: linked } = await admin
+      .from("candidates")
+      .update({ auth_user_id: session.userId, updated_at: new Date().toISOString() })
+      .eq("email", email.toLowerCase())
+      .is("auth_user_id", null)
+      .select("id")
+      .maybeSingle();
+    if (linked) return { session, candidateId: (linked as { id: string }).id };
+  }
+
+  const placeholderName = email ? email.split("@")[0]!.slice(0, 200) : "Kandidat baru";
+  const { data: created, error } = await admin
+    .from("candidates")
+    .insert({
+      auth_user_id: session.userId,
+      email: email ? email.toLowerCase() : null,
+      full_name: placeholderName.length >= 2 ? placeholderName : "Kandidat baru",
+      profile_data: { schema_version: 1, credentials: {}, onboarding: {} },
+      source: "direct_signup",
+    })
+    .select("id")
+    .single();
+  if (error || !created) {
+    throw new Error(
+      `requireCandidate: failed to self-heal candidate for auth_user ${session.userId}: ${error?.message ?? "unknown"}`,
+    );
+  }
+  return { session, candidateId: (created as { id: string }).id };
 }
 
 /**

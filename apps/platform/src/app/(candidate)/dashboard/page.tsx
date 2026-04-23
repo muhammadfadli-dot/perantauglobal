@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Badge } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
@@ -68,22 +67,20 @@ function userStage(internal: string): { label: string; variant: "warn" | "info" 
 }
 
 export default async function DashboardPage() {
-  const { session, role } = await getSessionAndRole();
-  if (!session) redirect("/");
-  if (role === "admin") redirect("/admin");
+  const { session, candidateId } = await requireCandidate();
 
   const supabase = await createServerClient();
   const { data } = await supabase
     .from("candidates")
     .select("id, full_name, email, phone, city, profile_data")
-    .eq("auth_user_id", session.userId)
+    .eq("id", candidateId)
     .single();
   const candidate = data as CandidateRow | null;
 
   const { data: appsData } = await supabase
     .from("applications")
     .select("id, position_slug, pipeline_stage, created_at, positions (name, country)")
-    .eq("candidate_id", candidate?.id ?? "")
+    .eq("candidate_id", candidateId)
     .order("created_at", { ascending: false });
   const applications = (appsData ?? []) as unknown as ApplicationRow[];
 

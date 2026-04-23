@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { Icon } from "@/components/pg/Icon";
 import ApplyWizard from "./ApplyWizard";
 
@@ -41,26 +41,24 @@ export default async function ApplyNewPage({
   const { position: positionSlug, job_order: jobOrderId } = await searchParams;
   if (!positionSlug) redirect("/explore");
 
-  const { session, role } = await getSessionAndRole();
-  if (!session) redirect("/auth/sign-in");
-  if (role === "admin") redirect("/admin");
-
+  const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  // Fetch candidate
   const { data: candData } = await supabase
     .from("candidates")
     .select("id, profile_data")
-    .eq("auth_user_id", session.userId)
+    .eq("id", candidateId)
     .single();
-  const candidate = candData as { id: string; profile_data: unknown } | null;
-  if (!candidate) redirect("/");
+  const candidate = (candData ?? { id: candidateId, profile_data: {} }) as {
+    id: string;
+    profile_data: unknown;
+  };
 
   // Already applied?
   const { data: existing } = await supabase
     .from("applications")
     .select("id")
-    .eq("candidate_id", candidate.id)
+    .eq("candidate_id", candidateId)
     .eq("position_slug", positionSlug)
     .maybeSingle();
   if (existing) {
@@ -74,7 +72,7 @@ export default async function ApplyNewPage({
     jobOrderId
       ? supabase.from("job_orders").select("id, intake_label, slot_count, slot_filled, deadline").eq("id", jobOrderId).eq("status", "open").maybeSingle()
       : supabase.from("job_orders").select("id, intake_label, slot_count, slot_filled, deadline").eq("position_slug", positionSlug).eq("status", "open").order("created_at", { ascending: false }).limit(1).maybeSingle(),
-    supabase.from("candidate_documents").select("doc_type, verified, rejected_at").eq("candidate_id", candidate.id),
+    supabase.from("candidate_documents").select("doc_type, verified, rejected_at").eq("candidate_id", candidateId),
   ]);
 
   const position = positionData as Position | null;

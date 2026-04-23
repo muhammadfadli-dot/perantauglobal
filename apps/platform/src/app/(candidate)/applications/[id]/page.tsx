@@ -1,6 +1,6 @@
-import { redirect, notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import AnswersForm from "./AnswersForm";
@@ -64,19 +64,8 @@ function userStage(internal: string) {
 export default async function ApplicationDetailPage({ params }: PageProps) {
   const { id } = await params;
 
-  const { session, role } = await getSessionAndRole();
-  if (!session) redirect("/");
-  if (role === "admin") redirect("/admin");
-
+  const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
-
-  const { data: candData } = await supabase
-    .from("candidates")
-    .select("id")
-    .eq("auth_user_id", session.userId)
-    .single();
-  const candidate = candData as { id: string } | null;
-  if (!candidate) redirect("/");
 
   const { data: appData } = await supabase
     .from("applications")
@@ -84,7 +73,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       "id, candidate_id, position_slug, pipeline_stage, created_at, answers, positions (slug, name, country, description, requirements)"
     )
     .eq("id", id)
-    .eq("candidate_id", candidate.id)
+    .eq("candidate_id", candidateId)
     .single();
   const application = appData as unknown as ApplicationRow | null;
   if (!application || !application.positions) notFound();

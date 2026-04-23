@@ -1,6 +1,5 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Badge } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
@@ -25,19 +24,18 @@ export default async function ExplorePage({ searchParams }: PageProps) {
   const { filter } = await searchParams;
   const hardOnly = filter === "hard";
 
-  const { session, role } = await getSessionAndRole();
-  if (!session) redirect("/");
-  if (role === "admin") redirect("/admin");
-
+  const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
   const { data: candData } = await supabase
     .from("candidates")
     .select("id, profile_data")
-    .eq("auth_user_id", session.userId)
+    .eq("id", candidateId)
     .single();
-  const candidate = candData as { id: string; profile_data: unknown } | null;
-  if (!candidate) redirect("/");
+  const candidate = (candData ?? { id: candidateId, profile_data: {} }) as {
+    id: string;
+    profile_data: unknown;
+  };
 
   const profileData = (candidate.profile_data ?? {}) as Record<string, unknown>;
   const credentials = (profileData.credentials ?? {}) as Record<string, unknown>;

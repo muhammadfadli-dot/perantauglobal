@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import ProfileForm from "./ProfileForm";
@@ -21,18 +20,15 @@ type CandidateRow = {
 };
 
 export default async function ProfilePage() {
-  const { session, role } = await getSessionAndRole();
-  if (!session) redirect("/");
-  if (role === "admin") redirect("/admin");
-
+  const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
   const { data } = await supabase
     .from("candidates")
     .select("id, full_name, email, phone, city, birth_date, gender, education, profile_data")
-    .eq("auth_user_id", session.userId)
+    .eq("id", candidateId)
     .single();
   const candidate = data as CandidateRow | null;
-  if (!candidate) redirect("/");
+  if (!candidate) throw new Error(`Candidate ${candidateId} disappeared between requireCandidate() and select`);
 
   const { data: docsData } = await supabase
     .from("candidate_documents")
