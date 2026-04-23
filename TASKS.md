@@ -2,7 +2,32 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-04-22 (Phase 1.5: app.perantauglobal.com live on new platform; dashboard.* retired; apex cutover in progress)
+**Last updated:** 2026-04-23 (Phase A+B+C shipped — talent-pool flow live end-to-end)
+
+## Where we are (handoff snapshot)
+
+**Latest commit on main:** `2036269` — feat(web): Phase C — strip forms to bio-only
+
+**Talent pool flow LIVE on prod:**
+1. User submits bio-only form at `www.perantauglobal.com/lowongan/[slug]` (or `/program/global-talent-hub`)
+2. `/api/lowongan/[slug]` writes legacy gt-tools + shadow pending_submission, triggers `signInWithOtp` (implicit flow)
+3. Magic-link → `app.perantauglobal.com/auth/confirm` (hash fragment → setSession)
+4. Trigger `handle_new_auth_user` materializes candidate + application with profile_data v2 shape `{schema_version:1, credentials:{}, onboarding:{}}`
+5. User lands on `/dashboard` → banner "Lengkapi profil" → fills `/profile` (10 credential fields) → saves
+6. Application detail `/applications/[id]` shows requirements with hard/soft badges + readiness meter
+
+**E2E smoke test passed** 2026-04-22/23 via `panjifrmansyah+test5@gmail.com` (alias trick, since admin email auto-redirects to /admin).
+
+**PRs merged this sprint:**
+- [#2](https://github.com/panji-firmansyah/perantauglobal/pull/2) `cd84fb9` — cutover + migration 0005 + portal core
+- [#3](https://github.com/panji-firmansyah/perantauglobal/pull/3) `a839dc5` — migration 0006 (trigger v2)
+- [#4](https://github.com/panji-firmansyah/perantauglobal/pull/4) `728a4c1` — drop candidates.phone UNIQUE
+- [#5](https://github.com/panji-firmansyah/perantauglobal/pull/5) `2036269` — Phase C strip forms
+
+**Gotchas learned (may bite next session):**
+- Supabase `merge_branch` via MCP does NOT reliably persist schema changes to main. 0006 + 0007 both had to be re-applied directly via `apply_migration` after branch merge "succeeded". Future: apply migrations directly after branch test, OR verify constraint state post-merge before trusting.
+- `candidates.phone` UNIQUE dropped — talent pool allows phone collisions (family share devices, same person multi-email).
+- `role_data` column on `pending_submissions` + `applications.answers` still receives data from legacy forms during transition. After Phase C, role_data = `{}` always. Can drop column in Phase 2 sunset.
 
 ---
 
@@ -37,19 +62,64 @@ Finishing wiring + user-action items before flipping DNS to the new stack.
   - First platform preview: `perantauglobal-platform-d7e73abxt-dayalima-group.vercel.app`
   - Future pushes to `main` → prod deployments (no DNS yet)
   - Future branch pushes → preview deployments
-- [x] **Production cutover — partial** (2026-04-22):
-  1. [x] `app.perantauglobal.com` → NEW platform (live, returning `/auth/sign-in`)
-  2. [x] `dashboard.perantauglobal.com` → retired (returns 404; legacy admin sunset, new admin at `app.*/admin`)
-  3. [ ] `perantauglobal.com` + `www.perantauglobal.com` → NEW web (pending: remove from legacy `perantauglobal-com` in personal team, then add to `perantauglobal-web` in Dayalima Group)
-  4. [ ] Change Supabase Auth Site URL: `http://localhost:3000` → `https://app.perantauglobal.com`
-  5. [ ] Update email templates if they reference `{{ .SiteURL }}`
-  6. [ ] Delete `SUPABASE_SERVICE_ROLE_KEY` from `apps/web/.env.local` + Vercel env
-  7. [ ] Remove legacy `/api/lowongan/[slug]` + `/api/program/[slug]` legacy write paths → keep magic-link-only
-  8. [ ] Archive `gt-tools` Supabase project (read-only, keep 3 months)
+- [x] **Production cutover — COMPLETE** (2026-04-22):
+  1. [x] `app.perantauglobal.com` → NEW platform (live)
+  2. [x] `dashboard.perantauglobal.com` → retired (404)
+  3. [x] `perantauglobal.com` + `www.perantauglobal.com` → NEW web (Dayalima Group)
+  4. [x] Supabase Auth Site URL set to `https://app.perantauglobal.com`
+  5. [ ] Customize Supabase magic-link email template (DTG branding) — deferred Phase 2
+  6. [ ] Delete `SUPABASE_SERVICE_ROLE_KEY` from apps/web — deferred Phase 2 (kept for legacy dual-write)
+  7. [ ] Remove legacy `/api/lowongan/[slug]` + `/api/program/[slug]` legacy write paths — deferred Phase 2
+  8. [ ] Archive `gt-tools` Supabase project — deferred Phase 2 (keep 3 months)
+
+**Phase A — Schema v2 (requirements + readiness)** ✅ DONE 2026-04-22
+- Migration 0005: positions.requirements → typed `{type:hard|soft, label, allowed_values?}`
+- `compute_readiness()` rewritten to return JSONB `{per_field, hard_pass, score_pct}`
+- `readiness_view` gains `hard_pass` + `completion_pct` columns
+- `candidates.profile_data` migrated to v2 `{schema_version, credentials, onboarding}`
+- Hand-tuned hard/soft per 7 positions (talent-pool MVP intuition; program PIC session to refine later)
+
+**Phase B — Portal core** ✅ DONE 2026-04-22
+- B.1: web browser client switched to implicit flow; new `/auth/confirm` client page handles hash-fragment tokens → setSession → /dashboard
+- B.2: `/profile` page (10-field credential editor, mobile-first, sticky save)
+- B.3: `/applications/[id]` page (requirements list with hard/soft badges + answers form: motivation/earliest_start/visa_status/referral)
+- B.4: `/dashboard` rebuilt mobile-first (profile completion banner, readiness bar per app, sticky bottom nav)
+- B.6 hotfix: migration 0006 — trigger writes profile_data v2 shape (was writing flat v1)
+- B.7 hotfix: migration 0007 — drop `candidates_phone_key` UNIQUE (was blocking trigger on phone collisions from backfilled candidates)
+
+**Phase C — Strip www forms to bio-only** ✅ DONE 2026-04-23
+- LowonganForm: dropped `roleFields` prop + checkbox logic → bio-only (7 fields)
+- GTHForm: dropped current_status/interested_country/has_lpk → bio + education (5 fields)
+- 6 lowongan Content components + lowongan/index.ts: remove `FormFieldConfig` references
+- API routes unchanged (accept `role_data: {}` cleanly)
 
 ---
 
-## Next session punch list (pick up here)
+## Next session — pick up here
+
+### Phase D (~2 days) — Multi-position apply "magic"
+1. `apps/platform/src/app/(candidate)/explore/page.tsx` — rank all active positions by readiness % for current candidate. Filter: hard-pass only / all. One-click Apply CTA per card.
+2. Server action `applyToPosition(positionSlug)` — INSERT applications row with `answers: {}`, `pipeline_stage: 'applied'`. Unique constraint `(candidate_id, position_slug)` handles double-click.
+3. Dashboard enhancement: show top 3 matched positions preview card + "Lihat semua" CTA to /explore.
+4. Add `/explore` to bottom nav label (currently "Jelajah" — confirm wording).
+5. E2E: test user with filled profile → /explore shows ranked list → one-click apply → dashboard shows new application row.
+
+### Phase 2 polish (after Phase D, or parallel)
+- Customize Supabase magic-link email template (DTG branding via Resend template)
+- Remove legacy `/api/lowongan/[slug]` + `/api/program/[slug]` dual-write paths
+- Delete `SUPABASE_SERVICE_ROLE_KEY` from apps/web env + Vercel
+- Archive gt-tools Supabase
+- Fix known `global-talent-hub` form/DB field mismatch (form writes to wrong requirement keys — low priority since GTH is all-SOFT anyway)
+- Delete dead `apps/web/src/app/[locale]/auth/callback/` page (no longer reached post-implicit-flow)
+
+### Features waiting for Panji direction (not yet planned)
+- Copywriting / content review for new portal flow
+- WhatsApp reminder automation (Meta business verification dependency)
+- Program PIC session → fine-tune requirements hard/soft per position
+- SPG re-wire with custom 7-dimension scoring
+- BP2MI SISKOP2MI integration (Phase 2 compliance)
+
+## Historical tasks (completed; reference only)
 
 ### TASK 1: Verify dev env ✅ DONE (2026-04-21)
 - `pnpm install` — 676 packages, 34s
