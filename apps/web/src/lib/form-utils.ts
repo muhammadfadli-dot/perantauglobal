@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
 
 /**
  * Validate that all required fields are present and non-empty.
@@ -31,26 +30,4 @@ export function validateEmail(email: string): NextResponse | null {
     );
   }
   return null;
-}
-
-/**
- * Insert a record into a Supabase table.
- * Returns error response or success response.
- */
-export async function insertToSupabase(
-  table: string,
-  data: Record<string, unknown>,
-  logPrefix: string
-): Promise<NextResponse> {
-  const { error } = await supabase.from(table).insert(data);
-
-  if (error) {
-    console.error(`[${logPrefix}] Supabase error:`, error.message);
-    return NextResponse.json(
-      { error: "Failed to submit. Please try again." },
-      { status: 500 }
-    );
-  }
-
-  return NextResponse.json({ success: true });
 }

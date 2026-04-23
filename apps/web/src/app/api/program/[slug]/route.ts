@@ -1,101 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
-import {
-  validateRequired,
-  validateEmail,
-  insertToSupabase,
-} from "@/lib/form-utils";
+import { validateRequired, validateEmail } from "@/lib/form-utils";
 import { sendMetaEvent } from "@/lib/meta-capi";
-import { shadowPendingSubmission } from "@/lib/shadow-write";
+import { writePendingSubmission } from "@/lib/pending-write";
 
-// Legacy program slugs → new positions.slug.
-// Legacy program routes use short aliases; new schema uses canonical slugs.
+// Program slug → positions.slug mapping. After Phase C strip, program forms
+// are bio-only; only global-talent-hub still uses this endpoint (SPG has its
+// own route, truck-driver moved to /lowongan/truck-driver-jepang).
 const PROGRAM_TO_POSITION_SLUG: Record<string, string> = {
-  "truck-driver": "truck-driver-jepang",
   "global-talent-hub": "global-talent-hub",
 };
 
-// ---------------------------------------------------------------------------
-// Program Registry — each entry defines table, required fields, and transform
-// ---------------------------------------------------------------------------
-
-interface ProgramDef {
-  table: string;
-  required: string[];
-  /** Extra validation beyond required + email. Return error response or null. */
-  validate?: (body: Record<string, unknown>) => NextResponse | null;
-  /** Transform camelCase payload → snake_case DB row */
-  transform: (body: Record<string, unknown>) => Record<string, unknown>;
-}
-
-const PROGRAMS: Record<string, ProgramDef> = {
-  "truck-driver": {
-    table: "tdp_registrations",
-    required: [
-      "fullName",
-      "whatsapp",
-      "email",
-      "city",
-      "age",
-      "education",
-      "simType",
-      "drivingExperience",
-      "japaneseLevel",
-      "hasSswCertificate",
-    ],
-    validate: (b) => {
-      const age = Number(b.age);
-      if (age < 18 || age > 44) {
-        return NextResponse.json(
-          { error: "Age must be between 18 and 44" },
-          { status: 400 }
-        );
-      }
-      return null;
-    },
-    transform: (b) => ({
-      full_name: b.fullName,
-      whatsapp: b.whatsapp,
-      email: b.email,
-      city: b.city,
-      age: Number(b.age),
-      education: b.education,
-      sim_type: b.simType,
-      sim_issued_year: b.simIssuedYear ? Number(b.simIssuedYear) : null,
-      driving_experience: b.drivingExperience,
-      japanese_level: b.japaneseLevel,
-      has_ssw_certificate: b.hasSswCertificate === "yes",
-    }),
-  },
-
-  "global-talent-hub": {
-    table: "gth_registrations",
-    required: [
-      "fullName",
-      "whatsapp",
-      "email",
-      "city",
-      "education",
-      "currentStatus",
-      "interestedCountry",
-      "hasLPK",
-    ],
-    transform: (b) => ({
-      full_name: b.fullName,
-      whatsapp: b.whatsapp,
-      email: b.email,
-      city: b.city,
-      education: b.education,
-      current_status: b.currentStatus,
-      interested_country: b.interestedCountry,
-      has_lpk: b.hasLPK,
-    }),
-  },
-};
-
-// ---------------------------------------------------------------------------
-// Dynamic POST handler
-// ---------------------------------------------------------------------------
+// Shared required fields per Phase C bio-only shape.
+const REQUIRED = ["fullName", "whatsapp", "email", "city", "education"] as const;
 
 export async function POST(
   request: NextRequest,
@@ -103,9 +20,9 @@ export async function POST(
 ) {
   try {
     const { slug } = await params;
-    const program = PROGRAMS[slug];
+    const positionSlug = PROGRAM_TO_POSITION_SLUG[slug];
 
-    if (!program) {
+    if (!positionSlug) {
       return NextResponse.json(
         { error: "Unknown program" },
         { status: 404 }
@@ -114,55 +31,47 @@ export async function POST(
 
     const body = (await request.json()) as Record<string, unknown>;
 
-    // 1. Required fields
-    const reqErr = validateRequired(body, program.required);
+    const reqErr = validateRequired(body, Array.from(REQUIRED));
     if (reqErr) return reqErr;
 
-    // 2. Email format
     const emailErr = validateEmail(body.email as string);
     if (emailErr) return emailErr;
 
-    // 3. Program-specific validation
-    if (program.validate) {
-      const extraErr = program.validate(body);
-      if (extraErr) return extraErr;
-    }
-
-    // 4. Transform & insert
-    const row = program.transform(body);
-    const result = await insertToSupabase(
-      program.table,
-      row,
-      `${slug} Registration`
+    const writeResult = await writePendingSubmission(
+      {
+        position_slug: positionSlug,
+        email: body.email as string,
+        phone: (body.whatsapp || body.phone) as string | undefined,
+        form_data: {
+          full_name: body.fullName,
+          whatsapp: body.whatsapp,
+          email: body.email,
+          city: body.city,
+          education: body.education,
+        },
+        consents: [
+          {
+            purpose: "application_processing",
+            purpose_text:
+              "Memproses pendaftaran program (verifikasi data, komunikasi via WhatsApp/email, pencocokan lowongan).",
+            version: "2026-04-22",
+            granted: true,
+          },
+        ],
+      },
+      request,
     );
 
-    // 4.5 Dual-write shadow: mirror into new Supabase pending_submissions if
-    // this program maps to a seeded position. Fire-and-forget.
-    const positionSlug = PROGRAM_TO_POSITION_SLUG[slug];
-    if (result.status === 200 && positionSlug) {
-      await shadowPendingSubmission(
-        {
-          position_slug: positionSlug,
-          email: body.email as string,
-          phone: (body.whatsapp || body.phone) as string | undefined,
-          form_data: body,
-          consents: [
-            {
-              purpose: "application_processing",
-              purpose_text:
-                "Memproses pendaftaran program (verifikasi data, komunikasi via WhatsApp/email, pencocokan lowongan).",
-              version: "2026-04-22",
-              granted: true,
-            },
-          ],
-        },
-        request,
+    if (!writeResult.ok) {
+      console.error(`[${slug} Registration] write failed:`, writeResult.error);
+      return NextResponse.json(
+        { error: "Failed to submit. Please try again." },
+        { status: 500 }
       );
     }
 
-    // 5. Send to Meta CAPI (non-blocking)
     const eventId = body.eventId as string | undefined;
-    if (eventId && result.status === 200) {
+    if (eventId) {
       waitUntil(
         sendMetaEvent({
           eventName: "Lead",
@@ -183,7 +92,7 @@ export async function POST(
       );
     }
 
-    return result;
+    return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }

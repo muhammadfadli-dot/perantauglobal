@@ -3,11 +3,11 @@ import type { Json } from "@perantauglobal/db";
 import { supabaseV2, isV2Configured } from "./supabase-v2";
 
 /**
- * Shape passed into shadowPendingSubmission. Matches the `pending_submissions`
- * + `consents` tables in the new perantauglobal schema.
+ * Shape passed into writePendingSubmission. Matches the `pending_submissions`
+ * + `consents` tables in the perantauglobal schema.
  */
-export interface ShadowWriteArgs {
-  /** Position slug — must match `positions.slug` in new Supabase. */
+export interface WritePendingArgs {
+  /** Position slug — must match `positions.slug`. */
   position_slug: string;
   /** Candidate email used for magic-link auth + dedupe. */
   email: string;
@@ -34,23 +34,23 @@ export interface ShadowWriteArgs {
   }>;
 }
 
+export type WritePendingResult =
+  | { ok: true; pendingId: string }
+  | { ok: false; error: string };
+
 /**
- * Fire-and-forget shadow write to new Supabase.
+ * Canonical write of a pending_submission + linked consents.
  *
- * Writes to `pending_submissions` + `consents` atomically-ish (consent
- * inserts happen after pending_submission insert; if consent fails the
- * pending row still stands, which is acceptable — we have the core lead).
- *
- * Never throws to caller — logs on failure. Legacy form path remains
- * source of truth until cutover.
+ * Previously this was a fire-and-forget "shadow" alongside a legacy gt-tools
+ * insert. Post-Phase-2 cleanup, this is the only write path — if it fails we
+ * surface the error to the caller so the form returns 500.
  */
-export async function shadowPendingSubmission(
-  args: ShadowWriteArgs,
+export async function writePendingSubmission(
+  args: WritePendingArgs,
   request: NextRequest,
-): Promise<void> {
+): Promise<WritePendingResult> {
   if (!isV2Configured()) {
-    console.info("[shadow-write] skipped: V2 env not configured");
-    return;
+    return { ok: false, error: "supabase not configured" };
   }
 
   const ip =
@@ -77,8 +77,8 @@ export async function shadowPendingSubmission(
     });
 
     if (pendingErr) {
-      console.warn("[shadow-write] pending_submissions insert failed:", pendingErr.message);
-      return;
+      console.warn("[pending-write] pending_submissions insert failed:", pendingErr.message);
+      return { ok: false, error: pendingErr.message };
     }
 
     const grantedConsents = args.consents.filter((c) => c.granted);
@@ -96,16 +96,15 @@ export async function shadowPendingSubmission(
         })),
       );
       if (consentErr) {
-        console.warn("[shadow-write] consents insert failed:", consentErr.message);
+        console.warn("[pending-write] consents insert failed:", consentErr.message);
+        return { ok: false, error: consentErr.message };
       }
     }
 
-    console.info("[shadow-write] ok:", {
-      position: args.position_slug,
-      pending_id: pendingId,
-      consents: grantedConsents.length,
-    });
+    return { ok: true, pendingId };
   } catch (err) {
-    console.warn("[shadow-write] unexpected error:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.warn("[pending-write] unexpected error:", message);
+    return { ok: false, error: message };
   }
 }

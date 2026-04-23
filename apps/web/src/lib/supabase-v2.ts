@@ -20,7 +20,7 @@ export function supabaseV2() {
 }
 
 /**
- * True when both env vars are present. Use to skip shadow-write gracefully
+ * True when both env vars are present. Use to skip pending-write gracefully
  * in dev environments that haven't been configured yet.
  */
 export function isV2Configured(): boolean {

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
-import { supabase } from "@/lib/supabase";
 import { sendMetaEvent } from "@/lib/meta-capi";
-import { shadowPendingSubmission } from "@/lib/shadow-write";
+import { writePendingSubmission } from "@/lib/pending-write";
 
-// Map slug → role + country
+// Map slug → role + country. Kept as a whitelist so we reject unknown slugs
+// before touching the DB.
 const SLUG_MAP: Record<string, { role: string; country: string }> = {
   "perawat-saudi-arabia": { role: "nurse", country: "saudi_arabia" },
   "dental-nurse-saudi-arabia": { role: "dental_nurse", country: "saudi_arabia" },
@@ -28,7 +28,6 @@ interface CandidatePayload {
   role: string;
   country: string;
   source_url?: string;
-  role_data?: Record<string, unknown>;
   eventId?: string;
   fbp?: string;
   fbc?: string;
@@ -51,7 +50,6 @@ export async function POST(
 
     const body = (await request.json()) as CandidatePayload;
 
-    // Validate required fields
     const required = ["full_name", "whatsapp", "email", "city", "education"] as const;
     for (const field of required) {
       if (!body[field]) {
@@ -62,7 +60,6 @@ export async function POST(
       }
     }
 
-    // Validate email format
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
       return NextResponse.json(
         { error: "Invalid email format" },
@@ -70,34 +67,7 @@ export async function POST(
       );
     }
 
-    const { error } = await supabase.from("candidate_applications").insert({
-      role: mapping.role,
-      country: mapping.country,
-      source_url: body.source_url || null,
-      full_name: body.full_name,
-      whatsapp: body.whatsapp,
-      email: body.email,
-      city: body.city,
-      birth_date: body.birth_date || null,
-      gender: body.gender || null,
-      education: body.education,
-      role_data: body.role_data || {},
-    });
-
-    if (error) {
-      console.error("[Candidate Application] Supabase error:", error.message);
-      return NextResponse.json(
-        { error: "Failed to submit. Please try again." },
-        { status: 500 }
-      );
-    }
-
-    // Dual-write shadow: mirror into new Supabase pending_submissions + consents.
-    // MUST complete before the response so that the client-side
-    // `signInWithOtp` call below has a fully-committed pending row for the
-    // auth.users trigger to materialize from. Errors are logged but not
-    // propagated — legacy path remains source of truth.
-    await shadowPendingSubmission(
+    const writeResult = await writePendingSubmission(
       {
         position_slug: slug,
         email: body.email,
@@ -112,7 +82,6 @@ export async function POST(
           education: body.education,
           role: mapping.role,
           country: mapping.country,
-          role_data: body.role_data ?? {},
           source_url: body.source_url ?? null,
         },
         consents: [
@@ -127,6 +96,14 @@ export async function POST(
       },
       request,
     );
+
+    if (!writeResult.ok) {
+      console.error("[Candidate Application] write failed:", writeResult.error);
+      return NextResponse.json(
+        { error: "Failed to submit. Please try again." },
+        { status: 500 }
+      );
+    }
 
     if (body.eventId) {
       waitUntil(

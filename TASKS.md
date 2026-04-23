@@ -105,12 +105,16 @@ Finishing wiring + user-action items before flipping DNS to the new stack.
 5. E2E: test user with filled profile → /explore shows ranked list → one-click apply → dashboard shows new application row.
 
 ### Phase 2 polish (after Phase D, or parallel)
-- Customize Supabase magic-link email template (DTG branding via Resend template)
-- Remove legacy `/api/lowongan/[slug]` + `/api/program/[slug]` dual-write paths
-- Delete `SUPABASE_SERVICE_ROLE_KEY` from apps/web env + Vercel
-- Archive gt-tools Supabase
-- Fix known `global-talent-hub` form/DB field mismatch (form writes to wrong requirement keys — low priority since GTH is all-SOFT anyway)
-- Delete dead `apps/web/src/app/[locale]/auth/callback/` page (no longer reached post-implicit-flow)
+- [x] **Phase 2A — dual-write sunset (2026-04-23):**
+  - `/api/lowongan/[slug]` + `/api/program/[slug]` no longer write to gt-tools; new Supabase is canonical. Fire-and-forget shadow → strict result. Route returns 500 if `pending_submissions` insert fails.
+  - `shadow-write.ts` → renamed `pending-write.ts`; fn `shadowPendingSubmission` → `writePendingSubmission`, returns `{ ok, pendingId } | { ok: false, error }`.
+  - `/api/program/[slug]` simplified to GTH-only (truck-driver dead code removed; truck-driver lives at `/lowongan/truck-driver-jepang`). GTH `required` list trimmed to match Phase C bio-only form — fixes latent 400 from stale `currentStatus/interestedCountry/hasLPK` requirement.
+  - `insertToSupabase` helper + `role_data` field removed.
+  - Dead `apps/web/src/app/[locale]/auth/callback/` deleted (unreachable post-implicit-flow).
+- Delete `SUPABASE_SERVICE_ROLE_KEY` from apps/web env + Vercel — still needed: `/api/register`, `/api/contact`, `/api/employer-inquiry`, `/api/program/spg` all use gt-tools via `@/lib/supabase.ts`. Can drop after those migrate.
+- Customize Supabase magic-link email template (DTG branding via Resend template) — user action, Supabase dashboard
+- Archive gt-tools Supabase — user action, after 2-3 weeks prod observation
+- Re-wire `/api/program/spg`, `/api/register`, `/api/contact`, `/api/employer-inquiry` to new Supabase (or drop — evaluate per surface)
 
 ### Features waiting for Panji direction (not yet planned)
 - Copywriting / content review for new portal flow
