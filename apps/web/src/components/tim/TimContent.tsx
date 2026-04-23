@@ -122,7 +122,7 @@ export default function TimContent() {
             Daftar sekarang, dampingan dari tim rekrutmen + pelatihan + dokumen + support tersedia sampai kamu tiba di negara tujuan.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <EditorialButton href="/daftar" variant="ink" suffix="→">
+            <EditorialButton href="/program/global-talent-hub" variant="ink" suffix="→">
               Daftar sekarang
             </EditorialButton>
             <EditorialButton href="https://wa.me/6285211415104" variant="cream" suffix="→" target="_blank" rel="noopener noreferrer">

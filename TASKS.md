@@ -2,7 +2,7 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-04-23 (Phase A+B+C shipped — talent-pool flow live end-to-end)
+**Last updated:** 2026-04-23 (Phase A–D + 2A+2B shipped — talent-pool flow live, service_role retired from apps/web)
 
 ## Where we are (handoff snapshot)
 
@@ -111,10 +111,16 @@ Finishing wiring + user-action items before flipping DNS to the new stack.
   - `/api/program/[slug]` simplified to GTH-only (truck-driver dead code removed; truck-driver lives at `/lowongan/truck-driver-jepang`). GTH `required` list trimmed to match Phase C bio-only form — fixes latent 400 from stale `currentStatus/interestedCountry/hasLPK` requirement.
   - `insertToSupabase` helper + `role_data` field removed.
   - Dead `apps/web/src/app/[locale]/auth/callback/` deleted (unreachable post-implicit-flow).
-- Delete `SUPABASE_SERVICE_ROLE_KEY` from apps/web env + Vercel — still needed: `/api/register`, `/api/contact`, `/api/employer-inquiry`, `/api/program/spg` all use gt-tools via `@/lib/supabase.ts`. Can drop after those migrate.
+- [x] **Phase 2B — service_role sunset (2026-04-23):**
+  - Migration 0008 — new tables `contact_submissions` + `employer_inquiries` on new Supabase (anon INSERT, admin SELECT/UPDATE via `is_admin()`).
+  - `/api/contact` + `/api/employer-inquiry` rewired to `supabaseV2()` anon client.
+  - `/daftar` page + `RegisterForm` + `/api/register` + `DaftarHero` **deleted** (redundant with GTH talent-hub funnel). `/daftar` → `/program/global-talent-hub` permanent redirect added. All 5 `/daftar` CTA refs across layanan/cerita-sukses/faq/tim/proses + nav ctaHref + mobileSticky formAnchor updated.
+  - `/program/spg` form **paused** — `SPGSmartForm.tsx` replaced with waitlist notice + WhatsApp CTA. `spg-form/` subdir (FormStep1-4, Success/StopScreen, FormProgress, types.ts with SCORE_WEIGHTS) deleted. `/api/program/spg` route deleted. SPG program IP in git history, ready for Phase 2 re-wire when position seeded with 7-dimension scoring.
+  - `apps/web/src/lib/supabase.ts` (service_role client) **deleted**.
+  - `apps/web/.env.example` cleaned: legacy `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` removed; only anon-key envs remain.
+  - **USER ACTION:** delete `SUPABASE_SERVICE_ROLE_KEY` + `SUPABASE_URL` (legacy) from Vercel `perantauglobal-web` project env after this PR lands.
 - Customize Supabase magic-link email template (DTG branding via Resend template) — user action, Supabase dashboard
 - Archive gt-tools Supabase — user action, after 2-3 weeks prod observation
-- Re-wire `/api/program/spg`, `/api/register`, `/api/contact`, `/api/employer-inquiry` to new Supabase (or drop — evaluate per surface)
 
 ### Features waiting for Panji direction (not yet planned)
 - Copywriting / content review for new portal flow

@@ -26,6 +26,9 @@ const nextConfig: NextConfig = {
       { source: "/program/global-nurse", destination: "/lowongan/perawat-saudi-arabia", permanent: true },
       { source: "/id/program/global-nurse", destination: "/lowongan/perawat-saudi-arabia", permanent: true },
       { source: "/en/program/global-nurse", destination: "/lowongan/perawat-saudi-arabia", permanent: true },
+      // Generic /daftar retired — funnel to GTH talent hub
+      { source: "/daftar", destination: "/program/global-talent-hub", permanent: true },
+      { source: "/id/daftar", destination: "/program/global-talent-hub", permanent: true },
     ];
   },
   webpack(config) {

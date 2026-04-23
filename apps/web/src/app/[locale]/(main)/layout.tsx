@@ -51,7 +51,7 @@ export default async function MainLayout({
         metaLeft={t("mobileSticky.metaLeft")}
         metaRight={t("mobileSticky.metaRight")}
         ctaLabel={t("mobileSticky.ctaLabel")}
-        formAnchor="/daftar"
+        formAnchor="/program/global-talent-hub"
         whatsappUrl="https://wa.me/6285211415104"
       />
     </>

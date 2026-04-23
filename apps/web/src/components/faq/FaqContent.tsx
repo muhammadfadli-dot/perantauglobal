@@ -155,7 +155,7 @@ export default function FaqContent() {
             <EditorialButton href="https://wa.me/6285211415104" variant="ink" suffix="→" target="_blank" rel="noopener noreferrer">
               WhatsApp langsung
             </EditorialButton>
-            <EditorialButton href="/daftar" variant="cream" suffix="→">
+            <EditorialButton href="/program/global-talent-hub" variant="cream" suffix="→">
               Daftar sekarang
             </EditorialButton>
           </div>

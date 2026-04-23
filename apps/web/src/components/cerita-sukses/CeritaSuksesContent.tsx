@@ -152,7 +152,7 @@ export default function CeritaSuksesContent() {
           </DisplayHeadline>
           <p className="mt-6 max-w-[42ch] text-lg leading-[1.5] text-white/90">{t("cta.subtitle")}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <EditorialButton href="/daftar" variant="ink" suffix="→">
+            <EditorialButton href="/program/global-talent-hub" variant="ink" suffix="→">
               Daftar sekarang
             </EditorialButton>
             <EditorialButton href="https://wa.me/6285211415104" variant="cream" suffix="→" target="_blank" rel="noopener noreferrer">

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
-import { supabase } from "@/lib/supabase";
+import { supabaseV2 } from "@/lib/supabase-v2";
 import { sendMetaEvent } from "@/lib/meta-capi";
 
 interface EmployerInquiryPayload {
@@ -22,7 +22,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as EmployerInquiryPayload;
 
-    // Validate required fields
     if (
       !body.company_name ||
       !body.contact_person ||
@@ -39,7 +38,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate email format
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
       return NextResponse.json(
         { error: "Invalid email format" },
@@ -47,7 +45,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { error } = await supabase.from("employer_inquiries").insert({
+    const { error } = await supabaseV2().from("employer_inquiries").insert({
       company_name: body.company_name,
       contact_person: body.contact_person,
       email: body.email,

@@ -304,6 +304,90 @@ export type Database = {
           },
         ]
       }
+      contact_submissions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          notes: string | null
+          phone: string | null
+          status: string
+          subject: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          subject: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          subject?: string
+        }
+        Relationships: []
+      }
+      employer_inquiries: {
+        Row: {
+          additional_requirements: string | null
+          company_name: string
+          contact_person: string
+          country: string
+          created_at: string
+          email: string
+          id: string
+          industry: string
+          notes: string | null
+          phone: string
+          status: string
+          timeline: string
+          workers_needed: string
+        }
+        Insert: {
+          additional_requirements?: string | null
+          company_name: string
+          contact_person: string
+          country: string
+          created_at?: string
+          email: string
+          id?: string
+          industry: string
+          notes?: string | null
+          phone: string
+          status?: string
+          timeline: string
+          workers_needed: string
+        }
+        Update: {
+          additional_requirements?: string | null
+          company_name?: string
+          contact_person?: string
+          country?: string
+          created_at?: string
+          email?: string
+          id?: string
+          industry?: string
+          notes?: string | null
+          phone?: string
+          status?: string
+          timeline?: string
+          workers_needed?: string
+        }
+        Relationships: []
+      }
       pending_submissions: {
         Row: {
           consent_ids: string[] | null
@@ -607,43 +691,3 @@ export const Constants = {
     },
   },
 } as const
-
-// =========================================================================
-// Requirements v2 helper types (migration 0005 + handwritten, kept in sync
-// with the SQL compute_readiness() function signature).
-// =========================================================================
-
-export interface RequirementSpec {
-  type: "hard" | "soft"
-  label: string
-  allowed_values?: readonly string[]
-}
-
-export type PositionRequirements = Record<string, RequirementSpec>
-
-export interface ReadinessPerField {
-  passed: boolean
-  type: "hard" | "soft"
-  label: string
-}
-
-export interface ReadinessResult {
-  per_field: Record<string, ReadinessPerField>
-  hard_pass: boolean
-  score_pct: number
-}
-
-/**
- * profile_data JSONB shape (v2, post-migration 0005).
- * v1 (pre-0005) was flat — compute_readiness handles both via COALESCE.
- */
-export interface CandidateProfileDataV2 {
-  schema_version: 1
-  credentials: Record<string, unknown>
-  onboarding?: {
-    started_at?: string
-    completed_at?: string | null
-    skipped?: boolean
-    last_step?: number
-  }
-}

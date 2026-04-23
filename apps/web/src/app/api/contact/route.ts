@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
-import { supabase } from "@/lib/supabase";
+import { supabaseV2 } from "@/lib/supabase-v2";
 import { sendMetaEvent } from "@/lib/meta-capi";
 
 interface ContactPayload {
@@ -18,7 +18,6 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as ContactPayload;
 
-    // Validate required fields
     if (!body.name || !body.email || !body.subject || !body.message) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -26,7 +25,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate email format
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
       return NextResponse.json(
         { error: "Invalid email format" },
@@ -34,7 +32,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { error } = await supabase.from("contact_submissions").insert({
+    const { error } = await supabaseV2().from("contact_submissions").insert({
       name: body.name,
       email: body.email,
       phone: body.phone || null,
@@ -50,7 +48,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Send to Meta CAPI (non-blocking — runs after response is sent)
     if (body.eventId) {
       waitUntil(
         sendMetaEvent({
