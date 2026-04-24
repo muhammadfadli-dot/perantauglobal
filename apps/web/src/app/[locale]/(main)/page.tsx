@@ -1,4 +1,5 @@
 import { setRequestLocale } from "next-intl/server";
+import Image from "next/image";
 import Link from "next/link";
 import { generateMeta } from "@/lib/seo";
 import { Icon } from "@/components/pg/Icon";
@@ -93,37 +94,49 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               ))}
             </div>
           </div>
-          {/* Desktop hero photo block — typographic, no stock photo */}
+          {/* Desktop hero photo — inspirational perantau imagery */}
           <div className="hidden md:block">
-            <div
-              className="relative rounded-3xl overflow-hidden text-white aspect-[4/5] flex flex-col justify-end p-10"
-              style={{
-                background:
-                  "radial-gradient(ellipse at 80% 10%, rgba(255,255,255,.18), transparent 60%), var(--pg-red-600)",
-              }}
-            >
+            <div className="relative rounded-3xl overflow-hidden text-white aspect-[4/5]">
+              <Image
+                src="/images/home-hero.jpg"
+                alt="Perantau Indonesia siap berangkat di Bandara Soekarno-Hatta"
+                fill
+                priority
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="object-cover"
+              />
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  backgroundImage:
-                    "repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 1px, transparent 1px 100px)",
+                  background:
+                    "linear-gradient(180deg, rgba(14,14,16,.05) 0%, rgba(14,14,16,.15) 50%, rgba(14,14,16,.78) 100%)",
                 }}
               />
-              <div className="relative">
-                <div className="text-xs font-bold tracking-[0.14em] uppercase opacity-80">
-                  Featured Posisi
+              {/* Brand corner badge */}
+              <div className="absolute top-5 left-5 inline-flex items-center gap-2 bg-white/95 backdrop-blur text-pg-ink-900 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-[0.12em] uppercase">
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: "var(--pg-red-600)" }}
+                />
+                P3MI Resmi
+              </div>
+              {/* Bottom content */}
+              <div className="absolute inset-x-0 bottom-0 p-8">
+                <div
+                  className="text-[11px] font-bold tracking-[0.14em] uppercase"
+                  style={{ color: "var(--pg-red-500)" }}
+                >
+                  Perantau
                 </div>
-                <div className="text-7xl font-extrabold leading-[0.95] tracking-tight mt-3">
-                  Perawat
+                <div className="text-5xl font-extrabold leading-[0.98] tracking-tight mt-2 text-balance">
+                  Berangkat
                   <br />
-                  Saudi
-                  <br />
-                  Arabia.
+                  dengan tenang.
                 </div>
-                <div className="flex items-center gap-3 mt-6 text-base font-semibold">
-                  <Icon name="wallet" size={18} stroke={2} /> SAR 3.200/bulan
+                <div className="flex items-center gap-3 mt-4 text-sm font-semibold text-white/90">
+                  <Icon name="shield" size={16} stroke={2} /> Legal & tercatat
                   <span className="opacity-50">·</span>
-                  <Icon name="clock" size={18} stroke={2} /> Kontrak 2 tahun
+                  <Icon name="clock" size={16} stroke={2} /> ~4 bulan proses
                 </div>
               </div>
             </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { Icon } from "@/components/pg/Icon";
@@ -83,20 +84,39 @@ export default async function TalentHubPage({
               </ButtonLink>
             </div>
           </div>
-          {/* Hero illustration block */}
+          {/* Hero photo */}
           <div className="hidden md:block">
-            <div
-              className="relative rounded-3xl overflow-hidden text-white aspect-[4/5] flex flex-col justify-end p-10"
-              style={{
-                background:
-                  "radial-gradient(ellipse at 20% 90%, rgba(255,255,255,.18), transparent 60%), var(--pg-red-600)",
-              }}
-            >
-              <div className="relative">
-                <div className="text-xs font-bold tracking-[0.14em] uppercase opacity-80">
-                  Talent Hub · Aplikasi
+            <div className="relative rounded-3xl overflow-hidden text-white aspect-[4/5]">
+              <Image
+                src="/images/program/global-talent-hub-hero.jpg"
+                alt="Kandidat Perantau Global sedang belajar dengan peta dunia di belakang"
+                fill
+                priority
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="object-cover"
+              />
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgba(14,14,16,.05) 0%, rgba(14,14,16,.2) 45%, rgba(14,14,16,.82) 100%)",
+                }}
+              />
+              <div className="absolute top-5 left-5 inline-flex items-center gap-2 bg-white/95 backdrop-blur text-pg-ink-900 px-3 py-1.5 rounded-full text-[11px] font-bold tracking-[0.12em] uppercase">
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: "var(--pg-red-600)" }}
+                />
+                Talent Hub · Aplikasi
+              </div>
+              <div className="absolute inset-x-0 bottom-0 p-8">
+                <div
+                  className="text-[11px] font-bold tracking-[0.14em] uppercase"
+                  style={{ color: "var(--pg-red-500)" }}
+                >
+                  Satu pintu
                 </div>
-                <div className="text-7xl font-extrabold leading-[0.95] tracking-tight mt-3">
+                <div className="text-5xl font-extrabold leading-[0.98] tracking-tight mt-2 text-balance">
                   Daftar.
                   <br />
                   Apply.
