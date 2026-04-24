@@ -1,316 +1,435 @@
-# Design System — Perantau Editorial
-
-> **Canonical rulebook. Read before writing any new component, page, or blog post.**
-> Every new work MUST follow this. If a pattern isn't listed here, check an existing editorial component for reference — don't invent.
-
-**Status:** Active, authoritative. The legacy "Warm Professional" system (rounded cards, soft shadows, gradient heroes) is deprecated and removed from the codebase as of 2026-04-18.
-
+---
+version: alpha
+name: Perantau Global v2
+description: Simple, red-led utility system for PT Daya Talenta Global's P3MI platform — warm paper ground, modern radii, single DTG-red accent across web + platform.
+colors:
+  primary: "#d7262f"
+  primary-hover: "#b91d24"
+  primary-pressed: "#8f1319"
+  primary-subtle: "#fff4f4"
+  primary-soft: "#ffe3e3"
+  on-primary: "#ffffff"
+  ink: "#141414"
+  ink-strong: "#2a2a2a"
+  ink-muted: "#5a5a5a"
+  ink-soft: "#7a7a7a"
+  rule-strong: "#b3b3b3"
+  rule: "#dedede"
+  rule-soft: "#ededed"
+  surface-subtle: "#f6f6f5"
+  surface: "#fafaf8"
+  surface-raised: "#ffffff"
+  on-surface: "#141414"
+  ok: "#0f8a4a"
+  ok-bg: "#e6f4ec"
+  warn: "#a66500"
+  warn-bg: "#fbf0d9"
+  err: "#b91d24"
+  err-bg: "#fde5e7"
+  info: "#1e5aa8"
+  info-bg: "#e4edf8"
+typography:
+  display-hero:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 64px
+    fontWeight: 800
+    lineHeight: 68px
+    letterSpacing: -0.03em
+  display-lg:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 48px
+    fontWeight: 800
+    lineHeight: 52px
+    letterSpacing: -0.025em
+  h1:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 28px
+    fontWeight: 800
+    lineHeight: 34px
+    letterSpacing: -0.02em
+  h2:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 22px
+    fontWeight: 800
+    lineHeight: 28px
+    letterSpacing: -0.015em
+  h3:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 18px
+    fontWeight: 700
+    lineHeight: 24px
+    letterSpacing: -0.01em
+  body-lg:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 18px
+    fontWeight: 400
+    lineHeight: 28px
+  body-md:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 16px
+    fontWeight: 400
+    lineHeight: 25px
+  body-sm:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 14px
+    fontWeight: 400
+    lineHeight: 21px
+  label:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 14px
+    fontWeight: 600
+    lineHeight: 20px
+  button:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 16px
+    fontWeight: 600
+    lineHeight: 20px
+    letterSpacing: -0.01em
+  button-sm:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 14px
+    fontWeight: 600
+    lineHeight: 18px
+  eyebrow:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 12px
+    fontWeight: 700
+    lineHeight: 16px
+    letterSpacing: 0.12em
+  badge:
+    fontFamily: Plus Jakarta Sans
+    fontSize: 12px
+    fontWeight: 700
+    lineHeight: 16px
+    letterSpacing: 0.04em
+  mono-sm:
+    fontFamily: IBM Plex Mono
+    fontSize: 13px
+    fontWeight: 400
+    lineHeight: 20px
+rounded:
+  none: 0px
+  sm: 8px
+  md: 12px
+  lg: 16px
+  xl: 20px
+  pill: 999px
+spacing:
+  sp-1: 4px
+  sp-2: 8px
+  sp-3: 12px
+  sp-4: 16px
+  sp-5: 20px
+  sp-6: 24px
+  sp-7: 32px
+  sp-8: 40px
+  sp-9: 56px
+components:
+  button-primary:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.md}"
+    padding: 0 22px
+    height: 52px
+  button-primary-hover:
+    backgroundColor: "{colors.primary-hover}"
+    textColor: "{colors.on-primary}"
+  button-dark:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.md}"
+    padding: 0 22px
+    height: 52px
+  button-ghost:
+    backgroundColor: "{colors.surface-raised}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: 0 22px
+    height: 52px
+  button-small:
+    backgroundColor: "{colors.primary}"
+    textColor: "{colors.on-primary}"
+    rounded: "{rounded.md}"
+    padding: 0 16px
+    height: 40px
+  card:
+    backgroundColor: "{colors.surface-raised}"
+    textColor: "{colors.ink-strong}"
+    rounded: "{rounded.lg}"
+    padding: 20px
+  chip:
+    backgroundColor: "{colors.surface-raised}"
+    textColor: "{colors.ink-strong}"
+    rounded: "{rounded.pill}"
+    padding: 0 14px
+    height: 36px
+  chip-active:
+    backgroundColor: "{colors.ink}"
+    textColor: "{colors.on-primary}"
+  badge-ok:
+    backgroundColor: "{colors.ok-bg}"
+    textColor: "{colors.ok}"
+    rounded: "{rounded.pill}"
+    padding: 4px 10px
+  badge-warn:
+    backgroundColor: "{colors.warn-bg}"
+    textColor: "{colors.warn}"
+    rounded: "{rounded.pill}"
+    padding: 4px 10px
+  badge-err:
+    backgroundColor: "{colors.err-bg}"
+    textColor: "{colors.err}"
+    rounded: "{rounded.pill}"
+    padding: 4px 10px
+  badge-info:
+    backgroundColor: "{colors.info-bg}"
+    textColor: "{colors.info}"
+    rounded: "{rounded.pill}"
+    padding: 4px 10px
+  badge-mute:
+    backgroundColor: "{colors.rule-soft}"
+    textColor: "{colors.ink-muted}"
+    rounded: "{rounded.pill}"
+    padding: 4px 10px
+  input:
+    backgroundColor: "{colors.surface-raised}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.md}"
+    padding: 12px 14px
 ---
 
-## 1. Product Context
-
-- Website for **PT Daya Talenta Global (Perantau Global)** — licensed P3MI (migrant worker placement agency) under Dayalima Group.
-- **Audiences:** ID locale = job seekers (full site, Indonesian). EN locale = reserved for future employer pages, currently `notFound()` for ID-only routes.
-- **Surface:** Marketing site + conversion landing pages (lowongan, programs, daftar).
-
-## 2. Direction — "Perantau Editorial"
-
-**Mood:** Magazine-style, ink + cream + DTG red, treated as an official-document aesthetic. Confident, specific, slightly typographic-flex. Trustworthy because it looks like a printed document, not a startup landing page.
-
-**Visual references baked in:**
-- Magazine front-cover hero composition (type block + photo + illustration collage).
-- Stamped legal document ("Legal Dossier Card" pattern with filing strip + ruled paper + diagonal stamp + signatory).
-- Boarding pass / passport motifs (SVG illustrations).
-- Ticker bar scrolling credentials.
-- Section numbering (`§ 01 — Section name`) throughout.
-
-**Anti-patterns — never ship these:**
-- ❌ Soft rounded cards with drop shadows
-- ❌ `rounded-xl` / `rounded-lg` on layout containers (only `rounded-full` for pill badges)
-- ❌ Centered hero with 3 icon-circle benefit cards
-- ❌ Purple/blue/teal accents (only DTG Red is allowed)
-- ❌ Decorative blobs, gradient meshes, floating SVG waves
-- ❌ Gradient hero backgrounds (`from-red-dark via-red to-black`)
-- ❌ Lucide icons inside pill badges as the dominant visual
-- ❌ "Transform your career" generic stock copy
-- ❌ Mixed font weights (always `font-extrabold` for display; `font-medium` reserved for italic emphasis)
-
----
-
-## 3. Tokens
-
-All tokens live in [`src/app/globals.css`](src/app/globals.css) and are accessed as `var(--color-dtg-*)` or `var(--font-*)`. Tailwind utility classes referencing them work via `@theme inline {}`.
-
-### 3.1 Colors
-
-| Token | Hex | CSS Variable | Use |
-|---|---|---|---|
-| DTG Red | `#C8102E` | `--color-dtg-red` | Sole accent. CTAs, headline accent words, dots on mono meta strips, interactive hover |
-| DTG Red Dark | `#8B0000` | `--color-dtg-red-dark` | Red button hover state only |
-| DTG Red Light | `#E8384F` | `--color-dtg-red-light` | Reserved |
-| **DTG Ink** | `#0E0E10` | `--color-dtg-ink` | Primary dark — borders, display type, dark sections |
-| **DTG Cream** | `#F5F0E8` | `--color-dtg-cream` | Primary alt background (warmer than paper) |
-| **DTG Paper** | `#F9F6EF` | `--color-dtg-paper` | Lighter alt background, table rows, inset cards |
-| DTG Black | `#1A1A1A` | `--color-dtg-black` | **Legacy — use `--color-dtg-ink` instead** |
-| Gray 50/100/300/500/700/900 | … | `--color-dtg-gray-*` | Neutral text/borders for non-editorial contexts only (rare) |
-| Success / Warning / Error / Info / WhatsApp | … | `--color-success` etc. | Semantic states (callout accents, form validation) |
-
-**Three-color discipline:** every section is some combination of cream / ink / red. Pure white (`#fff`) only for high-contrast inner panels (inside cream sections). Paper for ruled-paper dossier cards.
-
-### 3.2 Fonts
-
-| Family | CSS Variable | Use |
-|---|---|---|
-| Plus Jakarta Sans (800) | `--font-display` | All display headlines (H1–H3). Always `font-extrabold`, `tracking-[-0.03em]` to `-0.05em`. |
-| Source Sans 3 (400/500/600/700) | `--font-sans` | Body, paragraphs, form inputs |
-| **JetBrains Mono (400/500/700)** | **`--font-mono`** | Section tags (`§ 01`), uppercase data labels, ticker rows, button arrow suffixes, filing serials, tagbar content |
-| Georgia (serif italic) | inline | Signatory line in `<LegalDossierCard>` only |
-
-### 3.3 Display type scale
-
-| Use | Size | Apply |
-|---|---|---|
-| Hero H1 | `clamp(48px, 8.5vw, 112px)` | `<DisplayHeadline size="hero">` |
-| Section H2 | `clamp(40px, 7vw, 96px)` | `<DisplayHeadline size="section">` |
-| Sidebar H2 | `clamp(36px, 5.5vw, 72px)` | `<DisplayHeadline size="sidebar">` |
-| Poster H2 | `clamp(56px, 10vw, 144px)` | `<DisplayHeadline size="poster">` (Final CTA) |
-
-All display: `font-extrabold`, `letter-spacing -0.04em` to `-0.05em`, `line-height 0.88`–`1.02`, `text-wrap: balance`.
-
-### 3.4 Mono rules
-
-- Always `font-bold uppercase tracking-[0.1em]` to `tracking-[0.18em]`.
-- 9–13px range. Use `<MonoLabel>` primitive with `size="xs" | "sm" | "md"`.
-- Use for: section tags, data field labels, ticker entries, filing serial numbers, button arrows (→ / ↓ / +), copyright strips, metadata.
-- **Never for body copy. Never sentence case. Never below 9px.**
-
-### 3.5 Signature emphasis pattern
-
-Display headlines mix three voices in one line:
-1. Body word(s) — solid ink, extrabold (default)
-2. Optional **italic middle word** — `<Italic>` (font-medium italic)
-3. Optional **red accent final word** — `<Accent>` (red extrabold)
-
-Example:
-```tsx
-<DisplayHeadline size="hero">
-  Paket lengkap, <Italic>tanpa potongan</Italic> <Accent>gelap.</Accent>
-</DisplayHeadline>
-```
-
-## 4. Borders, Shadows, Radius — strict rules
-
-| Rule | Allowed | Forbidden |
-|---|---|---|
-| Layout borders | `border border-[var(--color-dtg-ink)]` (1px) | Rounded layout containers |
-| Grid separators | `gap-px border border-[var(--color-dtg-ink)] bg-[var(--color-dtg-ink)]` (negative-border trick) | Double borders, dividers in gray |
-| Radius | `rounded-full` on pill badges (rare) | `rounded-md`, `rounded-lg`, `rounded-xl`, `rounded-2xl` on layout |
-| Shadows | None on layout. Inset stamp shadow inside `<LegalDossierCard>` only | `shadow-[var(--shadow-sm)]` / `shadow-md` / `shadow-lg` on cards |
-| Ring | `ring-offset-2` for `:focus-visible` only | `ring-1 ring-inset` on cards |
-
-## 5. Section structure
-
-Every section follows this skeleton:
-
-```tsx
-<section id="..." className="bg-{white|cream|ink|red} px-6 py-20 lg:px-14 lg:py-24">
-  <div className="mx-auto max-w-[1440px]">
-    <AsymmetricSectionHeader
-      number="0X"
-      label="..."
-      headline={<DisplayHeadline size="section">...</DisplayHeadline>}
-      body="..."
-      callout={...optional}
-    />
-    {/* section body — magazine grid / dossier table / accordion / etc. */}
-  </div>
-</section>
-```
-
-### Section background rotation
-
-Alternate: cream → white → cream → ink → cream → red (Final CTA). Never two same-colored sections in a row. Dark ink sections work great for dramatic moments (process timeline, program CTAs).
-
-### Section padding
-
-| Mobile | Desktop |
-|---|---|
-| `py-20 px-6` | `lg:py-24 lg:px-14` |
-
-### Max width
-
-`max-w-[1440px]` for full-bleed sections with `mx-auto`.
-
-## 6. Editorial primitives — `src/components/editorial/`
-
-Always prefer these over raw JSX.
-
-| Primitive | Use | Key props |
-|---|---|---|
-| `<Nav>` | Sticky cream navbar (used at layout level) | `anchors[]`, `ctaLabel`, `ctaHref`, `masthead?` |
-| `<Footer>` | Dark ink footer | `brand`, `columns[]`, `legal` |
-| `<Ticker>` | Full-bleed scrolling credentials marquee | `items: [{icon, text}]`, `tone?` |
-| `<MobileStickyCTA>` | Mobile-only fixed bottom bar | `metaLeft`, `metaRight`, `ctaLabel`, `formAnchor`, `whatsappUrl` |
-| `<SectionTag>` | `§ 0X — Label` mono caps + optional divider | `number`, `label`, `tone?`, `divider?` |
-| `<MonoLabel>` | Inline mono uppercase label | `size?` (`xs`/`sm`/`md`) |
-| `<MetaStrip>` | Top/bottom strip of section (mono, inline) | `left`, `right`, `tone`, `border` |
-| `<EditorialButton>` | The canonical button. Hard edges, mono arrow suffix. | `variant` (`ink`/`cream`/`red`/`outline`), `suffix` (`→`/`↓`/`↑`/`×`/`+`/`null`), `fullWidth?`, `size?` |
-| `<DisplayHeadline>` + `<Italic>` + `<Accent>` | Display headline composer | `size` (`hero`/`section`/`sidebar`/`poster`) |
-| `<AsymmetricSectionHeader>` | Standard 2-col section header | `number`, `label`, `headline`, `body?`, `callout?` |
-| `<LegalDossierCard>` | Stamped-document credentials card | `serial`, `status`, `badge`, `headline`, `body`, `credentials[]`, `signatory` |
-| `<IllStamp>` / `<IllPlane>` / `<IllTicket>` / `<IllPassport>` / `<IllCompass>` / `<IllPin>` / `<IllHand>` | Flat SVG editorial illustrations | `size`, plus `label` / `routeCode` / `routeLabel` / `gate` / `seat` on relevant ones |
-
-## 7. Forms
-
-**All forms use these rules. Non-negotiable.**
-
-```tsx
-const input =
-  "w-full border border-[var(--color-dtg-ink)] bg-white px-3.5 py-3 text-[15px] text-[var(--color-dtg-ink)] outline-none focus:border-[var(--color-dtg-red)]";
-const label =
-  "mb-1.5 block font-[family-name:var(--font-mono)] text-[11px] font-bold uppercase tracking-[0.1em] opacity-70";
-```
-
-**Required:**
-- Hard 1px ink borders on inputs/selects/textareas
-- Mono uppercase labels with red asterisk for required fields
-- Sidebar layout (`lg:grid-cols-[340px_1fr]`) with `<SectionTag>` + `<DisplayHeadline size="sidebar">` + body copy + anti-scam notice in sidebar
-- `<EditorialButton variant="ink" suffix="→" fullWidth>` for submit
-- Success state: replace form with centered `<IllStamp size={180} label="RECEIVED" />` + `<DisplayHeadline size="sidebar">` + ref number in mono
-- Anti-scam box: `border border-[var(--color-dtg-ink)] bg-white p-4 font-[family-name:var(--font-mono)] text-[13px]` with `⚠` prefix
-
-**Radio / checkbox groups** — style as border-wrapped pills, not native:
-```tsx
-<label className="flex cursor-pointer items-center gap-2 border border-[var(--color-dtg-ink)] px-4 py-2 has-[input:checked]:bg-[var(--color-dtg-ink)] has-[input:checked]:text-[var(--color-dtg-cream)]">
-  <input type="radio" name="..." value="..." className="sr-only" />
-  Label
-</label>
-```
-
-## 8. MDX / Blog content rules
-
-Blog articles, destinasi details, and layanan details use `<MDXRemote>` with `remarkPlugins: [remarkGfm]`. The prose styling is editorial — all customizations live in `prose-*` classes on the `<article>` wrapper:
-
-```tsx
-<article className="prose prose-lg max-w-none
-  prose-headings:font-[family-name:var(--font-display)] prose-headings:tracking-[-0.03em] prose-headings:text-[var(--color-dtg-ink)]
-  prose-h2:mt-14 prose-h2:text-[clamp(28px,3vw,40px)] prose-h2:font-extrabold prose-h2:border-t-2 prose-h2:border-[var(--color-dtg-ink)] prose-h2:pt-6
-  prose-h3:text-2xl prose-h3:font-extrabold
-  prose-p:text-[18px] prose-p:leading-[1.75]
-  prose-a:text-[var(--color-dtg-red)] prose-a:underline-offset-4
-  prose-strong:font-extrabold
-  prose-li:text-[18px] prose-li:leading-[1.65]
-  prose-blockquote:border-l-4 prose-blockquote:border-[var(--color-dtg-red)] prose-blockquote:bg-[var(--color-dtg-paper)] prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:not-italic">
-  <MDXRemote source={content} components={mdxComponents} options={{...}} />
-</article>
-```
-
-### MDX components (in `src/components/mdx/`)
-
-| Component | When to use | Look |
-|---|---|---|
-| `<Callout type="info|warning|success|tip" title="...">` | Highlight a note, warning, tip, or confirmed fact | Ruled-paper card with colored left-border bar + mono `§ INFO/PERHATIAN/etc` header |
-| `<StatGrid>` + `<Stat value label icon?>` | 4-cell stats row | Hard-edged magazine grid with large display numbers |
-| `<Steps>` + `<Step number title icon? children?>` | Numbered process within an article | Dossier-style rows with red step number + body |
-| `<Highlight label?>` | Pull-out info block with tables/lists | 2-border card with optional mono header + ink-bordered tables inside |
-| `<ComparisonTable>` wrapping `<table>` | Side-by-side data comparison | Ink-header bordered table with cream row hover |
-| `<CTABox title description buttonText href? variant="primary|whatsapp">` | Mid-article CTA | Red or green poster with ink button |
-
-**Blog frontmatter** expects: `title`, `description`, `date`, `author`, `category`, `tags[]`. Frontmatter category maps to `blog.categories.{key}` translation.
-
-**Writing editorial blog copy:**
-- First H2 gets the article's main point — it's the first reading anchor
-- Use `**bold**` for data points (numbers, names), not for emphasis in general
-- Use `>` blockquote for pull quotes (they render editorial)
-- Tables should use `<ComparisonTable>` wrapper when comparing; plain markdown tables otherwise inside `<Highlight>`
-- Mid-article CTA with `<CTABox>` once — don't overdo
-
-## 9. Page chrome — what layout provides
-
-`src/app/[locale]/(main)/layout.tsx` + `src/app/[locale]/lowongan/layout.tsx` + `src/app/[locale]/program/layout.tsx` all render:
-1. `<Nav masthead>` at top (sticky, cream)
-2. `{children}`
-3. `<Footer>` at bottom (ink, 3-col)
-4. `<MobileStickyCTA>` (fixed bottom, mobile-only)
-
-Homepage composes its own `<main>` inside the `(main)` group — don't render chrome again inside pages.
-
-Pages that are ID-only guard with:
-```tsx
-if (locale !== "id") notFound();
-```
-
-## 10. Photography & Illustrations
-
-- **Hero photos:** portrait format, `16:9` landscape on desktop. Existing: `/public/images/{home-hero, lowongan/{role}-hero, program/{slug}-hero}.jpg`. Generated via fal-ai FLUX.
-- **Editorial illustrations:** use SVG primitives (`<IllStamp>`, `<IllPlane>`, etc.) — flat, DTG red + cream + ink only, no realism.
-- **Boarding pass (`<IllTicket>`) parameters:** always pass destination-specific `routeCode`, `routeLabel`, `gate`, `seat`. Default is Jakarta → Riyadh.
-- **Stamps (`<IllStamp>`):** `label` prop should be uppercase single word (`RESMI`, `APPROVED`, `SSW`, `EDITION`, `LEGAL`, `APPLY`).
-
-## 11. Animation
-
-- `slideUp` on hero entry. Existing in globals.css.
-- `@keyframes ticker` for scrolling marquee (45s linear infinite).
-- FAQ accordion: `grid-template-rows: 0fr → 1fr` transition (not max-height).
-- All animations no-op under `prefers-reduced-motion: reduce`.
-
-## 12. Checklist — when shipping a new page or component
-
-Before merging, verify:
-
-**Tokens & type**
-- [ ] No `rounded-xl`/`rounded-lg`/`rounded-2xl` on layout
-- [ ] No `shadow-*` on cards
-- [ ] No `ring-1 ring-inset` on containers
-- [ ] All labels use `<MonoLabel>` or equivalent mono classes
-- [ ] Display headlines use `<DisplayHeadline>` (no raw `<h1>` with custom size)
-- [ ] Italic emphasis uses `<Italic>`; red accent uses `<Accent>` — not raw `<span className="italic">`
-
-**Structure**
-- [ ] Section has `<AsymmetricSectionHeader>` OR a dossier/sidebar composition
-- [ ] Section number (`§ 0X`) follows page's sequence (01, 02, 03, …)
-- [ ] Section backgrounds alternate (cream / white / ink / red)
-- [ ] Final CTA of page is a red poster with meta strips + illustrations
-
-**Forms**
-- [ ] Inputs use hard ink borders + mono labels
-- [ ] Submit uses `<EditorialButton variant="ink" suffix="→" fullWidth>`
-- [ ] Success state uses `<IllStamp label="RECEIVED">` pattern
-- [ ] Anti-scam notice is present in sidebar for lead-gen forms
-
-**Chrome**
-- [ ] Page lives inside `(main)`, `lowongan`, or `program` group → chrome auto-provided
-- [ ] EN-locale guard (`if (locale !== "id") notFound();`) if ID-only
-- [ ] `generateStaticParams()` returns `[{locale: "id"}]` for ID-only routes
-
-**MDX (if applicable)**
-- [ ] Article wrapper has the canonical editorial `prose-*` classes
-- [ ] MDX components (Callout/StatGrid/Steps/Highlight/ComparisonTable/CTABox) are used instead of raw JSX where semantics match
-- [ ] Frontmatter includes category + tags; category maps to `blog.categories.{key}` i18n
-
-**Verify**
-- [ ] `npm run build` passes
-- [ ] `npm run lint` passes (no new errors; pre-existing warnings OK)
-- [ ] Browser check at 390px + 1440px
-- [ ] No platform-specific `package.json` additions (per CLAUDE.md)
-
-## 13. Where to find references
-
-- **Canonical lowongan (fully built & validated):** `/id/lowongan/perawat-saudi-arabia`
-- **Canonical homepage:** `/id`
-- **Dev primitives catalog:** `/id/design-system`
-- **Canonical blog article:** `/id/blog/biaya-kerja-jepang-2026` (or first available)
-- **Legal dossier reference:** inside `/id/tentang` (§ 01) and `/id/lowongan/perawat-saudi-arabia` (§ 01)
-- **Form reference:** `/id/daftar` (3-step wizard), `/id/lowongan/perawat-saudi-arabia#form` (single form), `/id/program/spg#form` (scoring wizard)
-
-## 14. Legacy cleanup history
-
-As of 2026-04-18 merge, the following were removed:
-- `src/components/sections/*` (HeroSection, StatsBar, TrustBar, ProblemSolution, ServicesOverview, WhyChooseUs, DestinationHighlights, Testimonials, LatestPosts, CTASection, BlogHero, PageHero, EmployerHero, ContactForm, EmployerInquiryForm)
-- `src/components/program/TDP*` (10 truck-driver-specific components)
-- `src/components/program/{ProgramHero,SPGTrustBar,GTHHero,GTHTrustBar,GTHFinalCTA,SPGFinalCTA,SPGForm}.tsx`
-- `src/components/layout/{Navbar,Footer,MobileCTA,FloatingWhatsApp}.tsx` → entire dir removed
-- `src/components/ui/{Button,Accordion,Breadcrumb,AnimateOnScroll,Badge,Card,StatsCounter}.tsx` → entire dir removed
-- `src/components/blog/{BlogGrid,CategoryFilter}.tsx`
-
-If you encounter references to any of these in old commits, replace with editorial primitives from `src/components/editorial/`.
+> **Canonical rulebook.** Baca sebelum bikin komponen, page, atau blog post baru. This file IS the source of truth — not any older internal doc. Status: active (Apr 2026), replaces "Perantau Editorial" yang sudah di-sunset.
+>
+> Companion assets di [`design/`](design/) — bundle dari Claude Design:
+> - [`design/project/tokens.css`](design/project/tokens.css) — authoritative v2 tokens (source of truth buat YAML frontmatter di file ini).
+> - [`design/project/pg-ui.jsx`](design/project/pg-ui.jsx) — shared primitives (Icon, Badge, StatusDot, TopBar, BottomNav, StickyCTA, RedHero).
+> - [`design/project/pg-{www,app,admin,…}.jsx`](design/project/) — rendered mobile + desktop screens.
+> - [`design/project/Perantau Global - Mobile Redesign.html`](design/project/Perantau%20Global%20-%20Mobile%20Redesign.html) — browser-openable canvas preview.
+> - [`design/chats/`](design/chats/) — design session transcript (intent history).
+>
+> Paper file "perantau global" = living brand guideline canvas yang mirror DESIGN.md sections visually.
+
+## Overview
+
+Perantau Global adalah platform rekrutmen resmi **PT Daya Talenta Global** (P3MI) di bawah Dayalima Group. Dua surface:
+
+- **`apps/web`** — marketing + conversion landing pages (perantauglobal.com). Audience: calon PMI (locale ID), future employer portal (locale EN).
+- **`apps/platform`** — candidate portal (mobile-first) + admin CRM (data-dense) di app.perantauglobal.com.
+
+Satu design system melayani keduanya lewat namespace token `pg-*` yang tinggal di `apps/{web,platform}/src/app/globals.css`.
+
+### Mood — "warm utility, red-led"
+
+Warm off-white paper sebagai ground, Plus Jakarta Sans sebagai one-font-to-rule, modern radii (12–16px) yang lebih kalem dari trend 2010s tapi tidak hard-edge brutalist. Merah DTG `#d7262f` muncul sebagai satu-satunya aksen — CTA, focus ring, accent word di headline. Tidak ada gradient hero, tidak ada glassmorphism, tidak ada editorial legal-dossier decor.
+
+Prinsip:
+- **One red per screen.** Kalau ada dua CTA setara, salah satu harus turun ke `button-ghost` atau `button-dark`.
+- **Paper is ground, white is raised.** `#fafaf8` untuk body background; `#ffffff` untuk card / surface yang diangkat.
+- **Weight > color for hierarchy.** Heading pakai 700–800, body 400. Warna merah tidak dipakai untuk "menonjolkan" — itu jobnya weight contrast.
+- **Rounded modern.** `rounded-xl` buttons (12px), `rounded-2xl` cards (16px), `rounded-full` badges. Jangan mix radii pada peer components.
+
+### What got deprecated
+
+Sebelumnya repo punya sistem **"Perantau Editorial"** — section numbering (`§ 01`), `<LegalDossierCard>`, 1px hard ink borders di mana-mana, mixed fonts (Plus Jakarta + Source Sans 3 + JetBrains + Georgia). Semua primitives `src/components/editorial/` sudah dihapus. Kalau ketemu referensinya di old branch/blog, rewrite pakai komponen di `src/components/pg/`.
+
+Legacy CSS aliases (`--color-dtg-red`, `--color-dtg-cream`, `--color-dtg-gray-*`) masih ada di `globals.css` untuk page yang belum dimigrasi — **don't introduce new usage**. Pakai `pg-*` tokens.
+
+## Colors
+
+Palette diturunkan dari adegan sederhana: **warm paper + ink + a single red ribbon**. Satu aksen, grounded neutrals, status-pair untuk semantics.
+
+### Brand — Red
+
+One accent. Dipakai hemat.
+
+- **`pg-red-600` `#d7262f`** — primary. CTA fill, link utama, focus ring outline, accent word di hero headline.
+- **`pg-red-700` `#b91d24`** — hover state pada CTA primary.
+- **`pg-red-800` `#8f1319`** — pressed / mouse-down state.
+- **`pg-red-500` `#e23b3b`** — highlight (rare); avoid unless you genuinely need a lighter accent.
+- **`pg-red-200` `#ffc9c9`** — soft background untuk red callouts.
+- **`pg-red-100` `#ffe3e3`** — subtle alert surface.
+- **`pg-red-50` `#fff4f4`** — faintest wash, use sparingly.
+
+### Neutrals — Ink scale
+
+Full 8-step scale. Scene: graphite pencil lines on plaster.
+
+- **`pg-ink-900` `#141414`** — body text default, heading color.
+- **`pg-ink-700` `#2a2a2a`** — sub-heading, emphasized body.
+- **`pg-ink-500` `#5a5a5a`** — metadata, secondary text, icon muted. WCAG AA pada surface paper.
+- **`pg-ink-400` `#7a7a7a`** — hint, placeholder. Use sparingly.
+- **`pg-ink-300` `#b3b3b3`** — strong divider, disabled text.
+- **`pg-ink-200` `#dedede`** — standard divider, input border, chip border (1.5px).
+- **`pg-ink-100` `#ededed`** — card border (1px), subtle separator.
+- **`pg-ink-50` `#f6f6f5`** — subtle surface, input track, hover background.
+
+### Surfaces
+
+- **`pg-paper` `#fafaf8`** — global page background. Warm off-white paper tint.
+- **`pg-white` `#ffffff`** — card, modal, any raised surface.
+- **`pg-ink-50` `#f6f6f5`** — sunken / inset surface (tag pills, chip hover).
+
+### Status
+
+Bg × on pairs — semua lolos WCAG AA. Pakai di badges, inline callouts, form feedback.
+
+- **Ok**: `#0f8a4a` on `#e6f4ec` — success, verified, completed.
+- **Warn**: `#a66500` on `#fbf0d9` — attention needed, pending review.
+- **Err**: `#b91d24` on `#fde5e7` — error, blocked, rejected. (Reuses brand red family on purpose.)
+- **Info**: `#1e5aa8` on `#e4edf8` — informational, neutral context.
+
+## Typography
+
+Satu keluarga untuk semua: **Plus Jakarta Sans** (weights 400/500/600/700/800). Untuk data monospace (IDs, codes, timestamps, serial numbers): **IBM Plex Mono** 400 (repo globals.css loads JetBrains Mono sebagai primary dengan IBM Plex Mono fallback — keduanya valid).
+
+### Scale — mobile-first
+
+App interface adalah mobile-first. Scale kecil-kecilan tapi tegas.
+
+- **pg-h1 28/34 extrabold (800)** — screen heading utama.
+- **pg-h2 22/28 extrabold (800)** — section heading dalam screen.
+- **pg-h3 18/24 bold (700)** — card heading, group label.
+- **body-lg 18/28 regular (400)** — hero copy, emphasized paragraphs.
+- **body-md 16/25 regular (400)** — default body. **Min 16px di mobile — jangan turunkan.**
+- **body-sm 14/21 regular (400)** — meta, caption.
+- **label 14/20 semibold (600)** — form labels.
+- **button 16/20 semibold (600)** primary; **button-sm 14/18 semibold (600)**.
+- **eyebrow 12 bold uppercase tracking `0.12em`** — di atas heading, default color `pg-red-600`.
+- **badge 12 bold uppercase tracking `0.04em`** — status pills.
+- **display-hero 64/68 extrabold** untuk marketing hero desktop. Tracking `-0.03em`.
+- **display-lg 48/52 extrabold** untuk marketing section heading desktop.
+
+### Color rules
+
+- **Heading**: `pg-ink-900` (`#141414`). Solid, full-contrast.
+- **Body default**: `pg-ink-700` (`#2a2a2a`) — bukan ink-900. Sedikit lebih soft, lebih mudah dibaca di paragraf panjang.
+- **Meta/caption**: `pg-ink-500` (`#5a5a5a`).
+- **Hint/placeholder**: `pg-ink-400` (`#7a7a7a`).
+- Accent word di heading: `pg-red-600`.
+
+### Rules
+
+- Font weight carries hierarchy — bukan color.
+- `.prose p` dan `article p` di-cap `max-width: 65ch` secara global.
+- Global CSS set `letter-spacing: -0.02em` dan `text-wrap: balance` pada h1–h4; jangan override.
+- Mono hanya untuk data literal (uuid, serial, timestamp, ref number). Tidak pernah untuk body copy atau labels.
+- Heading extrabold/bold (700–800), body regular (400). Medium (500)/semibold (600) khusus buttons, labels, eyebrows. Light (300) tidak dipakai.
+
+## Layout
+
+### Containers
+- **Marketing page** (apps/web): `max-w-[1200px]` content, `max-w-[1440px]` full-bleed section wrapper.
+- **Candidate portal** (apps/platform mobile-first): `max-w-[640px]` column, optimized 390–768px viewport.
+- **Admin CRM** (apps/platform admin): `max-w-[1440px]` with sidebar 240px + main.
+
+### Spacing scale
+
+9 steps, mobile-first generous: `sp-1 4 · sp-2 8 · sp-3 12 · sp-4 16 · sp-5 20 · sp-6 24 · sp-7 32 · sp-8 40 · sp-9 56`.
+
+- **Section hero breathing**: `sp-8–sp-9` (40–56px) vertical on mobile; lebih longgar di desktop.
+- **Major sections**: `sp-7` (32px) between.
+- **Card padding**: `sp-5` (20px) default — matches `Card` primitive's `p-5`.
+- **Button height**: 52px default, 40px small. Tap target minimum 44px tetep dijaga.
+- **Form field gap**: `sp-4` (16px). Label ke input: `sp-1` (4px).
+
+## Elevation & Depth
+
+Shadows ada tapi dipakai hemat — kita bukan Material, tapi juga bukan brutalist.
+
+- **`pg-shadow-1`** — `0 1px 2px rgba(20,20,20,.06), 0 0 0 1px rgba(20,20,20,.04)` — dropdown triggers, resting chips.
+- **`pg-shadow-2`** — `0 4px 16px rgba(20,20,20,.08), 0 0 0 1px rgba(20,20,20,.04)` — sticky headers, elevated cards on hover, modals.
+
+(Legacy `shadow-lg` tersedia di globals.css — `0 8px 24px rgba(20,20,20,.10) …` — untuk popover / command palette yang butuh separation lebih.)
+
+Most cards use flat `border border-pg-ink-100` instead of shadow — cleaner at density. Don't stack both.
+
+Never: colored drop shadow, glassmorphism blur, neon glow, gradient meshes.
+
+## Shapes
+
+Modern radii, 5 steps: `sm 8 · md 12 · lg 16 · xl 20 · pill 999`.
+
+- **md (12px)** — buttons, inputs (`--pg-r-md` / `rounded-xl` in Tailwind).
+- **lg (16px)** — cards, modals, panels (`--pg-r-lg` / `rounded-2xl`).
+- **xl (20px)** — hero surfaces, large feature cards.
+- **sm (8px)** — small UI chips, icon wrappers, tag pills (`rounded-lg`).
+- **pill (999px)** — chips, badges, status dots.
+- **No radius (0)** — tables, dividers, full-bleed bands.
+
+Border widths:
+- **1px** — card default border (`border-pg-ink-100`).
+- **1.5px** — interactive UI elements that need extra presence (chips, ghost button border, radio/checkbox wrappers).
+- **2px** — focus ring (global `:focus-visible` = `outline: 2px solid var(--pg-red-600)` + `outline-offset: 2px`).
+
+## Components
+
+Canonical primitives live at `apps/web/src/components/pg/*` and `apps/platform/src/components/pg/*`. Prefer these over raw markup.
+
+### Button (`<Button>`, `<ButtonLink>`)
+
+Variants `primary | dark | ghost`, with `block?`, `small?`.
+
+- **primary**: `bg-pg-red-600 text-white`, hover `bg-pg-red-700`. Default action per screen — max one.
+- **dark**: `bg-pg-ink-900 text-white`, hover `bg-black`. Strong alternative action; use when primary is elsewhere and this one needs emphasis without using red.
+- **ghost**: transparent, `text-pg-ink-900`, `border-[1.5px] border-pg-ink-200`, hover `bg-pg-ink-50`. Low-emphasis alternative.
+
+Geometry: `rounded-xl`, `min-h-[52px]` default / `40px` small, `px-[22px]` / `px-4` small, `font-semibold`. `active:scale-[0.985]` microfeedback via Tailwind.
+
+### Card (`<Card>`)
+
+`bg-pg-white border border-pg-ink-100 rounded-2xl p-5`. Optional `noPadding` to wrap media. Elevate with `shadow-sm` only when you actually need separation from siblings.
+
+### Chip (`<Chip>`)
+
+`h-9 px-3.5 rounded-full border-[1.5px] text-sm font-semibold`. Default state: white surface + `pg-ink-700` text + `pg-ink-200` border. Active state: `bg-pg-ink-900 text-white border-pg-ink-900` (swap in `active={true}`). Use for filters, tag selection, category toggles.
+
+### Badge (`<Badge>`)
+
+`px-2.5 py-1 rounded-full text-[12px] font-bold uppercase tracking-wide`. Variants `ok | warn | err | info | mute`, each with pre-paired bg/text tokens. Optional icon prop renders 12px ahead of the label.
+
+### StatusDot (`<StatusDot>`)
+
+`w-2 h-2 rounded-full`, fill from `pg-ok | pg-warn | pg-err | pg-ink-300`. Inline indicator only — pair with label.
+
+### Eyebrow (`<Eyebrow>`)
+
+`text-[12px] font-bold uppercase tracking-[0.12em]`, tone `red | ink | ok`. Section prefix above a display heading ("LOWONGAN AKTIF" · "PROSES" · "FAQ").
+
+### Input (form field)
+
+`bg-pg-white border border-pg-ink-200 rounded-xl px-3.5 py-3 text-[15px] text-pg-ink-900`. Focus: border swaps to `pg-red-600` + global focus ring kicks in. Required marker = red asterisk after label. Labels use `label` token (14 semibold).
+
+### RedHero (`<RedHero>`)
+
+Marketing hero block — full-bleed red surface with display headline. Use at top of marketing landings (not within app shell). White text on `pg-red-600`. Only one per page.
+
+## Do's and Don'ts
+
+### Do
+
+- Use `pg-*` tokens. If a page still uses `dtg-*` or `--color-success`, that's a migration target — schedule a cleanup when you touch it.
+- **One primary red CTA per screen.** Secondary and tertiary actions go to `dark` or `ghost`.
+- Default to `bg-pg-paper` for page ground, elevate to `pg-white` only when visual separation helps.
+- Let whitespace breathe — 48–96px vertical on heroes and major section breaks.
+- Mono (`--font-mono`) for IDs, serial numbers, timestamps, code — signals "system" and earns trust.
+- Keep font weight as the primary hierarchy tool. Reach for color (red) last.
+
+### Don't
+
+- Don't introduce second accent colors (no purple, teal, lime). If you need semantic states, use `ok/warn/err/info` tokens — not new hues.
+- Don't use red for decorative fill, illustration, or "to make it pop". Red = action or danger, nothing else.
+- Don't mix radii on peer components (button harus `rounded-xl` everywhere; card `rounded-2xl`).
+- Don't stack `border` + `shadow-*` on the same card — pick one depth cue.
+- Don't use body text below 14px outside of mono labels/badges. Audience utama kita membaca di mobile — keep it legible.
+- Don't import from deprecated paths (`src/components/editorial/*`, `src/components/ui/*`, `src/components/sections/*`) — they don't exist in v2.
+- Don't revive the "Perantau Editorial" aesthetic (section numbering, LegalDossierCard, hard 1px ink borders everywhere, mixed fonts) — it's sunset.
+- Don't add fonts. Plus Jakarta Sans + JetBrains Mono is the whole type system.
+
+### Migration notes
+
+When rewriting a legacy page:
+1. Replace `bg-dtg-cream` → `bg-pg-paper`. `bg-dtg-ink` → `bg-pg-ink-900`. `text-dtg-red` → `text-pg-red-600`.
+2. Replace `rounded-none` / hard-edge containers → `rounded-2xl` cards, `rounded-xl` buttons.
+3. Drop `<SectionTag number="01" …>` + `<DisplayHeadline>` — use plain `<h2>` with an optional `<Eyebrow>` on top.
+4. Remove any `<LegalDossierCard>`, `<Ticker>`, `<AsymmetricSectionHeader>`, `<EditorialButton>` references — substitute with `<Card>`, `<Badge>`, `<Button variant="primary|dark|ghost">`.
+5. Delete inline `font-[family-name:var(--font-display)]` / Source Sans / Georgia references — let the global `font-sans` (= Plus Jakarta) handle it.
