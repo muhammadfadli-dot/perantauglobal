@@ -77,19 +77,16 @@ export async function getSessionAndRole(): Promise<{
 /**
  * Returns `candidates.id` for the current session, self-healing if missing.
  *
- * Why this exists: the DB trigger `handle_new_auth_user()` only materializes a
- * candidate row when there's a matching `pending_submissions` entry (the
- * legacy "fill form → magic link" flow). Users who sign up directly via
- * email+password (PR #11) verify their email but never get a candidate row,
- * causing /explore, /applications, /profile to silently redirect home —
- * classic "dead-end redirect" anti-pattern.
+ * Normal case: the DB trigger `handle_new_auth_user()` (migration 0015) always
+ * creates a candidate row on email verification — whether the user came from
+ * the form-apply flow (pending_submissions present) or direct sign-up
+ * (raw_user_meta_data.full_name). So the lookup below usually succeeds on the
+ * first query.
  *
- * This helper is belt-and-braces with the trigger: idempotent, safe to call
- * on every request. It first tries to link-by-email (in case a candidate was
- * imported/backfilled with null auth_user_id), then inserts a skeleton row.
- *
- * Returns:
- *   { session, role, candidateId } on success (redirects internally otherwise)
+ * Safety net: if the trigger didn't run (legacy rows from before 0015, or a
+ * backfilled candidate with NULL auth_user_id that needs to be linked), fall
+ * back to self-insert via RLS `candidates_self_insert` (migration 0014) then
+ * service-role link-by-email. Idempotent, safe to call on every request.
  */
 export async function requireCandidate(): Promise<{
   session: { userId: string; email: string | null };
@@ -107,8 +104,6 @@ export async function requireCandidate(): Promise<{
     .maybeSingle();
   if (existing) return { session, candidateId: (existing as { id: string }).id };
 
-  // Self-insert via user's own JWT — allowed by RLS `candidates_self_insert`
-  // (migration 0014). No service role needed for the common path.
   const email = session.email ?? "";
   const prefix = email ? email.split("@")[0]!.slice(0, 200) : "";
   const placeholderName = prefix.length >= 2 ? prefix : "Kandidat baru";
@@ -126,9 +121,8 @@ export async function requireCandidate(): Promise<{
     .single();
   if (created) return { session, candidateId: (created as { id: string }).id };
 
-  // INSERT failed — most likely UNIQUE email collision with a backfilled
-  // candidate (auth_user_id IS NULL). Fallback: service-role link-by-email,
-  // iff the key is available. Otherwise surface the original error.
+  // UNIQUE email collision with a backfilled candidate (auth_user_id IS NULL).
+  // Service-role link-by-email if available.
   if (email && process.env.SUPABASE_SERVICE_ROLE_KEY) {
     const admin = createServiceRoleClient();
     const { data: linked } = await admin

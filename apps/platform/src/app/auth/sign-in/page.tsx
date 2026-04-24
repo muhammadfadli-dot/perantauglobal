@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import SignInForm from "./SignInForm";
 
 export const metadata = { title: "Masuk — Perantau Global" };
@@ -27,7 +28,9 @@ export default function SignInPage() {
       </section>
 
       <section className="px-6 pt-6 max-w-md mx-auto w-full flex-1">
-        <SignInForm />
+        <Suspense fallback={null}>
+          <SignInForm />
+        </Suspense>
       </section>
     </main>
   );

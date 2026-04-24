@@ -14,6 +14,7 @@ type State =
   | { kind: "error"; message: string };
 
 export default function SignUpForm() {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -23,6 +24,11 @@ export default function SignUpForm() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
 
+    const trimmedName = fullName.trim();
+    if (trimmedName.length < 2) {
+      setState({ kind: "error", message: "Nama minimal 2 karakter." });
+      return;
+    }
     if (!email.includes("@")) {
       setState({ kind: "error", message: "Email tidak valid." });
       return;
@@ -44,7 +50,10 @@ export default function SignUpForm() {
     const { data, error } = await sb.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo },
+      options: {
+        emailRedirectTo,
+        data: { full_name: trimmedName, source: "direct_signup" },
+      },
     });
 
     if (error) {
@@ -106,6 +115,17 @@ export default function SignUpForm() {
 
   return (
     <form onSubmit={submit} className="space-y-4">
+      <Field
+        label="Nama lengkap"
+        icon="user"
+        type="text"
+        autoComplete="name"
+        value={fullName}
+        onChange={setFullName}
+        placeholder="Maya Sari"
+        required
+      />
+
       <Field
         label="Email"
         icon="mail"
@@ -182,7 +202,7 @@ function Field({
   trailing,
 }: {
   label: string;
-  icon: "mail" | "lock";
+  icon: "mail" | "lock" | "user";
   type: string;
   autoComplete?: string;
   value: string;
