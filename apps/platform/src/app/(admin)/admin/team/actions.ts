@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { logAdminAction } from "@/lib/audit-log";
 
 async function assertAdmin() {
   const { session, role } = await getSessionAndRole();
@@ -15,6 +16,9 @@ export async function inviteAdmin(email: string, notes?: string) {
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(cleaned)) {
     throw new Error("Email tidak valid.");
   }
+  await logAdminAction("invite_admin", "admin_user", cleaned, {
+    has_notes: Boolean(notes && notes.trim()),
+  });
   const supabase = await createServerClient();
   const { error } = await supabase.from("admin_users").insert({
     email: cleaned,
@@ -30,9 +34,11 @@ export async function inviteAdmin(email: string, notes?: string) {
 
 export async function removeAdmin(email: string) {
   const session = await assertAdmin();
-  if (session.email && session.email.toLowerCase() === email.toLowerCase()) {
+  const cleaned = email.toLowerCase();
+  if (session.email && session.email.toLowerCase() === cleaned) {
     throw new Error("Kamu tidak bisa hapus akun sendiri.");
   }
+  await logAdminAction("remove_admin", "admin_user", cleaned);
   const supabase = await createServerClient();
   const { error } = await supabase.from("admin_users").delete().eq("email", email);
   if (error) throw new Error(error.message);

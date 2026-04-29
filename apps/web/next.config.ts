@@ -3,7 +3,62 @@ import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
+// CSP for the marketing site.
+// Starts in REPORT-ONLY mode because GTM container can load arbitrary tags
+// added by the marketing team (LinkedIn Pixel, TikTok Pixel, etc.) without
+// touching this code. Report-only lets us monitor violations in production
+// for ~1-2 weeks, then flip CSP_ENFORCE = true once we know the full set
+// of tag-served origins.
+//
+// Once enforced, every new GTM tag origin must be added to script-src /
+// connect-src / img-src below. That's the price of a strict CSP — a feature,
+// not a bug.
+const CSP_ENFORCE = false;
+
+const cspDirectives = [
+  "default-src 'self'",
+  // 'unsafe-inline' for Next.js hydration; 'unsafe-eval' kept off until we see
+  // a violation report needing it (some GA tags use eval, but the modern ones
+  // shouldn't).
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
+  "style-src 'self' 'unsafe-inline'",
+  "font-src 'self' data:",
+  "img-src 'self' data: blob: https://www.googletagmanager.com https://www.google-analytics.com https://www.facebook.com https://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co https://www.google-analytics.com https://graph.facebook.com https://www.googletagmanager.com",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  "upgrade-insecure-requests",
+].join("; ");
+
+const securityHeaders = [
+  {
+    key: "Strict-Transport-Security",
+    value: "max-age=63072000; includeSubDomains",
+  },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+  },
+  {
+    key: CSP_ENFORCE ? "Content-Security-Policy" : "Content-Security-Policy-Report-Only",
+    value: cspDirectives,
+  },
+];
+
 const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ];
+  },
   async redirects() {
     return [
       // EN locale retired — all /en/* → homepage. Site is now ID-only,

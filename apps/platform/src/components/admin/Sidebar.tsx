@@ -15,6 +15,7 @@ const NAV: { href: string; label: string; icon: IconName }[] = [
   { href: "/admin/inbox", label: "Inbox", icon: "mail" },
   { href: "/admin/analytics", label: "Analytics", icon: "sparkle_dot" },
   { href: "/admin/team", label: "Tim", icon: "shield" },
+  { href: "/admin/audit-log", label: "Audit Log", icon: "clock" },
 ];
 
 export default function AdminSidebar({ email }: { email: string | null }) {

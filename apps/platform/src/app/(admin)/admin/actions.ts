@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { logAdminAction } from "@/lib/audit-log";
 
 async function assertAdmin() {
   const { session, role } = await getSessionAndRole();
@@ -17,6 +18,9 @@ export async function updateApplicationStage(
   stage: string,
 ) {
   const { reviewedBy } = await assertAdmin();
+  await logAdminAction("update_application_stage", "application", applicationId, {
+    new_stage: stage,
+  });
   const supabase = await createServerClient();
   const payload = {
     pipeline_stage: stage,
@@ -37,6 +41,9 @@ export async function updateApplicationNotes(
   notes: string,
 ) {
   const { reviewedBy } = await assertAdmin();
+  await logAdminAction("update_application_notes", "application", applicationId, {
+    notes_length: notes.length,
+  });
   const supabase = await createServerClient();
   const payload = {
     po_notes: notes,
@@ -56,6 +63,9 @@ export async function toggleReachedOut(
   reachedOut: boolean,
 ) {
   const { reviewedBy } = await assertAdmin();
+  await logAdminAction("toggle_reached_out", "application", applicationId, {
+    reached_out: reachedOut,
+  });
   const supabase = await createServerClient();
   const payload = {
     reached_out: reachedOut,
@@ -78,6 +88,10 @@ export async function assignTier(
   notes?: string,
 ) {
   const { reviewedBy } = await assertAdmin();
+  await logAdminAction("assign_tier", "application", applicationId, {
+    tier,
+    has_notes: Boolean(notes && notes.trim()),
+  });
   const supabase = await createServerClient();
   const { error } = await supabase
     .from("application_tiers")
@@ -88,7 +102,6 @@ export async function assignTier(
       assigned_by: reviewedBy,
       assigned_at: new Date().toISOString(),
     } as never);
-  void notes;
   if (error) throw new Error(error.message);
   revalidatePath("/admin/candidates", "layout");
   revalidatePath("/admin/applications", "layout");
@@ -96,6 +109,7 @@ export async function assignTier(
 
 export async function clearTier(applicationId: string) {
   await assertAdmin();
+  await logAdminAction("clear_tier", "application", applicationId);
   const supabase = await createServerClient();
   const { error } = await supabase
     .from("application_tiers")
