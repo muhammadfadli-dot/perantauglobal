@@ -11,15 +11,71 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          admin_email: string
+          admin_user_id: string
+          id: string
+          ip_address: unknown
+          metadata: Json | null
+          occurred_at: string
+          resource_id: string | null
+          resource_type: string
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          admin_email: string
+          admin_user_id: string
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          occurred_at?: string
+          resource_id?: string | null
+          resource_type: string
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string
+          admin_user_id?: string
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          occurred_at?: string
+          resource_id?: string | null
+          resource_type?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       admin_users: {
-        Row: { added_at: string | null; added_by: string | null; email: string; notes: string | null }
-        Insert: { added_at?: string | null; added_by?: string | null; email: string; notes?: string | null }
-        Update: { added_at?: string | null; added_by?: string | null; email?: string; notes?: string | null }
+        Row: {
+          added_at: string | null
+          added_by: string | null
+          email: string
+          notes: string | null
+        }
+        Insert: {
+          added_at?: string | null
+          added_by?: string | null
+          email: string
+          notes?: string | null
+        }
+        Update: {
+          added_at?: string | null
+          added_by?: string | null
+          email?: string
+          notes?: string | null
+        }
         Relationships: []
       }
       application_status_history: {
@@ -165,6 +221,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "applications_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "readiness_view"
+            referencedColumns: ["candidate_id"]
+          },
+          {
             foreignKeyName: "applications_job_order_id_fkey"
             columns: ["job_order_id"]
             isOneToOne: false
@@ -177,6 +240,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "applications_position_slug_fkey"
+            columns: ["position_slug"]
+            isOneToOne: false
+            referencedRelation: "readiness_view"
+            referencedColumns: ["position_slug"]
           },
         ]
       }
@@ -236,6 +306,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidates"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_documents_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "readiness_view"
+            referencedColumns: ["candidate_id"]
           },
         ]
       }
@@ -339,7 +416,29 @@ export type Database = {
           version?: string
           withdrawn_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "consents_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consents_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "readiness_view"
+            referencedColumns: ["candidate_id"]
+          },
+          {
+            foreignKeyName: "consents_pending_id_fkey"
+            columns: ["pending_id"]
+            isOneToOne: false
+            referencedRelation: "pending_submissions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contact_submissions: {
         Row: {
@@ -485,6 +584,13 @@ export type Database = {
             referencedRelation: "positions"
             referencedColumns: ["slug"]
           },
+          {
+            foreignKeyName: "job_orders_position_slug_fkey"
+            columns: ["position_slug"]
+            isOneToOne: false
+            referencedRelation: "readiness_view"
+            referencedColumns: ["position_slug"]
+          },
         ]
       }
       pending_submissions: {
@@ -530,7 +636,22 @@ export type Database = {
           position_slug?: string
           user_agent?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pending_submissions_position_slug_fkey"
+            columns: ["position_slug"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "pending_submissions_position_slug_fkey"
+            columns: ["position_slug"]
+            isOneToOne: false
+            referencedRelation: "readiness_view"
+            referencedColumns: ["position_slug"]
+          },
+        ]
       }
       position_form_fields: {
         Row: {
@@ -582,6 +703,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "position_form_fields_position_slug_fkey"
+            columns: ["position_slug"]
+            isOneToOne: false
+            referencedRelation: "readiness_view"
+            referencedColumns: ["position_slug"]
           },
         ]
       }
@@ -648,20 +776,220 @@ export type Database = {
         Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
+      log_admin_action: {
+        Args: {
+          p_action: string
+          p_ip_address?: unknown
+          p_metadata?: Json
+          p_resource_id: string
+          p_resource_type: string
+          p_user_agent?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       doc_type:
-        | "ktp" | "passport" | "cv" | "certificate" | "medical" | "photo" | "other"
+        | "ktp"
+        | "passport"
+        | "cv"
+        | "certificate"
+        | "medical"
+        | "photo"
+        | "other"
       form_field_type:
-        | "select" | "radio" | "number" | "text" | "textarea" | "file" | "multiselect"
+        | "select"
+        | "radio"
+        | "number"
+        | "text"
+        | "textarea"
+        | "file"
+        | "multiselect"
       job_order_status: "open" | "closed" | "filled" | "cancelled"
       pipeline_stage:
-        | "applied" | "screening" | "voice_screen" | "interview" | "document_check"
-        | "briefing" | "trial" | "selected" | "training" | "deployed" | "active"
-        | "rejected" | "exit"
+        | "applied"
+        | "screening"
+        | "voice_screen"
+        | "interview"
+        | "document_check"
+        | "briefing"
+        | "trial"
+        | "selected"
+        | "training"
+        | "deployed"
+        | "active"
+        | "rejected"
+        | "exit"
       tier_label: "A" | "B" | "C" | "D" | "rejected"
       user_role: "candidate" | "admin" | "recruiter"
     }
-    CompositeTypes: { [_ in never]: never }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      doc_type: [
+        "ktp",
+        "passport",
+        "cv",
+        "certificate",
+        "medical",
+        "photo",
+        "other",
+      ],
+      form_field_type: [
+        "select",
+        "radio",
+        "number",
+        "text",
+        "textarea",
+        "file",
+        "multiselect",
+      ],
+      job_order_status: [
+        "open",
+        "closed",
+        "filled",
+        "cancelled",
+      ],
+      pipeline_stage: [
+        "applied",
+        "screening",
+        "voice_screen",
+        "interview",
+        "document_check",
+        "briefing",
+        "trial",
+        "selected",
+        "training",
+        "deployed",
+        "active",
+        "rejected",
+        "exit",
+      ],
+      tier_label: ["A", "B", "C", "D", "rejected"],
+      user_role: ["candidate", "admin", "recruiter"],
+    },
+  },
+} as const

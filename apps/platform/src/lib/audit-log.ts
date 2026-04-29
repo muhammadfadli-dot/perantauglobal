@@ -1,5 +1,8 @@
 import { headers } from "next/headers";
+import type { Database } from "@perantauglobal/db";
 import { createServerClient } from "./supabase-server";
+
+type LogActionArgs = Database["public"]["Functions"]["log_admin_action"]["Args"];
 
 /**
  * Admin action audit log helper. PDP UU 27/2022 Pasal 35 compliance.
@@ -12,9 +15,6 @@ import { createServerClient } from "./supabase-server";
  * Insert is gated server-side by the `log_admin_action()` SECURITY DEFINER
  * function (migration 0017): it stamps auth.uid() + auth.jwt()->'email' so
  * admins can't impersonate or backdate entries.
- *
- * After applying migration 0017 + regenerating types via Supabase MCP, the
- * `as never` casts below can be removed.
  */
 
 export type AuditAction =
@@ -64,17 +64,17 @@ export async function logAdminAction(
   const userAgent = h.get("user-agent") ?? null;
 
   const supabase = await createServerClient();
-  const { error } = await supabase.rpc(
-    "log_admin_action" as never,
-    {
-      p_action: action,
-      p_resource_type: resourceType,
-      p_resource_id: resourceId,
-      p_metadata: metadata ?? null,
-      p_ip_address: ip,
-      p_user_agent: userAgent,
-    } as never,
-  );
+  const args: LogActionArgs = {
+    p_action: action,
+    p_resource_type: resourceType,
+    p_resource_id: resourceId,
+    p_metadata: metadata ?? null,
+    // p_ip_address is `unknown` (INET) and p_user_agent is `string | undefined`
+    // in the generated RPC types — pass undefined when missing, not null.
+    p_ip_address: ip ?? undefined,
+    p_user_agent: userAgent ?? undefined,
+  };
+  const { error } = await supabase.rpc("log_admin_action", args);
 
   if (error) {
     throw new Error(

@@ -1,20 +1,8 @@
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
+import type { Json } from "@perantauglobal/db";
 
 export const dynamic = "force-dynamic";
-
-type AuditRow = {
-  id: string;
-  admin_user_id: string | null;
-  admin_email: string;
-  action: string;
-  resource_type: string;
-  resource_id: string | null;
-  metadata: Record<string, unknown> | null;
-  ip_address: string | null;
-  user_agent: string | null;
-  occurred_at: string;
-};
 
 const PAGE_SIZE = 50;
 
@@ -92,9 +80,9 @@ function fmtTime(iso: string): string {
   });
 }
 
-function metadataPreview(metadata: Record<string, unknown> | null): string {
-  if (!metadata) return "";
-  const entries = Object.entries(metadata);
+function metadataPreview(metadata: Json | null): string {
+  if (metadata === null || typeof metadata !== "object" || Array.isArray(metadata)) return "";
+  const entries = Object.entries(metadata as Record<string, Json | undefined>);
   if (entries.length === 0) return "";
   return entries
     .map(([k, v]) => `${k}=${typeof v === "string" ? v.slice(0, 40) : JSON.stringify(v).slice(0, 40)}`)
@@ -128,36 +116,13 @@ export default async function AuditLogPage({
 
   // The admin_audit_log table is gated by RLS (admin-read-only), and is
   // populated only via the SECURITY DEFINER `log_admin_action()` function.
-  // Cast: types regenerated post-migration 0017.
-  const sb = supabase as unknown as {
-    from: (table: string) => {
-      select: (cols: string, opts?: { count?: "exact"; head?: boolean }) => {
-        order: (col: string, opts: { ascending: boolean }) => {
-          range: (a: number, b: number) => Promise<{ data: AuditRow[] | null; error: { message: string } | null; count: number | null }>;
-        } & { eq: (col: string, val: string) => unknown; gte: (col: string, val: string) => unknown; lte: (col: string, val: string) => unknown; ilike: (col: string, val: string) => unknown; range: (a: number, b: number) => unknown };
-      };
-    };
-  };
-
-  type Builder = {
-    eq: (col: string, val: string) => Builder;
-    gte: (col: string, val: string) => Builder;
-    lte: (col: string, val: string) => Builder;
-    ilike: (col: string, val: string) => Builder;
-    range: (a: number, b: number) => Promise<{
-      data: AuditRow[] | null;
-      error: { message: string } | null;
-      count: number | null;
-    }>;
-  };
-
-  let q = sb
+  let q = supabase
     .from("admin_audit_log")
     .select(
       "id, admin_user_id, admin_email, action, resource_type, resource_id, metadata, ip_address, user_agent, occurred_at",
       { count: "exact" },
     )
-    .order("occurred_at", { ascending: false }) as unknown as Builder;
+    .order("occurred_at", { ascending: false });
 
   if (action !== "all") q = q.eq("action", action);
   if (resource) q = q.eq("resource_type", resource);
@@ -354,7 +319,8 @@ export default async function AuditLogPage({
                         </div>
                       </td>
                       <td className="px-4 py-3 font-mono text-[11px] text-pg-ink-500 whitespace-nowrap">
-                        {r.ip_address ?? "—"}
+                        {/* INET serializes as a string from PostgREST. */}
+                        {(r.ip_address as string | null) ?? "—"}
                       </td>
                     </tr>
                   );
