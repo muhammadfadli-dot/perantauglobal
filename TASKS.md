@@ -2,7 +2,57 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-04-29 (Perf — region pin sin1 + Promise.all candidate RSC queries shipped)
+**Last updated:** 2026-04-29 (Phase S — Security hardening for PII readiness: Next.js bump + admin audit log + security headers + advisor cleanup)
+
+## Phase S — Security hardening for PII readiness (2026-04-29) ✅ DONE
+
+**Trigger:** Pre-flight check sebelum host PII serius (KTP, paspor, sertifikat) per PDP UU 27/2022. `/cso --comprehensive` audit produces 10 findings (3 P0, 4 P1, 3 P2) — full report di `.gstack/security-reports/2026-04-29-comprehensive-pii-readiness.md`.
+
+**P0 shipped (PR [#21](https://github.com/panji-firmansyah/perantauglobal/pull/21) `4f004de`):**
+- **Next.js 16.1.6 → 16.2.4** di kedua app. Patches GHSA-mq59-m269-xvcx (Server Actions CSRF bypass via null Origin, affect SEMUA admin action) + GHSA-q4gf-8mx6-v5v3 (DoS via Server Components). Plus pnpm override on `postcss<8.5.10`. `pnpm audit` zero vulnerabilities.
+- **Migration 0017 admin_audit_log** — append-only table + `log_admin_action()` SECURITY DEFINER helper (gates via `is_admin()`, stamps `auth.uid()` + `auth.jwt().email`). PDP UU 27/2022 Pasal 35 compliance ("records of processing activities"). Wired ke 11 admin server actions: documents (view via signed URL, verify, reject), applications (stage, notes, reached_out, tier assign/clear), admin allowlist (invite, remove), inbox (status, notes). Pre-existing `application_status_history` trigger continues to log stage transitions in addition.
+- **`/admin/audit-log` page** dengan filter (action, resource type, admin email, date range) + paginated 50/page. Sidebar entry "Audit Log" added.
+- **Security headers** di kedua `next.config.ts`: HSTS (2yr, no preload), X-Frame-Options DENY, X-Content-Type-Options nosniff, Referrer-Policy strict-origin-when-cross-origin, Permissions-Policy disables camera/mic/geo. **CSP**: `apps/platform` enforce mode (Supabase + first-party only), `apps/web` Report-Only mode (GTM container can load arbitrary tags from marketing — flip to enforce after monitoring violations 1-2 weeks). Toggle constant `CSP_ENFORCE` in each file.
+- **Side effect:** drop `apps/web/src/app/icon.svg` — Next.js 16.2.4 regression in `next-metadata-image-loader` (verified: even minimal valid SVG fails). icon.png + favicon.ico cover same use case.
+
+**Cleanup follow-up:**
+- **PR [#22](https://github.com/panji-firmansyah/perantauglobal/pull/22) `fcba505`** — Apply migration 0017 ke prod via MCP, regen TS types, drop semua `as never` casts. Bonus: bump `@supabase/ssr` `0.5.2 → 0.10.2`. ssr 0.5.2 declare `SupabaseClient<Database, SchemaName, Schema>` (3 generics) tapi supabase-js 2.104.0 udah upgrade ke 5 generics dengan slot `SchemaNameOrClientOptions`. Silent mismatch bikin SEMUA `.from(...)` jadi `never[]` dan `.rpc(...)` expected `args: undefined`. Lesson: kalau supabase-js bump, audit ssr version compat.
+- **PR [#23](https://github.com/panji-firmansyah/perantauglobal/pull/23) `9dfdffd`** — Migration `0018_tighten_security_definer_grants`. REVOKE EXECUTE FROM PUBLIC + anon di `log_admin_action`, `is_admin`, `handle_new_auth_user`. Authenticated grants retained where server code requires (is_admin, log_admin_action). handle_new_auth_user revoked from authenticated too (trigger only).
+- **PR [#25](https://github.com/panji-firmansyah/perantauglobal/pull/25) `62ec707`** — Migration `0019_set_search_path_on_functions`. ALTER FUNCTION ... SET search_path = public di 4 legacy functions (`set_updated_at`, `compute_readiness`, `log_application_stage_change`, `update_job_order_slot_filled`).
+
+**Migrations applied to production:** 0017 + 0018 + 0019 (all via Supabase MCP). TS types regenerated; `Database["public"]["Functions"]["log_admin_action"]` and `Tables.admin_audit_log` now in `packages/db/src/types.ts`.
+
+**Advisor state:** 8 warnings cleared this session. Sisa:
+- 1 ERROR pre-existing (`security_definer_view` di `readiness_view` dari 0001 — view rewrite needed, deferred)
+- 2 WARN intentional (`is_admin` + `log_admin_action` callable by authenticated — server code emang butuh, defensive coded)
+- 4 WARN by-design (anon insert policies untuk form submission `WITH CHECK (true)` — correct karena anon gak punya auth context)
+- 1 WARN config (`auth_leaked_password_protection` — Panji enable manual di Supabase dashboard → Auth → Settings → "Check passwords against HaveIBeenPwned")
+
+**Strengths confirmed by audit (no action needed):**
+- RLS comprehensive di 11 tabel sensitif, pattern `*_self_read` / `*_admin_all` konsisten
+- Storage bucket `candidate-documents` private + MIME whitelist + 5MB cap + path-based ownership + verified-doc-undeletable
+- `is_admin()` defense-in-depth dual-source (JWT claim OR `admin_users` allowlist)
+- Pending submissions email-squat defense (24h nonce + trigger fires only on `email_confirmed_at` flip per migration 0012)
+- Consents schema PDP-ready (purpose, version, granted_at/withdrawn_at, IP, UA captured)
+- Service role never di browser code (verified)
+- Secrets hygiene clean (no real leaks in git history; only placeholder `eyJ...` in markdown spec)
+
+**Sprint 2 (P1/P2 deferred):**
+- Rate limiting di `/api/contact` + `/api/lowongan/[slug]` (Upstash Ratelimit recommended)
+- Hapus GET handler dari `/auth/sign-out` (CSRF logout vector)
+- Zod `.max()` length caps untuk text inputs di public forms
+- Confirm Supabase HIBP password check enabled (config gate above)
+- Implement PDP rights flows: account deletion (Pasal 23), data export (Pasal 21), per-purpose consent revoke UI (Pasal 24)
+- Define + enforce data retention policy (auto-delete `pending_submissions` >30 days, etc.)
+- Incident response runbook (3x24h breach notification per Pasal 39-40)
+- Branch protection rules + minimal CI security gate (`pnpm audit --audit-level=moderate` + secret scan)
+
+**User action items (not in repo, manual):**
+- [ ] Enable HIBP leaked-password check di Supabase dashboard → Auth → Settings
+- [ ] Smoke test admin doc view triggers audit log entry visible at `/admin/audit-log`
+- [ ] After 1-2 weeks of clean CSP violation reports on www, flip `apps/web/next.config.ts` `CSP_ENFORCE = true`
+
+---
 
 ## Phase 2 — Job Orders + Admin CRM essentials (2026-04-23) ✅ DONE
 
