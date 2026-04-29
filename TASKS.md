@@ -2,7 +2,7 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-04-23 (Phase R — Big Redesign: pg-* design system + new copy + new IA shipped)
+**Last updated:** 2026-04-29 (Perf — region pin sin1 + Promise.all candidate RSC queries shipped)
 
 ## Phase 2 — Job Orders + Admin CRM essentials (2026-04-23) ✅ DONE
 
@@ -207,6 +207,13 @@ Finishing wiring + user-action items before flipping DNS to the new stack.
 ---
 
 ## Next session — pick up here
+
+### Perf — sisa punch list (mid-impact, after region pin + parallelize)
+Region pin ke `sin1` + `Promise.all` di candidate dashboard/explore udah shipped via PR [#20](https://github.com/panji-firmansyah/perantauglobal/pull/20) (commit `a753f41`). Sisa item dari audit, urut prioritas:
+1. **Suspense streaming di apps/web** — 0 `<Suspense>` boundary saat ini; pages block on all data sebelum render. Wrap data-fetching sections (homepage, /lowongan, /lowongan/[slug]) di `<Suspense fallback={<Skeleton />}>` biar shell muncul progressive. Estimasi: 200-400ms perceived improvement.
+2. **Compress hero image** — `apps/web/public/images/home-hero.jpg` 2.75 MB JPEG (2752x1536). Generate WebP/AVIF variant atau reduce resolution. `next/image` udah dipakai dengan `priority` flag, source-nya yg kegedean.
+3. **`unstable_cache` untuk expensive Supabase views** — `readiness_view` join pricey kalau dipanggil tiap request. Wrap di `unstable_cache()` dengan TTL 30-60s. Skip kalau Phase D bawa requirement real-time match update.
+4. **Audit middleware latency** — `apps/platform/src/middleware.ts:34` panggil `supabase.auth.getUser()` di setiap request. Setelah region pin udah co-located, harusnya cepet, tapi worth profile sekali.
 
 ### Phase D (~2 days) — Multi-position apply "magic"
 1. `apps/platform/src/app/(candidate)/explore/page.tsx` — rank all active positions by readiness % for current candidate. Filter: hard-pass only / all. One-click Apply CTA per card.
