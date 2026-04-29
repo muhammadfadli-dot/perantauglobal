@@ -27,12 +27,23 @@ export default async function ExplorePage({ searchParams }: PageProps) {
   const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  const { data: candData } = await supabase
-    .from("candidates")
-    .select("id, profile_data")
-    .eq("id", candidateId)
-    .single();
-  const candidate = (candData ?? { id: candidateId, profile_data: {} }) as {
+  const [candRes, readinessRes, appsRes] = await Promise.all([
+    supabase
+      .from("candidates")
+      .select("id, profile_data")
+      .eq("id", candidateId)
+      .single(),
+    supabase
+      .from("readiness_view")
+      .select("candidate_id, position_slug, position_name, country, completion_pct, hard_pass")
+      .eq("candidate_id", candidateId),
+    supabase
+      .from("applications")
+      .select("id, position_slug")
+      .eq("candidate_id", candidateId),
+  ]);
+
+  const candidate = (candRes.data ?? { id: candidateId, profile_data: {} }) as {
     id: string;
     profile_data: unknown;
   };
@@ -41,18 +52,10 @@ export default async function ExplorePage({ searchParams }: PageProps) {
   const credentials = (profileData.credentials ?? {}) as Record<string, unknown>;
   const profileEmpty = Object.keys(credentials).length === 0;
 
-  const { data: readinessData } = await supabase
-    .from("readiness_view")
-    .select("candidate_id, position_slug, position_name, country, completion_pct, hard_pass")
-    .eq("candidate_id", candidate.id);
-  const readiness = (readinessData ?? []) as ReadinessRow[];
+  const readiness = (readinessRes.data ?? []) as ReadinessRow[];
 
-  const { data: appsData } = await supabase
-    .from("applications")
-    .select("id, position_slug")
-    .eq("candidate_id", candidate.id);
   const appliedMap = new Map<string, string>(
-    (appsData ?? []).map((a) => {
+    (appsRes.data ?? []).map((a) => {
       const row = a as { id: string; position_slug: string };
       return [row.position_slug, row.id];
     })

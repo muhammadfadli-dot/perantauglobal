@@ -70,19 +70,26 @@ export default async function DashboardPage() {
   const { session, candidateId } = await requireCandidate();
 
   const supabase = await createServerClient();
-  const { data } = await supabase
-    .from("candidates")
-    .select("id, full_name, email, phone, city, profile_data")
-    .eq("id", candidateId)
-    .single();
-  const candidate = data as CandidateRow | null;
 
-  const { data: appsData } = await supabase
-    .from("applications")
-    .select("id, position_slug, pipeline_stage, created_at, positions (name, country)")
-    .eq("candidate_id", candidateId)
-    .order("created_at", { ascending: false });
-  const applications = (appsData ?? []) as unknown as ApplicationRow[];
+  const [candidateRes, appsRes, matchRes] = await Promise.all([
+    supabase
+      .from("candidates")
+      .select("id, full_name, email, phone, city, profile_data")
+      .eq("id", candidateId)
+      .single(),
+    supabase
+      .from("applications")
+      .select("id, position_slug, pipeline_stage, created_at, positions (name, country)")
+      .eq("candidate_id", candidateId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("readiness_view")
+      .select("position_slug, position_name, country, completion_pct, hard_pass")
+      .eq("candidate_id", candidateId),
+  ]);
+
+  const candidate = candidateRes.data as CandidateRow | null;
+  const applications = (appsRes.data ?? []) as unknown as ApplicationRow[];
 
   const profileData = (candidate?.profile_data ?? {}) as Record<string, unknown>;
   const credentials = (profileData.credentials ?? {}) as Record<string, unknown>;
@@ -93,12 +100,8 @@ export default async function DashboardPage() {
 
   let topMatches: MatchRow[] = [];
   if (candidate) {
-    const { data: matchData } = await supabase
-      .from("readiness_view")
-      .select("position_slug, position_name, country, completion_pct, hard_pass")
-      .eq("candidate_id", candidate.id);
     const appliedSet = new Set(applications.map((a) => a.position_slug));
-    topMatches = ((matchData ?? []) as MatchRow[])
+    topMatches = ((matchRes.data ?? []) as MatchRow[])
       .filter((r) => r.position_slug && !appliedSet.has(r.position_slug))
       .sort((a, b) => {
         const hp = Number(b.hard_pass ?? false) - Number(a.hard_pass ?? false);
