@@ -113,8 +113,9 @@ export default function DocActions({
         </div>
       )}
       {error && (
-        <div className="text-[12px] text-pg-err flex items-start gap-1">
-          <Icon name="warn" size={12} className="mt-0.5 shrink-0" /> {error}
+        <div className="text-[12px] text-pg-err flex items-start gap-1 max-w-[220px] break-words">
+          <Icon name="warn" size={12} className="mt-0.5 shrink-0" />
+          <span className="min-w-0 break-words">{error}</span>
         </div>
       )}
     </div>

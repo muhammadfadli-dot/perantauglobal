@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createServerClient, getSessionAndRole, createServiceRoleClient } from "@/lib/supabase-server";
+import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
 
 async function assertAdmin() {
   const { session, role } = await getSessionAndRole();
@@ -46,10 +46,13 @@ export async function rejectDocument(id: string, reason: string) {
   revalidatePath("/admin/documents");
 }
 
-/** Returns a 60-second signed URL to view the document file. */
+/** Returns a 60-second signed URL to view the document file.
+ *  Admin's own session is used — the storage RLS policy
+ *  `docs_storage_select_own_or_admin` (migration 0010) grants SELECT to admins,
+ *  which is all `createSignedUrl` needs. No service role required. */
 export async function getDocumentSignedUrl(filePath: string): Promise<string> {
   await assertAdmin();
-  const supabase = createServiceRoleClient();
+  const supabase = await createServerClient();
   const { data, error } = await supabase.storage
     .from("candidate-documents")
     .createSignedUrl(filePath, 60);
