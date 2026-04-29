@@ -1,5 +1,5 @@
 -- =========================================================================
--- MIGRATION 0019: pin search_path on functions that left it mutable
+-- MIGRATION 0020: pin search_path on functions that left it mutable
 -- =========================================================================
 -- Closes Supabase advisor lint 0011 (`function_search_path_mutable`) for
 -- four pre-existing functions defined without an explicit search_path:
