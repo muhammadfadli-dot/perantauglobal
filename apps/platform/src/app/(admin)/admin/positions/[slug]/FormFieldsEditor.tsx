@@ -15,6 +15,13 @@ type Field = {
   required: boolean;
   tier_weight: number;
   sort_order: number;
+  collect_at_stage: "applied" | "screening" | "document_check" | string;
+};
+
+const STAGE_LABEL: Record<string, string> = {
+  applied: "Saat apply",
+  screening: "Screening",
+  document_check: "Doc check",
 };
 
 const TYPE_OPTIONS: FormFieldInput["field_type"][] = [
@@ -89,7 +96,7 @@ function FieldRow({ positionSlug, field }: { positionSlug: string; field: Field 
         <div className="flex-1 min-w-0">
           <div className="text-[14px] font-bold">{field.field_label}</div>
           <div className="text-[11px] text-pg-ink-500 font-mono mt-0.5">
-            {field.field_key} · {field.field_type}
+            {field.field_key} · {field.field_type} · {STAGE_LABEL[field.collect_at_stage] ?? field.collect_at_stage}
           </div>
           {field.field_help && (
             <div className="text-[12px] text-pg-ink-500 mt-1">{field.field_help}</div>
@@ -136,6 +143,7 @@ function AddForm({
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [fieldType, setFieldType] = useState<FormFieldInput["field_type"]>("radio");
+  const [stage, setStage] = useState<NonNullable<FormFieldInput["collect_at_stage"]>>("screening");
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -167,6 +175,7 @@ function AddForm({
           required: fd.get("required") === "on",
           tier_weight: Number(fd.get("tier_weight") ?? 0),
           sort_order: sortOrder,
+          collect_at_stage: stage,
         });
         onClose();
       } catch (err) {
@@ -234,6 +243,37 @@ function AddForm({
           </div>
           <input name="tier_weight" type="number" min={0} max={10} defaultValue={0} className={inputClass} />
         </label>
+      </div>
+      <div className="mt-3">
+        <div className="text-[12px] font-bold text-pg-ink-500 mb-1.5">
+          Tanya kapan?
+        </div>
+        <div className="grid gap-1.5">
+          {(
+            [
+              ["applied", "Saat apply", "Cuma untuk hard-pass disqualifier (mis. \"Bersedia tinggal asrama 6 bulan?\")"],
+              ["screening", "Screening", "Default — pertanyaan tier-scoring & profil"],
+              ["document_check", "Doc check", "Essay panjang, motivasi mendalam"],
+            ] as const
+          ).map(([val, label, desc]) => {
+            const selected = stage === val;
+            return (
+              <button
+                key={val}
+                type="button"
+                onClick={() => setStage(val)}
+                className={`text-left px-3 py-2 rounded-lg border-[1.5px] ${
+                  selected
+                    ? "border-pg-red-600 bg-pg-red-50"
+                    : "border-pg-ink-200 hover:border-pg-ink-400"
+                }`}
+              >
+                <div className="text-[13px] font-bold">{label}</div>
+                <div className="text-[11px] text-pg-ink-500 mt-0.5 leading-snug">{desc}</div>
+              </button>
+            );
+          })}
+        </div>
       </div>
       {error && (
         <div className="mt-3 px-3 py-2 rounded-lg text-[12px] flex items-start gap-1" style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}>

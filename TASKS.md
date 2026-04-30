@@ -2,7 +2,40 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-04-29 (Phase S — Security hardening for PII readiness: Next.js bump + admin audit log + security headers + advisor cleanup)
+**Last updated:** 2026-04-30 (Phase 3 — Schema v3 wired into UI: requirement library, document metadata, readiness v3, Lengkapi Lamaran flow)
+
+## Phase 3 — Schema v3 → UI (2026-04-30) ✅ DONE
+
+**Migrations applied to production Supabase:**
+- `0020_requirements_v3` — `positions.requirements` JSONB schema bump from v2 to v3 (`importance` rename, `category`, `evidence_mode`, `collect_at_stage`, `document_type`, `document_filter`). Backfill via `migrate_requirement_v2_to_v3()` ILIKE heuristic. `compute_readiness()` updated to handle v3 field shape (still self-declared only).
+- `0021_candidate_documents_metadata` — extends `doc_type` enum (8 new values: formal_photo, str_certificate, driving_license, language_certificate, professional_certificate, education_certificate, work_certificate, medical_check). Adds `metadata JSONB`, `expires_at TIMESTAMPTZ`, `display_name TEXT`. New `compute_readiness_v3(candidate_id, position_slug)` joins documents + profile, evidence-mode aware. CHECK constraint `metadata < 4096 bytes`. GIN index `jsonb_path_ops` on metadata.
+- `0022_position_form_fields_stage` — adds `collect_at_stage pipeline_stage NOT NULL DEFAULT 'screening'`. Index `(position_slug, collect_at_stage, sort_order)`.
+- `0023_backfill_photo_to_formal_photo` — written but not yet applied (see "User action items" below).
+
+**TS catalogs (PR [#30](https://github.com/panji-firmansyah/perantauglobal/pull/30) `ed660db`):**
+- `packages/db/schemas/requirements/library.ts` — REQUIREMENT_LIBRARY (28 templates) grouped by category. Wired into Admin Position Builder via the new RequirementLibraryPanel.
+- `packages/db/schemas/documents/index.ts` — DOC_TYPE_METADATA_SCHEMAS (10 doc types). Renders the right form fields per doc_type in the new DocumentUploadModal.
+
+**Phase 3 UI shipped (PR [#31](https://github.com/panji-firmansyah/perantauglobal/pull/31)):**
+- `apps/platform/src/lib/readiness.ts` — wraps `compute_readiness_v3` RPC. `getRequirementsWithStatus()` returns per-key pass/fail + the source RequirementDef so UIs can render forms-to-fill, not just display.
+- `components/pg/DocumentUploadModal.tsx` — generic bottom-sheet modal driven by DOC_TYPE_METADATA_SCHEMAS. Renders text/select/date/number per `MetadataField`, promotes `is_expires_at` field to the column, dumps the rest to `metadata` JSONB. `prefillMetadata` prop for auto-derived values from `document_filter`.
+- `(candidate)/profile/DocUploader.tsx` refactored to use the modal — KTP / paspor / foto / CV uploads now capture metadata. Switch from legacy `photo` to `formal_photo` with back-compat lookup.
+- `(candidate)/applications/[id]/lengkapi/` — RequirementInlineForm per requirement: self_declared (radio against allowed_values, free text fallback), document (modal pre-filled with `document_filter`), either (both stacked).
+- `(candidate)/applications/[id]/page.tsx` — live "Persyaratan posisi" section sourced from `compute_readiness_v3`, with "Lengkapi N persyaratan" CTA.
+- `(admin)/admin/positions/[slug]/RequirementLibraryPanel.tsx` — one-click add/remove from REQUIREMENT_LIBRARY with category filter chips. Backed by `addRequirementToPosition` / `removeRequirementFromPosition` server actions that merge into the JSONB.
+
+**Polish (PR [#?] this commit):**
+- `RequirementsEditor` JSON schema hint updated v2 → v3.
+- `FormFieldsEditor` exposes `collect_at_stage` selector (Saat apply / Screening / Doc check) — actions + page query both updated to roundtrip the column.
+- `apps/platform/eslint.config.mjs` rewritten as ESLint 9 flat config (mirror of apps/web). Removes `@eslint/eslintrc` shim. `pnpm --filter platform lint` now runs cleanly. Fixed 1 collateral pre-existing `no-html-link-for-pages` in JobOrderForm.
+- DocumentUploadModal restructured to mount-on-open via `SheetBody` extraction, eliminating `useEffect` setState reset pattern (cleaner React 19 idiom).
+
+**User action items:**
+- [ ] Smoke test PR #31 on Vercel preview (URLs in PR comments) — see chat for step-by-step.
+- [ ] Apply migration 0023 (`photo → formal_photo` backfill) via Supabase MCP after smoke test passes.
+- [ ] Optional follow-up: collect_at_stage filtering in apply flow (only show `applied`-stage fields/requirements upfront, defer rest to Lengkapi Lamaran).
+
+---
 
 ## Phase S — Security hardening for PII readiness (2026-04-29) ✅ DONE
 

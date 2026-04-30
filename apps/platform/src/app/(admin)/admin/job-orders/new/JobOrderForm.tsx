@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { Icon } from "@/components/pg/Icon";
 import { Button } from "@/components/pg/primitives";
 import { createJobOrder } from "../actions";
@@ -176,12 +177,12 @@ export default function JobOrderForm({
             </>
           )}
         </Button>
-        <a
+        <Link
           href="/admin/job-orders"
           className="inline-flex items-center justify-center gap-2 min-h-[52px] px-[22px] text-base font-semibold rounded-xl border-[1.5px] border-pg-ink-200 text-pg-ink-900 no-underline hover:bg-pg-ink-50"
         >
           Batal
-        </a>
+        </Link>
       </div>
     </form>
   );

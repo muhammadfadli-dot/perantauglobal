@@ -63,9 +63,12 @@ export default function RequirementsEditor({
         spellCheck={false}
         className="w-full bg-pg-paper px-4 py-3 text-[13px] font-mono leading-[1.5] outline-none focus:bg-pg-white border-y border-pg-ink-100"
       />
-      <div className="px-5 py-3 flex items-center justify-between gap-3">
-        <div className="text-[12px] text-pg-ink-500 leading-snug">
-          Schema: <code className="font-mono">{`{ field_key: { type: "hard"|"soft", label, allowed_values? } }`}</code>
+      <div className="px-5 py-3 flex items-center justify-between gap-3 flex-wrap">
+        <div className="text-[12px] text-pg-ink-500 leading-snug max-w-[40ch]">
+          v3 schema:{" "}
+          <code className="font-mono text-[11px]">
+            {`{ key: { importance, label, category, evidence_mode, allowed_values?, value_labels?, document_type?, document_filter?, collect_at_stage?, description? } }`}
+          </code>
         </div>
         <Button onClick={save} disabled={pending || saved} small>
           {pending ? "Menyimpan…" : saved ? (

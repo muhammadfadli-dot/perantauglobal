@@ -108,6 +108,13 @@ export type FormFieldInput = {
   required?: boolean;
   tier_weight?: number;
   sort_order?: number;
+  /**
+   * Pipeline stage at which this question gets shown to the candidate.
+   * - "applied"        → critical hard-pass disqualifier, asked on apply form
+   * - "screening"      → tier-scoring questions, asked post-apply (default)
+   * - "document_check" → motivation essays, deeper bio
+   */
+  collect_at_stage?: "applied" | "screening" | "document_check";
 };
 
 export async function createFormField(positionSlug: string, input: FormFieldInput) {
@@ -123,6 +130,7 @@ export async function createFormField(positionSlug: string, input: FormFieldInpu
     required: input.required ?? false,
     tier_weight: input.tier_weight ?? 0,
     sort_order: input.sort_order ?? 0,
+    collect_at_stage: input.collect_at_stage ?? "screening",
   } as never);
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/positions/${positionSlug}`);
@@ -141,6 +149,7 @@ export async function updateFormField(id: string, positionSlug: string, patch: P
       ...(patch.required !== undefined ? { required: patch.required } : {}),
       ...(patch.tier_weight !== undefined ? { tier_weight: patch.tier_weight } : {}),
       ...(patch.sort_order !== undefined ? { sort_order: patch.sort_order } : {}),
+      ...(patch.collect_at_stage !== undefined ? { collect_at_stage: patch.collect_at_stage } : {}),
     } as never)
     .eq("id", id);
   if (error) throw new Error(error.message);

@@ -40,6 +40,7 @@ type FormField = {
   required: boolean;
   tier_weight: number;
   sort_order: number;
+  collect_at_stage: "applied" | "screening" | "document_check" | string;
 };
 
 const COUNTRY_LABEL: Record<string, string> = {
@@ -60,7 +61,7 @@ export default async function PositionDetailPage({
   const [{ data: positionData }, { data: jobOrdersData }, { data: fieldsData }] = await Promise.all([
     supabase.from("positions").select("slug, name, country, description, active, requirements").eq("slug", slug).maybeSingle(),
     supabase.from("job_orders").select("id, intake_label, internal_employer_name, slot_count, slot_filled, status, deadline, created_at").eq("position_slug", slug).order("created_at", { ascending: false }),
-    supabase.from("position_form_fields").select("id, field_key, field_label, field_help, field_type, options, required, tier_weight, sort_order").eq("position_slug", slug).order("sort_order"),
+    supabase.from("position_form_fields").select("id, field_key, field_label, field_help, field_type, options, required, tier_weight, sort_order, collect_at_stage").eq("position_slug", slug).order("sort_order"),
   ]);
 
   const position = positionData as Position | null;

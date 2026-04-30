@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "./Icon";
 import { supabaseBrowser } from "@/lib/supabase-browser";
@@ -40,27 +40,36 @@ export default function DocumentUploadModal({
   prefillMetadata = {},
   onUploaded,
 }: DocumentUploadModalProps) {
+  if (!open) return null;
+  // Mount-on-open via the parent ensures fresh state each time.
+  return (
+    <SheetBody
+      onClose={onClose}
+      candidateId={candidateId}
+      docType={docType}
+      prefillMetadata={prefillMetadata}
+      onUploaded={onUploaded}
+    />
+  );
+}
+
+function SheetBody({
+  onClose,
+  candidateId,
+  docType,
+  prefillMetadata,
+  onUploaded,
+}: Omit<DocumentUploadModalProps, "open"> & { prefillMetadata: Record<string, string> }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
 
   const schema: DocTypeSchema | null = getDocTypeSchema(docType);
 
-  const [meta, setMeta] = useState<Record<string, string>>({});
+  const [meta, setMeta] = useState<Record<string, string>>(() => ({ ...prefillMetadata }));
   const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (open) {
-      // seed with prefill on every open
-      setMeta({ ...prefillMetadata });
-      setFile(null);
-      setError(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, docType]);
-
-  if (!open) return null;
   if (!schema) {
     return (
       <Sheet onClose={onClose}>
@@ -109,7 +118,9 @@ export default function DocumentUploadModal({
     try {
       const sb = supabaseBrowser();
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "bin";
-      const filename = `${docType}-${Date.now()}.${ext}`;
+      // eslint-disable-next-line react-hooks/purity -- inside async event handler, not render
+      const stamp = Date.now();
+      const filename = `${docType}-${stamp}.${ext}`;
       const path = `${candidateId}/${docType}/${filename}`;
 
       const { error: uploadErr } = await sb.storage
