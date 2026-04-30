@@ -4,6 +4,7 @@ import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import AnswersForm from "./AnswersForm";
+import { getRequirementsWithStatus } from "@/lib/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -96,6 +97,15 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const stage = userStage(application.pipeline_stage);
   const current = stage.phases[stage.currentIdx];
   const isFailed = current.key === "tidak";
+
+  // Live readiness against position requirements (compute_readiness_v3).
+  const { requirements, score_pct, hard_pass } = await getRequirementsWithStatus(
+    candidateId,
+    position.slug,
+    supabase,
+  );
+  const openCount = requirements.filter((r) => !r.passed).length;
+  const showLengkapi = !isFailed && openCount > 0;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -209,6 +219,74 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 </div>
               </div>
             ))}
+          </div>
+        </section>
+
+        {/* Persyaratan posisi (readiness v3) */}
+        <section className="px-5 pt-6">
+          <div className="flex justify-between items-baseline">
+            <h2 className="text-lg font-bold tracking-tight">Persyaratan posisi</h2>
+            <div className="text-sm font-bold text-pg-red-600">{score_pct}%</div>
+          </div>
+          <div className="mt-3 bg-pg-white border border-pg-ink-100 rounded-2xl p-4">
+            <div className="grid gap-2.5">
+              {requirements.map((req) => (
+                <div key={req.key} className="flex items-center gap-3">
+                  <div
+                    className="w-7 h-7 rounded-full grid place-items-center shrink-0"
+                    style={{
+                      background: req.passed
+                        ? "var(--pg-ok-bg)"
+                        : req.importance === "hard"
+                          ? "var(--pg-err-bg)"
+                          : "var(--pg-ink-50)",
+                      color: req.passed
+                        ? "var(--pg-ok)"
+                        : req.importance === "hard"
+                          ? "var(--pg-err)"
+                          : "var(--pg-ink-400)",
+                    }}
+                  >
+                    <Icon name={req.passed ? "check" : "x"} size={14} stroke={2.5} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-semibold truncate">{req.label}</div>
+                    <div className="text-[12px] text-pg-ink-500 mt-0.5">
+                      {req.passed
+                        ? req.doc_passed && req.evidence_mode !== "self_declared"
+                          ? "Terverifikasi via dokumen"
+                          : "Sudah terpenuhi"
+                        : req.importance === "hard"
+                          ? "Wajib · belum lengkap"
+                          : "Bonus · belum lengkap"}
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {requirements.length === 0 && (
+                <div className="text-sm text-pg-ink-500">
+                  Posisi ini tidak punya persyaratan khusus.
+                </div>
+              )}
+            </div>
+            {showLengkapi && (
+              <Link
+                href={`/applications/${id}/lengkapi`}
+                className="mt-4 w-full inline-flex items-center justify-center gap-1.5 min-h-[48px] rounded-xl bg-pg-red-600 text-white font-bold text-sm hover:bg-pg-red-700 no-underline"
+              >
+                Lengkapi {openCount} persyaratan
+                <Icon name="arrow_right" size={16} />
+              </Link>
+            )}
+            {hard_pass && requirements.length > 0 && (
+              <div
+                className="mt-3 px-3 py-2 rounded-lg text-[12px] font-semibold flex items-center gap-2"
+                style={{ background: "var(--pg-ok-bg)", color: "var(--pg-ok)" }}
+              >
+                <Icon name="check" size={14} stroke={2.5} />
+                Semua syarat utama terpenuhi
+              </div>
+            )}
           </div>
         </section>
 

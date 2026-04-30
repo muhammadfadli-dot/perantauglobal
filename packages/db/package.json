@@ -10,7 +10,10 @@
     "./client": "./src/client.ts",
     "./server": "./src/server.ts",
     "./types": "./src/types.ts",
-    "./schemas/*": "./schemas/*"
+    "./schemas/*": "./schemas/*",
+    "./schemas/requirements": "./schemas/requirements/index.ts",
+    "./schemas/requirements/library": "./schemas/requirements/library.ts",
+    "./schemas/documents": "./schemas/documents/index.ts"
   },
   "scripts": {
     "migrate": "echo 'Run via Supabase MCP or CLI — see migrations/README.md'",

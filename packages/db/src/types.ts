@@ -253,10 +253,13 @@ export type Database = {
       candidate_documents: {
         Row: {
           candidate_id: string
+          display_name: string | null
           doc_type: Database["public"]["Enums"]["doc_type"]
+          expires_at: string | null
           file_path: string
           file_size: number | null
           id: string
+          metadata: Json
           mime_type: string | null
           notes: string | null
           rejected_at: string | null
@@ -269,10 +272,13 @@ export type Database = {
         }
         Insert: {
           candidate_id: string
+          display_name?: string | null
           doc_type: Database["public"]["Enums"]["doc_type"]
+          expires_at?: string | null
           file_path: string
           file_size?: number | null
           id?: string
+          metadata?: Json
           mime_type?: string | null
           notes?: string | null
           rejected_at?: string | null
@@ -285,10 +291,13 @@ export type Database = {
         }
         Update: {
           candidate_id?: string
+          display_name?: string | null
           doc_type?: Database["public"]["Enums"]["doc_type"]
+          expires_at?: string | null
           file_path?: string
           file_size?: number | null
           id?: string
+          metadata?: Json
           mime_type?: string | null
           notes?: string | null
           rejected_at?: string | null
@@ -655,6 +664,7 @@ export type Database = {
       }
       position_form_fields: {
         Row: {
+          collect_at_stage: Database["public"]["Enums"]["pipeline_stage"]
           created_at: string
           field_help: string | null
           field_key: string
@@ -669,6 +679,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          collect_at_stage?: Database["public"]["Enums"]["pipeline_stage"]
           created_at?: string
           field_help?: string | null
           field_key: string
@@ -683,6 +694,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          collect_at_stage?: Database["public"]["Enums"]["pipeline_stage"]
           created_at?: string
           field_help?: string | null
           field_key?: string
@@ -775,6 +787,10 @@ export type Database = {
         Args: { profile: Json; requirements: Json }
         Returns: Json
       }
+      compute_readiness_v3: {
+        Args: { p_candidate_id: string; p_position_slug: string }
+        Returns: Json
+      }
       is_admin: { Args: never; Returns: boolean }
       log_admin_action: {
         Args: {
@@ -787,6 +803,7 @@ export type Database = {
         }
         Returns: string
       }
+      migrate_requirement_v2_to_v3: { Args: { req: Json }; Returns: Json }
     }
     Enums: {
       doc_type:
@@ -797,6 +814,14 @@ export type Database = {
         | "medical"
         | "photo"
         | "other"
+        | "formal_photo"
+        | "str_certificate"
+        | "driving_license"
+        | "language_certificate"
+        | "professional_certificate"
+        | "education_certificate"
+        | "work_certificate"
+        | "medical_check"
       form_field_type:
         | "select"
         | "radio"
@@ -946,6 +971,13 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
+// Convenience aliases for enum values exported as TS string-union types.
+export type PipelineStage = Database["public"]["Enums"]["pipeline_stage"]
+export type DocType = Database["public"]["Enums"]["doc_type"]
+export type TierLabel = Database["public"]["Enums"]["tier_label"]
+export type JobOrderStatus = Database["public"]["Enums"]["job_order_status"]
+export type FormFieldType = Database["public"]["Enums"]["form_field_type"]
+
 export const Constants = {
   public: {
     Enums: {
@@ -957,6 +989,14 @@ export const Constants = {
         "medical",
         "photo",
         "other",
+        "formal_photo",
+        "str_certificate",
+        "driving_license",
+        "language_certificate",
+        "professional_certificate",
+        "education_certificate",
+        "work_certificate",
+        "medical_check",
       ],
       form_field_type: [
         "select",
@@ -967,12 +1007,7 @@ export const Constants = {
         "file",
         "multiselect",
       ],
-      job_order_status: [
-        "open",
-        "closed",
-        "filled",
-        "cancelled",
-      ],
+      job_order_status: ["open", "closed", "filled", "cancelled"],
       pipeline_stage: [
         "applied",
         "screening",

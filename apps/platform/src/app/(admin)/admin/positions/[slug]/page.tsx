@@ -5,6 +5,7 @@ import { Badge } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
 import PositionMetaEditor from "./PositionMetaEditor";
 import RequirementsEditor from "./RequirementsEditor";
+import RequirementLibraryPanel from "./RequirementLibraryPanel";
 import FormFieldsEditor from "./FormFieldsEditor";
 
 export const dynamic = "force-dynamic";
@@ -123,11 +124,21 @@ export default async function PositionDetailPage({
 
           <section>
             <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-2.5">
-              Pertanyaan tambahan (custom form fields)
+              Tambah dari library
             </div>
-            <FormFieldsEditor positionSlug={position.slug} initial={fields} />
+            <RequirementLibraryPanel
+              slug={position.slug}
+              active={new Set(Object.keys(position.requirements ?? {}))}
+            />
           </section>
         </div>
+
+        <section>
+          <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-2.5">
+            Pertanyaan tambahan (custom form fields)
+          </div>
+          <FormFieldsEditor positionSlug={position.slug} initial={fields} />
+        </section>
       </div>
 
       {/* Job orders for this position */}

@@ -42,9 +42,15 @@ export default async function ProfilePage() {
     rejected_at: string | null;
     rejected_reason: string | null;
   }>;
-  const REQUIRED_DOC_TYPES = ["ktp", "passport", "photo", "cv"] as const;
+  // Universal docs every candidate needs. Look up both legacy ("photo") and
+  // new ("formal_photo") doc_type values for back-compat.
+  const REQUIRED_DOC_TYPES: DocItem["type"][] = ["ktp", "passport", "formal_photo", "cv"];
   const docItems: DocItem[] = REQUIRED_DOC_TYPES.map((t) => {
-    const latest = docsRows.find((d) => d.doc_type === t);
+    const candidates =
+      t === "formal_photo"
+        ? docsRows.filter((d) => d.doc_type === "formal_photo" || d.doc_type === "photo")
+        : docsRows.filter((d) => d.doc_type === t);
+    const latest = candidates[0];
     if (!latest) return { type: t, status: "missing" };
     if (latest.verified) return { type: t, status: "verified", file_path: latest.file_path };
     if (latest.rejected_at) return { type: t, status: "rejected", file_path: latest.file_path, rejected_reason: latest.rejected_reason };

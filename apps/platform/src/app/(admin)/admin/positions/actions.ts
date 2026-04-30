@@ -47,6 +47,58 @@ export async function updatePositionRequirements(slug: string, requirementsJson:
   revalidatePath(`/admin/positions/${slug}`);
 }
 
+/**
+ * Add or remove a single requirement from a position's requirements JSONB.
+ * Used by the RequirementLibraryPanel — admin clicks "Add" on a curated
+ * library entry, we merge it in (overwrite if key exists).
+ */
+export async function addRequirementToPosition(
+  slug: string,
+  key: string,
+  requirement: Record<string, unknown>,
+) {
+  await assertAdmin();
+  const supabase = await createServerClient();
+  const { data: row } = await supabase
+    .from("positions")
+    .select("requirements")
+    .eq("slug", slug)
+    .single();
+  const current = (((row?.requirements as Record<string, unknown>) ?? {}) as Record<
+    string,
+    unknown
+  >);
+  const next = { ...current, [key]: requirement };
+  const { error } = await supabase
+    .from("positions")
+    .update({ requirements: next } as never)
+    .eq("slug", slug);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/admin/positions/${slug}`);
+}
+
+export async function removeRequirementFromPosition(slug: string, key: string) {
+  await assertAdmin();
+  const supabase = await createServerClient();
+  const { data: row } = await supabase
+    .from("positions")
+    .select("requirements")
+    .eq("slug", slug)
+    .single();
+  const current = (((row?.requirements as Record<string, unknown>) ?? {}) as Record<
+    string,
+    unknown
+  >);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { [key]: _removed, ...rest } = current;
+  const { error } = await supabase
+    .from("positions")
+    .update({ requirements: rest } as never)
+    .eq("slug", slug);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/admin/positions/${slug}`);
+}
+
 export type FormFieldInput = {
   field_key: string;
   field_label: string;
