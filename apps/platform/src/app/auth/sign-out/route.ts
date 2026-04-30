@@ -9,11 +9,13 @@ type CookieSetter = Array<{ name: string; value: string; options?: CookieOptions
 
 /**
  * Sign out — clears the Supabase session cookies and redirects to sign-in.
- * Supports POST (from form) and GET (from a link).
+ *
+ * POST only. GET removed to prevent CSRF logout vector — a malicious image
+ * tag pointing at `/auth/sign-out` would silently log the user out otherwise.
  */
 async function handle(request: NextRequest) {
   const { origin } = new URL(request.url);
-  const response = NextResponse.redirect(`${origin}/auth/sign-in`);
+  const response = NextResponse.redirect(`${origin}/auth/sign-in`, { status: 303 });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -34,5 +36,8 @@ async function handle(request: NextRequest) {
   return response;
 }
 
-export const GET = handle;
 export const POST = handle;
+
+export function GET() {
+  return new NextResponse("Method Not Allowed", { status: 405, headers: { Allow: "POST" } });
+}

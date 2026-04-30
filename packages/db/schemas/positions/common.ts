@@ -6,10 +6,10 @@ import { z } from "zod";
  */
 export const sharedCandidateSchema = z.object({
   full_name: z.string().min(1, "Nama wajib diisi").max(200),
-  email: z.string().email("Email tidak valid"),
+  email: z.string().email("Email tidak valid").max(254),
   whatsapp: z.string().min(8, "Nomor WhatsApp terlalu pendek").max(20),
   city: z.string().min(1, "Kota wajib diisi").max(100),
-  birth_date: z.string().optional().nullable(),
+  birth_date: z.string().max(20).optional().nullable(),
   gender: z.enum(["male", "female"]).optional().nullable(),
   education: z.enum(["sma", "d3", "s1", "s2"]),
 });
@@ -20,10 +20,10 @@ export type SharedCandidate = z.infer<typeof sharedCandidateSchema>;
  * Tracking metadata attached to pending_submissions.
  */
 export const trackingSchema = z.object({
-  source_url: z.string().optional().nullable(),
-  utm_source: z.string().optional().nullable(),
-  utm_campaign: z.string().optional().nullable(),
-  referrer_url: z.string().optional().nullable(),
+  source_url: z.string().max(500).optional().nullable(),
+  utm_source: z.string().max(120).optional().nullable(),
+  utm_campaign: z.string().max(120).optional().nullable(),
+  referrer_url: z.string().max(500).optional().nullable(),
 });
 
 export type Tracking = z.infer<typeof trackingSchema>;

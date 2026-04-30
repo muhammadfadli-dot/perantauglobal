@@ -30,6 +30,21 @@
   --color-pg-info: var(--pg-info);
   --color-pg-info-bg: var(--pg-info-bg);
 
+  --color-pg-border: var(--pg-border);
+  --color-pg-border-soft: var(--pg-border-soft);
+  --color-pg-ink-primary: var(--pg-ink-primary);
+  --color-pg-ink-secondary: var(--pg-ink-secondary);
+  --color-pg-ink-tertiary: var(--pg-ink-tertiary);
+  --color-pg-ink-quaternary: var(--pg-ink-quaternary);
+  --color-pg-ok-soft-fg: var(--pg-ok-soft-fg);
+  --color-pg-ok-soft-bg: var(--pg-ok-soft-bg);
+  --color-pg-ok-soft-border: var(--pg-ok-soft-border);
+  --color-pg-warn-soft-fg: var(--pg-warn-soft-fg);
+  --color-pg-warn-soft-bg: var(--pg-warn-soft-bg);
+  --color-pg-warn-soft-border: var(--pg-warn-soft-border);
+  --color-pg-red-soft-bg: var(--pg-red-soft-bg);
+  --color-pg-red-soft-border: var(--pg-red-soft-border);
+
   /* Legacy aliases */
   --color-dtg-red: #d7262f;
   --color-dtg-red-dark: #b91d24;
@@ -76,6 +91,22 @@
   --pg-err-bg: #fde5e7;
   --pg-info: #1e5aa8;
   --pg-info-bg: #e4edf8;
+
+  /* Paper v2 admin tokens (Apr 2026) — match Paper artboards exactly */
+  --pg-border: #ececea;
+  --pg-border-soft: #f1f1ef;
+  --pg-ink-primary: #0e0e0e;
+  --pg-ink-secondary: #4a4a4a;
+  --pg-ink-tertiary: #6f6f6f;
+  --pg-ink-quaternary: #9a9a9a;
+  --pg-ok-soft-fg: #3d7a41;
+  --pg-ok-soft-bg: #e8f0e9;
+  --pg-ok-soft-border: #dce9dd;
+  --pg-warn-soft-fg: #a07000;
+  --pg-warn-soft-bg: #fff8e6;
+  --pg-warn-soft-border: #ffe9b0;
+  --pg-red-soft-bg: #fff4f4;
+  --pg-red-soft-border: #ffe3e3;
 }
 
 html,

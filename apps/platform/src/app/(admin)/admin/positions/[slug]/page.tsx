@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServerClient } from "@/lib/supabase-server";
+import AdminTopBar from "@/components/admin/TopBar";
 import { Badge } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
 import PositionMetaEditor from "./PositionMetaEditor";
@@ -71,38 +72,49 @@ export default async function PositionDetailPage({
   const fields = (fieldsData ?? []) as FormField[];
 
   return (
-    <main className="p-6 lg:p-10 max-w-6xl">
-      <Link
-        href="/admin/positions"
-        className="inline-flex items-center gap-1 text-[12px] font-bold tracking-wide uppercase text-pg-ink-500 hover:text-pg-red-600 no-underline"
-      >
-        <Icon name="arrow_left" size={14} /> Catalog posisi
-      </Link>
-
-      <div className="mt-6 flex items-start justify-between gap-4">
-        <div>
-          <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-red-600">
-            {COUNTRY_LABEL[position.country] ?? position.country}
+    <>
+      <AdminTopBar
+        crumbs={[
+          { label: "Operasi" },
+          { label: "Catalog posisi", href: "/admin/positions" },
+          { label: position.name, emphasis: true },
+        ]}
+        rightSlot={
+          <div className="flex items-center gap-2">
+            {position.active ? (
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold"
+                style={{ background: "var(--pg-ok-soft-bg)", color: "var(--pg-ok-soft-fg)" }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--pg-ok-soft-fg)" }} /> Aktif
+              </span>
+            ) : (
+              <Badge variant="mute">Nonaktif</Badge>
+            )}
+            <Link
+              href={`/admin/job-orders/new?position=${position.slug}`}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-[13px] font-bold text-white no-underline"
+              style={{ background: "var(--pg-red-600)" }}
+            >
+              <Icon name="plus" size={14} stroke={2.4} /> Buat job order
+            </Link>
           </div>
-          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-1.5">
-            {position.name}
-          </h1>
-          <div className="text-[13px] text-pg-ink-500 mt-1 font-mono">{position.slug}</div>
-          {position.description && (
-            <p className="text-base text-pg-ink-700 mt-3 leading-relaxed max-w-2xl">
-              {position.description}
-            </p>
-          )}
+        }
+      />
+    <main className="px-8 py-7 max-w-6xl">
+      <div className="flex flex-col gap-1.5 mb-6">
+        <div className="text-[11px] font-semibold tracking-[0.12em] uppercase" style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}>
+          {COUNTRY_LABEL[position.country] ?? position.country}
         </div>
-        <div className="flex flex-col items-end gap-2">
-          {position.active ? <Badge variant="ok">Aktif</Badge> : <Badge variant="mute">Nonaktif</Badge>}
-          <Link
-            href={`/admin/job-orders/new?position=${position.slug}`}
-            className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 text-sm font-semibold rounded-xl bg-pg-red-600 text-white no-underline hover:bg-pg-red-700"
-          >
-            <Icon name="plus" size={16} stroke={2.4} /> Buat job order
-          </Link>
-        </div>
+        <h1 className="text-[32px] font-extrabold leading-[36px] tracking-[-0.025em]">
+          {position.name}
+        </h1>
+        <div className="text-[12px] text-pg-ink-tertiary" style={{ fontFamily: "var(--font-mono)" }}>{position.slug}</div>
+        {position.description && (
+          <p className="text-[14px] text-pg-ink-tertiary mt-2 leading-tight max-w-2xl">
+            {position.description}
+          </p>
+        )}
       </div>
 
       <div className="mt-8 grid gap-5">
@@ -203,5 +215,6 @@ export default async function PositionDetailPage({
         )}
       </section>
     </main>
+    </>
   );
 }

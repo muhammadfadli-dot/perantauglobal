@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createBrowserClient as createSSRBrowserClient } from "@supabase/ssr";
 import { Icon } from "@/components/pg/Icon";
 
-export default function SignOutButton({ variant = "subtle" }: { variant?: "subtle" | "ghost" }) {
+export default function SignOutButton({ variant = "subtle" }: { variant?: "subtle" | "ghost" | "iconOnly" }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
 
@@ -17,6 +17,20 @@ export default function SignOutButton({ variant = "subtle" }: { variant?: "subtl
     await sb.auth.signOut();
     router.push("/");
     router.refresh();
+  }
+
+  if (variant === "iconOnly") {
+    return (
+      <button
+        type="button"
+        onClick={signOut}
+        disabled={busy}
+        aria-label="Keluar"
+        className="text-pg-ink-300 hover:text-pg-ink-700 disabled:opacity-50"
+      >
+        <Icon name="x" size={14} stroke={2} />
+      </button>
+    );
   }
 
   if (variant === "ghost") {
