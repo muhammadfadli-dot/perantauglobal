@@ -52,5 +52,5 @@ export async function submitApplication(input: SubmitInput) {
   revalidatePath("/dashboard");
   revalidatePath("/applications");
   revalidatePath("/explore");
-  redirect(`/applications/${(created as { id: string }).id}?just_applied=1`);
+  redirect(`/applications/${(created as { id: string }).id}/welcome`);
 }

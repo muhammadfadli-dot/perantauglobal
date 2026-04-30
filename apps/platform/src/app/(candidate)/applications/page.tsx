@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
-import { Badge } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
 
 export const dynamic = "force-dynamic";
@@ -14,27 +13,43 @@ type ApplicationRow = {
   positions: { name: string; country: string } | null;
 };
 
-function userStage(internal: string): { label: string; variant: "warn" | "info" | "ok" | "err" | "mute" } {
+type ReadinessRow = {
+  position_slug: string | null;
+  hard_pass: boolean | null;
+};
+
+const COUNTRY_LABEL: Record<string, string> = {
+  saudi_arabia: "Arab Saudi",
+  japan: "Jepang",
+  taiwan: "Taiwan",
+  indonesia: "Indonesia",
+  any: "Global",
+};
+
+function userStage(internal: string): {
+  label: string;
+  tone: "warn" | "info" | "ok" | "err" | "mute";
+} {
   switch (internal) {
     case "applied":
     case "screening":
     case "voice_screen":
     case "document_check":
-      return { label: "Sedang diseleksi", variant: "warn" };
+      return { label: "Sedang diseleksi", tone: "warn" };
     case "interview":
     case "briefing":
     case "trial":
-      return { label: "Wawancara & dokumen", variant: "info" };
+      return { label: "Wawancara & dokumen", tone: "info" };
     case "selected":
     case "training":
     case "deployed":
     case "active":
-      return { label: "Diterima", variant: "ok" };
+      return { label: "Diterima", tone: "ok" };
     case "rejected":
     case "exit":
-      return { label: "Tidak lolos", variant: "err" };
+      return { label: "Tidak terpilih", tone: "err" };
     default:
-      return { label: "Diproses", variant: "mute" };
+      return { label: "Diproses", tone: "mute" };
   }
 }
 
@@ -42,67 +57,117 @@ export default async function ApplicationsListPage() {
   const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  const { data: appsData } = await supabase
-    .from("applications")
-    .select("id, position_slug, pipeline_stage, created_at, positions (name, country)")
-    .eq("candidate_id", candidateId)
-    .order("created_at", { ascending: false });
+  const [{ data: appsData }, { data: readinessData }] = await Promise.all([
+    supabase
+      .from("applications")
+      .select("id, position_slug, pipeline_stage, created_at, positions (name, country)")
+      .eq("candidate_id", candidateId)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("readiness_view")
+      .select("position_slug, hard_pass")
+      .eq("candidate_id", candidateId),
+  ]);
+
   const applications = (appsData ?? []) as unknown as ApplicationRow[];
+  const readinessBySlug = new Map(
+    ((readinessData ?? []) as ReadinessRow[]).map((r) => [r.position_slug, r])
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
       <TopBarApp title="Lamaran kamu" bell />
       <main className="flex-1 pb-6">
         <section className="px-5 pt-4">
-          <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-red-600">
+          <div
+            className="text-[10px] font-semibold tracking-[0.12em] uppercase"
+            style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
+          >
             Semua lamaran
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight mt-1">
+          <h1 className="text-[28px] font-extrabold tracking-[-0.02em] mt-1 text-pg-ink-primary">
             {applications.length} lamaran
           </h1>
         </section>
 
-        <section className="px-5 pt-4 grid gap-3">
+        <section className="px-5 pt-4 flex flex-col gap-3">
           {applications.length === 0 ? (
-            <div className="bg-pg-white border border-pg-ink-100 rounded-2xl p-6 text-center">
-              <div className="text-base font-bold">Belum ada lamaran</div>
-              <div className="text-sm text-pg-ink-500 mt-1.5 leading-relaxed">
+            <div
+              className="bg-pg-white rounded-2xl p-6 text-center"
+              style={{ border: "1px solid var(--pg-border)" }}
+            >
+              <div className="text-[16px] font-bold text-pg-ink-primary">Belum ada lamaran</div>
+              <div className="text-[13px] text-pg-ink-tertiary mt-1.5">
                 Mulai jelajahi posisi yang cocok untuk kamu.
               </div>
               <Link
                 href="/explore"
-                className="inline-flex items-center justify-center gap-2 min-h-[44px] px-4 mt-4 text-sm font-semibold rounded-xl bg-pg-red-600 text-white no-underline"
+                className="inline-flex items-center gap-2 px-4 py-2.5 mt-4 text-[13px] font-bold text-white no-underline rounded-xl"
+                style={{ background: "var(--pg-red-600)" }}
               >
-                Cari lowongan <Icon name="arrow_right" size={16} />
+                Cari lowongan <Icon name="arrow_right" size={14} />
               </Link>
             </div>
           ) : (
             applications.map((a) => {
               const stage = userStage(a.pipeline_stage);
+              const r = readinessBySlug.get(a.position_slug);
+              const missing = !r?.hard_pass;
+              const muted = ["rejected", "exit"].includes(a.pipeline_stage);
               return (
                 <Link
                   key={a.id}
                   href={`/applications/${a.id}`}
-                  className="block bg-pg-white border border-pg-ink-100 rounded-2xl px-4 py-4 no-underline text-pg-ink-900"
+                  className="block bg-pg-white rounded-2xl px-4 py-4 no-underline text-pg-ink-primary"
+                  style={{
+                    border: "1px solid var(--pg-border)",
+                    opacity: muted ? 0.65 : 1,
+                  }}
                 >
                   <div className="flex justify-between items-start gap-3">
-                    <div>
-                      <div className="text-[12px] tracking-[0.08em] uppercase text-pg-ink-400">
-                        {a.positions?.country ?? "—"}
+                    <div className="min-w-0">
+                      <div
+                        className="text-[10px] font-semibold tracking-[0.1em] uppercase"
+                        style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
+                      >
+                        {COUNTRY_LABEL[a.positions?.country ?? ""] ?? a.positions?.country}
                       </div>
-                      <div className="text-lg font-extrabold tracking-tight mt-0.5">
+                      <div className="text-[18px] font-extrabold tracking-[-0.01em] mt-0.5 truncate">
                         {a.positions?.name ?? a.position_slug}
                       </div>
                     </div>
-                    <Badge variant={stage.variant}>{stage.label}</Badge>
+                    <StagePill tone={stage.tone}>{stage.label}</StagePill>
                   </div>
-                  <div className="flex justify-between items-center mt-3.5 pt-3.5 border-t border-pg-ink-100">
-                    <div className="text-sm text-pg-ink-500">
-                      Dilamar {new Date(a.created_at).toLocaleDateString("id-ID")}
+
+                  {missing && !muted && (
+                    <div
+                      className="flex items-center justify-between gap-2 mt-3 px-3 py-2.5 rounded-xl"
+                      style={{ background: "var(--pg-red-soft-bg)" }}
+                    >
+                      <div className="flex items-center gap-2 text-[13px] text-pg-red-700 font-semibold">
+                        <span
+                          className="w-1.5 h-1.5 rounded-full"
+                          style={{ background: "var(--pg-red-600)" }}
+                        />
+                        1 hal wajib belum diisi
+                      </div>
+                      <span className="text-[12px] font-bold text-pg-red-600">Lengkapi ›</span>
                     </div>
-                    <div className="flex items-center gap-1 text-pg-red-600 font-bold text-sm">
-                      Detail <Icon name="chevron_right" size={16} />
+                  )}
+
+                  <div
+                    className="flex justify-between items-center mt-3 pt-3"
+                    style={{ borderTop: "1px solid var(--pg-border)" }}
+                  >
+                    <div className="text-[13px] text-pg-ink-tertiary">
+                      Dilamar{" "}
+                      {new Date(a.created_at).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "numeric",
+                        year: "numeric",
+                      })}
                     </div>
+                    <span className="text-[12px] font-bold text-pg-red-600">Detail ›</span>
                   </div>
                 </Link>
               );
@@ -112,5 +177,32 @@ export default async function ApplicationsListPage() {
       </main>
       <BottomNav />
     </div>
+  );
+}
+
+function StagePill({
+  tone,
+  children,
+}: {
+  tone: "warn" | "info" | "ok" | "err" | "mute";
+  children: React.ReactNode;
+}) {
+  const colors =
+    tone === "warn"
+      ? { bg: "var(--pg-warn-soft-bg)", fg: "var(--pg-warn-soft-fg)" }
+      : tone === "info"
+      ? { bg: "var(--pg-info-bg)", fg: "var(--pg-info)" }
+      : tone === "ok"
+      ? { bg: "var(--pg-ok-soft-bg)", fg: "var(--pg-ok-soft-fg)" }
+      : tone === "err"
+      ? { bg: "var(--pg-err-bg)", fg: "var(--pg-err)" }
+      : { bg: "var(--pg-ink-50)", fg: "var(--pg-ink-tertiary)" };
+  return (
+    <span
+      className="inline-flex shrink-0 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-[0.06em] uppercase whitespace-nowrap"
+      style={{ background: colors.bg, color: colors.fg, fontFamily: "var(--font-mono)" }}
+    >
+      {children}
+    </span>
   );
 }
