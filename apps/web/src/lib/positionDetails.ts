@@ -211,6 +211,122 @@ export const POSITION_DETAILS: Record<string, PositionDetail> = {
     process: COMMON_PROCESS,
   },
 
+  "head-barista-saudi-arabia": {
+    jobDescription: [
+      "Menciptakan dan menghidangkan menu minuman baru bersama Barista/Bartender lain",
+      "Menjamin kualitas minuman yang dihidangkan",
+      "Bertanggung jawab atas inventory bahan baku minuman",
+      "Melayani pelanggan dengan ramah dan informatif",
+      "Mengelola pesanan dengan rapi dan tepat",
+      "Menjaga kebersihan area kerja serta peralatan",
+    ],
+    details: [
+      { label: "Penempatan kerja", value: "30WET (wet30s)" },
+      { label: "Lokasi", value: "Muhayil Asir, Saudi Arabia" },
+      { label: "Jam kerja", value: "8 jam/hari · 6 hari/minggu" },
+      { label: "Istirahat", value: "1 hari/minggu" },
+      { label: "Annual leave", value: "21 hari" },
+      { label: "Hari libur", value: "Sesuai hukum Arab Saudi" },
+      { label: "Status kepegawaian", value: "Kontrak 2 tahun" },
+      { label: "Masa percobaan", value: "90 hari" },
+    ],
+    benefits: [
+      { icon: "wallet", label: "Total gaji", value: "SAR 2.200 / bulan" },
+      { icon: "shield", label: "Asuransi", value: "Disediakan" },
+      { icon: "home", label: "Akomodasi", value: "Disediakan oleh perusahaan" },
+      { icon: "truck", label: "Transportasi", value: "Disediakan oleh perusahaan" },
+    ],
+    qualifications: [
+      "Laki-laki, 21–30 tahun",
+      "Mampu berkomunikasi bahasa Inggris",
+      "Minimal 1 tahun pengalaman sebagai head barista / barista",
+    ],
+    fee: {
+      amount: "Termasuk dokumentasi",
+      breakdown: ["Pra MCU", "MCU GAMCA", "Apostille", "Visa", "Psikotes"],
+      note: COMMON_FEE_NOTE,
+    },
+    process: COMMON_PROCESS,
+  },
+
+  "roaster-saudi-arabia": {
+    jobDescription: [
+      "Melakukan proses roasting kopi sesuai standar (atur suhu, waktu, dan profil roasting)",
+      "Menjaga kualitas rasa melalui pengecekan dan cupping (tes rasa)",
+      "Mengoperasikan & merawat mesin roasting agar tetap optimal",
+      "Mencatat dan menganalisa data roasting untuk konsistensi hasil",
+      "Mengelola stok biji kopi (green bean & roasted bean) serta proses produksi",
+    ],
+    details: [
+      { label: "Penempatan kerja", value: "30WET (wet30s)" },
+      { label: "Lokasi", value: "Muhayil Asir, Saudi Arabia" },
+      { label: "Jam kerja", value: "8 jam/hari · 6 hari/minggu" },
+      { label: "Istirahat", value: "1 hari/minggu" },
+      { label: "Annual leave", value: "21 hari" },
+      { label: "Hari libur", value: "Sesuai hukum Arab Saudi" },
+      { label: "Status kepegawaian", value: "Kontrak 2 tahun" },
+      { label: "Masa percobaan", value: "90 hari" },
+    ],
+    benefits: [
+      { icon: "wallet", label: "Total gaji", value: "Mulai dari SAR 2.800 / bulan" },
+      { icon: "shield", label: "Asuransi", value: "Disediakan" },
+      { icon: "home", label: "Akomodasi", value: "Disediakan oleh perusahaan" },
+      { icon: "truck", label: "Transportasi", value: "Disediakan oleh perusahaan" },
+      { icon: "stethoscope", label: "Fasilitas medis", value: "Disediakan oleh perusahaan" },
+      { icon: "clock", label: "Uang lembur", value: "Sesuai hukum Arab Saudi" },
+    ],
+    qualifications: [
+      "Laki-laki, 21–30 tahun",
+      "Mampu berkomunikasi bahasa Inggris",
+      "Minimal 1 tahun pengalaman coffee roasting",
+    ],
+    fee: {
+      amount: "Termasuk dokumentasi",
+      breakdown: ["Pra MCU", "MCU GAMCA", "Apostille", "Enjaz", "Psikotes"],
+      note: COMMON_FEE_NOTE,
+    },
+    process: COMMON_PROCESS,
+  },
+
+  "chef-pastry-saudi-arabia": {
+    jobDescription: [
+      "Membuat dan menyiapkan produk pastry & dessert sesuai standar resep",
+      "Menjaga kualitas dan konsistensi produk",
+      "Mengembangkan menu & resep baru menyesuaikan tren, konsep brand, dan preferensi pasar (termasuk market Timur Tengah)",
+      "Mengelola operasional dapur pastry",
+      "Memastikan kebersihan & standar food safety",
+    ],
+    details: [
+      { label: "Penempatan kerja", value: "30WET (wet30s)" },
+      { label: "Lokasi", value: "Muhayil Asir, Saudi Arabia" },
+      { label: "Jam kerja", value: "8 jam/hari · 6 hari/minggu" },
+      { label: "Istirahat", value: "1 hari/minggu" },
+      { label: "Annual leave", value: "21 hari" },
+      { label: "Hari libur", value: "Sesuai hukum Arab Saudi" },
+      { label: "Status kepegawaian", value: "Kontrak 2 tahun" },
+      { label: "Masa percobaan", value: "90 hari" },
+    ],
+    benefits: [
+      { icon: "wallet", label: "Total gaji", value: "Mulai dari SAR 2.500 / bulan" },
+      { icon: "shield", label: "Asuransi", value: "Disediakan" },
+      { icon: "home", label: "Akomodasi", value: "Disediakan oleh perusahaan" },
+      { icon: "truck", label: "Transportasi", value: "Disediakan oleh perusahaan" },
+      { icon: "stethoscope", label: "Fasilitas medis", value: "Disediakan oleh perusahaan" },
+      { icon: "clock", label: "Uang lembur", value: "Sesuai hukum Arab Saudi" },
+    ],
+    qualifications: [
+      "Laki-laki, 21–30 tahun",
+      "Mampu berkomunikasi bahasa Inggris",
+      "Minimal 1 tahun pengalaman pastry / dessert",
+    ],
+    fee: {
+      amount: "Termasuk dokumentasi",
+      breakdown: ["Pra MCU", "MCU GAMCA", "Apostille", "Enjaz", "Psikotes"],
+      note: COMMON_FEE_NOTE,
+    },
+    process: COMMON_PROCESS,
+  },
+
   "spa-therapist-saudi-arabia": {
     details: [
       { label: "Penempatan kerja", value: "Dany Salon" },

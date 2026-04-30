@@ -13,6 +13,9 @@ const SLUG_MAP: Record<string, { role: string; country: string }> = {
   "waiter-saudi-arabia": { role: "waiter", country: "saudi_arabia" },
   "waitress-saudi-arabia": { role: "waitress", country: "saudi_arabia" },
   "chef-bakery-saudi-arabia": { role: "chef_bakery", country: "saudi_arabia" },
+  "head-barista-saudi-arabia": { role: "head_barista", country: "saudi_arabia" },
+  "roaster-saudi-arabia": { role: "roaster", country: "saudi_arabia" },
+  "chef-pastry-saudi-arabia": { role: "chef_pastry", country: "saudi_arabia" },
   "spa-therapist-saudi-arabia": { role: "spa_therapist", country: "saudi_arabia" },
   "laundry-worker-saudi-arabia": { role: "laundry_worker", country: "saudi_arabia" },
   // Jepang
