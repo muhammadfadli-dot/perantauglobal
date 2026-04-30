@@ -136,6 +136,7 @@ export default async function CandidateDetailPage({
   let age: number | null = null;
   if (cand.birth_date) {
     const b = new Date(cand.birth_date);
+    // eslint-disable-next-line react-hooks/purity -- per-request age computation; non-idempotent by design
     age = Math.floor((Date.now() - b.getTime()) / (365.25 * 24 * 60 * 60 * 1000));
   }
 
@@ -195,6 +196,7 @@ export default async function CandidateDetailPage({
   activity.sort((a, b) => b.ts.getTime() - a.ts.getTime());
 
   function timeAgo(ts: Date): string {
+    // eslint-disable-next-line react-hooks/purity -- per-request "X jam lalu" label; non-idempotent by design
     const diffH = Math.round((Date.now() - ts.getTime()) / (1000 * 60 * 60));
     if (diffH < 1) return "Baru aja";
     if (diffH < 24) return `${diffH} jam lalu`;

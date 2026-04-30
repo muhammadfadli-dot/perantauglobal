@@ -63,6 +63,7 @@ export default async function AdminPositionsPage({
     supabase
       .from("applications")
       .select("*", { count: "exact", head: true })
+      // eslint-disable-next-line react-hooks/purity -- per-request time window for "applications this week" stat; intentionally non-idempotent in RSC
       .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
   ]);
 

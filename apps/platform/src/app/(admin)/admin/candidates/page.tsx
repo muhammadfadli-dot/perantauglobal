@@ -72,6 +72,7 @@ export default async function CandidatesListPage({
     supabase
       .from("candidates")
       .select("*", { count: "exact", head: true })
+      // eslint-disable-next-line react-hooks/purity -- per-request time window for "candidates this week" stat; intentionally non-idempotent in RSC
       .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
   ]);
 
@@ -150,6 +151,7 @@ export default async function CandidatesListPage({
   });
 
   function timeAgo(iso: string): string {
+    // eslint-disable-next-line react-hooks/purity -- per-request "X jam lalu" label; non-idempotent by design
     const diffH = Math.round((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60));
     if (diffH < 1) return "Baru aja";
     if (diffH < 24) return `${diffH} jam lalu`;
@@ -174,14 +176,14 @@ export default async function CandidatesListPage({
               Semua kandidat yang udah daftar — filter berdasar tier, posisi, atau status.
             </p>
           </div>
-          <a
+          <Link
             href="/admin/candidates/export"
-            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-[13px] font-bold text-pg-ink-secondary"
+            className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-lg text-[13px] font-bold text-pg-ink-secondary no-underline"
             style={{ border: "1px solid var(--pg-border)", background: "var(--pg-white)" }}
           >
             <Icon name="download" size={14} stroke={2} />
             Export CSV
-          </a>
+          </Link>
         </div>
 
         {/* Stats */}

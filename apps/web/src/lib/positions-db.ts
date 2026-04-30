@@ -23,6 +23,25 @@ export type ActiveJobOrder = {
   public_description: string | null;
 };
 
+/**
+ * Per-position custom field rendered as Step 2 of the apply form on web.
+ * Loaded from `position_form_fields WHERE collect_at_stage = 'applied'`.
+ *
+ * Answers flow into:
+ *   - applications.answers JSONB
+ *   - candidates.profile_data.credentials (via handle_new_auth_user trigger)
+ */
+export type AppliedFormField = {
+  id: string;
+  field_key: string;
+  field_label: string;
+  field_help: string | null;
+  field_type: string;
+  options: { value: string; label: string }[] | null;
+  required: boolean;
+  sort_order: number;
+};
+
 const REVALIDATE_SECONDS = 60;
 
 /**
@@ -51,6 +70,26 @@ export async function fetchOpenJobOrders(): Promise<Map<string, ActiveJobOrder>>
     return map;
   } catch {
     return new Map();
+  }
+}
+
+/**
+ * Returns custom apply-stage form fields for a position. Empty array if
+ * none seeded — caller should treat that as "render single-step form".
+ */
+export async function fetchAppliedFields(slug: string): Promise<AppliedFormField[]> {
+  try {
+    const sb = supabaseV2();
+    const { data, error } = await sb
+      .from("position_form_fields")
+      .select("id, field_key, field_label, field_help, field_type, options, required, sort_order")
+      .eq("position_slug", slug)
+      .eq("collect_at_stage", "applied")
+      .order("sort_order");
+    if (error || !data) return [];
+    return data as AppliedFormField[];
+  } catch {
+    return [];
   }
 }
 

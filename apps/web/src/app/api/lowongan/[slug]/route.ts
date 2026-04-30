@@ -40,6 +40,13 @@ interface CandidatePayload {
   role: string;
   country: string;
   source_url?: string;
+  /**
+   * Apply-stage qualifying answers. Keys must match `position_form_fields.field_key`
+   * for the slug; values are string (radio/select/text/number) or string[] (multiselect).
+   * Materialized into `applications.answers` and merged into
+   * `candidates.profile_data.credentials` by the handle_new_auth_user trigger.
+   */
+  role_data?: Record<string, string | string[]>;
   eventId?: string;
   fbp?: string;
   fbc?: string;
@@ -52,6 +59,30 @@ function validatePasswordServer(pw: string): boolean {
     /[A-Z]/.test(pw) &&
     /[0-9]/.test(pw)
   );
+}
+
+/**
+ * Defensive: only accept role_data that matches our expected shape
+ * (string keys, string|string[] values). Drop anything weird so we never
+ * stuff arbitrary objects into pending_submissions.form_data.role_data.
+ */
+function sanitizeRoleData(
+  raw: unknown,
+): Record<string, string | string[]> {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+  const out: Record<string, string | string[]> = {};
+  for (const [key, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (typeof key !== "string" || key.length === 0 || key.length > 64) continue;
+    if (typeof value === "string") {
+      if (value.length > 0 && value.length <= 500) out[key] = value;
+    } else if (Array.isArray(value)) {
+      const arr = value
+        .filter((v): v is string => typeof v === "string" && v.length > 0 && v.length <= 200)
+        .slice(0, 32);
+      if (arr.length > 0) out[key] = arr;
+    }
+  }
+  return out;
 }
 
 export async function POST(
@@ -119,6 +150,7 @@ export async function POST(
           role: mapping.role,
           country: mapping.country,
           source_url: body.source_url ?? null,
+          role_data: sanitizeRoleData(body.role_data),
         },
         consents: [
           {

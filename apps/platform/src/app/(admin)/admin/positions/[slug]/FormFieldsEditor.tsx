@@ -3,7 +3,13 @@
 import { useState, useTransition } from "react";
 import { Icon } from "@/components/pg/Icon";
 import { Button, Badge } from "@/components/pg/primitives";
-import { createFormField, deleteFormField, type FormFieldInput } from "../actions";
+import {
+  createFormField,
+  deleteFormField,
+  reorderFormField,
+  updateFormField,
+  type FormFieldInput,
+} from "../actions";
 
 type Field = {
   id: string;
@@ -34,6 +40,14 @@ const TYPE_OPTIONS: FormFieldInput["field_type"][] = [
   "file",
 ];
 
+type Stage = "applied" | "screening" | "document_check";
+
+const STAGE_DESCRIPTIONS: Array<[Stage, string, string]> = [
+  ["applied", "Saat apply", "Ditanya di web sebelum bikin akun. Untuk hard-pass disqualifier (mis. \"STR aktif?\")."],
+  ["screening", "Screening", "Default — pertanyaan tier-scoring & profil. Ditanya post-apply di Talent Hub."],
+  ["document_check", "Doc check", "Essay panjang, motivasi mendalam. Ditanya di tahap doc check."],
+];
+
 export default function FormFieldsEditor({
   positionSlug,
   initial,
@@ -42,6 +56,7 @@ export default function FormFieldsEditor({
   initial: Field[];
 }) {
   const [showAdd, setShowAdd] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   return (
     <div>
@@ -51,16 +66,34 @@ export default function FormFieldsEditor({
             Belum ada custom field. Tambah pertanyaan tambahan untuk apply form posisi ini.
           </div>
         ) : (
-          initial.map((f) => (
-            <FieldRow key={f.id} positionSlug={positionSlug} field={f} />
-          ))
+          initial.map((f, idx) =>
+            editingId === f.id ? (
+              <FieldForm
+                key={f.id}
+                positionSlug={positionSlug}
+                mode="edit"
+                initial={f}
+                onClose={() => setEditingId(null)}
+              />
+            ) : (
+              <FieldRow
+                key={f.id}
+                positionSlug={positionSlug}
+                field={f}
+                isFirst={idx === 0}
+                isLast={idx === initial.length - 1}
+                onEdit={() => setEditingId(f.id)}
+              />
+            ),
+          )
         )}
       </div>
 
       <div className="mt-4">
         {showAdd ? (
-          <AddForm
+          <FieldForm
             positionSlug={positionSlug}
+            mode="add"
             sortOrder={(initial[initial.length - 1]?.sort_order ?? 0) + 10}
             onClose={() => setShowAdd(false)}
           />
@@ -70,11 +103,34 @@ export default function FormFieldsEditor({
           </Button>
         )}
       </div>
+
+      <div
+        className="mt-4 px-3.5 py-2.5 rounded-lg flex items-start gap-2 text-[12px] leading-relaxed"
+        style={{ background: "var(--pg-info-bg)", color: "var(--pg-info)" }}
+      >
+        <Icon name="info" size={14} className="shrink-0 mt-0.5" />
+        <div>
+          Perubahan field <b>tersinkron ke website</b> (perantauglobal.com/lowongan/…) dalam ~60
+          detik. Untuk preview langsung, refresh halaman website setelah simpan.
+        </div>
+      </div>
     </div>
   );
 }
 
-function FieldRow({ positionSlug, field }: { positionSlug: string; field: Field }) {
+function FieldRow({
+  positionSlug,
+  field,
+  isFirst,
+  isLast,
+  onEdit,
+}: {
+  positionSlug: string;
+  field: Field;
+  isFirst: boolean;
+  isLast: boolean;
+  onEdit: () => void;
+}) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -90,36 +146,84 @@ function FieldRow({ positionSlug, field }: { positionSlug: string; field: Field 
     });
   }
 
+  function move(direction: "up" | "down") {
+    setError(null);
+    start(async () => {
+      try {
+        await reorderFormField(field.id, positionSlug, direction);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Gagal pindah");
+      }
+    });
+  }
+
   return (
     <div className="bg-pg-white border border-pg-ink-100 rounded-xl px-4 py-3.5">
       <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="text-[14px] font-bold">{field.field_label}</div>
-          <div className="text-[11px] text-pg-ink-500 font-mono mt-0.5">
-            {field.field_key} · {field.field_type} · {STAGE_LABEL[field.collect_at_stage] ?? field.collect_at_stage}
+        <div className="flex items-start gap-2 flex-1 min-w-0">
+          <div className="flex flex-col gap-0.5 shrink-0 -ml-1.5 mt-0.5">
+            <button
+              type="button"
+              onClick={() => move("up")}
+              disabled={pending || isFirst}
+              aria-label="Pindah naik"
+              className="w-5 h-5 grid place-items-center text-pg-ink-500 hover:text-pg-red-600 disabled:opacity-25 disabled:hover:text-pg-ink-500"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="18 15 12 9 6 15" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => move("down")}
+              disabled={pending || isLast}
+              aria-label="Pindah turun"
+              className="w-5 h-5 grid place-items-center text-pg-ink-500 hover:text-pg-red-600 disabled:opacity-25 disabled:hover:text-pg-ink-500"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
           </div>
-          {field.field_help && (
-            <div className="text-[12px] text-pg-ink-500 mt-1">{field.field_help}</div>
-          )}
-          {field.options && field.options.length > 0 && (
-            <div className="text-[12px] text-pg-ink-500 mt-1">
-              Options: {field.options.map((o) => o.label).join(", ")}
+          <div className="flex-1 min-w-0">
+            <div className="text-[14px] font-bold">{field.field_label}</div>
+            <div className="text-[11px] text-pg-ink-500 font-mono mt-0.5">
+              {field.field_key} · {field.field_type} ·{" "}
+              {STAGE_LABEL[field.collect_at_stage] ?? field.collect_at_stage}
             </div>
-          )}
+            {field.field_help && (
+              <div className="text-[12px] text-pg-ink-500 mt-1">{field.field_help}</div>
+            )}
+            {field.options && field.options.length > 0 && (
+              <div className="text-[12px] text-pg-ink-500 mt-1">
+                Options: {field.options.map((o) => o.label).join(", ")}
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <div className="flex gap-1.5">
             {field.required && <Badge variant="err">Wajib</Badge>}
             {field.tier_weight > 0 && <Badge variant="info">Bobot {field.tier_weight}</Badge>}
           </div>
-          <button
-            type="button"
-            onClick={remove}
-            disabled={pending}
-            className="inline-flex items-center gap-1 text-[12px] font-bold text-pg-err hover:underline disabled:opacity-50"
-          >
-            <Icon name="trash" size={12} /> Hapus
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={onEdit}
+              disabled={pending}
+              className="inline-flex items-center gap-1 text-[12px] font-bold text-pg-ink-700 hover:text-pg-red-600 disabled:opacity-50"
+            >
+              <Icon name="edit" size={12} /> Edit
+            </button>
+            <button
+              type="button"
+              onClick={remove}
+              disabled={pending}
+              className="inline-flex items-center gap-1 text-[12px] font-bold text-pg-err hover:underline disabled:opacity-50"
+            >
+              <Icon name="trash" size={12} /> Hapus
+            </button>
+          </div>
         </div>
       </div>
       {error && (
@@ -131,19 +235,34 @@ function FieldRow({ positionSlug, field }: { positionSlug: string; field: Field 
   );
 }
 
-function AddForm({
-  positionSlug,
-  sortOrder,
-  onClose,
-}: {
-  positionSlug: string;
-  sortOrder: number;
-  onClose: () => void;
-}) {
+type FieldFormProps =
+  | {
+      mode: "add";
+      positionSlug: string;
+      sortOrder: number;
+      onClose: () => void;
+      initial?: undefined;
+    }
+  | {
+      mode: "edit";
+      positionSlug: string;
+      initial: Field;
+      onClose: () => void;
+      sortOrder?: undefined;
+    };
+
+function FieldForm(props: FieldFormProps) {
+  const { mode, positionSlug, onClose } = props;
+  const initial = mode === "edit" ? props.initial : null;
+
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [fieldType, setFieldType] = useState<FormFieldInput["field_type"]>("radio");
-  const [stage, setStage] = useState<NonNullable<FormFieldInput["collect_at_stage"]>>("screening");
+  const [fieldType, setFieldType] = useState<FormFieldInput["field_type"]>(
+    (initial?.field_type as FormFieldInput["field_type"]) ?? "radio",
+  );
+  const [stage, setStage] = useState<Stage>(
+    (initial?.collect_at_stage as Stage) ?? "screening",
+  );
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -151,50 +270,83 @@ function AddForm({
     const fd = new FormData(e.currentTarget);
     const optionsRaw = String(fd.get("options") ?? "").trim();
     let options: { value: string; label: string }[] | null = null;
-    if (optionsRaw && (fieldType === "select" || fieldType === "radio" || fieldType === "multiselect")) {
+    if (
+      optionsRaw &&
+      (fieldType === "select" || fieldType === "radio" || fieldType === "multiselect")
+    ) {
       try {
-        options = optionsRaw.split("\n").filter(Boolean).map((line) => {
-          const [value, ...labelParts] = line.split("|");
-          const label = labelParts.join("|").trim() || value.trim();
-          return { value: value.trim(), label };
-        });
+        options = optionsRaw
+          .split("\n")
+          .filter(Boolean)
+          .map((line) => {
+            const [value, ...labelParts] = line.split("|");
+            const label = labelParts.join("|").trim() || value.trim();
+            return { value: value.trim(), label };
+          });
       } catch {
         setError("Format options salah. Pakai 'value|label' per baris.");
         return;
       }
     }
 
+    const payload: FormFieldInput = {
+      field_key: String(fd.get("field_key") ?? "").trim(),
+      field_label: String(fd.get("field_label") ?? "").trim(),
+      field_help: (fd.get("field_help") as string) || undefined,
+      field_type: fieldType,
+      options,
+      required: fd.get("required") === "on",
+      tier_weight: Number(fd.get("tier_weight") ?? 0),
+      sort_order: mode === "add" ? props.sortOrder : initial!.sort_order,
+      collect_at_stage: stage,
+    };
+
     start(async () => {
       try {
-        await createFormField(positionSlug, {
-          field_key: String(fd.get("field_key") ?? "").trim(),
-          field_label: String(fd.get("field_label") ?? "").trim(),
-          field_help: (fd.get("field_help") as string) || undefined,
-          field_type: fieldType,
-          options,
-          required: fd.get("required") === "on",
-          tier_weight: Number(fd.get("tier_weight") ?? 0),
-          sort_order: sortOrder,
-          collect_at_stage: stage,
-        });
+        if (mode === "add") {
+          await createFormField(positionSlug, payload);
+        } else {
+          // updateFormField doesn't allow renaming field_key (server uniq + downstream answers reference it)
+          const { field_key: _ignored, ...patch } = payload;
+          void _ignored;
+          await updateFormField(initial!.id, positionSlug, patch);
+        }
         onClose();
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Gagal menambah");
+        setError(err instanceof Error ? err.message : "Gagal menyimpan");
       }
     });
   }
 
-  const inputClass = "w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3 py-2 text-sm focus:border-pg-red-600 outline-none";
+  const inputClass =
+    "w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3 py-2 text-sm focus:border-pg-red-600 outline-none";
+
+  const optionsDefault =
+    initial?.options?.map((o) => `${o.value}|${o.label}`).join("\n") ?? "";
 
   return (
-    <form onSubmit={submit} className="bg-pg-white border-[1.5px] border-pg-red-200 rounded-2xl p-4">
+    <form
+      onSubmit={submit}
+      className="bg-pg-white border-[1.5px] border-pg-red-200 rounded-2xl p-4"
+    >
       <div className="text-[12px] font-bold tracking-[0.1em] uppercase text-pg-red-600 mb-3">
-        Tambah pertanyaan baru
+        {mode === "add" ? "Tambah pertanyaan baru" : "Edit pertanyaan"}
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <label>
-          <div className="text-[12px] font-bold text-pg-ink-500 mb-1">Field key (snake_case)</div>
-          <input name="field_key" type="text" required pattern="[a-z][a-z0-9_]*" placeholder="kopi_skill" className={`${inputClass} font-mono`} />
+          <div className="text-[12px] font-bold text-pg-ink-500 mb-1">
+            Field key (snake_case){mode === "edit" && " — read-only"}
+          </div>
+          <input
+            name="field_key"
+            type="text"
+            required
+            pattern="[a-z][a-z0-9_]*"
+            placeholder="kopi_skill"
+            defaultValue={initial?.field_key ?? ""}
+            readOnly={mode === "edit"}
+            className={`${inputClass} font-mono ${mode === "edit" ? "bg-pg-ink-50 text-pg-ink-500" : ""}`}
+          />
         </label>
         <label>
           <div className="text-[12px] font-bold text-pg-ink-500 mb-1">Tipe</div>
@@ -204,58 +356,82 @@ function AddForm({
             className={inputClass}
           >
             {TYPE_OPTIONS.map((t) => (
-              <option key={t} value={t}>{t}</option>
+              <option key={t} value={t}>
+                {t}
+              </option>
             ))}
           </select>
         </label>
       </div>
       <label className="block mt-3">
         <div className="text-[12px] font-bold text-pg-ink-500 mb-1">Label (yang user lihat)</div>
-        <input name="field_label" type="text" required placeholder="Berapa lama pengalaman barista kamu?" className={inputClass} />
+        <input
+          name="field_label"
+          type="text"
+          required
+          placeholder="Berapa lama pengalaman barista kamu?"
+          defaultValue={initial?.field_label ?? ""}
+          className={inputClass}
+        />
       </label>
       <label className="block mt-3">
         <div className="text-[12px] font-bold text-pg-ink-500 mb-1">
-          Help text <span className="font-normal text-pg-ink-400">(jelaskan kenapa ditanya)</span>
+          Help text{" "}
+          <span className="font-normal text-pg-ink-400">(opsional, jelaskan kenapa ditanya)</span>
         </div>
-        <input name="field_help" type="text" placeholder="Untuk cocokkan kamu dengan brand kopi yang tepat." className={inputClass} />
+        <input
+          name="field_help"
+          type="text"
+          placeholder="Untuk cocokkan kamu dengan brand kopi yang tepat."
+          defaultValue={initial?.field_help ?? ""}
+          className={inputClass}
+        />
       </label>
       {(fieldType === "select" || fieldType === "radio" || fieldType === "multiselect") && (
         <label className="block mt-3">
           <div className="text-[12px] font-bold text-pg-ink-500 mb-1">
-            Options <span className="font-normal text-pg-ink-400">(satu per baris, format: value|label)</span>
+            Options{" "}
+            <span className="font-normal text-pg-ink-400">
+              (satu per baris, format: value|label)
+            </span>
           </div>
           <textarea
             name="options"
             rows={4}
             placeholder={`belum_pernah|Belum pernah\n1_2|1–2 tahun\n3_plus|3 tahun ke atas`}
+            defaultValue={optionsDefault}
             className={`${inputClass} font-mono`}
           />
         </label>
       )}
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         <label className="flex items-center gap-2 cursor-pointer">
-          <input name="required" type="checkbox" className="w-4 h-4 accent-pg-red-600" />
+          <input
+            name="required"
+            type="checkbox"
+            defaultChecked={initial?.required ?? false}
+            className="w-4 h-4 accent-pg-red-600"
+          />
           <span className="text-sm font-semibold">Wajib diisi</span>
         </label>
         <label>
           <div className="text-[12px] font-bold text-pg-ink-500 mb-1">
             Tier weight <span className="font-normal text-pg-ink-400">(0–10)</span>
           </div>
-          <input name="tier_weight" type="number" min={0} max={10} defaultValue={0} className={inputClass} />
+          <input
+            name="tier_weight"
+            type="number"
+            min={0}
+            max={10}
+            defaultValue={initial?.tier_weight ?? 0}
+            className={inputClass}
+          />
         </label>
       </div>
       <div className="mt-3">
-        <div className="text-[12px] font-bold text-pg-ink-500 mb-1.5">
-          Tanya kapan?
-        </div>
+        <div className="text-[12px] font-bold text-pg-ink-500 mb-1.5">Tanya kapan?</div>
         <div className="grid gap-1.5">
-          {(
-            [
-              ["applied", "Saat apply", "Cuma untuk hard-pass disqualifier (mis. \"Bersedia tinggal asrama 6 bulan?\")"],
-              ["screening", "Screening", "Default — pertanyaan tier-scoring & profil"],
-              ["document_check", "Doc check", "Essay panjang, motivasi mendalam"],
-            ] as const
-          ).map(([val, label, desc]) => {
+          {STAGE_DESCRIPTIONS.map(([val, label, desc]) => {
             const selected = stage === val;
             return (
               <button
@@ -276,12 +452,17 @@ function AddForm({
         </div>
       </div>
       {error && (
-        <div className="mt-3 px-3 py-2 rounded-lg text-[12px] flex items-start gap-1" style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}>
+        <div
+          className="mt-3 px-3 py-2 rounded-lg text-[12px] flex items-start gap-1"
+          style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
+        >
           <Icon name="warn" size={12} className="mt-0.5 shrink-0" /> {error}
         </div>
       )}
       <div className="mt-4 flex gap-2">
-        <Button type="submit" small disabled={pending}>{pending ? "Menyimpan…" : "Simpan field"}</Button>
+        <Button type="submit" small disabled={pending}>
+          {pending ? "Menyimpan…" : mode === "add" ? "Simpan field" : "Update field"}
+        </Button>
         <button
           type="button"
           onClick={onClose}

@@ -3,13 +3,13 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { setRequestLocale } from "next-intl/server";
 import { Icon } from "@/components/pg/Icon";
-import { Badge, StatusDot } from "@/components/pg/primitives";
+import { StatusDot } from "@/components/pg/primitives";
 import { RedHero } from "@/components/pg/RedHero";
 import { ApplyForm } from "@/components/pg/ApplyForm";
 import { ExistingUserShortcut } from "@/components/pg/ExistingUserShortcut";
 import { getPosition, POSITIONS } from "@/lib/positions";
 import { getPositionDetail } from "@/lib/positionDetails";
-import { fetchOpenJobOrders } from "@/lib/positions-db";
+import { fetchOpenJobOrders, fetchAppliedFields } from "@/lib/positions-db";
 
 type RouteParams = { locale: string; slug: string };
 
@@ -46,8 +46,11 @@ export default async function LowonganDetailPage({
   const detail = getPositionDetail(slug);
   if (!baseStatic || !detail) notFound();
 
-  // Overlay live job_order if open
-  const jobOrders = await fetchOpenJobOrders();
+  // Overlay live job_order if open + fetch apply-stage qualifying fields in parallel
+  const [jobOrders, appliedFields] = await Promise.all([
+    fetchOpenJobOrders(),
+    fetchAppliedFields(slug),
+  ]);
   const jo = jobOrders.get(slug);
   const position = jo
     ? {
@@ -264,6 +267,7 @@ export default async function LowonganDetailPage({
               positionSlug={position.slug}
               positionRole={position.role}
               positionCountry={position.country}
+              fields={appliedFields}
             />
             <ExistingUserShortcut positionSlug={position.slug} />
           </div>
@@ -277,6 +281,7 @@ export default async function LowonganDetailPage({
             positionSlug={position.slug}
             positionRole={position.role}
             positionCountry={position.country}
+            fields={appliedFields}
           />
           <ExistingUserShortcut positionSlug={position.slug} />
         </div>

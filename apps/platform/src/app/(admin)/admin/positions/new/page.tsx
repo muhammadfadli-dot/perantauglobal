@@ -1,3 +1,4 @@
+import Link from "next/link";
 import AdminTopBar from "@/components/admin/TopBar";
 import PositionWizard from "./PositionWizard";
 
@@ -13,12 +14,12 @@ export default function NewPositionPage() {
           { label: "Tambah posisi", emphasis: true },
         ]}
         rightSlot={
-          <a
+          <Link
             href="/admin/positions"
             className="text-[13px] font-bold text-pg-ink-secondary px-3 py-2 rounded-lg no-underline hover:bg-pg-ink-50"
           >
             Batal
-          </a>
+          </Link>
         }
       />
       <PositionWizard />

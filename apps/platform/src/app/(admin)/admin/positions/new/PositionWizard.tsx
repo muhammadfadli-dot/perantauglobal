@@ -4,7 +4,6 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
   REQUIREMENT_LIBRARY,
-  REQUIREMENT_LIBRARY_BY_CATEGORY,
   type RequirementCategory,
   type RequirementTemplate,
 } from "@perantauglobal/db/schemas/requirements/library";
@@ -87,6 +86,7 @@ export default function PositionWizard() {
     if (!state.name) return;
     const base = slugify(state.name);
     const suffix = state.country && state.country !== "any" ? `-${state.country.replace("_", "-")}` : "";
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: derive slug from upstream inputs unless user has manually edited it
     setState((s) => ({ ...s, slug: base + suffix }));
   }, [state.name, state.country, state.slugTouched]);
 

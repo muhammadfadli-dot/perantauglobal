@@ -8,6 +8,36 @@ async function assertAdmin() {
   if (!session || role !== "admin") throw new Error("Forbidden");
 }
 
+/**
+ * Fire-and-forget POST to apps/web's /api/revalidate endpoint to trigger
+ * on-demand cache busting after admin changes form fields. Skipped silently
+ * if env is missing (dev / non-prod).
+ *
+ * Required env (production):
+ *   - WEB_REVALIDATE_URL      e.g. https://perantauglobal.com/api/revalidate
+ *   - REVALIDATE_SECRET       same shared secret as the web endpoint
+ */
+async function notifyWebRevalidate(slug: string): Promise<void> {
+  const url = process.env.WEB_REVALIDATE_URL;
+  const secret = process.env.REVALIDATE_SECRET;
+  if (!url || !secret) return;
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ secret, slug }),
+      // Don't block admin UI on this — best effort, ISR fallback covers it
+      // within 60s if the call fails.
+      signal: AbortSignal.timeout(3000),
+    });
+  } catch (err) {
+    console.warn(
+      `[revalidate-web] failed to notify ${url} for slug=${slug}:`,
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+}
+
 export async function updatePositionMeta(
   slug: string,
   patch: { name?: string; description?: string; active?: boolean }
@@ -134,6 +164,7 @@ export async function createFormField(positionSlug: string, input: FormFieldInpu
   } as never);
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/positions/${positionSlug}`);
+  await notifyWebRevalidate(positionSlug);
 }
 
 export async function updateFormField(id: string, positionSlug: string, patch: Partial<FormFieldInput>) {
@@ -154,6 +185,7 @@ export async function updateFormField(id: string, positionSlug: string, patch: P
     .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/positions/${positionSlug}`);
+  await notifyWebRevalidate(positionSlug);
 }
 
 export async function deleteFormField(id: string, positionSlug: string) {
@@ -162,4 +194,43 @@ export async function deleteFormField(id: string, positionSlug: string) {
   const { error } = await supabase.from("position_form_fields").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/positions/${positionSlug}`);
+  await notifyWebRevalidate(positionSlug);
+}
+
+/**
+ * Swap sort_order with the previous or next field in the same position.
+ * No-op if already at the edge. Used by the FormFieldsEditor reorder buttons.
+ */
+export async function reorderFormField(
+  id: string,
+  positionSlug: string,
+  direction: "up" | "down",
+) {
+  await assertAdmin();
+  const supabase = await createServerClient();
+  const { data, error: fetchErr } = await supabase
+    .from("position_form_fields")
+    .select("id, sort_order")
+    .eq("position_slug", positionSlug)
+    .order("sort_order", { ascending: true });
+  if (fetchErr) throw new Error(fetchErr.message);
+  const fields = (data ?? []) as { id: string; sort_order: number }[];
+  const idx = fields.findIndex((f) => f.id === id);
+  if (idx === -1) throw new Error("Field tidak ditemukan.");
+  const swapIdx = direction === "up" ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= fields.length) return;
+  const a = fields[idx];
+  const b = fields[swapIdx];
+  const { error: e1 } = await supabase
+    .from("position_form_fields")
+    .update({ sort_order: b.sort_order } as never)
+    .eq("id", a.id);
+  if (e1) throw new Error(e1.message);
+  const { error: e2 } = await supabase
+    .from("position_form_fields")
+    .update({ sort_order: a.sort_order } as never)
+    .eq("id", b.id);
+  if (e2) throw new Error(e2.message);
+  revalidatePath(`/admin/positions/${positionSlug}`);
+  await notifyWebRevalidate(positionSlug);
 }
