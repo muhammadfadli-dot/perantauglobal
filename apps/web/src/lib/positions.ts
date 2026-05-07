@@ -166,6 +166,18 @@ export const POSITIONS: Position[] = [
     age: "23–33",
     contractLabel: "Kontrak 2 tahun",
   },
+  {
+    slug: "heavy-diesel-mechanic-saudi-arabia",
+    role: "Heavy Diesel Truck Mechanic",
+    country: "Saudi Arabia",
+    icon: "truck",
+    status: "queue",
+    salary: "SAR 3.500–4.000",
+    salaryNote: "/bulan",
+    gender: "Laki-laki",
+    age: "25–37",
+    contractLabel: "Kontrak 2 tahun",
+  },
   // === Jepang ===
   {
     slug: "truck-driver-jepang",

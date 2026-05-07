@@ -385,6 +385,51 @@ export const POSITION_DETAILS: Record<string, PositionDetail> = {
     process: COMMON_PROCESS,
   },
 
+  "heavy-diesel-mechanic-saudi-arabia": {
+    jobDescription: [
+      "Troubleshooting dan perbaikan mesin truk diesel berat",
+      "Perawatan preventif armada",
+      "Penggunaan alat diagnostik mesin",
+      "Pemecahan masalah mekanis & engine",
+      "Manajemen waktu pengerjaan workshop",
+    ],
+    details: [
+      { label: "Lokasi", value: "Provinsi Timur Saudi Arabia (Dammam, Khobar, Dhahran)" },
+      { label: "Jam kerja", value: "8–10 jam/hari" },
+      { label: "Hari libur", value: "Sesuai hukum Arab Saudi" },
+      { label: "Status kepegawaian", value: "Kontrak 2 tahun" },
+    ],
+    benefits: [
+      { icon: "wallet", label: "Gaji pokok", value: "SAR 3.500–4.000 / bulan" },
+      { icon: "shield", label: "Asuransi", value: "Disediakan" },
+      { icon: "home", label: "Akomodasi", value: "Disediakan oleh perusahaan" },
+      { icon: "truck", label: "Transportasi", value: "Disediakan oleh perusahaan" },
+    ],
+    qualifications: [
+      "Laki-laki, 25–37 tahun",
+      "Pengalaman minimal 5 tahun di perawatan & perbaikan truk diesel berat",
+      "Mampu mendiagnosis masalah mekanis dan mesin",
+      "Familiar dengan engine CAT atau alat berat sejenis",
+      "Mampu berkomunikasi bahasa Inggris",
+      "Sehat secara fisik & mampu bekerja di lingkungan menuntut",
+    ],
+    fee: {
+      amount: "Rp 10.250.000",
+      breakdown: [
+        "ID CPMI",
+        "BPJS PRA & PURNA",
+        "Psikotes",
+        "MCU GAMCA",
+        "Enjaz Visa",
+        "Dokumen Terjemah",
+        "Apostille SKCK & Ijazah",
+        "QVP",
+      ],
+      note: COMMON_FEE_NOTE,
+    },
+    process: COMMON_PROCESS,
+  },
+
   // === Jepang ===
   "truck-driver-jepang": {
     jobDescription: ["Mengendarai kendaraan truk"],

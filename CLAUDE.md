@@ -49,7 +49,7 @@ Run from monorepo root:
 
 - `candidates` — canonical identity (bio + profile_data JSONB shared facts)
 - `candidate_documents` — file URLs (KTP, passport, CV, certs)
-- `positions` — 16-slot registry (role × country, requirements JSONB)
+- `positions` — 17-slot registry (role × country, requirements JSONB)
 - `applications` — candidate × position (pipeline_stage, answers JSONB)
 - `pending_submissions` — nonce-based staging until magic link verify
 - `consents` — PDP UU 27/2022 compliance log per purpose
