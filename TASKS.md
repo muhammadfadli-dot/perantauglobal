@@ -2,7 +2,87 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-04-30 (Phase 3 — Schema v3 wired into UI: requirement library, document metadata, readiness v3, Lengkapi Lamaran flow)
+**Last updated:** 2026-05-11 (Phase 4 — Admin UX restructure: lamaran=talent-pool, job_orders=pipeline. Branch: `claude/trusting-northcutt-1810ec`, NOT YET MERGED to main.)
+
+## Phase 4 — Admin UX restructure: talent-pool ↔ pipeline split (2026-05-11) 🚧 IN BRANCH
+
+**Branch:** `claude/trusting-northcutt-1810ec` (worktree). Dev server tested live by Panji. NOT YET PR'd or merged. Next session should ship/PR this branch.
+
+**Conceptual shift driving the work:**
+- `applications` (lamaran) = **talent pool entries**, no pipeline. The lamaran admin page is the inbox/triage surface.
+- `job_orders` = **pipeline tracker**. Admin moves a candidate from pool → job order; that's when screening/interview/etc stages become meaningful.
+- `applications.pipeline_stage` column NOT dropped — too invasive (audit found 7-10 days of refactor across trigger, 4 admin pages, 3 candidate pages, analytics, candidate progress timeline). Just the **semantics** of how the lamaran page treats it changed. Real schema cleanup deferred to Phase 5.
+
+**Migrations applied to production Supabase:**
+- `0029_admin_applications_list` — first version of `list_applications_for_admin()` RPC + `applications_stage_counts()`. Single round-trip fetches paginated apps with computed readiness via `compute_readiness_v3` JOIN LATERAL pattern. Filter by stage/position/search, sort by 'newest' or 'readiness'.
+- `0030_admin_lamaran_pool_view` — DROPped + recreated `list_applications_for_admin` with new shape: `p_stage` removed, `p_pool` added (`pool` | `in_job_order` | `all`, default `pool`). Returns extra `job_order_id` + `job_order_intake_label` for in-JO badge in row.
+
+**Data correction:** `barista-saudi-arabia` flipped from `active=false` → `true` via direct UPDATE (had 3 open job orders + 38 apps; user confirmed posisi lagi jalan, archive flag was stale).
+
+**TS types (`packages/db/src/types.ts`):** hand-edited to add `applications_stage_counts` + `list_applications_for_admin` function signatures. Re-run `generate_typescript_types` MCP if other things drift.
+
+**Server actions added (`apps/platform/src/app/(admin)/admin/actions.ts`):**
+- `moveApplicationToJobOrder(applicationId, jobOrderId)` — validates JO is open + position matches, sets `job_order_id`, advances `pipeline_stage` from `applied` → `screening` (if applicable so trigger logs history). Audit-logged as `move_application_to_job_order` (new AuditAction added in `lib/audit-log.ts`).
+
+**Admin lamaran page (`/admin/applications`) — full rewrite:**
+- Heading: "Pipeline lamaran" → "Talent pool" with inline tagline pointing pipeline=job-order
+- Filter posisi redesigned twice: first as country-grouped pills inside a card, then iterated to **collapsible country cards** (default state: 6 cards Semua + 5 country flags 🇸🇦🇯🇵🇮🇩🇹🇼🌐 with counts). Click country → smooth max-height grid expansion → position pills appear. Auto-expands country of `?position=` URL on load.
+- Status column dropped (redundant, all rows are talent pool by default)
+- Action column merged into right-aligned **Job order** column: shows clickable info-blue chip "→ [intake_label]" if in JO, else `JobOrderPicker` button (red bordered "+ Pindah ke JO", opens dropdown of open JOs for that position with confirm dialog)
+- New `ReadinessBadge` component — variants by hard_pass × score_pct (ok/warn/err/mute)
+- "Belum ada JO" italic helper for positions with no open JO
+- Pagination + Reset filter + search by name/HP + sort toggle (newest/readiness, smart default = readiness when position filtered)
+
+**Admin candidates list page (`/admin/candidates`) — bahasa polos + de-redundance:**
+- Drop "Top talent (Tier A)" stat + drop tier column + drop tier-based avatar coloring
+- Drop "Pull → JO" action button (broken `#pull-to-jo` anchor + redundant with lamaran page)
+- Stats: Total kandidat / Sudah qualified (replaces Hard-pass) / Belum lamar / Cek dokumen (replaces Need review)
+- Filter tabs: Semua / Sudah qualified / Belum lamar / Cek dokumen (drop Tier A tab)
+- Tagline: "Database orang yang udah daftar. Untuk triage lamaran per posisi, lihat halaman Lamaran." (de-dupes mental model)
+
+**Admin candidate detail page (`/admin/candidates/[id]`) — redesign per visi:**
+- Drop global "Pull ke Job Order" header button (replaced by conditional "✓ Sudah di job order" badge if all apps linked)
+- Drop topTier red avatar + Tier badge + Top talent tag
+- Drop "Avg fit" BigStat — replaced with "Qualified" (count of apps where hard_pass=true)
+- Activity log: Pipeline stage description shows "Talent pool" for non-JO apps, "Pipeline: [stage]" for in-JO
+
+**ApplicationCard — total redesign (`components/admin/ApplicationCard.tsx`):**
+- Drop ReachOutToggle (concept moves to JO context — not surfaced in this card anymore)
+- Drop TierPicker entirely
+- Drop tier badge + score badge in description line
+- Drop raw JSON answers `<pre>` dump
+- Add **ReadinessBadge** in header next to position name
+- Show **JO chip** (clickable to JO page) if in JO, else inline `JobOrderPicker`
+- **Formatted Q&A** section: per `position_form_fields` (joined per position_slug), per row shows status icon (check/x/info), field_label, value formatted via `field.options[].label` lookup (so "yes" renders as "STR aktif" etc), with "Hard fail" pill for failed hard requirements
+- Pipeline section: only renders if `inJobOrder` — gray card "Pipeline di [intake_label]" + StageSelector
+
+**Sidebar reorder (`components/admin/Sidebar.tsx`):** Operasi section now `Lamaran → Catalog posisi → Job orders → Kandidat → ...` (Lamaran promoted to first under Operasi as the daily triage primary surface).
+
+**Worktree disk note:** Current working tree at `.claude/worktrees/trusting-northcutt-1810ec`. Has env files copied from main repo + node_modules. Main repo (perantauglobal/) on `main` branch, in sync with origin. Cleaned up 22 dead worktrees + 30+ stale branches earlier in the session.
+
+**Files touched this session:**
+- `packages/db/migrations/{0029,0030}*.sql` (new)
+- `packages/db/src/types.ts` (add 2 function sigs)
+- `apps/platform/src/app/(admin)/admin/actions.ts` (add `moveApplicationToJobOrder`)
+- `apps/platform/src/lib/audit-log.ts` (add `move_application_to_job_order` action)
+- `apps/platform/src/components/admin/Sidebar.tsx` (reorder)
+- `apps/platform/src/components/admin/ApplicationFilters.tsx` (full redesign — country cards expandable)
+- `apps/platform/src/components/admin/ApplicationCard.tsx` (full redesign — formatted Q&A)
+- `apps/platform/src/components/admin/ReadinessBadge.tsx` (new)
+- `apps/platform/src/components/admin/JobOrderPicker.tsx` (new)
+- `apps/platform/src/app/(admin)/admin/applications/page.tsx` (full rewrite)
+- `apps/platform/src/app/(admin)/admin/candidates/page.tsx` (clean up tier+jargon)
+- `apps/platform/src/app/(admin)/admin/candidates/[id]/page.tsx` (drop tier, add readiness/formFields fetch, pass to ApplicationCard)
+
+**Verified:** typecheck + lint clean both apps; dev server stable. Panji tested Silvi flow end-to-end (move to JO, formatted answers, readiness badge).
+
+**Open items / next session:**
+- [ ] Ship this branch — PR + merge to main + deploy to prod
+- [ ] **User flagged for next session:** evaluate the user (candidate-facing) side. Today was admin-side only. Candidate dashboard, applications list, application detail still use old `pipeline_stage` semantics + may have similar conceptual mismatch.
+- [ ] Cleanup deferred: drop unused `applications_stage_counts` SQL function; drop `application_tiers` query from candidate detail page (no longer rendered); drop `TierPicker.tsx` + `ReachOutToggle.tsx` if confirmed unused elsewhere
+- [ ] Phase 5 candidate (deferred): real schema migration to move `pipeline_stage` semantics from `applications` → some junction table tied to job_orders. ~7-10 days. Only do if Phase 4 conceptual model proves stable in production usage.
+
+---
 
 ## Phase 3 — Schema v3 → UI (2026-04-30) ✅ DONE
 

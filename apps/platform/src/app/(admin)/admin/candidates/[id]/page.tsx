@@ -4,6 +4,7 @@ import { createServerClient } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import ApplicationCard from "@/components/admin/ApplicationCard";
 import { Icon } from "@/components/pg/Icon";
+import { getReadinessV3, type ReadinessResultV3 } from "@/lib/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -35,12 +36,28 @@ type AppRow = {
   reached_out_at: string | null;
   score: number | null;
   created_at: string;
+  job_order_id: string | null;
   positions: {
     name: string;
     country: string;
     requirements: Record<string, unknown> | null;
   } | null;
   application_tiers: { tier: "A" | "B" | "C" | "D" | "rejected" } | null;
+  job_orders: {
+    id: string;
+    intake_label: string;
+    internal_employer_name: string;
+    status: string;
+  } | null;
+};
+
+type OpenJobOrder = {
+  id: string;
+  intake_label: string;
+  internal_employer_name: string;
+  position_slug: string;
+  slot_count: number;
+  slot_filled: number;
 };
 
 type Document = {
@@ -60,9 +77,18 @@ type Activity = {
   tone: "ok" | "warn" | "info" | "mute";
 };
 
+type FormField = {
+  position_slug: string;
+  field_key: string;
+  field_label: string;
+  field_type: string;
+  options: { value: string; label: string }[] | null;
+  collect_at_stage: string;
+};
+
 const STAGE_LABEL: Record<string, string> = {
-  applied: "Sedang diseleksi",
-  screening: "Sedang diseleksi",
+  applied: "Baru masuk",
+  screening: "Screening",
   voice_screen: "Voice screen",
   interview: "Wawancara",
   document_check: "Cek dokumen",
@@ -71,13 +97,13 @@ const STAGE_LABEL: Record<string, string> = {
   selected: "Terpilih",
   training: "Training",
   deployed: "Sudah dideploy",
-  active: "Active",
+  active: "Aktif",
   rejected: "Tidak terpilih",
   exit: "Selesai",
 };
 
 const STAGE_TONE: Record<string, "ok" | "warn" | "info" | "mute"> = {
-  applied: "warn",
+  applied: "mute",
   screening: "warn",
   voice_screen: "info",
   interview: "info",
@@ -98,7 +124,12 @@ export default async function CandidateDetailPage({
   const { id } = await params;
   const supabase = await createServerClient();
 
-  const [{ data: candidate }, { data: apps }, { data: documents }] = await Promise.all([
+  const [
+    { data: candidate },
+    { data: apps },
+    { data: documents },
+    { data: openJOs },
+  ] = await Promise.all([
     supabase
       .from("candidates")
       .select(
@@ -109,7 +140,7 @@ export default async function CandidateDetailPage({
     supabase
       .from("applications")
       .select(
-        "id, position_slug, pipeline_stage, answers, po_notes, reached_out, reached_out_at, score, created_at, positions (name, country, requirements), application_tiers (tier)"
+        "id, position_slug, pipeline_stage, answers, po_notes, reached_out, reached_out_at, score, created_at, job_order_id, positions (name, country, requirements), application_tiers (tier), job_orders (id, intake_label, internal_employer_name, status)"
       )
       .eq("candidate_id", id)
       .order("created_at", { ascending: false }),
@@ -118,12 +149,59 @@ export default async function CandidateDetailPage({
       .select("id, doc_type, verified, rejected_at, expires_at, uploaded_at, display_name")
       .eq("candidate_id", id)
       .order("uploaded_at", { ascending: false }),
+    supabase
+      .from("job_orders")
+      .select(
+        "id, intake_label, internal_employer_name, position_slug, slot_count, slot_filled"
+      )
+      .eq("status", "open")
+      .order("created_at", { ascending: false }),
   ]);
 
   if (!candidate) return notFound();
   const cand = candidate as Candidate;
   const applications = (apps ?? []) as unknown as AppRow[];
   const docs = (documents ?? []) as Document[];
+  const openJobOrders = (openJOs ?? []) as OpenJobOrder[];
+  const jobOrdersByPosition = new Map<string, OpenJobOrder[]>();
+  for (const jo of openJobOrders) {
+    const arr = jobOrdersByPosition.get(jo.position_slug) ?? [];
+    arr.push(jo);
+    jobOrdersByPosition.set(jo.position_slug, arr);
+  }
+  const allInJobOrder =
+    applications.length > 0 && applications.every((a) => a.job_order_id);
+
+  // Per-application readiness + position form fields, fetched in parallel.
+  const positionSlugs = [...new Set(applications.map((a) => a.position_slug))];
+  const [readinessByApp, formFieldsByPosition] = await Promise.all([
+    Promise.all(
+      applications.map(async (a) => {
+        const r = await getReadinessV3(cand.id, a.position_slug, supabase);
+        return [a.id, r] as [string, ReadinessResultV3];
+      }),
+    ).then((entries) => new Map(entries)),
+    positionSlugs.length > 0
+      ? supabase
+          .from("position_form_fields")
+          .select("position_slug, field_key, field_label, field_type, options, collect_at_stage")
+          .in("position_slug", positionSlugs)
+          .order("sort_order")
+          .then(({ data }) => {
+            const map = new Map<string, FormField[]>();
+            for (const f of (data ?? []) as FormField[]) {
+              const arr = map.get(f.position_slug) ?? [];
+              arr.push(f);
+              map.set(f.position_slug, arr);
+            }
+            return map;
+          })
+      : Promise.resolve(new Map<string, FormField[]>()),
+  ]);
+
+  const qualifiedPositionsCount = applications.filter(
+    (a) => readinessByApp.get(a.id)?.hard_pass,
+  ).length;
 
   const initials = cand.full_name
     .split(" ")
@@ -143,28 +221,6 @@ export default async function CandidateDetailPage({
   const verifiedDocs = docs.filter((d) => d.verified).length;
   const totalDocs = docs.length;
 
-  // Pull tier from highest priority application
-  const allTiers = applications
-    .map((a) => a.application_tiers?.tier)
-    .filter(Boolean) as string[];
-  const topTier = allTiers.includes("A")
-    ? "A"
-    : allTiers.includes("B")
-    ? "B"
-    : allTiers.includes("C")
-    ? "C"
-    : allTiers.includes("D")
-    ? "D"
-    : null;
-
-  // Average FIT % across applications
-  const avgFit =
-    applications.length > 0
-      ? Math.round(
-          applications.reduce((s, a) => s + (a.score ?? 0), 0) / applications.length
-        )
-      : 0;
-
   // Compose activity log
   const activity: Activity[] = [];
   for (const d of docs.slice(0, 4)) {
@@ -180,11 +236,16 @@ export default async function CandidateDetailPage({
     });
   }
   for (const a of applications.slice(0, 4)) {
+    const r = readinessByApp.get(a.id);
+    const fitPct = r?.score_pct ?? null;
+    const inJO = !!a.job_order_id;
     activity.push({
       ts: new Date(a.created_at),
       title: `Lamar ${a.positions?.name ?? a.position_slug}`,
-      desc: `Stage: ${STAGE_LABEL[a.pipeline_stage] ?? a.pipeline_stage}${a.score ? ` · Fit ${a.score}%` : ""}`,
-      tone: STAGE_TONE[a.pipeline_stage] ?? "info",
+      desc: inJO
+        ? `Pipeline: ${STAGE_LABEL[a.pipeline_stage] ?? a.pipeline_stage}${fitPct !== null ? ` · Fit ${fitPct}%` : ""}`
+        : `Talent pool${fitPct !== null ? ` · Fit ${fitPct}%` : ""}`,
+      tone: inJO ? STAGE_TONE[a.pipeline_stage] ?? "info" : "mute",
     });
   }
   activity.push({
@@ -226,14 +287,20 @@ export default async function CandidateDetailPage({
                 Hubungi
               </a>
             )}
-            <Link
-              href={`/admin/job-orders?candidate=${cand.id}`}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-bold text-white no-underline"
-              style={{ background: "var(--pg-red-600)" }}
-            >
-              <Icon name="plus" size={13} stroke={2.4} />
-              Pull ke Job Order
-            </Link>
+            {allInJobOrder ? (
+              <span
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-bold no-underline"
+                style={{
+                  border: "1px solid var(--pg-border)",
+                  background: "var(--pg-ok-soft-bg)",
+                  color: "var(--pg-ok-soft-fg)",
+                }}
+                title="Semua lamaran sudah masuk job order"
+              >
+                <Icon name="check" size={13} stroke={2.4} />
+                Sudah di job order
+              </span>
+            ) : null}
           </div>
         }
       />
@@ -247,9 +314,7 @@ export default async function CandidateDetailPage({
           >
             <div
               className="w-24 h-24 rounded-full grid place-items-center text-white font-extrabold text-[28px] tracking-tight"
-              style={{
-                background: topTier === "A" ? "var(--pg-red-600)" : "var(--pg-ink-primary)",
-              }}
+              style={{ background: "var(--pg-ink-primary)" }}
             >
               {initials}
             </div>
@@ -264,44 +329,14 @@ export default async function CandidateDetailPage({
                 {[cand.city, age ? `${age}thn` : null, cand.education].filter(Boolean).join(" · ") || "—"}
               </div>
             </div>
-            {topTier && (
-              <div className="flex items-center gap-1.5 mt-1">
-                <span
-                  className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-[0.06em] uppercase"
-                  style={{
-                    background:
-                      topTier === "A"
-                        ? "var(--pg-red-soft-bg)"
-                        : "var(--pg-ink-50)",
-                    color:
-                      topTier === "A"
-                        ? "var(--pg-red-600)"
-                        : "var(--pg-ink-tertiary)",
-                    fontFamily: "var(--font-mono)",
-                  }}
-                >
-                  Tier {topTier}
-                </span>
-                {topTier === "A" && (
-                  <span
-                    className="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-[0.06em] uppercase"
-                    style={{
-                      background: "var(--pg-ink-primary)",
-                      color: "white",
-                      fontFamily: "var(--font-mono)",
-                    }}
-                  >
-                    Top talent
-                  </span>
-                )}
-              </div>
-            )}
             <div className="flex items-baseline gap-7 mt-3 pt-4 w-full justify-center" style={{ borderTop: "1px solid var(--pg-border)" }}>
               <BigStat value={String(applications.length)} label="Lamaran" />
               <BigStat
-                value={`${avgFit}%`}
-                label="Avg fit"
-                color={avgFit >= 80 ? "var(--pg-ok-soft-fg)" : "var(--pg-ink-primary)"}
+                value={String(qualifiedPositionsCount)}
+                label="Qualified"
+                color={
+                  qualifiedPositionsCount > 0 ? "var(--pg-ok-soft-fg)" : "var(--pg-ink-primary)"
+                }
               />
               <BigStat
                 value={`${verifiedDocs}/${totalDocs}`}
@@ -438,7 +473,14 @@ export default async function CandidateDetailPage({
             ) : (
               <div className="flex flex-col gap-2.5">
                 {applications.map((a) => (
-                  <ApplicationCard key={a.id} application={a} />
+                  <ApplicationCard
+                    key={a.id}
+                    application={a}
+                    candidateName={cand.full_name}
+                    openJobOrders={jobOrdersByPosition.get(a.position_slug) ?? []}
+                    readiness={readinessByApp.get(a.id) ?? null}
+                    formFields={formFieldsByPosition.get(a.position_slug) ?? []}
+                  />
                 ))}
               </div>
             )}

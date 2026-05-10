@@ -783,6 +783,13 @@ export type Database = {
       }
     }
     Functions: {
+      applications_stage_counts: {
+        Args: { p_position?: string; p_search?: string }
+        Returns: {
+          count: number
+          pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
+        }[]
+      }
       compute_readiness: {
         Args: { profile: Json; requirements: Json }
         Returns: Json
@@ -792,6 +799,34 @@ export type Database = {
         Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
+      list_applications_for_admin: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_pool?: string
+          p_position?: string
+          p_search?: string
+          p_sort?: string
+        }
+        Returns: {
+          candidate_city: string
+          candidate_id: string
+          candidate_name: string
+          candidate_phone: string
+          created_at: string
+          id: string
+          job_order_id: string | null
+          job_order_intake_label: string | null
+          pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
+          position_country: string
+          position_name: string
+          position_slug: string
+          reached_out: boolean
+          readiness: Json
+          score: number
+          total_count: number
+        }[]
+      }
       log_admin_action: {
         Args: {
           p_action: string

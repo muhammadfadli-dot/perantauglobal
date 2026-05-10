@@ -11,7 +11,7 @@ const PAGE_SIZE = 25;
 type Search = {
   q?: string;
   page?: string;
-  tab?: "all" | "tier_a" | "ready" | "review" | "no_apply";
+  tab?: "all" | "qualified" | "review" | "no_apply";
 };
 
 export default async function CandidatesListPage({
@@ -51,19 +51,17 @@ export default async function CandidatesListPage({
 
   const ids = candidates.map((c) => c.id);
 
-  // Stats — separate from list
+  // Stats — talent pool overview, not per-application triage (that lives in /admin/applications)
   const [
     { count: totalCandidates },
-    { data: tierData },
     { data: readinessData },
     { data: pendingDocsData },
     { count: weekCandidates },
   ] = await Promise.all([
     supabase.from("candidates").select("*", { count: "exact", head: true }),
     supabase
-      .from("application_tiers")
-      .select("tier, applications!inner(candidate_id)"),
-    supabase.from("readiness_view").select("candidate_id, hard_pass, position_slug, position_name, completion_pct"),
+      .from("readiness_view")
+      .select("candidate_id, hard_pass, position_slug, position_name, completion_pct"),
     supabase
       .from("candidate_documents")
       .select("candidate_id")
@@ -72,26 +70,16 @@ export default async function CandidatesListPage({
     supabase
       .from("candidates")
       .select("*", { count: "exact", head: true })
-      // eslint-disable-next-line react-hooks/purity -- per-request time window for "candidates this week" stat; intentionally non-idempotent in RSC
+      // eslint-disable-next-line react-hooks/purity -- per-request "this week" stat; intentionally non-idempotent in RSC
       .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
   ]);
 
-  // Tier-A unique candidates (via application -> candidate join)
-  const tierMap = new Map<string, string>();
-  for (const t of (tierData ?? []) as unknown as {
-    tier: string;
-    applications: { candidate_id: string } | null;
-  }[]) {
-    const cid = t.applications?.candidate_id;
-    if (!cid) continue;
-    if (!tierMap.has(cid) || t.tier < (tierMap.get(cid) ?? "Z")) {
-      tierMap.set(cid, t.tier);
-    }
-  }
-  const tierACount = [...tierMap.values()].filter((t) => t === "A").length;
-
-  // Hard-pass-ready: unique candidates with at least one hard_pass row
-  const hardPassMap = new Map<string, { count: number; topPos?: { name: string; slug: string; pct: number | null } }>();
+  // Qualified candidates = anyone with hard_pass=true on at least one position.
+  // Also tracks their best matching position for the table.
+  const qualifiedMap = new Map<
+    string,
+    { count: number; topPos?: { name: string; slug: string; pct: number | null } }
+  >();
   for (const r of (readinessData ?? []) as {
     candidate_id: string;
     hard_pass: boolean;
@@ -99,23 +87,26 @@ export default async function CandidatesListPage({
     position_name: string;
     completion_pct: number | null;
   }[]) {
-    const cur = hardPassMap.get(r.candidate_id) ?? { count: 0 };
+    const cur = qualifiedMap.get(r.candidate_id) ?? { count: 0 };
     if (r.hard_pass) {
       cur.count += 1;
       if (!cur.topPos || (r.completion_pct ?? 0) > (cur.topPos.pct ?? 0)) {
         cur.topPos = { name: r.position_name, slug: r.position_slug, pct: r.completion_pct };
       }
     }
-    hardPassMap.set(r.candidate_id, cur);
+    qualifiedMap.set(r.candidate_id, cur);
   }
-  const hardPassReadyCount = [...hardPassMap.values()].filter((v) => v.count > 0).length;
+  const qualifiedCount = [...qualifiedMap.values()].filter((v) => v.count > 0).length;
 
   const pendingDocCandidates = new Set(
     ((pendingDocsData ?? []) as { candidate_id: string }[]).map((d) => d.candidate_id)
   );
 
   // Apps per candidate — for the displayed page only
-  const appsByCandidate = new Map<string, { count: number; latest_position: string | null }>();
+  const appsByCandidate = new Map<
+    string,
+    { count: number; latest_position: string | null }
+  >();
   if (ids.length > 0) {
     const { data: appsData } = await supabase
       .from("applications")
@@ -141,10 +132,8 @@ export default async function CandidatesListPage({
   // Filter rows by tab
   const rows = candidates.filter((c) => {
     const apps = appsByCandidate.get(c.id);
-    const tier = tierMap.get(c.id);
-    const hp = hardPassMap.get(c.id);
-    if (tab === "tier_a") return tier === "A";
-    if (tab === "ready") return (hp?.count ?? 0) > 0;
+    const qf = qualifiedMap.get(c.id);
+    if (tab === "qualified") return (qf?.count ?? 0) > 0;
     if (tab === "review") return pendingDocCandidates.has(c.id);
     if (tab === "no_apply") return !apps;
     return true;
@@ -157,6 +146,8 @@ export default async function CandidatesListPage({
     if (diffH < 24) return `${diffH} jam lalu`;
     return `${Math.round(diffH / 24)} hari lalu`;
   }
+
+  const noApplyCount = candidates.filter((c) => !appsByCandidate.has(c.id)).length;
 
   return (
     <>
@@ -173,7 +164,11 @@ export default async function CandidatesListPage({
               Kandidat
             </h1>
             <p className="text-[14px] text-pg-ink-tertiary">
-              Semua kandidat yang udah daftar — filter berdasar tier, posisi, atau status.
+              Database orang yang udah daftar. Untuk triage lamaran per posisi, lihat halaman{" "}
+              <Link href="/admin/applications" className="text-pg-red-600 font-semibold no-underline hover:underline">
+                Lamaran
+              </Link>
+              .
             </p>
           </div>
           <Link
@@ -186,7 +181,7 @@ export default async function CandidatesListPage({
           </Link>
         </div>
 
-        {/* Stats */}
+        {/* Stats — overview of the talent pool, not per-application metrics */}
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           <StatCard
             label="Total kandidat"
@@ -195,23 +190,22 @@ export default async function CandidatesListPage({
             subTone="ok"
           />
           <StatCard
-            label="Top talent (Tier A)"
-            value={tierACount}
-            valueColor="var(--pg-red-600)"
-            sub={
-              (totalCandidates ?? 0) > 0
-                ? `${Math.round((tierACount / (totalCandidates ?? 1)) * 100)}% dari pool`
-                : undefined
-            }
-          />
-          <StatCard
-            label="Hard-pass ready"
-            value={hardPassReadyCount}
+            label="Sudah qualified"
+            value={qualifiedCount}
             valueColor="var(--pg-ok-soft-fg)"
-            sub="Lengkap untuk pull JO"
+            sub="Lolos syarat min. 1 posisi"
           />
           <StatCard
-            label="Need review"
+            label="Belum lamar"
+            value={
+              candidates.length > 0
+                ? candidates.filter((c) => !appsByCandidate.has(c.id)).length
+                : 0
+            }
+            sub="Masih kosong, perlu di-engage"
+          />
+          <StatCard
+            label="Cek dokumen"
             value={pendingDocCandidates.size}
             valueColor="var(--pg-warn-soft-fg)"
             sub="Dokumen pending verify"
@@ -223,28 +217,22 @@ export default async function CandidatesListPage({
           <div className="flex items-center gap-1 flex-wrap">
             <FilterTab href={buildUrl({ q })} label="Semua" count={candidates.length} active={tab === "all"} />
             <FilterTab
-              href={buildUrl({ q, tab: "tier_a" })}
-              label="Tier A"
-              count={tierACount}
-              active={tab === "tier_a"}
-            />
-            <FilterTab
-              href={buildUrl({ q, tab: "ready" })}
-              label="Hard-pass ready"
-              count={hardPassReadyCount}
-              active={tab === "ready"}
-            />
-            <FilterTab
-              href={buildUrl({ q, tab: "review" })}
-              label="Need review"
-              count={pendingDocCandidates.size}
-              active={tab === "review"}
+              href={buildUrl({ q, tab: "qualified" })}
+              label="Sudah qualified"
+              count={qualifiedCount}
+              active={tab === "qualified"}
             />
             <FilterTab
               href={buildUrl({ q, tab: "no_apply" })}
               label="Belum lamar"
-              count={candidates.filter((c) => !appsByCandidate.has(c.id)).length}
+              count={noApplyCount}
               active={tab === "no_apply"}
+            />
+            <FilterTab
+              href={buildUrl({ q, tab: "review" })}
+              label="Cek dokumen"
+              count={pendingDocCandidates.size}
+              active={tab === "review"}
             />
           </div>
           <CandidateFilters initialQuery={q ?? ""} />
@@ -258,7 +246,7 @@ export default async function CandidatesListPage({
           <div
             className="grid items-center px-5 py-3 text-[10px] font-semibold tracking-[0.1em] uppercase"
             style={{
-              gridTemplateColumns: "minmax(0,2.4fr) 0.7fr 0.6fr 1.5fr 1fr 1fr",
+              gridTemplateColumns: "minmax(0,2.4fr) 0.7fr 1.8fr 1fr 1fr",
               color: "var(--pg-ink-tertiary)",
               fontFamily: "var(--font-mono)",
               borderBottom: "1px solid var(--pg-border)",
@@ -266,10 +254,9 @@ export default async function CandidatesListPage({
           >
             <span>Kandidat</span>
             <span>Lamaran</span>
-            <span>Tier</span>
-            <span>Top match</span>
-            <span>Last activity</span>
-            <span className="text-right">Actions</span>
+            <span>Match terkuat</span>
+            <span>Aktivitas</span>
+            <span className="text-right">Aksi</span>
           </div>
           {rows.length === 0 && (
             <div className="px-5 py-12 text-center text-[13px] text-pg-ink-tertiary">
@@ -278,8 +265,7 @@ export default async function CandidatesListPage({
           )}
           {rows.map((r) => {
             const apps = appsByCandidate.get(r.id);
-            const tier = tierMap.get(r.id);
-            const hp = hardPassMap.get(r.id);
+            const qf = qualifiedMap.get(r.id);
             const initials = (r.full_name || "?")
               .split(/\s+/)
               .filter(Boolean)
@@ -291,7 +277,7 @@ export default async function CandidatesListPage({
                 key={r.id}
                 className="grid items-center px-5 py-3.5 hover:bg-pg-paper transition-colors"
                 style={{
-                  gridTemplateColumns: "minmax(0,2.4fr) 0.7fr 0.6fr 1.5fr 1fr 1fr",
+                  gridTemplateColumns: "minmax(0,2.4fr) 0.7fr 1.8fr 1fr 1fr",
                   borderBottom: "1px solid var(--pg-border-soft)",
                 }}
               >
@@ -302,8 +288,8 @@ export default async function CandidatesListPage({
                   <div
                     className="w-9 h-9 rounded-full grid place-items-center font-bold shrink-0"
                     style={{
-                      background: tier === "A" ? "var(--pg-red-600)" : "var(--pg-ink-50)",
-                      color: tier === "A" ? "white" : "var(--pg-ink-secondary)",
+                      background: "var(--pg-ink-50)",
+                      color: "var(--pg-ink-secondary)",
                       fontFamily: "var(--font-mono)",
                       fontSize: "11px",
                     }}
@@ -325,40 +311,14 @@ export default async function CandidatesListPage({
                 <span className="text-[14px] font-semibold text-pg-ink-secondary tabular-nums">
                   {apps?.count ?? 0}
                 </span>
-                <span>
-                  {tier ? (
-                    <span
-                      className="inline-flex w-6 h-6 rounded-full grid place-items-center text-[11px] font-bold"
-                      style={{
-                        background:
-                          tier === "A"
-                            ? "var(--pg-red-soft-bg)"
-                            : tier === "B"
-                            ? "var(--pg-warn-soft-bg)"
-                            : "var(--pg-ink-50)",
-                        color:
-                          tier === "A"
-                            ? "var(--pg-red-600)"
-                            : tier === "B"
-                            ? "var(--pg-warn-soft-fg)"
-                            : "var(--pg-ink-tertiary)",
-                        fontFamily: "var(--font-mono)",
-                      }}
-                    >
-                      {tier}
-                    </span>
-                  ) : (
-                    <span className="text-pg-ink-quaternary text-[13px]">—</span>
-                  )}
-                </span>
                 <span className="min-w-0">
-                  {hp?.topPos ? (
+                  {qf?.topPos ? (
                     <Link
-                      href={`/admin/positions/${hp.topPos.slug}`}
+                      href={`/admin/positions/${qf.topPos.slug}`}
                       className="block min-w-0 no-underline"
                     >
                       <div className="text-[13px] font-semibold text-pg-ink-primary truncate">
-                        {hp.topPos.name}
+                        {qf.topPos.name}
                       </div>
                       <div
                         className="text-[10px] font-bold mt-0.5"
@@ -367,7 +327,7 @@ export default async function CandidatesListPage({
                           fontFamily: "var(--font-mono)",
                         }}
                       >
-                        FIT {Math.round(hp.topPos.pct ?? 0)}%
+                        FIT {Math.round(qf.topPos.pct ?? 0)}%
                       </div>
                     </Link>
                   ) : apps ? (
@@ -390,22 +350,12 @@ export default async function CandidatesListPage({
                   {timeAgo(r.created_at)}
                 </span>
                 <span className="text-right">
-                  {tier === "A" || (hp?.count ?? 0) > 0 ? (
-                    <Link
-                      href={`/admin/candidates/${r.id}#pull-to-jo`}
-                      className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-white no-underline"
-                      style={{ background: "var(--pg-red-600)" }}
-                    >
-                      Pull → JO
-                    </Link>
-                  ) : (
-                    <Link
-                      href={`/admin/candidates/${r.id}`}
-                      className="text-[12px] font-semibold text-pg-ink-secondary no-underline hover:text-pg-red-600"
-                    >
-                      Lihat detail
-                    </Link>
-                  )}
+                  <Link
+                    href={`/admin/candidates/${r.id}`}
+                    className="text-[12px] font-semibold text-pg-ink-secondary no-underline hover:text-pg-red-600"
+                  >
+                    Lihat detail →
+                  </Link>
                 </span>
               </div>
             );

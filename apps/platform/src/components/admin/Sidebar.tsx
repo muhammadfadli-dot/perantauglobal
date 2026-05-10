@@ -42,6 +42,8 @@ export default function AdminSidebar({
   const operasi: NavSection = {
     title: "Operasi",
     items: [
+      // Lamaran first — primary daily triage surface
+      { href: "/admin/applications", label: "Lamaran", icon: "compass", count: counts?.applications },
       { href: "/admin/positions", label: "Catalog posisi", icon: "doc", count: counts?.positions },
       {
         href: "/admin/job-orders",
@@ -52,7 +54,6 @@ export default function AdminSidebar({
           : undefined,
       },
       { href: "/admin/candidates", label: "Kandidat", icon: "users", count: counts?.candidates },
-      { href: "/admin/applications", label: "Lamaran", icon: "compass", count: counts?.applications },
       {
         href: "/admin/documents",
         label: "Review dokumen",

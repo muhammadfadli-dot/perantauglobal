@@ -28,6 +28,7 @@ export type AuditAction =
   | "toggle_reached_out"
   | "assign_tier"
   | "clear_tier"
+  | "move_application_to_job_order"
   // Admin allowlist operations (escalation events)
   | "invite_admin"
   | "remove_admin"
