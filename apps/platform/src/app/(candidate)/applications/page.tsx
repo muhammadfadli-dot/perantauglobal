@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
+import { getApplicationStatus } from "@/lib/applicationStatus";
 
 export const dynamic = "force-dynamic";
 
@@ -26,33 +27,6 @@ const COUNTRY_LABEL: Record<string, string> = {
   any: "Global",
 };
 
-function userStage(internal: string): {
-  label: string;
-  tone: "warn" | "info" | "ok" | "err" | "mute";
-} {
-  switch (internal) {
-    case "applied":
-    case "screening":
-    case "voice_screen":
-    case "document_check":
-      return { label: "Sedang diseleksi", tone: "warn" };
-    case "interview":
-    case "briefing":
-    case "trial":
-      return { label: "Wawancara & dokumen", tone: "info" };
-    case "selected":
-    case "training":
-    case "deployed":
-    case "active":
-      return { label: "Diterima", tone: "ok" };
-    case "rejected":
-    case "exit":
-      return { label: "Tidak terpilih", tone: "err" };
-    default:
-      return { label: "Diproses", tone: "mute" };
-  }
-}
-
 export default async function ApplicationsListPage() {
   const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
@@ -76,7 +50,7 @@ export default async function ApplicationsListPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <TopBarApp title="Lamaran kamu" bell />
+      <TopBarApp title="Lamaran kamu" />
       <main className="flex-1 pb-6">
         <section className="px-5 pt-4">
           <div
@@ -110,10 +84,13 @@ export default async function ApplicationsListPage() {
             </div>
           ) : (
             applications.map((a) => {
-              const stage = userStage(a.pipeline_stage);
               const r = readinessBySlug.get(a.position_slug);
-              const missing = !r?.hard_pass;
-              const muted = ["rejected", "exit"].includes(a.pipeline_stage);
+              const status = getApplicationStatus({
+                pipelineStage: a.pipeline_stage,
+                hardPass: r?.hard_pass,
+              });
+              const muted = status.key === "rejected";
+              const needsDocs = status.key === "needs_docs";
               return (
                 <Link
                   key={a.id}
@@ -136,10 +113,10 @@ export default async function ApplicationsListPage() {
                         {a.positions?.name ?? a.position_slug}
                       </div>
                     </div>
-                    <StagePill tone={stage.tone}>{stage.label}</StagePill>
+                    <StagePill tone={status.tone}>{status.label}</StagePill>
                   </div>
 
-                  {missing && !muted && (
+                  {needsDocs && (
                     <div
                       className="flex items-center justify-between gap-2 mt-3 px-3 py-2.5 rounded-xl"
                       style={{ background: "var(--pg-red-soft-bg)" }}
@@ -149,7 +126,7 @@ export default async function ApplicationsListPage() {
                           className="w-1.5 h-1.5 rounded-full"
                           style={{ background: "var(--pg-red-600)" }}
                         />
-                        1 hal wajib belum diisi
+                        Dokumen wajib belum lengkap
                       </div>
                       <span className="text-[12px] font-bold text-pg-red-600">Lengkapi ›</span>
                     </div>

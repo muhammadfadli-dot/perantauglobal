@@ -3,9 +3,7 @@ import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import SignOutButton from "@/components/SignOutButton";
-import ProfileForm from "./ProfileForm";
-import DocUploader, { type DocItem } from "./DocUploader";
-import SecurityCard from "./SecurityCard";
+import { formatMemberId, EDUCATION_LABEL } from "@/lib/candidate";
 
 export const dynamic = "force-dynamic";
 
@@ -19,40 +17,26 @@ type CandidateRow = {
   gender: string | null;
   education: string | null;
   profile_data: unknown;
-};
-
-const EDUCATION_LABEL: Record<string, string> = {
-  sma: "SMA/SMK",
-  d3: "D3 sederajat",
-  s1: "S1 sederajat",
-  s2: "S2 sederajat",
-  smk: "SMK",
-};
-
-const GENDER_LABEL: Record<string, string> = {
-  male: "Pria",
-  female: "Wanita",
+  created_at: string;
 };
 
 export default async function ProfilePage() {
   const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  const [{ data: candidateData }, { data: docsData }, { data: readinessData }] = await Promise.all([
+  const [{ data: candidateData }, { data: docsData }] = await Promise.all([
     supabase
       .from("candidates")
-      .select("id, full_name, email, phone, city, birth_date, gender, education, profile_data")
+      .select(
+        "id, full_name, email, phone, city, birth_date, gender, education, profile_data, created_at",
+      )
       .eq("id", candidateId)
       .single(),
     supabase
       .from("candidate_documents")
-      .select("doc_type, file_path, verified, rejected_at, rejected_reason, uploaded_at")
+      .select("doc_type, verified, rejected_at, uploaded_at")
       .eq("candidate_id", candidateId)
       .order("uploaded_at", { ascending: false }),
-    supabase
-      .from("readiness_view")
-      .select("position_slug, position_name, country, hard_pass")
-      .eq("candidate_id", candidateId),
   ]);
 
   const candidate = candidateData as CandidateRow | null;
@@ -60,194 +44,228 @@ export default async function ProfilePage() {
 
   const docsRows = (docsData ?? []) as Array<{
     doc_type: string;
-    file_path: string;
     verified: boolean;
     rejected_at: string | null;
-    rejected_reason: string | null;
   }>;
 
-  const REQUIRED_DOC_TYPES: DocItem["type"][] = ["ktp", "passport", "formal_photo", "cv"];
-  const docItems: DocItem[] = REQUIRED_DOC_TYPES.map((t) => {
-    const candidates =
-      t === "formal_photo"
-        ? docsRows.filter((d) => d.doc_type === "formal_photo" || d.doc_type === "photo")
-        : docsRows.filter((d) => d.doc_type === t);
-    const latest = candidates[0];
-    if (!latest) return { type: t, status: "missing" };
-    if (latest.verified) return { type: t, status: "verified", file_path: latest.file_path };
-    if (latest.rejected_at)
-      return {
-        type: t,
-        status: "rejected",
-        file_path: latest.file_path,
-        rejected_reason: latest.rejected_reason,
-      };
-    return { type: t, status: "pending", file_path: latest.file_path };
-  });
-  const verifiedDocs = docItems.filter((d) => d.status === "verified").length;
+  // Identity completion: 5 fields beyond email (which is locked to auth account)
+  const identityFields = [
+    candidate.phone,
+    candidate.city,
+    candidate.birth_date,
+    candidate.gender,
+    candidate.education,
+  ];
+  const identityFilled = identityFields.filter(Boolean).length;
+  const identityTotal = identityFields.length;
+  const identityComplete = identityFilled === identityTotal;
 
+  // Documents — count latest verified per required type
+  const REQUIRED_DOCS = ["ktp", "passport", "formal_photo", "cv"];
+  const docsLatestByType = new Map<string, { verified: boolean; rejected: boolean }>();
+  for (const d of docsRows) {
+    const key = d.doc_type === "photo" ? "formal_photo" : d.doc_type;
+    if (!docsLatestByType.has(key)) {
+      docsLatestByType.set(key, { verified: d.verified, rejected: !!d.rejected_at });
+    }
+  }
+  const docsVerified = REQUIRED_DOCS.filter((t) => docsLatestByType.get(t)?.verified).length;
+  const docsTotal = REQUIRED_DOCS.length;
+
+  // Credentials count
   const profileData = (candidate.profile_data ?? {}) as Record<string, unknown>;
   const credentials = (profileData.credentials ?? {}) as Record<string, string>;
-  const credentialCount = Object.keys(credentials).length;
+  const credentialsFilled = Object.values(credentials).filter(
+    (v) => typeof v === "string" && v.trim() !== "",
+  ).length;
 
-  // Calculate "buka N lowongan baru" — readiness items hard-passed
-  const readiness = (readinessData ?? []) as Array<{
-    position_slug: string | null;
-    position_name: string | null;
-    country: string | null;
-    hard_pass: boolean | null;
-  }>;
-  const hardPassCount = readiness.filter((r) => r.hard_pass).length;
-  const profileMissing = Math.max(0, 5 - credentialCount);
-
-  const initials = candidate.full_name
-    .split(" ")
+  const memberId = formatMemberId(candidate.id, candidate.created_at);
+  const subline = [
+    candidate.city,
+    candidate.education
+      ? EDUCATION_LABEL[candidate.education] ?? candidate.education.toUpperCase()
+      : null,
+  ]
     .filter(Boolean)
-    .slice(0, 2)
-    .map((s) => s[0]?.toUpperCase())
-    .join("") || "??";
+    .join(" · ");
 
-  const dataDiri: { label: string; value: string; missing?: boolean }[] = [
-    { label: "Email", value: candidate.email ?? "—" },
-    { label: "Nomor HP", value: candidate.phone ?? "Belum diisi", missing: !candidate.phone },
-    { label: "Kota", value: candidate.city ?? "Belum diisi", missing: !candidate.city },
-    {
-      label: "Tanggal lahir",
-      value: candidate.birth_date
-        ? new Date(candidate.birth_date).toLocaleDateString("id-ID")
-        : "Belum diisi",
-      missing: !candidate.birth_date,
-    },
-    {
-      label: "Gender",
-      value: candidate.gender ? (GENDER_LABEL[candidate.gender] ?? candidate.gender) : "Belum diisi",
-      missing: !candidate.gender,
-    },
-    {
-      label: "Pendidikan",
-      value: candidate.education
-        ? (EDUCATION_LABEL[candidate.education] ?? candidate.education.toUpperCase())
-        : "Belum diisi",
-      missing: !candidate.education,
-    },
-  ];
+  const initials =
+    (candidate.full_name || "??")
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((s) => s[0]?.toUpperCase())
+      .join("") || "??";
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
-      <TopBarApp title="Profil" bell />
+    <div className="min-h-screen flex flex-col">
+      <TopBarApp title="Profil" />
 
       <main className="flex-1 pb-6">
-        {/* Header */}
-        <section className="px-5 pt-4">
+        {/* Header card — avatar + name + member ID */}
+        <section
+          className="px-5 pt-4 pb-5"
+          style={{
+            background: "linear-gradient(180deg, var(--pg-surface-subtle) 0%, transparent 100%)",
+            borderBottom: "1px solid var(--pg-border)",
+          }}
+        >
           <div className="flex items-center gap-3.5">
             <div
-              className="w-[60px] h-[60px] rounded-full grid place-items-center text-white text-[20px] font-extrabold shrink-0"
-              style={{ background: "var(--pg-red-600)" }}
+              className="w-14 h-14 rounded-full grid place-items-center text-white text-[18px] font-extrabold shrink-0"
+              style={{
+                background: "linear-gradient(135deg, var(--pg-red-600) 0%, var(--pg-red-700) 100%)",
+                boxShadow:
+                  "0 3px 10px rgba(215,38,47,0.25), inset 0 1px 0 rgba(255,255,255,0.25)",
+              }}
             >
               {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <div className="text-[20px] font-extrabold tracking-[-0.01em] truncate text-pg-ink-primary">
+              <div className="text-[19px] font-extrabold tracking-[-0.02em] leading-tight truncate">
                 {candidate.full_name}
               </div>
-              <div className="text-[13px] text-pg-ink-tertiary truncate">
-                {[candidate.city, candidate.education ? (EDUCATION_LABEL[candidate.education] ?? candidate.education.toUpperCase()) : null]
-                  .filter(Boolean)
-                  .join(" · ") || "Lengkapi data kamu"}
-              </div>
+              {subline && (
+                <div className="text-[12px] text-pg-ink-tertiary mt-0.5 truncate">
+                  {subline}
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Status banner — Paper style */}
-          {profileMissing > 0 && (
-            <div
-              className="mt-4 px-4 py-3 rounded-xl flex items-center justify-between gap-3"
-              style={{ background: "var(--pg-red-soft-bg)" }}
+          {/* Member ID pill */}
+          <div className="mt-3 flex items-center gap-2">
+            <span
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono"
+              style={{
+                background: "var(--pg-white)",
+                border: "1px solid var(--pg-border)",
+                boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
+              }}
             >
-              <div
-                className="text-[12px] font-bold uppercase tracking-[0.04em]"
-                style={{ color: "var(--pg-red-600)" }}
+              <Icon name="check" size={12} className="text-pg-red-600" />
+              <span
+                className="text-[11px] font-bold tracking-[0.08em] uppercase"
+                style={{ color: "var(--pg-ink-tertiary)" }}
               >
-                {hardPassCount > 0 ? `Buka ${hardPassCount} lowongan baru` : "Lengkapi profil"}
-              </div>
-              <div className="text-[12px] font-bold text-pg-red-700">
-                Lengkapi {profileMissing} hal lagi
-              </div>
-            </div>
-          )}
+                Anggota
+              </span>
+              <span
+                className="text-[11px] font-extrabold tracking-[0.06em]"
+                style={{ color: "var(--pg-ink-primary)" }}
+              >
+                {memberId}
+              </span>
+            </span>
+          </div>
         </section>
 
-        {/* Identitas saya */}
-        <Section title="Identitas saya" hint="Wajib untuk semua lamaran.">
-          <div
-            className="bg-pg-white rounded-2xl overflow-hidden"
-            style={{ border: "1px solid var(--pg-border)" }}
-          >
-            {dataDiri.map((row, i) => (
-              <div
-                key={row.label}
-                className="flex items-center justify-between px-4 py-3.5 gap-3"
-                style={{
-                  borderTop: i === 0 ? "none" : "1px solid var(--pg-border-soft)",
-                }}
-              >
-                <span className="text-[13px] text-pg-ink-tertiary shrink-0">{row.label}</span>
-                <span
-                  className={`text-[13px] font-semibold text-right truncate ${
-                    row.missing ? "italic" : ""
-                  }`}
-                  style={{ color: row.missing ? "var(--pg-ink-quaternary)" : "var(--pg-ink-primary)" }}
-                >
-                  {row.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </Section>
+        {/* Group: Data kamu */}
+        <Group label="Data kamu">
+          <ListRow
+            href="/profile/identitas"
+            iconBg="var(--pg-red-soft-bg)"
+            iconColor="var(--pg-red-600)"
+            iconSvg={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="8" r="4" />
+                <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
+              </svg>
+            }
+            label="Data diri"
+            badge={
+              identityComplete
+                ? { text: "Lengkap", tone: "ok" }
+                : { text: `${identityFilled}/${identityTotal}`, tone: "warn" }
+            }
+          />
+          <ListRow
+            href="/profile/dokumen"
+            iconBg="var(--pg-amber-100)"
+            iconColor="var(--pg-amber-700)"
+            iconSvg={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+              </svg>
+            }
+            label="Dokumen"
+            badge={
+              docsVerified === docsTotal
+                ? { text: "Lengkap", tone: "ok" }
+                : { text: `${docsVerified}/${docsTotal}`, tone: "warn" }
+            }
+          />
+          <ListRow
+            href="/profile/kualifikasi"
+            iconBg="var(--pg-info-bg)"
+            iconColor="var(--pg-info)"
+            iconSvg={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 2L9 7l-5.5.8L7.5 12l-1 5.5L12 15l5.5 2.5-1-5.5 4-4.2L15 7z" />
+              </svg>
+            }
+            label="Kualifikasi"
+            badge={
+              credentialsFilled > 0
+                ? { text: `${credentialsFilled} terisi`, tone: "ok" }
+                : { text: "Belum ada", tone: "mute" }
+            }
+            isLast
+          />
+        </Group>
 
-        {/* Dokumen */}
-        <Section
-          title="Dokumen"
-          hint="KTP wajib. Paspor, foto, & CV diminta saat tahap Cek Dokumen."
-          rightHint={`${verifiedDocs} / ${docItems.length}`}
-        >
-          <DocUploader candidateId={candidate.id} initial={docItems} />
-          <div
-            className="mt-3 flex gap-2 items-start text-[12px] leading-tight"
-            style={{ color: "var(--pg-ink-tertiary)" }}
-          >
-            <Icon name="info" size={13} className="shrink-0 mt-0.5" />
-            <span>Format: JPG, PNG, HEIC, atau PDF. Maks 5MB. Pastikan foto jelas.</span>
-          </div>
-        </Section>
+        {/* Group: Akun */}
+        <Group label="Akun">
+          <ListRow
+            href="/profile/password"
+            iconBg="var(--pg-ink-50)"
+            iconColor="var(--pg-ink-secondary)"
+            iconSvg={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            }
+            label="Password"
+          />
+          <ListRow
+            iconBg="var(--pg-ink-50)"
+            iconColor="var(--pg-ink-secondary)"
+            iconSvg={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+            }
+            label="Notifikasi"
+            badge={{ text: "Soon", tone: "mute" }}
+            disabled
+          />
+          <ListRow
+            iconBg="var(--pg-ink-50)"
+            iconColor="var(--pg-ink-secondary)"
+            iconSvg={
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-12V5l-8-3-8 3v5c0 8 8 12 8 12z" />
+              </svg>
+            }
+            label="Privasi & data"
+            badge={{ text: "Soon", tone: "mute" }}
+            disabled
+            isLast
+          />
+        </Group>
 
-        {/* Kualifikasi & Sertifikat */}
-        <Section
-          title="Kualifikasi & sertifikat"
-          hint="Tiap kualifikasi buka lebih banyak lowongan yang cocok."
-        >
-          <ProfileForm initialCredentials={credentials} candidateId={candidate.id} />
-        </Section>
+        <section className="px-5 pt-4">
+          <SignOutButton variant="ghost" />
+        </section>
 
-        {/* Pengaturan */}
-        <Section title="Pengaturan" hint="Atur akun, notifikasi, & data kamu.">
-          <div
-            className="bg-pg-white rounded-2xl overflow-hidden"
-            style={{ border: "1px solid var(--pg-border)" }}
-          >
-            {candidate.email && (
-              <div className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--pg-border-soft)" }}>
-                <SecurityCard email={candidate.email} />
-              </div>
-            )}
-            <SettingRow icon="bell" label="Notifikasi" href="/profile" disabled />
-            <SettingRow icon="shield" label="Privasi & data" href="/profile" disabled />
-          </div>
-
-          <div className="mt-3">
-            <SignOutButton variant="ghost" />
-          </div>
-        </Section>
+        <section className="px-5 pt-4 pb-2">
+          <p className="text-[11px] text-pg-ink-quaternary text-center font-mono tracking-[0.06em]">
+            v0.1 · Global Talent Hub
+          </p>
+        </section>
       </main>
 
       <BottomNav />
@@ -255,79 +273,95 @@ export default async function ProfilePage() {
   );
 }
 
-function Section({
-  title,
-  hint,
-  rightHint,
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+function Group({
+  label,
   children,
 }: {
-  title: string;
-  hint?: string;
-  rightHint?: string;
+  label: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className="px-5 pt-6">
-      <div className="flex justify-between items-baseline mb-1">
-        <div
-          className="text-[10px] font-semibold tracking-[0.12em] uppercase"
-          style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
-        >
-          {title}
-        </div>
-        {rightHint && (
-          <div
-            className="text-[11px] font-semibold"
-            style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
-          >
-            {rightHint}
-          </div>
-        )}
+    <section className="px-5 pt-5">
+      <div
+        className="text-[10px] font-bold tracking-[0.12em] uppercase font-mono mb-2 ml-1"
+        style={{ color: "var(--pg-ink-tertiary)" }}
+      >
+        {label}
       </div>
-      {hint && (
-        <div className="text-[12px] text-pg-ink-tertiary mb-3 leading-tight">{hint}</div>
-      )}
-      {children}
+      <div
+        className="rounded-2xl overflow-hidden"
+        style={{
+          background: "var(--pg-white)",
+          border: "1px solid var(--pg-border)",
+          boxShadow: "0 1px 2px rgba(20,20,20,0.04), 0 4px 16px rgba(20,20,20,0.06)",
+        }}
+      >
+        {children}
+      </div>
     </section>
   );
 }
 
-function SettingRow({
-  icon,
-  label,
+function ListRow({
   href,
+  iconBg,
+  iconColor,
+  iconSvg,
+  label,
+  badge,
   disabled,
+  isLast,
 }: {
-  icon: Parameters<typeof Icon>[0]["name"];
+  href?: string;
+  iconBg: string;
+  iconColor: string;
+  iconSvg: React.ReactNode;
   label: string;
-  href: string;
+  badge?: { text: string; tone: "ok" | "warn" | "mute" };
   disabled?: boolean;
+  isLast?: boolean;
 }) {
+  const badgeStyles =
+    badge?.tone === "ok"
+      ? { background: "var(--pg-ok-soft-bg)", color: "var(--pg-ok-soft-fg)" }
+      : badge?.tone === "warn"
+      ? { background: "var(--pg-warn-soft-bg)", color: "var(--pg-warn-soft-fg)" }
+      : { background: "var(--pg-ink-50)", color: "var(--pg-ink-tertiary)" };
+
   const inner = (
     <div
-      className="flex items-center justify-between px-4 py-3.5 gap-3"
-      style={{ borderTop: "1px solid var(--pg-border-soft)", opacity: disabled ? 0.55 : 1 }}
+      className="flex items-center gap-3 px-4 py-3.5"
+      style={{
+        borderBottom: isLast ? "none" : "1px solid var(--pg-border-soft)",
+        opacity: disabled ? 0.6 : 1,
+      }}
     >
-      <div className="flex items-center gap-2.5">
-        <Icon name={icon} size={16} className="text-pg-ink-tertiary" />
-        <span className="text-[14px] font-semibold text-pg-ink-primary">{label}</span>
-        {disabled && (
+      <div
+        className="w-8 h-8 rounded-lg grid place-items-center shrink-0"
+        style={{ background: iconBg, color: iconColor }}
+      >
+        <span style={{ width: 18, height: 18, display: "block" }}>
+          {iconSvg}
+        </span>
+      </div>
+      <span className="flex-1 text-[14px] font-bold text-pg-ink-primary">{label}</span>
+      <div className="flex items-center gap-2 shrink-0">
+        {badge && (
           <span
-            className="text-[9px] font-bold tracking-[0.06em] uppercase px-1.5 py-0.5 rounded"
-            style={{
-              background: "var(--pg-ink-50)",
-              color: "var(--pg-ink-tertiary)",
-              fontFamily: "var(--font-mono)",
-            }}
+            className="text-[9px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded font-mono"
+            style={badgeStyles}
           >
-            Soon
+            {badge.text}
           </span>
         )}
+        <Icon name="chevron_right" size={16} className="text-pg-ink-quaternary" />
       </div>
-      <Icon name="chevron_right" size={16} className="text-pg-ink-quaternary" />
     </div>
   );
-  if (disabled) return inner;
+
+  if (disabled || !href) return inner;
   return (
     <Link href={href} className="block no-underline text-pg-ink-primary">
       {inner}

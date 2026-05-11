@@ -1,6 +1,7 @@
 import { createServerClient } from "./supabase-server";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@perantauglobal/db";
+import { getRequirementVocabulary } from "@perantauglobal/db/schemas/requirements";
 
 /**
  * Readiness v3 — joins candidate profile + documents to compute pass/fail
@@ -106,14 +107,18 @@ export async function getRequirementsWithStatus(
   const requirements: RequirementWithStatus[] = Object.entries(reqs).map(
     ([key, raw]) => {
       const status = readiness.per_field[key];
+      const vocab =
+        raw.allowed_values && raw.allowed_values.length > 0
+          ? undefined
+          : getRequirementVocabulary(key);
       return {
         key,
         label: raw.label ?? key,
         importance: raw.importance ?? "hard",
         category: raw.category ?? "personal",
         evidence_mode: raw.evidence_mode ?? "self_declared",
-        allowed_values: raw.allowed_values,
-        value_labels: raw.value_labels,
+        allowed_values: raw.allowed_values ?? vocab?.allowed_values,
+        value_labels: raw.value_labels ?? vocab?.value_labels,
         description: raw.description,
         document_type: raw.document_type,
         document_filter: raw.document_filter,

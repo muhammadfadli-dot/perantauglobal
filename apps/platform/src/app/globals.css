@@ -107,6 +107,14 @@
   --pg-warn-soft-border: #ffe9b0;
   --pg-red-soft-bg: #fff4f4;
   --pg-red-soft-border: #ffe3e3;
+
+  /* Paspor Perantau Global — amber/gold "earned medal" palette */
+  --pg-amber-50: #fff7e8;
+  --pg-amber-100: #fcecc7;
+  --pg-amber-200: #f6d896;
+  --pg-amber-500: #c98a14;
+  --pg-amber-600: #a16d0c;
+  --pg-amber-700: #6e4906;
 }
 
 html,
@@ -115,6 +123,21 @@ body {
   color: var(--pg-ink-900);
   font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
+}
+
+@keyframes pg-pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.5; }
+}
+
+@keyframes pg-pulse-mini {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.5; }
+}
+
+@keyframes pg-pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 h1, h2, h3, h4 {

@@ -1,246 +1,253 @@
 import Link from "next/link";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
-import { Badge } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
-import ApplyButton from "./ApplyButton";
 
 export const dynamic = "force-dynamic";
 
-type ReadinessRow = {
-  candidate_id: string | null;
-  position_slug: string | null;
-  position_name: string | null;
-  country: string | null;
-  completion_pct: number | null;
-  hard_pass: boolean | null;
+type PositionRow = {
+  slug: string;
+  name: string;
+  country: string;
+  created_at: string;
 };
 
 interface PageProps {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ country?: string }>;
 }
 
+const COUNTRIES = [
+  { code: "saudi_arabia", short: "Saudi", full: "Arab Saudi", flag: "🇸🇦" },
+  { code: "japan", short: "Jepang", full: "Jepang", flag: "🇯🇵" },
+  { code: "taiwan", short: "Taiwan", full: "Taiwan", flag: "🇹🇼" },
+  { code: "indonesia", short: "Indo", full: "Indonesia", flag: "🇮🇩" },
+] as const;
+
+const COUNTRY_FULL: Record<string, string> = Object.fromEntries(
+  COUNTRIES.map((c) => [c.code, c.full]),
+);
+const COUNTRY_FLAG: Record<string, string> = Object.fromEntries(
+  COUNTRIES.map((c) => [c.code, c.flag]),
+);
+
+const NEW_DAYS = 14;
+
 export default async function ExplorePage({ searchParams }: PageProps) {
-  const { filter } = await searchParams;
-  const hardOnly = filter === "hard";
+  const { country: countryParam } = await searchParams;
+  const activeCountry =
+    countryParam && COUNTRIES.some((c) => c.code === countryParam)
+      ? countryParam
+      : null;
 
   const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  const [candRes, readinessRes, appsRes] = await Promise.all([
+  const [positionsRes, appsRes] = await Promise.all([
     supabase
-      .from("candidates")
-      .select("id, profile_data")
-      .eq("id", candidateId)
-      .single(),
-    supabase
-      .from("readiness_view")
-      .select("candidate_id, position_slug, position_name, country, completion_pct, hard_pass")
-      .eq("candidate_id", candidateId),
+      .from("positions")
+      .select("slug, name, country, created_at")
+      .eq("active", true)
+      .order("created_at", { ascending: false }),
     supabase
       .from("applications")
       .select("id, position_slug")
       .eq("candidate_id", candidateId),
   ]);
 
-  const candidate = (candRes.data ?? { id: candidateId, profile_data: {} }) as {
-    id: string;
-    profile_data: unknown;
-  };
-
-  const profileData = (candidate.profile_data ?? {}) as Record<string, unknown>;
-  const credentials = (profileData.credentials ?? {}) as Record<string, unknown>;
-  const profileEmpty = Object.keys(credentials).length === 0;
-
-  const readiness = (readinessRes.data ?? []) as ReadinessRow[];
-
+  const positions = (positionsRes.data ?? []) as PositionRow[];
   const appliedMap = new Map<string, string>(
-    (appsRes.data ?? []).map((a) => {
-      const row = a as { id: string; position_slug: string };
-      return [row.position_slug, row.id];
-    })
+    ((appsRes.data ?? []) as Array<{ id: string; position_slug: string }>).map(
+      (a) => [a.position_slug, a.id],
+    ),
   );
 
-  const ranked = [...readiness].sort((a, b) => {
-    const hp = Number(b.hard_pass ?? false) - Number(a.hard_pass ?? false);
-    if (hp !== 0) return hp;
-    return (b.completion_pct ?? 0) - (a.completion_pct ?? 0);
-  });
+  // Per-country counts (always reflect all positions, not filtered)
+  const countByCountry = new Map<string, number>();
+  for (const p of positions) {
+    countByCountry.set(p.country, (countByCountry.get(p.country) ?? 0) + 1);
+  }
+  const totalCount = positions.length;
 
-  const filtered = hardOnly ? ranked.filter((r) => r.hard_pass) : ranked;
-  const hardCount = ranked.filter((r) => r.hard_pass).length;
+  // Filtered list for display
+  const filtered = activeCountry
+    ? positions.filter((p) => p.country === activeCountry)
+    : positions;
+
+  // "Baru" cutoff
+  const newCutoff = Date.now() - NEW_DAYS * 24 * 60 * 60 * 1000;
+
+  // Header copy
+  const headerTitle = activeCountry
+    ? `Lowongan ${COUNTRY_FULL[activeCountry]}`
+    : "Mau ke mana?";
+  const headerSub = activeCountry
+    ? `${filtered.length} posisi terbuka di ${COUNTRY_FULL[activeCountry]}.`
+    : `${totalCount} lowongan terbuka di ${COUNTRIES.length} negara.`;
 
   return (
     <div className="min-h-screen flex flex-col">
-      <TopBarApp title="Jelajah lowongan" bell />
+      <TopBarApp title="Jelajah" />
 
       <main className="flex-1 pb-6">
+        {/* Page hero */}
+        <section className="px-5 pt-3 pb-1">
+          <h1 className="text-[26px] font-extrabold tracking-[-0.025em] leading-tight">
+            {headerTitle}
+          </h1>
+          <p className="text-[13px] text-pg-ink-tertiary mt-1">{headerSub}</p>
+        </section>
+
+        {/* Search bar — stub */}
         <section className="px-5 pt-3">
-          <div className="flex bg-pg-ink-100 p-1 rounded-full">
-            <Link
-              href="/explore"
-              className={`flex-1 px-3 py-2.5 text-center text-sm font-bold rounded-full no-underline ${
-                !hardOnly ? "bg-pg-white text-pg-ink-900 shadow-sm" : "text-pg-ink-500"
-              }`}
-            >
-              Semua · {ranked.length}
-            </Link>
-            <Link
-              href="/explore?filter=hard"
-              className={`flex-1 px-3 py-2.5 text-center text-sm font-bold rounded-full no-underline ${
-                hardOnly ? "bg-pg-white text-pg-ink-900 shadow-sm" : "text-pg-ink-500"
-              }`}
-            >
-              Lolos syarat · {hardCount}
-            </Link>
+          <div
+            className="flex items-center gap-2.5 px-3.5 py-3 rounded-2xl"
+            style={{
+              background: "var(--pg-white)",
+              border: "1px solid var(--pg-border)",
+              boxShadow: "0 1px 2px rgba(20,20,20,0.04), 0 4px 12px rgba(20,20,20,0.04)",
+            }}
+          >
+            <Icon name="search" size={18} className="text-pg-ink-tertiary shrink-0" />
+            <span className="text-[14px] text-pg-ink-tertiary">
+              Cari posisi (mis. perawat, barista)…
+            </span>
           </div>
         </section>
 
-        {profileEmpty && (
-          <section className="px-5 pt-4">
-            <div
-              className="flex gap-3 items-start px-4 py-3.5 rounded-xl"
-              style={{ background: "var(--pg-warn-bg)", color: "var(--pg-warn)" }}
-            >
-              <Icon name="warn" size={18} className="shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <div className="text-sm font-bold">Profil kamu masih kosong</div>
-                <div className="text-[13px] mt-0.5 opacity-90">
-                  Persentase di bawah belum akurat. Lengkapi profil dulu.
-                </div>
-                <Link
-                  href="/profile"
-                  className="inline-flex items-center gap-1 mt-2 text-sm font-bold underline"
-                >
-                  Lengkapi profil <Icon name="arrow_right" size={14} />
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
-
+        {/* Country selector — 5-up segmented control */}
         <section className="px-5 pt-4">
-          <div className="text-[13px] text-pg-ink-500">
-            Diurutkan dari yang paling cocok untuk kamu.
+          <div
+            className="text-[10px] font-bold tracking-[0.12em] uppercase font-mono mb-2.5 pl-1"
+            style={{ color: "var(--pg-red-600)" }}
+          >
+            Negara tujuan
+          </div>
+          <div
+            className="gap-2"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+              gap: 8,
+            }}
+          >
+            <CountryButton
+              href="/explore"
+              flag="✦"
+              isSpecial
+              label="Semua"
+              count={totalCount}
+              active={!activeCountry}
+            />
+            {COUNTRIES.map((c) => (
+              <CountryButton
+                key={c.code}
+                href={`/explore?country=${c.code}`}
+                flag={c.flag}
+                label={c.short}
+                count={countByCountry.get(c.code) ?? 0}
+                active={activeCountry === c.code}
+              />
+            ))}
           </div>
         </section>
 
-        <section className="px-5 pt-3 pb-6 grid gap-3.5">
+        {/* Count label */}
+        <section className="px-5 pt-5 pb-2 flex justify-between items-baseline">
+          <span className="text-[12px] text-pg-ink-tertiary">
+            <b
+              className="text-pg-ink-primary font-extrabold font-mono"
+              style={{ fontSize: 13 }}
+            >
+              {filtered.length}
+            </b>{" "}
+            hasil{activeCountry ? ` di ${COUNTRY_FULL[activeCountry]}` : ""}
+          </span>
+          <span
+            className="text-[12px] font-bold"
+            style={{ color: "var(--pg-ink-quaternary)" }}
+          >
+            Terbaru di atas
+          </span>
+        </section>
+
+        {/* List */}
+        <section className="px-5 pt-1 flex flex-col gap-2">
           {filtered.length === 0 ? (
-            <div className="bg-pg-white border border-pg-ink-100 rounded-2xl p-6 text-center">
-              <div className="text-base font-bold">Belum ada posisi</div>
-              <div className="text-sm text-pg-ink-500 mt-1.5 leading-relaxed">
-                {hardOnly
-                  ? "Belum ada posisi yang syarat wajibnya kamu lolosi. Lengkapi profil supaya muncul."
-                  : "Belum ada posisi aktif. Cek lagi nanti."}
+            <div
+              className="px-6 py-10 text-center rounded-2xl"
+              style={{
+                background: "var(--pg-white)",
+                border: "1px dashed var(--pg-ink-200)",
+              }}
+            >
+              <div className="text-[14px] font-extrabold text-pg-ink-primary">
+                Belum ada posisi
+              </div>
+              <div className="text-[12px] text-pg-ink-tertiary mt-1 leading-snug">
+                {activeCountry
+                  ? `Belum ada lowongan ${COUNTRY_FULL[activeCountry]} aktif. Cek negara lain atau coba lagi nanti.`
+                  : "Belum ada lowongan aktif. Cek lagi nanti."}
               </div>
             </div>
           ) : (
-            filtered.map((r, idx) => {
-              const slug = r.position_slug ?? "";
-              const pct = r.completion_pct ?? 0;
-              const hardPass = r.hard_pass ?? false;
-              const existingAppId = appliedMap.get(slug);
-              const isTop = idx === 0 && hardPass;
-
-              if (existingAppId) {
-                return (
-                  <Link
-                    key={slug}
-                    href={`/applications/${existingAppId}`}
-                    className="block bg-pg-white border border-pg-ink-100 rounded-2xl p-4 no-underline text-pg-ink-900"
-                  >
-                    <div className="flex justify-between items-start gap-3">
-                      <div>
-                        <div className="text-[11px] tracking-[0.1em] uppercase text-pg-ink-400">
-                          {r.country}
-                        </div>
-                        <div className="text-lg font-extrabold tracking-tight mt-0.5">
-                          {r.position_name}
-                        </div>
-                      </div>
-                      <Badge variant="info">Sudah dilamar</Badge>
-                    </div>
-                    <div className="flex items-center gap-1 text-pg-red-600 font-bold text-sm mt-3">
-                      Lihat status <Icon name="chevron_right" size={16} />
-                    </div>
-                  </Link>
-                );
-              }
-
-              if (isTop) {
-                return (
-                  <div
-                    key={slug}
-                    className="bg-pg-white border-[1.5px] border-pg-red-200 rounded-2xl overflow-hidden"
-                  >
-                    <div
-                      className="px-4 pt-4 pb-3.5 text-white relative min-h-[96px]"
-                      style={{
-                        background:
-                          "radial-gradient(ellipse at 80% 10%, rgba(255,255,255,.18), transparent 60%), var(--pg-red-600)",
-                      }}
-                    >
-                      <div
-                        className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide"
-                        style={{ background: "rgba(255,255,255,.16)" }}
-                      >
-                        {pct}% COCOK
-                      </div>
-                      <div className="text-[11px] font-bold tracking-[0.14em] uppercase opacity-85">
-                        {r.country}
-                      </div>
-                      <div className="text-[22px] font-extrabold tracking-tight mt-1.5">
-                        {r.position_name}
-                      </div>
-                    </div>
-                    <div className="px-4 py-3.5">
-                      <div className="grid gap-1.5">
-                        <Reason ok>Semua syarat wajib kamu penuhi</Reason>
-                        <Reason ok>Profil kamu cocok untuk posisi ini</Reason>
-                      </div>
-                      <ApplyButton positionSlug={slug} hardPass={hardPass} />
-                    </div>
-                  </div>
-                );
-              }
-
+            filtered.map((p) => {
+              const isNew = new Date(p.created_at).getTime() >= newCutoff;
+              const existingAppId = appliedMap.get(p.slug);
+              const href = existingAppId
+                ? `/applications/${existingAppId}`
+                : `/applications/new?position=${p.slug}`;
               return (
-                <div
-                  key={slug}
-                  className="bg-pg-white border border-pg-ink-100 rounded-2xl overflow-hidden"
+                <Link
+                  key={p.slug}
+                  href={href}
+                  className="flex items-center gap-3 px-4 py-3.5 rounded-2xl no-underline text-pg-ink-primary"
+                  style={{
+                    background: "var(--pg-white)",
+                    border: "1px solid var(--pg-border)",
+                    boxShadow: "0 1px 2px rgba(20,20,20,0.04), 0 4px 16px rgba(20,20,20,0.06)",
+                  }}
                 >
-                  <div className="p-4 flex gap-3.5">
+                  <div
+                    className="w-9 h-9 rounded-xl grid place-items-center shrink-0 text-[18px]"
+                    style={{ background: "var(--pg-ink-50)" }}
+                  >
+                    {COUNTRY_FLAG[p.country] ?? "🌐"}
+                  </div>
+                  <div className="flex-1 min-w-0">
                     <div
-                      className="w-13 h-13 rounded-xl grid place-items-center shrink-0"
+                      className="text-[9px] font-bold tracking-[0.1em] uppercase font-mono"
+                      style={{ color: "var(--pg-ink-tertiary)" }}
+                    >
+                      {COUNTRY_FULL[p.country] ?? p.country}
+                    </div>
+                    <div className="text-[15px] font-extrabold tracking-[-0.01em] mt-0.5 truncate">
+                      {p.name}
+                    </div>
+                  </div>
+                  {existingAppId ? (
+                    <span
+                      className="text-[9px] font-bold tracking-[0.06em] uppercase px-2 py-0.5 rounded font-mono"
+                      style={{ background: "var(--pg-info-bg)", color: "var(--pg-info)" }}
+                    >
+                      Dilamar
+                    </span>
+                  ) : isNew ? (
+                    <span
+                      className="text-[9px] font-bold tracking-[0.06em] uppercase px-2 py-0.5 rounded font-mono"
                       style={{
-                        width: 52,
-                        height: 52,
-                        background: hardPass ? "var(--pg-red-50)" : "var(--pg-ink-50)",
-                        color: hardPass ? "var(--pg-red-700)" : "var(--pg-ink-500)",
+                        background: "var(--pg-red-soft-bg)",
+                        color: "var(--pg-red-600)",
                       }}
                     >
-                      <Icon name="briefcase" size={26} stroke={2} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[11px] tracking-[0.1em] uppercase text-pg-ink-400">
-                        {r.country}
-                      </div>
-                      <div className="text-[17px] font-extrabold tracking-tight mt-0.5 truncate">
-                        {r.position_name}
-                      </div>
-                      <div className="text-sm text-pg-ink-500 mt-1">
-                        {hardPass ? `${pct}% cocok` : "Syarat wajib belum lengkap"}
-                      </div>
-                    </div>
-                    <Badge variant={hardPass ? "ok" : "mute"}>
-                      {hardPass ? `${pct}%` : "Antri"}
-                    </Badge>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <ApplyButton positionSlug={slug} hardPass={hardPass} />
-                  </div>
-                </div>
+                      Baru
+                    </span>
+                  ) : null}
+                  <Icon
+                    name="chevron_right"
+                    size={16}
+                    className="text-pg-ink-quaternary shrink-0"
+                  />
+                </Link>
               );
             })
           )}
@@ -252,16 +259,73 @@ export default async function ExplorePage({ searchParams }: PageProps) {
   );
 }
 
-function Reason({ ok, children }: { ok: boolean; children: React.ReactNode }) {
+// ─── Country button (5-up segmented control) ───────────────────────────────
+
+function CountryButton({
+  href,
+  flag,
+  label,
+  count,
+  active,
+  isSpecial,
+}: {
+  href: string;
+  flag: string;
+  label: string;
+  count: number;
+  active: boolean;
+  isSpecial?: boolean;
+}) {
   return (
-    <div className="flex items-center gap-2 text-[13px]">
-      <Icon
-        name={ok ? "check" : "x"}
-        size={14}
-        stroke={3}
-        className={ok ? "text-pg-ok" : "text-pg-err"}
-      />
-      <span>{children}</span>
-    </div>
+    <Link
+      href={href}
+      className="flex flex-col items-center gap-1 px-1 py-2.5 rounded-2xl no-underline transition-transform"
+      style={
+        active
+          ? {
+              background: "var(--pg-ink-primary)",
+              border: "1.5px solid var(--pg-ink-primary)",
+              boxShadow: "0 4px 12px rgba(20,20,20,0.20), inset 0 1px 0 rgba(255,255,255,0.10)",
+            }
+          : {
+              background: "var(--pg-white)",
+              border: "1.5px solid var(--pg-border)",
+              boxShadow: "0 1px 2px rgba(20,20,20,0.04), 0 4px 12px rgba(20,20,20,0.04)",
+            }
+      }
+    >
+      {isSpecial ? (
+        <span
+          className="w-[22px] h-[22px] rounded-full grid place-items-center text-[13px] font-extrabold"
+          style={
+            active
+              ? { background: "rgba(255,255,255,0.95)", color: "var(--pg-ink-primary)" }
+              : {
+                  background:
+                    "linear-gradient(135deg, var(--pg-red-600), var(--pg-red-700))",
+                  color: "#fff",
+                }
+          }
+        >
+          {flag}
+        </span>
+      ) : (
+        <span className="text-[22px] leading-none">{flag}</span>
+      )}
+      <span
+        className="text-[11px] font-bold leading-tight"
+        style={{ color: active ? "#fff" : "var(--pg-ink-primary)" }}
+      >
+        {label}
+      </span>
+      <span
+        className="text-[9px] font-bold tracking-[0.04em] font-mono"
+        style={{
+          color: active ? "rgba(255,255,255,0.7)" : "var(--pg-ink-tertiary)",
+        }}
+      >
+        {count}
+      </span>
+    </Link>
   );
 }

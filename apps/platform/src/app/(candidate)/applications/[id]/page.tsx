@@ -4,6 +4,8 @@ import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import { getRequirementsWithStatus } from "@/lib/readiness";
+import { getApplicationStatus } from "@/lib/applicationStatus";
+import { resolveCredentialValue } from "@perantauglobal/db/schemas/requirements";
 
 export const dynamic = "force-dynamic";
 
@@ -33,60 +35,16 @@ const COUNTRY_LABEL: Record<string, string> = {
   any: "Global",
 };
 
-const ANSWER_LABEL: Record<string, string> = {
-  motivation: "Motivasi",
-  earliest_start: "Siap berangkat",
-  visa_status: "Status visa",
-  referral: "Tertarik dari mana",
-  asrama_6mo: "Bersedia tinggal di asrama 6 bln",
+type FormFieldRow = {
+  field_key: string;
+  field_label: string;
+  field_type: string;
+  options: Array<{ value: string; label: string }> | null;
+  sort_order: number;
 };
 
 interface PageProps {
   params: Promise<{ id: string }>;
-}
-
-const PHASES = [
-  {
-    key: "diseleksi" as const,
-    label: "Sedang diseleksi",
-    short: "Sekarang",
-    desc: "Profil kamu lagi ditinjau tim recruitment. Update bakal muncul di sini.",
-    includes: ["applied", "screening", "voice_screen", "document_check"],
-  },
-  {
-    key: "wawancara" as const,
-    label: "Wawancara & dokumen",
-    short: "Wawancara",
-    desc: "Sedang dijadwalkan wawancara dan persiapan dokumen kerja.",
-    includes: ["interview", "briefing", "trial"],
-  },
-  {
-    key: "diterima" as const,
-    label: "Diterima",
-    short: "Diterima",
-    desc: "Kamu diterima! Selamat. Tim akan kabari proses keberangkatan.",
-    includes: ["selected", "training", "deployed", "active"],
-  },
-  {
-    key: "selesai" as const,
-    label: "Selesai",
-    short: "Selesai",
-    desc: "Selamat sudah berangkat. Semoga sukses di tempat baru.",
-    includes: ["active", "deployed"],
-  },
-];
-
-const REJECTED_PHASE = {
-  label: "Tidak terpilih",
-  desc: "Sayang sekali, kamu belum terpilih kali ini. Tetap semangat — coba lowongan lain di Jelajah.",
-};
-
-function phaseIdx(internal: string): number {
-  if (["rejected", "exit"].includes(internal)) return -1;
-  for (let i = 0; i < PHASES.length; i++) {
-    if (PHASES[i]!.includes.includes(internal)) return i;
-  }
-  return 0;
 }
 
 export default async function ApplicationDetailPage({ params }: PageProps) {
@@ -105,23 +63,36 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const application = appData as unknown as ApplicationRow | null;
   if (!application || !application.positions) notFound();
 
-  const { data: historyData } = await supabase
-    .from("application_status_history")
-    .select("id, from_stage, to_stage, changed_at, public_note")
-    .eq("application_id", application.id)
-    .order("changed_at", { ascending: false });
-  const history = (historyData ?? []) as Array<{
+  const [historyRes, formFieldsRes, candidateRes] = await Promise.all([
+    supabase
+      .from("application_status_history")
+      .select("id, from_stage, to_stage, changed_at, public_note")
+      .eq("application_id", application.id)
+      .order("changed_at", { ascending: false }),
+    supabase
+      .from("position_form_fields")
+      .select("field_key, field_label, field_type, options, sort_order")
+      .eq("position_slug", application.position_slug)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("candidates")
+      .select("profile_data")
+      .eq("id", candidateId)
+      .single(),
+  ]);
+
+  const history = (historyRes.data ?? []) as Array<{
     id: string;
     from_stage: string | null;
     to_stage: string;
     changed_at: string;
     public_note: string | null;
   }>;
+  const formFields = (formFieldsRes.data ?? []) as FormFieldRow[];
+  const credentials = (((candidateRes.data?.profile_data as Record<string, unknown>) ?? {})
+    .credentials ?? {}) as Record<string, string>;
 
   const position = application.positions;
-  const currentIdx = phaseIdx(application.pipeline_stage);
-  const isRejected = currentIdx === -1;
-  const current = isRejected ? null : PHASES[currentIdx];
 
   const { requirements, score_pct, hard_pass } = await getRequirementsWithStatus(
     candidateId,
@@ -131,6 +102,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const totalReqs = requirements.length;
   const passedReqs = requirements.filter((r) => r.passed).length;
   const openCount = totalReqs - passedReqs;
+
+  const status = getApplicationStatus({
+    pipelineStage: application.pipeline_stage,
+    hardPass: hard_pass,
+  });
+  const isRejected = status.key === "rejected";
   const showLengkapi = !isRejected && openCount > 0;
 
   // Find first missing hard requirement for inline message
@@ -138,9 +115,32 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
   const answers = (application.answers ?? {}) as Record<string, string>;
 
+  // Display rows for "Jawaban kamu". Source of truth is live credentials in
+  // candidates.profile_data (what readiness sees right now); fall back to the
+  // immutable applications.answers snapshot for values not lifted into
+  // credentials. We render only fields the position actually asks for —
+  // not a hardcoded list — so the section reflects the position's real form.
+  const answerRows = formFields.map((f) => {
+    const raw =
+      resolveCredentialValue(credentials, f.field_key) ??
+      answers[f.field_key] ??
+      "";
+    const opt = f.options?.find((o) => o.value === raw);
+    return {
+      key: f.field_key,
+      label: f.field_label,
+      value: opt?.label ?? raw,
+      hasValue: Boolean(raw),
+    };
+  });
+
+  // Public timeline: only entries with a public note from the recruitment team.
+  // Internal pipeline_stage transitions are deliberately hidden from candidates.
+  const publicHistory = history.filter((h) => h.public_note);
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
-      <TopBarApp title="Status lamaran" back backHref="/applications" bell />
+      <TopBarApp title="Status lamaran" back backHref="/applications" />
 
       <main className="flex-1 pb-8">
         {/* Header */}
@@ -151,95 +151,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           >
             {position.name} — {COUNTRY_LABEL[position.country] ?? position.country}
           </div>
-          {!isRejected ? (
-            <>
-              <div
-                className="inline-flex items-center gap-1.5 mt-3 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-[0.06em] uppercase"
-                style={{
-                  background: "var(--pg-red-soft-bg)",
-                  color: "var(--pg-red-600)",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full"
-                  style={{ background: "var(--pg-red-600)" }}
-                />
-                Tahap {currentIdx + 1} dari 4
-              </div>
-              <h1 className="text-[28px] font-extrabold tracking-[-0.025em] mt-2 text-pg-ink-primary leading-tight">
-                {current!.label}
-              </h1>
-              <p className="text-[14px] text-pg-ink-tertiary mt-2 leading-relaxed">
-                {current!.desc}
-              </p>
-            </>
-          ) : (
-            <>
-              <h1 className="text-[28px] font-extrabold tracking-[-0.025em] mt-3 text-pg-ink-primary">
-                {REJECTED_PHASE.label}
-              </h1>
-              <p className="text-[14px] text-pg-ink-tertiary mt-2 leading-relaxed">
-                {REJECTED_PHASE.desc}
-              </p>
-            </>
-          )}
+          <StatusBadge tone={status.tone} className="mt-3">
+            {status.label}
+          </StatusBadge>
+          <h1 className="text-[28px] font-extrabold tracking-[-0.025em] mt-2 text-pg-ink-primary leading-tight">
+            {status.headline}
+          </h1>
+          <p className="text-[14px] text-pg-ink-tertiary mt-2 leading-relaxed">
+            {status.description}
+          </p>
         </section>
-
-        {/* 4-step circle progress */}
-        {!isRejected && (
-          <section className="px-5 pt-5">
-            <div className="flex items-start justify-between">
-              {PHASES.map((p, i) => {
-                const done = i < currentIdx;
-                const active = i === currentIdx;
-                return (
-                  <div key={p.key} className="flex items-center flex-1 last:flex-none">
-                    <div className="flex flex-col items-center gap-1.5">
-                      <div
-                        className="w-6 h-6 rounded-full grid place-items-center shrink-0"
-                        style={{
-                          background: done
-                            ? "var(--pg-red-600)"
-                            : active
-                            ? "var(--pg-red-600)"
-                            : "transparent",
-                          border: !active && !done ? "1.5px solid var(--pg-ink-200)" : "none",
-                        }}
-                      >
-                        {done && <Icon name="check" size={11} stroke={3} className="text-white" />}
-                        {active && (
-                          <span className="w-2 h-2 rounded-full bg-white" />
-                        )}
-                      </div>
-                      <span
-                        className="text-[11px] font-bold whitespace-nowrap"
-                        style={{
-                          color: active
-                            ? "var(--pg-red-600)"
-                            : done
-                            ? "var(--pg-ink-primary)"
-                            : "var(--pg-ink-quaternary)",
-                        }}
-                      >
-                        {p.short}
-                      </span>
-                    </div>
-                    {i < PHASES.length - 1 && (
-                      <div
-                        className="h-px flex-1 mx-1.5"
-                        style={{
-                          background: i < currentIdx ? "var(--pg-red-600)" : "var(--pg-ink-200)",
-                          marginTop: "11px",
-                        }}
-                      />
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          </section>
-        )}
 
         {/* Persyaratan posisi — red soft card */}
         {!isRejected && totalReqs > 0 && (
@@ -313,7 +234,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           </section>
         )}
 
-        {/* Perjalanan lamaran */}
+        {/* Perjalanan lamaran — only public-facing events, never internal stages */}
         <section className="px-5 pt-6">
           <div
             className="text-[10px] font-semibold tracking-[0.12em] uppercase mb-1"
@@ -322,119 +243,90 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             Perjalanan lamaran
           </div>
           <div className="text-[13px] text-pg-ink-tertiary mb-3">
-            Setiap update bakal muncul di sini.
+            Update dari tim recruitment akan muncul di sini.
           </div>
           <div
             className="bg-pg-white rounded-2xl p-5 flex flex-col gap-3.5"
             style={{ border: "1px solid var(--pg-border)" }}
           >
-            {history.length === 0 && (
-              <div className="text-[13px] text-pg-ink-tertiary italic">
-                Belum ada update. Tim akan update setelah review profil kamu.
-              </div>
-            )}
-            {history.map((h, i) => {
-              const phaseIdxFor = phaseIdx(h.to_stage);
-              const phaseLabel =
-                phaseIdxFor === -1
-                  ? "Tidak terpilih"
-                  : PHASES[phaseIdxFor]?.label ?? h.to_stage;
+            {publicHistory.map((h, i) => {
               const isLatest = i === 0;
               const isToday =
                 new Date(h.changed_at).toDateString() === new Date().toDateString();
               return (
-                <div key={h.id} className="grid grid-cols-[16px_1fr] gap-3">
-                  <div className="relative pt-1.5">
-                    <div
-                      className="w-3 h-3 rounded-full"
-                      style={{
-                        background: isLatest ? "var(--pg-red-600)" : "transparent",
-                        border: isLatest ? "none" : "1.5px solid var(--pg-ink-300)",
-                      }}
-                    />
-                  </div>
-                  <div className="min-w-0">
-                    <div
-                      className="text-[11px] font-semibold flex items-center gap-2"
-                      style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
-                    >
-                      {new Date(h.changed_at).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                      {isToday && (
-                        <span
-                          className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-[0.04em] uppercase"
-                          style={{
-                            background: "var(--pg-red-soft-bg)",
-                            color: "var(--pg-red-600)",
-                          }}
-                        >
-                          Hari ini
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[15px] font-bold text-pg-ink-primary mt-0.5">
-                      {phaseLabel}
-                    </div>
-                    {h.public_note && (
-                      <div className="text-[13px] text-pg-ink-secondary mt-1.5 leading-tight">
-                        {h.public_note}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <TimelineItem
+                  key={h.id}
+                  date={h.changed_at}
+                  isLatest={isLatest}
+                  isToday={isToday}
+                  title="Update dari tim recruitment"
+                  note={h.public_note}
+                />
               );
             })}
+            <TimelineItem
+              date={application.created_at}
+              isLatest={publicHistory.length === 0}
+              isToday={
+                new Date(application.created_at).toDateString() ===
+                new Date().toDateString()
+              }
+              title="Lamaran terkirim"
+              note={
+                publicHistory.length === 0
+                  ? "Tim akan update setelah review profil kamu."
+                  : null
+              }
+            />
           </div>
         </section>
 
-        {/* Jawaban kamu — table style */}
-        <section className="px-5 pt-6">
-          <div className="flex items-baseline justify-between mb-1">
-            <div
-              className="text-[10px] font-semibold tracking-[0.12em] uppercase"
-              style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
-            >
-              Jawaban kamu
+        {/* Jawaban kamu — driven by position_form_fields, hidden if none */}
+        {answerRows.length > 0 && (
+          <section className="px-5 pt-6">
+            <div className="flex items-baseline justify-between mb-1">
+              <div
+                className="text-[10px] font-semibold tracking-[0.12em] uppercase"
+                style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
+              >
+                Jawaban kamu
+              </div>
+              <Link
+                href="/profile"
+                className="text-[12px] font-bold text-pg-red-600 no-underline"
+              >
+                Edit di profil
+              </Link>
             </div>
-            <Link
-              href={`/applications/${id}/lengkapi`}
-              className="text-[12px] font-bold text-pg-red-600 no-underline"
+            <div className="text-[13px] text-pg-ink-tertiary mb-3">
+              Diambil dari profil kamu. Update profil untuk ubah.
+            </div>
+            <div
+              className="bg-pg-white rounded-2xl overflow-hidden"
+              style={{ border: "1px solid var(--pg-border)" }}
             >
-              Edit
-            </Link>
-          </div>
-          <div className="text-[13px] text-pg-ink-tertiary mb-3">Bisa di-edit kapan aja.</div>
-          <div
-            className="bg-pg-white rounded-2xl overflow-hidden"
-            style={{ border: "1px solid var(--pg-border)" }}
-          >
-            {Object.entries(ANSWER_LABEL).map(([key, label], i) => {
-              const value = answers[key];
-              return (
+              {answerRows.map((row, i) => (
                 <div
-                  key={key}
+                  key={row.key}
                   className="flex items-center justify-between px-4 py-3.5"
                   style={{
                     borderTop: i === 0 ? "none" : "1px solid var(--pg-border-soft)",
                   }}
                 >
-                  <span className="text-[13px] text-pg-ink-secondary">{label}</span>
+                  <span className="text-[13px] text-pg-ink-secondary">{row.label}</span>
                   <span
                     className={`text-[13px] font-semibold text-right ml-3 truncate max-w-[60%] ${
-                      value ? "text-pg-ink-primary" : "italic"
+                      row.hasValue ? "text-pg-ink-primary" : "italic"
                     }`}
-                    style={{ color: value ? undefined : "var(--pg-ink-quaternary)" }}
+                    style={{ color: row.hasValue ? undefined : "var(--pg-ink-quaternary)" }}
                   >
-                    {value || "Belum diisi"}
+                    {row.hasValue ? row.value : "Belum diisi"}
                   </span>
                 </div>
-              );
-            })}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Ada pertanyaan? */}
         <section className="px-5 pt-6">
@@ -473,6 +365,89 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       </main>
 
       <BottomNav />
+    </div>
+  );
+}
+
+function StatusBadge({
+  tone,
+  className,
+  children,
+}: {
+  tone: "warn" | "info" | "ok" | "mute";
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const colors =
+    tone === "warn"
+      ? { bg: "var(--pg-warn-soft-bg)", fg: "var(--pg-warn-soft-fg)", dot: "var(--pg-warn-soft-fg)" }
+      : tone === "ok"
+      ? { bg: "var(--pg-ok-soft-bg)", fg: "var(--pg-ok-soft-fg)", dot: "var(--pg-ok-soft-fg)" }
+      : tone === "mute"
+      ? { bg: "var(--pg-ink-50)", fg: "var(--pg-ink-tertiary)", dot: "var(--pg-ink-tertiary)" }
+      : { bg: "var(--pg-red-soft-bg)", fg: "var(--pg-red-600)", dot: "var(--pg-red-600)" };
+  return (
+    <div
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-[0.06em] uppercase ${className ?? ""}`}
+      style={{ background: colors.bg, color: colors.fg, fontFamily: "var(--font-mono)" }}
+    >
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: colors.dot }} />
+      {children}
+    </div>
+  );
+}
+
+function TimelineItem({
+  date,
+  isLatest,
+  isToday,
+  title,
+  note,
+}: {
+  date: string;
+  isLatest: boolean;
+  isToday: boolean;
+  title: string;
+  note: string | null;
+}) {
+  return (
+    <div className="grid grid-cols-[16px_1fr] gap-3">
+      <div className="relative pt-1.5">
+        <div
+          className="w-3 h-3 rounded-full"
+          style={{
+            background: isLatest ? "var(--pg-red-600)" : "transparent",
+            border: isLatest ? "none" : "1.5px solid var(--pg-ink-300)",
+          }}
+        />
+      </div>
+      <div className="min-w-0">
+        <div
+          className="text-[11px] font-semibold flex items-center gap-2"
+          style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
+        >
+          {new Date(date).toLocaleDateString("id-ID", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          })}
+          {isToday && (
+            <span
+              className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-[0.04em] uppercase"
+              style={{
+                background: "var(--pg-red-soft-bg)",
+                color: "var(--pg-red-600)",
+              }}
+            >
+              Hari ini
+            </span>
+          )}
+        </div>
+        <div className="text-[15px] font-bold text-pg-ink-primary mt-0.5">{title}</div>
+        {note && (
+          <div className="text-[13px] text-pg-ink-secondary mt-1.5 leading-tight">{note}</div>
+        )}
+      </div>
     </div>
   );
 }

@@ -3,49 +3,96 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Icon, type IconName } from "./Icon";
+import { LogoMark } from "./Logo";
 
+/**
+ * Top app bar — sticky, brand-anchored.
+ *
+ * Layout: 3-column grid (40px / 1fr / 40px) so the title stays optically
+ * centered regardless of left/right content.
+ *
+ * Left slot:
+ *   - When `back`: back button → backHref (default /dashboard)
+ *   - Otherwise: small "PG" brand mark — identity anchor on root pages so the
+ *     bar always reads as "Perantau Global / Global Talent Hub"
+ *
+ * Right slot: reserved for future actions. Notification bell was removed
+ * because no notifications backend exists yet; we'll bring it back when
+ * push is real.
+ */
 export function TopBarApp({
   title,
   back,
-  bell,
   backHref,
 }: {
   title: string;
   back?: boolean;
-  bell?: boolean;
   backHref?: string;
 }) {
   return (
     <header
-      className="sticky top-0 z-30 flex items-center justify-between px-5 py-3 border-b border-pg-ink-100 min-h-[56px]"
-      style={{ background: "var(--pg-paper)" }}
+      className="sticky top-0 z-30 px-4"
+      style={{
+        background:
+          "linear-gradient(180deg, #fffefa 0%, var(--pg-paper) 100%)",
+        boxShadow:
+          "0 1px 0 rgba(20,20,20,0.04), 0 4px 12px rgba(20,20,20,0.04)",
+      }}
     >
-      <div className="flex items-center gap-3">
-        {back && (
-          <Link
-            href={backHref ?? "/dashboard"}
-            className="w-10 h-10 rounded-[10px] border border-pg-ink-200 bg-pg-white grid place-items-center text-pg-ink-900 no-underline"
-            aria-label="Kembali"
-          >
-            <Icon name="arrow_left" size={20} />
-          </Link>
-        )}
-        <div className="font-extrabold text-[17px] tracking-tight">{title}</div>
-      </div>
-      {bell && (
-        <button
-          type="button"
-          className="relative w-10 h-10 rounded-[10px] border border-pg-ink-200 bg-pg-white grid place-items-center"
-          aria-label="Notifikasi"
+      <div
+        className="min-h-[60px] py-3"
+        style={{
+          display: "grid",
+          gridTemplateColumns: "40px 1fr 40px",
+          alignItems: "center",
+          gap: 8,
+        }}
+      >
+        <div className="flex items-center justify-start">
+          {back ? (
+            <Link
+              href={backHref ?? "/dashboard"}
+              className="w-10 h-10 rounded-[12px] grid place-items-center text-pg-ink-900 no-underline"
+              style={{
+                background: "var(--pg-white)",
+                border: "1px solid var(--pg-border)",
+                boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
+              }}
+              aria-label="Kembali"
+            >
+              <Icon name="arrow_left" size={20} />
+            </Link>
+          ) : (
+            <BrandMark />
+          )}
+        </div>
+        <div
+          className="text-center font-extrabold text-[16px] tracking-[-0.015em] truncate"
+          style={{ color: "var(--pg-ink-primary)" }}
         >
-          <Icon name="bell" size={20} />
-          <span
-            className="absolute top-2 right-[9px] w-2 h-2 rounded-full"
-            style={{ background: "var(--pg-red-600)", border: "2px solid var(--pg-white)" }}
-          />
-        </button>
-      )}
+          {title}
+        </div>
+        <div /> {/* right slot — reserved for future actions */}
+      </div>
     </header>
+  );
+}
+
+function BrandMark() {
+  return (
+    <Link
+      href="/dashboard"
+      className="w-10 h-10 rounded-[12px] grid place-items-center text-white no-underline"
+      style={{
+        background:
+          "linear-gradient(135deg, var(--pg-red-600) 0%, var(--pg-red-700) 100%)",
+        boxShadow:
+          "0 2px 6px rgba(215,38,47,0.30), inset 0 1px 0 rgba(255,255,255,0.25)",
+      }}
+      aria-label="Perantau Global — beranda"
+    >
+      <LogoMark size={22} />
+    </Link>
   );
 }
 
