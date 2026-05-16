@@ -51,6 +51,14 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  images: {
+    // Allow higher quality for graphic illustrations (wireframe globe, etc.)
+    // Default Next 16 only allows q=75. Listing additional values whitelists them.
+    qualities: [60, 75, 90],
+    // Prefer AVIF (smaller) → WebP → JPEG. AVIF can be 30-50% smaller than JPEG
+    // at same visual quality, important for mobile users on slow connections.
+    formats: ["image/avif", "image/webp"],
+  },
   async headers() {
     return [
       {
