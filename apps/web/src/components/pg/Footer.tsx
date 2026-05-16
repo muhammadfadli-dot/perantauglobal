@@ -1,5 +1,6 @@
 import { Icon } from "./Icon";
 import Link from "next/link";
+import Image from "next/image";
 
 const COLS = [
   {
@@ -34,12 +35,13 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr] gap-8">
           <div>
             <div className="flex items-center gap-2.5">
-              <div
-                className="w-8 h-8 rounded-lg grid place-items-center text-white font-extrabold text-sm tracking-tight"
-                style={{ background: "var(--pg-red-600)" }}
-              >
-                P
-              </div>
+              <Image
+                src="/images/logos/logo-icon.svg"
+                alt="Perantau Global"
+                width={32}
+                height={32}
+                className="flex-shrink-0"
+              />
               <div className="font-extrabold text-lg tracking-tight">
                 Perantau<span style={{ color: "var(--pg-red-500)" }}>Global</span>
               </div>
