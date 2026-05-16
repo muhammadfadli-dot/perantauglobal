@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { Icon } from "./Icon";
 
@@ -24,13 +25,15 @@ export function TopBarWWW() {
           backdropFilter: "saturate(140%) blur(8px)",
         }}
       >
-        <Link href="/" className="flex items-center gap-2.5 no-underline text-pg-ink-900">
-          <div
-            className="w-7 h-7 rounded-lg grid place-items-center text-white font-extrabold text-sm tracking-tight"
-            style={{ background: "var(--pg-red-600)" }}
-          >
-            P
-          </div>
+        <Link href="/" className="flex items-center gap-2 no-underline text-pg-ink-900">
+          <Image
+            src="/images/logos/logo-icon.svg"
+            alt="Perantau Global"
+            width={28}
+            height={28}
+            className="flex-shrink-0"
+            priority
+          />
           <div className="font-extrabold tracking-tight text-base">
             Perantau<span className="text-pg-red-600">Global</span>
           </div>
@@ -49,17 +52,18 @@ export function TopBarWWW() {
         <div className="flex items-center gap-2">
           <a
             href={APP_URL}
-            className="inline-flex items-center justify-center min-h-[40px] px-3.5 text-sm font-semibold rounded-xl bg-pg-red-600 text-white hover:bg-pg-red-700 no-underline transition-colors"
+            className="inline-flex items-center justify-center min-h-[36px] md:min-h-[40px] px-2.5 sm:px-3.5 text-[13px] sm:text-sm font-semibold rounded-xl bg-pg-red-600 text-white hover:bg-pg-red-700 no-underline transition-colors whitespace-nowrap"
           >
-            Buka Talent Hub
+            <span className="sm:hidden">Daftar</span>
+            <span className="hidden sm:inline">Buka Talent Hub</span>
           </a>
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="md:hidden w-10 h-10 rounded-[10px] border border-pg-ink-200 bg-pg-white grid place-items-center cursor-pointer"
+            className="md:hidden w-9 h-9 sm:w-10 sm:h-10 rounded-[10px] border border-pg-ink-200 bg-pg-white grid place-items-center cursor-pointer flex-shrink-0"
             aria-label="Menu"
           >
-            <Icon name={open ? "x" : "menu"} size={20} />
+            <Icon name={open ? "x" : "menu"} size={18} />
           </button>
         </div>
       </header>
