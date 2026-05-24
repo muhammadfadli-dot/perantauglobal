@@ -43,10 +43,11 @@ interface CandidatePayload {
   country: string;
   source_url?: string;
   /**
-   * Apply-stage qualifying answers. Keys must match `position_form_fields.field_key`
-   * for the slug; values are string (radio/select/text/number) or string[] (multiselect).
-   * Materialized into `applications.answers` and merged into
-   * `candidates.profile_data.credentials` by the handle_new_auth_user trigger.
+   * Apply-stage qualifying answers. Keys must match
+   * `position_application_fields.field_key` (section='syarat_utama') for the
+   * slug; values are string (radio/select/text/number) or string[]
+   * (multiselect). Materialized into `applications.answers` only — no longer
+   * mirrored to `candidates.profile_data` (per-app fresh-start model post-Fase 5).
    */
   role_data?: Record<string, string | string[]>;
   eventId?: string;

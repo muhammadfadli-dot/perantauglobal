@@ -249,7 +249,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* Jawaban kamu — driven by position_form_fields, hidden if none */}
+        {/* Jawaban kamu — driven by position_application_fields, hidden if none */}
         {answerRows.length > 0 && (
           <section className="px-5 pt-6">
             <div className="flex items-baseline justify-between mb-1">

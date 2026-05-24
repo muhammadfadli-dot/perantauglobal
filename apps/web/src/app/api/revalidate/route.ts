@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 /**
  * Cross-app on-demand revalidation endpoint.
  *
- * Called by apps/platform admin actions after editing position metadata or
- * position_form_fields, so that website pages (lowongan list + lowongan/[slug])
- * pick up changes without waiting for the 60s ISR window.
+ * Called by apps/platform admin actions after editing position metadata,
+ * positions.content, or position_application_fields, so that website pages
+ * (lowongan list + lowongan/[slug]) pick up changes without waiting for the
+ * 60s ISR window.
  *
  * Auth: shared secret via REVALIDATE_SECRET env. Required to prevent
  * arbitrary cache invalidation from the public internet.

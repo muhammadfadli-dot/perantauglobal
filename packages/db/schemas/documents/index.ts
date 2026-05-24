@@ -8,15 +8,15 @@
  * metadata fields should appear in the Upload Modal per doc_type.
  *
  * Used by:
- *   - apps/platform/(candidate)/profile/_components/DocumentUploadModal.tsx
- *   - apps/platform/(candidate)/applications/[id]/lengkapi/RequirementInlineForm.tsx
+ *   - apps/platform/src/components/pg/DocumentUploadModal.tsx
+ *   - apps/platform/(candidate)/applications/[id]/lengkapi/ApplicationFieldForm.tsx
  *
  * The UI consumes this to dynamically render the right form fields.
  * The DB stores the resulting values in candidate_documents.metadata (JSONB).
  *
- * For evidence-mode = 'document' or 'either' requirements, the position's
- * `document_filter` JSONB matches against these metadata values via
- * compute_readiness_v3() (migration 0021).
+ * Per-application docs (post-Fase 5): candidate_documents.application_id
+ * links a doc to a specific application. application_readiness_view checks
+ * for the right doc_type per position_application_fields row.
  */
 
 export type MetadataFieldType = "text" | "select" | "date" | "number";

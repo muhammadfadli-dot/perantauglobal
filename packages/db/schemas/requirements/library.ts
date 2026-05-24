@@ -32,7 +32,7 @@ export type EvidenceMode = "document" | "self_declared" | "either";
 export type RequirementImportance = "hard" | "soft";
 
 export type RequirementTemplate = {
-  /** Unique key — also used as JSONB key in positions.requirements */
+  /** Unique key — becomes field_key in position_application_fields when admin picks this from the library */
   key: string;
   /** Display label shown to candidate */
   label: string;

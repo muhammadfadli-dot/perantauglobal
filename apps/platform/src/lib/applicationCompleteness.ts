@@ -5,17 +5,17 @@ import type { Database } from "@perantauglobal/db";
 /**
  * Per-application completeness — the post-Fase 5 model. Each application
  * stands on its own: filled-ness is computed from applications.answers
- * matched against position_application_fields (not the cross-candidate
- * profile_data.credentials path of the legacy readiness_v3).
+ * matched against position_application_fields (no cross-application bleed
+ * via the old shared profile_data.credentials path, which was sunset).
  *
  * Used by candidate-facing surfaces:
  *   - /applications/[id]/lengkapi    (this is the form to fill in)
  *   - /applications/[id]/page.tsx    (status + progress)
  *   - /applications/[id]/welcome
  *
- * Admin-facing pre-apply eligibility (readiness_view aggregating across all
- * candidates × positions) remains on the legacy compute_readiness path —
- * different semantics, different table.
+ * Admin-facing equivalent: application_readiness_view (SQL view, same
+ * underlying inputs, exposes only hard_pass per application). Use that
+ * when you need per-app hard_pass without the per-field detail.
  */
 
 export type FieldImportance = "required" | "optional";
