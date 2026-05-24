@@ -20,7 +20,8 @@
     "types": "echo 'Run via Supabase MCP generate_typescript_types'",
     "lint": "echo 'TODO'",
     "typecheck": "tsc --noEmit",
-    "backfill": "tsx scripts/backfill.ts"
+    "backfill": "tsx scripts/backfill.ts",
+    "backfill-content": "tsx scripts/backfill-position-content.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.100.0",
