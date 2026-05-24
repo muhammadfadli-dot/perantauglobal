@@ -1,6 +1,6 @@
 // Generated via Supabase MCP `generate_typescript_types`.
 // Regenerate: `mcp__supabase__generate_typescript_types { project_id: "jeadtvxgxmqnsqwxjmhj" }`
-// Do not edit by hand.
+// Do not edit by hand (except the Convenience aliases section at bottom).
 
 export type Json =
   | string
@@ -11,8 +11,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -186,13 +184,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "applications_candidate_id_fkey"
-            columns: ["candidate_id"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["candidate_id"]
-          },
-          {
             foreignKeyName: "applications_job_order_id_fkey"
             columns: ["job_order_id"]
             isOneToOne: false
@@ -205,13 +196,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["slug"]
-          },
-          {
-            foreignKeyName: "applications_position_slug_fkey"
-            columns: ["position_slug"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["position_slug"]
           },
         ]
       }
@@ -290,13 +274,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidates"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "candidate_documents_candidate_id_fkey"
-            columns: ["candidate_id"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["candidate_id"]
           },
         ]
       }
@@ -407,13 +384,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "candidates"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "consents_candidate_id_fkey"
-            columns: ["candidate_id"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["candidate_id"]
           },
           {
             foreignKeyName: "consents_pending_id_fkey"
@@ -568,13 +538,6 @@ export type Database = {
             referencedRelation: "positions"
             referencedColumns: ["slug"]
           },
-          {
-            foreignKeyName: "job_orders_position_slug_fkey"
-            columns: ["position_slug"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["position_slug"]
-          },
         ]
       }
       pending_submissions: {
@@ -627,13 +590,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "positions"
             referencedColumns: ["slug"]
-          },
-          {
-            foreignKeyName: "pending_submissions_position_slug_fkey"
-            columns: ["position_slug"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["position_slug"]
           },
         ]
       }
@@ -697,13 +653,6 @@ export type Database = {
             referencedRelation: "positions"
             referencedColumns: ["slug"]
           },
-          {
-            foreignKeyName: "position_application_fields_position_slug_fkey"
-            columns: ["position_slug"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["position_slug"]
-          },
         ]
       }
       positions: {
@@ -715,7 +664,6 @@ export type Database = {
           description: string | null
           name: string
           pipeline: Json
-          requirements: Json
           role: string
           scoring: Json
           slug: string
@@ -729,7 +677,6 @@ export type Database = {
           description?: string | null
           name: string
           pipeline?: Json
-          requirements?: Json
           role: string
           scoring?: Json
           slug: string
@@ -743,7 +690,6 @@ export type Database = {
           description?: string | null
           name?: string
           pipeline?: Json
-          requirements?: Json
           role?: string
           scoring?: Json
           slug?: string
@@ -753,17 +699,29 @@ export type Database = {
       }
     }
     Views: {
-      readiness_view: {
+      application_readiness_view: {
         Row: {
+          application_id: string | null
           candidate_id: string | null
-          completion_pct: number | null
-          country: string | null
           hard_pass: boolean | null
-          position_name: string | null
           position_slug: string | null
-          readiness: Json | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "applications_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_position_slug_fkey"
+            columns: ["position_slug"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
     }
     Functions: {
@@ -773,14 +731,6 @@ export type Database = {
           count: number
           pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
         }[]
-      }
-      compute_readiness: {
-        Args: { profile: Json; requirements: Json }
-        Returns: Json
-      }
-      compute_readiness_v3: {
-        Args: { p_candidate_id: string; p_position_slug: string }
-        Returns: Json
       }
       is_admin: { Args: never; Returns: boolean }
       list_applications_for_admin: {
@@ -822,7 +772,6 @@ export type Database = {
         }
         Returns: string
       }
-      migrate_requirement_v2_to_v3: { Args: { req: Json }; Returns: Json }
     }
     Enums: {
       application_field_importance: "required" | "optional"
@@ -1034,12 +983,7 @@ export const Constants = {
         "file",
         "multiselect",
       ],
-      job_order_status: [
-        "open",
-        "closed",
-        "filled",
-        "cancelled",
-      ],
+      job_order_status: ["open", "closed", "filled", "cancelled"],
       pipeline_stage: [
         "applied",
         "screening",

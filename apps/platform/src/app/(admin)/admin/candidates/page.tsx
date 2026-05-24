@@ -60,8 +60,8 @@ export default async function CandidatesListPage({
   ] = await Promise.all([
     supabase.from("candidates").select("*", { count: "exact", head: true }),
     supabase
-      .from("readiness_view")
-      .select("candidate_id, hard_pass, position_slug, position_name, completion_pct"),
+      .from("application_readiness_view")
+      .select("candidate_id, hard_pass"),
     supabase
       .from("candidate_documents")
       .select("candidate_id")
@@ -74,26 +74,16 @@ export default async function CandidatesListPage({
       .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
   ]);
 
-  // Qualified candidates = anyone with hard_pass=true on at least one position.
-  // Also tracks their best matching position for the table.
-  const qualifiedMap = new Map<
-    string,
-    { count: number; topPos?: { name: string; slug: string; pct: number | null } }
-  >();
-  for (const r of (readinessData ?? []) as {
+  // Qualified = candidates with ≥1 application where hard_pass=true.
+  // Sourced from application_readiness_view (Fase 6B: replaces legacy
+  // cross-join readiness_view that depended on profile_data.credentials).
+  const qualifiedMap = new Map<string, { count: number }>();
+  for (const r of (readinessData ?? []) as Array<{
     candidate_id: string;
     hard_pass: boolean;
-    position_slug: string;
-    position_name: string;
-    completion_pct: number | null;
-  }[]) {
+  }>) {
     const cur = qualifiedMap.get(r.candidate_id) ?? { count: 0 };
-    if (r.hard_pass) {
-      cur.count += 1;
-      if (!cur.topPos || (r.completion_pct ?? 0) > (cur.topPos.pct ?? 0)) {
-        cur.topPos = { name: r.position_name, slug: r.position_slug, pct: r.completion_pct };
-      }
-    }
+    if (r.hard_pass) cur.count += 1;
     qualifiedMap.set(r.candidate_id, cur);
   }
   const qualifiedCount = [...qualifiedMap.values()].filter((v) => v.count > 0).length;
@@ -312,24 +302,14 @@ export default async function CandidatesListPage({
                   {apps?.count ?? 0}
                 </span>
                 <span className="min-w-0">
-                  {qf?.topPos ? (
-                    <Link
-                      href={`/admin/positions/${qf.topPos.slug}`}
-                      className="block min-w-0 no-underline"
+                  {(qf?.count ?? 0) > 0 ? (
+                    <span
+                      className="inline-flex items-center gap-1 text-[12px] font-bold"
+                      style={{ color: "var(--pg-ok-soft-fg)", fontFamily: "var(--font-mono)" }}
                     >
-                      <div className="text-[13px] font-semibold text-pg-ink-primary truncate">
-                        {qf.topPos.name}
-                      </div>
-                      <div
-                        className="text-[10px] font-bold mt-0.5"
-                        style={{
-                          color: "var(--pg-ok-soft-fg)",
-                          fontFamily: "var(--font-mono)",
-                        }}
-                      >
-                        FIT {Math.round(qf.topPos.pct ?? 0)}%
-                      </div>
-                    </Link>
+                      <Icon name="check" size={12} stroke={2.4} />
+                      {qf!.count} qualified
+                    </span>
                   ) : apps ? (
                     <span className="text-[12px] text-pg-ink-tertiary italic">
                       Belum match

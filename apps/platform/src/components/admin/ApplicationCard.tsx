@@ -4,7 +4,29 @@ import { ReadinessBadge } from "./ReadinessBadge";
 import StageSelector from "./StageSelector";
 import NotesEditor from "./NotesEditor";
 import { JobOrderPicker } from "./JobOrderPicker";
-import type { ReadinessResultV3 } from "@/lib/readiness";
+/**
+ * Per-application readiness shape for ApplicationCard display.
+ * Built from getApplicationCompleteness by callers — see
+ * /admin/candidates/[id]/page.tsx for the adapter.
+ */
+export type ReadinessResultV3 = {
+  per_field: Record<
+    string,
+    {
+      passed: boolean
+      self_passed: boolean
+      doc_passed: boolean
+      importance: "hard" | "soft"
+      category: "personal" | "certification" | "language" | "experience"
+      evidence_mode: "self_declared" | "document" | "either"
+      label: string
+      collect_at_stage: string
+    }
+  >
+  hard_pass: boolean
+  score_pct: number
+  schema_version: 3
+}
 
 type OpenJobOrder = {
   id: string;

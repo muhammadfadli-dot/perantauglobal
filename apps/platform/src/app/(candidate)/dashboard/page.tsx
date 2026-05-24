@@ -19,38 +19,12 @@ const COUNTRY_LABEL: Record<string, string> = {
   any: "Global",
 };
 
-type ReadinessForApp = {
-  position_slug: string | null;
-  hard_pass: boolean | null;
-  completion_pct: number | null;
-  position_name: string | null;
-  country: string | null;
-};
-
 export default async function DashboardPage() {
   const { session, candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  const [dashboard, matchRes] = await Promise.all([
-    getDashboardData(candidateId, supabase),
-    supabase
-      .from("readiness_view")
-      .select("position_slug, position_name, country, completion_pct, hard_pass")
-      .eq("candidate_id", candidateId),
-  ]);
-
-  const readiness = (matchRes.data ?? []) as ReadinessForApp[];
+  const dashboard = await getDashboardData(candidateId, supabase);
   const lamaranSorted = sortLamaranByUrgency(dashboard.lamaran);
-
-  const appliedSet = new Set(dashboard.lamaran.map((l) => l.positionSlug));
-  const topMatches = readiness
-    .filter((r) => r.position_slug && !appliedSet.has(r.position_slug))
-    .sort((a, b) => {
-      const hp = Number(b.hard_pass ?? false) - Number(a.hard_pass ?? false);
-      if (hp !== 0) return hp;
-      return (b.completion_pct ?? 0) - (a.completion_pct ?? 0);
-    })
-    .slice(0, 4);
 
   const firstName =
     (dashboard.candidateFullName || session.email || "kandidat").split(" ")[0];
@@ -153,64 +127,9 @@ export default async function DashboardPage() {
           </section>
         )}
 
-        {/* Cocok buat kamu */}
-        {topMatches.length > 0 && (
-          <section className="px-5 pt-7">
-            <div className="flex justify-between items-baseline mb-3">
-              <h2
-                className="text-[10px] font-semibold tracking-[0.12em] uppercase font-mono"
-                style={{ color: "var(--pg-red-600)" }}
-              >
-                {lamaranSorted.length === 0 ? "Cocok buat kamu" : "Cocok juga buat kamu"}
-              </h2>
-              <Link href="/explore" className="text-[12px] font-bold text-pg-red-600 no-underline">
-                Semua
-              </Link>
-            </div>
-            <div className="flex gap-3 overflow-x-auto -mr-5 pr-5 pb-1">
-              {topMatches.map((m) => (
-                <Link
-                  key={m.position_slug ?? ""}
-                  href={`/explore?slug=${m.position_slug}`}
-                  className="min-w-[200px] bg-pg-white rounded-2xl overflow-hidden shrink-0 no-underline text-pg-ink-primary block"
-                  style={{
-                    border: "1px solid var(--pg-border)",
-                    boxShadow:
-                      "0 1px 2px rgba(20,20,20,0.04), 0 4px 16px rgba(20,20,20,0.06)",
-                  }}
-                >
-                  <div
-                    className="px-4 pt-3.5 pb-4"
-                    style={{
-                      background:
-                        "linear-gradient(160deg, var(--pg-red-600) 0%, var(--pg-red-700) 100%)",
-                      color: "white",
-                    }}
-                  >
-                    <div className="text-[10px] font-semibold tracking-[0.14em] uppercase opacity-90 font-mono">
-                      {COUNTRY_LABEL[m.country ?? ""] ?? m.country}
-                    </div>
-                    <div className="text-[18px] font-extrabold tracking-[-0.01em] mt-1 leading-tight">
-                      {m.position_name}
-                    </div>
-                  </div>
-                  <div className="px-4 py-3 flex flex-col gap-2">
-                    <span
-                      className="inline-flex w-fit px-2.5 py-1 rounded-md text-[10px] font-bold tracking-[0.04em] uppercase font-mono"
-                      style={{
-                        background: "var(--pg-ok-soft-bg)",
-                        color: "var(--pg-ok-soft-fg)",
-                      }}
-                    >
-                      {Math.round(m.completion_pct ?? 0)}% cocok
-                    </span>
-                    <span className="text-[12px] font-bold text-pg-red-600">Lihat ›</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </section>
-        )}
+        {/* "Cocok buat kamu" section removed in Fase 6B — pre-apply readiness
+            depended on shared profile_data.credentials which is sunset
+            (Fase 5). /explore is still the path for browsing positions. */}
       </main>
 
       <BottomNav />

@@ -3,6 +3,7 @@ import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import { getApplicationStatus } from "@/lib/applicationStatus";
+import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
 
 export const dynamic = "force-dynamic";
 
@@ -12,11 +13,6 @@ type ApplicationRow = {
   pipeline_stage: string;
   created_at: string;
   positions: { name: string; country: string } | null;
-};
-
-type ReadinessRow = {
-  position_slug: string | null;
-  hard_pass: boolean | null;
 };
 
 const COUNTRY_LABEL: Record<string, string> = {
@@ -31,21 +27,22 @@ export default async function ApplicationsListPage() {
   const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  const [{ data: appsData }, { data: readinessData }] = await Promise.all([
-    supabase
-      .from("applications")
-      .select("id, position_slug, pipeline_stage, created_at, positions (name, country)")
-      .eq("candidate_id", candidateId)
-      .order("created_at", { ascending: false }),
-    supabase
-      .from("readiness_view")
-      .select("position_slug, hard_pass")
-      .eq("candidate_id", candidateId),
-  ]);
+  const { data: appsData } = await supabase
+    .from("applications")
+    .select("id, position_slug, pipeline_stage, created_at, positions (name, country)")
+    .eq("candidate_id", candidateId)
+    .order("created_at", { ascending: false });
 
   const applications = (appsData ?? []) as unknown as ApplicationRow[];
-  const readinessBySlug = new Map(
-    ((readinessData ?? []) as ReadinessRow[]).map((r) => [r.position_slug, r])
+
+  // Per-application hard_pass — computed from applications.answers +
+  // position_application_fields (Fase 6B: replaces legacy readiness_view).
+  const hardPassByAppId = new Map<string, boolean>();
+  await Promise.all(
+    applications.map(async (a) => {
+      const c = await getApplicationCompleteness(a.id, supabase);
+      hardPassByAppId.set(a.id, c.hard_pass);
+    }),
   );
 
   return (
@@ -84,10 +81,9 @@ export default async function ApplicationsListPage() {
             </div>
           ) : (
             applications.map((a) => {
-              const r = readinessBySlug.get(a.position_slug);
               const status = getApplicationStatus({
                 pipelineStage: a.pipeline_stage,
-                hardPass: r?.hard_pass,
+                hardPass: hardPassByAppId.get(a.id),
               });
               const muted = status.key === "rejected";
               const needsDocs = status.key === "needs_docs";

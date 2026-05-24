@@ -71,8 +71,8 @@ export async function getDashboardData(
       .eq("candidate_id", candidateId)
       .order("created_at", { ascending: false }),
     client
-      .from("readiness_view")
-      .select("position_slug, hard_pass")
+      .from("application_readiness_view")
+      .select("application_id, hard_pass")
       .eq("candidate_id", candidateId),
   ]);
 
@@ -95,10 +95,10 @@ export async function getDashboardData(
     positions: { name: string; country: string } | null;
   }>;
   const readiness = (readinessData ?? []) as Array<{
-    position_slug: string | null;
+    application_id: string | null;
     hard_pass: boolean | null;
   }>;
-  const readinessBySlug = new Map(readiness.map((r) => [r.position_slug, r]));
+  const readinessByApp = new Map(readiness.map((r) => [r.application_id, r]));
 
   const identityFields = [
     cand?.phone,
@@ -118,7 +118,7 @@ export async function getDashboardData(
       country: a.positions!.country,
       appliedAt: a.created_at,
       stage: deriveStage(a.pipeline_stage, a.job_order_id),
-      needsDocs: readinessBySlug.get(a.position_slug)?.hard_pass === false,
+      needsDocs: readinessByApp.get(a.id)?.hard_pass === false,
     }));
 
   return {

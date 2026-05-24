@@ -10,7 +10,6 @@ type PositionRow = {
   name: string;
   country: string;
   active: boolean;
-  requirements: Record<string, unknown> | null;
   updated_at: string;
 };
 
@@ -52,13 +51,13 @@ export default async function AdminPositionsPage({
   ] = await Promise.all([
     supabase
       .from("positions")
-      .select("slug, name, country, active, requirements, updated_at")
+      .select("slug, name, country, active, updated_at")
       .order("active", { ascending: false })
       .order("country")
       .order("name"),
     supabase.from("job_orders").select("position_slug, status, slot_count, slot_filled").eq("status", "open"),
     supabase.from("applications").select("position_slug"),
-    supabase.from("readiness_view").select("position_slug, hard_pass"),
+    supabase.from("application_readiness_view").select("position_slug, hard_pass"),
     supabase.from("candidates").select("*", { count: "exact", head: true }),
     supabase
       .from("applications")

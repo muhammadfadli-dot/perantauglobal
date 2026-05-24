@@ -5,7 +5,7 @@ import AdminTopBar from "@/components/admin/TopBar";
 import ApplicationCard from "@/components/admin/ApplicationCard";
 import { Icon } from "@/components/pg/Icon";
 import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
-import type { ReadinessResultV3 } from "@/lib/readiness";
+import type { ReadinessResultV3 } from "@/components/admin/ApplicationCard";
 
 export const dynamic = "force-dynamic";
 

@@ -11,7 +11,6 @@ type Position = {
   name: string;
   country: string;
   description: string | null;
-  requirements: Record<string, { type?: "hard" | "soft"; label?: string; allowed_values?: string[] }> | null;
 };
 
 type FormField = {
@@ -70,7 +69,7 @@ export default async function ApplyNewPage({
   // Filter section='syarat_utama' = LP-stage questions for this portal apply
   // form. importance=required → required boolean for ApplyWizard props.
   const [{ data: positionData }, { data: fieldsData }, { data: jobOrderData }, { data: docsData }] = await Promise.all([
-    supabase.from("positions").select("slug, name, country, description, requirements").eq("slug", positionSlug).maybeSingle(),
+    supabase.from("positions").select("slug, name, country, description").eq("slug", positionSlug).maybeSingle(),
     supabase
       .from("position_application_fields")
       .select("id, field_key, field_label, field_help, field_type, options, importance, sort_order")
@@ -109,31 +108,15 @@ export default async function ApplyNewPage({
   const jobOrder = (jobOrderData ?? null) as JobOrder | null;
   const docsRows = (docsData ?? []) as Array<{ doc_type: string; verified: boolean; rejected_at: string | null }>;
 
-  // Compute requirements vs profile
-  const profileData = (candidate.profile_data ?? {}) as Record<string, unknown>;
-  const credentials = (profileData.credentials ?? {}) as Record<string, string>;
-  const reqEntries = Object.entries(position.requirements ?? {});
-  const reqStatus = reqEntries.map(([key, spec]) => {
-    const value = credentials[key];
-    let passed = false;
-    if (value && (typeof value === "string" ? value.trim() !== "" : true)) {
-      if (spec.allowed_values && spec.allowed_values.length > 0) {
-        passed = spec.allowed_values.includes(value);
-      } else {
-        passed = true;
-      }
-    }
-    return {
-      key,
-      label: spec.label ?? key,
-      type: (spec.type ?? "hard") as "hard" | "soft",
-      passed,
-      currentValue: value ?? null,
-      allowedValues: spec.allowed_values ?? null,
-    };
-  });
-
-  const hardMissing = reqStatus.filter((r) => r.type === "hard" && !r.passed);
+  // Fase 6B: positions.requirements + profile_data.credentials sunset. The
+  // per-position eligibility pre-check no longer exists — each apply is
+  // fresh, candidate fills syarat utama post-apply in /lengkapi. Pass
+  // empty reqStatus/hardMissingCount=0 to keep ApplyWizard prop shape
+  // stable; the wizard's syarat-utama step renders the same `fields` from
+  // position_application_fields anyway.
+  const reqStatus: never[] = [];
+  const hardMissing: never[] = [];
+  void candidate; // keep ref so the candidate fetch isn't dead
 
   // Document status
   const REQUIRED_DOC_TYPES = ["ktp", "passport"] as const;
