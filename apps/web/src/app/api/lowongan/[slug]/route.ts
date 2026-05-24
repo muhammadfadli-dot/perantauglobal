@@ -178,14 +178,29 @@ export async function POST(
     // PKCE code exchange sets the session cookie; the trigger fires on the
     // email_confirmed_at flip and materializes the candidate from the pending
     // staged above.
+    //
+    // Cross-domain attribution: forward `_fbp` / `_fbc` cookies (set on
+    // perantauglobal.com by Meta Pixel at ad click) via the redirect URL.
+    // The portal's auth/callback persists them as first-party cookies and
+    // fires CompleteRegistration CAPI on verify so Meta credits the
+    // conversion correctly. Without this, _fbc is silently lost crossing
+    // the subdomain boundary.
     const platformBase =
       process.env.NEXT_PUBLIC_APP_URL || "https://app.perantauglobal.com";
+    const redirectParams = new URLSearchParams();
+    if (body.fbp) redirectParams.set("fbp", body.fbp);
+    if (body.fbc) redirectParams.set("fbc", body.fbc);
+    const redirectQuery = redirectParams.toString();
+    const emailRedirectTo = redirectQuery
+      ? `${platformBase}/auth/callback?${redirectQuery}`
+      : `${platformBase}/auth/callback`;
+
     const db = supabaseV2();
     const { error: signUpError } = await db.auth.signUp({
       email,
       password: body.password,
       options: {
-        emailRedirectTo: `${platformBase}/auth/callback`,
+        emailRedirectTo,
         data: {
           full_name: body.full_name,
           source: "form_apply",
