@@ -741,69 +741,6 @@ export type Database = {
           },
         ]
       }
-      position_form_fields: {
-        Row: {
-          collect_at_stage: Database["public"]["Enums"]["pipeline_stage"]
-          created_at: string
-          field_help: string | null
-          field_key: string
-          field_label: string
-          field_type: Database["public"]["Enums"]["form_field_type"]
-          id: string
-          options: Json | null
-          position_slug: string
-          required: boolean
-          sort_order: number
-          tier_weight: number
-          updated_at: string
-        }
-        Insert: {
-          collect_at_stage?: Database["public"]["Enums"]["pipeline_stage"]
-          created_at?: string
-          field_help?: string | null
-          field_key: string
-          field_label: string
-          field_type: Database["public"]["Enums"]["form_field_type"]
-          id?: string
-          options?: Json | null
-          position_slug: string
-          required?: boolean
-          sort_order?: number
-          tier_weight?: number
-          updated_at?: string
-        }
-        Update: {
-          collect_at_stage?: Database["public"]["Enums"]["pipeline_stage"]
-          created_at?: string
-          field_help?: string | null
-          field_key?: string
-          field_label?: string
-          field_type?: Database["public"]["Enums"]["form_field_type"]
-          id?: string
-          options?: Json | null
-          position_slug?: string
-          required?: boolean
-          sort_order?: number
-          tier_weight?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "position_form_fields_position_slug_fkey"
-            columns: ["position_slug"]
-            isOneToOne: false
-            referencedRelation: "positions"
-            referencedColumns: ["slug"]
-          },
-          {
-            foreignKeyName: "position_form_fields_position_slug_fkey"
-            columns: ["position_slug"]
-            isOneToOne: false
-            referencedRelation: "readiness_view"
-            referencedColumns: ["position_slug"]
-          },
-        ]
-      }
       positions: {
         Row: {
           active: boolean

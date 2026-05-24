@@ -51,3 +51,75 @@ export async function updateAnswers(
   revalidatePath("/dashboard");
   return { ok: true };
 }
+
+/**
+ * Set a single answer on an application — merges into applications.answers
+ * JSONB. Used by the inline answer form on /lengkapi for per-field saves
+ * as the candidate fills out.
+ *
+ * Value can be:
+ *   - string (radio/select/text/textarea/number)
+ *   - string[] (multiselect)
+ *   - null (clear)
+ *
+ * For "file" field type, this server action is NOT the path — those upload
+ * to candidate_documents directly via the existing DocumentUploadModal
+ * with application_id set (per Fase 5 model).
+ */
+export async function setApplicationAnswer(
+  applicationId: string,
+  fieldKey: string,
+  value: string | string[] | null,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { session, role } = await getSessionAndRole();
+  if (!session) return { ok: false, error: "Belum masuk." };
+  if (role === "admin") return { ok: false, error: "Admin tidak boleh ubah lamaran kandidat." };
+
+  if (typeof fieldKey !== "string" || fieldKey.length === 0 || fieldKey.length > 64) {
+    return { ok: false, error: "field_key invalid." };
+  }
+
+  const supabase = await createServerClient();
+
+  const { data: cand } = await supabase
+    .from("candidates")
+    .select("id")
+    .eq("auth_user_id", session.userId)
+    .single();
+  const candidate = cand as { id: string } | null;
+  if (!candidate) return { ok: false, error: "Kandidat tidak ditemukan." };
+
+  // Fetch current answers, merge, write back. JSONB merge via PostgREST
+  // would be faster but requires a custom RPC; this two-roundtrip is fine
+  // for a single-field save.
+  const { data: appRow, error: fetchErr } = await supabase
+    .from("applications")
+    .select("answers")
+    .eq("id", applicationId)
+    .eq("candidate_id", candidate.id)
+    .single();
+  if (fetchErr) return { ok: false, error: fetchErr.message };
+
+  const current = ((appRow as { answers: Record<string, unknown> | null } | null)?.answers ??
+    {}) as Record<string, unknown>;
+
+  let nextAnswers: Record<string, unknown>;
+  if (value === null) {
+    const { [fieldKey]: _removed, ...rest } = current;
+    void _removed;
+    nextAnswers = rest;
+  } else {
+    nextAnswers = { ...current, [fieldKey]: value };
+  }
+
+  const { error } = await supabase
+    .from("applications")
+    .update({ answers: nextAnswers } as never)
+    .eq("id", applicationId)
+    .eq("candidate_id", candidate.id);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath(`/applications/${applicationId}`);
+  revalidatePath(`/applications/${applicationId}/lengkapi`);
+  return { ok: true };
+}

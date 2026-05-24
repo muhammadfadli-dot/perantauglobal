@@ -3,9 +3,8 @@ import Link from "next/link";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
-import { getRequirementsWithStatus } from "@/lib/readiness";
+import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
 import { getApplicationStatus } from "@/lib/applicationStatus";
-import { resolveCredentialValue } from "@perantauglobal/db/schemas/requirements";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +13,6 @@ type PositionRow = {
   name: string;
   country: string;
   description: string | null;
-  requirements: unknown;
 };
 
 type ApplicationRow = {
@@ -35,14 +33,6 @@ const COUNTRY_LABEL: Record<string, string> = {
   any: "Global",
 };
 
-type FormFieldRow = {
-  field_key: string;
-  field_label: string;
-  field_type: string;
-  options: Array<{ value: string; label: string }> | null;
-  sort_order: number;
-};
-
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -55,7 +45,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const { data: appData } = await supabase
     .from("applications")
     .select(
-      "id, candidate_id, position_slug, pipeline_stage, created_at, answers, positions (slug, name, country, description, requirements)"
+      "id, candidate_id, position_slug, pipeline_stage, created_at, answers, positions (slug, name, country, description)"
     )
     .eq("id", id)
     .eq("candidate_id", candidateId)
@@ -63,22 +53,13 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const application = appData as unknown as ApplicationRow | null;
   if (!application || !application.positions) notFound();
 
-  const [historyRes, formFieldsRes, candidateRes] = await Promise.all([
+  const [historyRes, completeness] = await Promise.all([
     supabase
       .from("application_status_history")
       .select("id, from_stage, to_stage, changed_at, public_note")
       .eq("application_id", application.id)
       .order("changed_at", { ascending: false }),
-    supabase
-      .from("position_form_fields")
-      .select("field_key, field_label, field_type, options, sort_order")
-      .eq("position_slug", application.position_slug)
-      .order("sort_order", { ascending: true }),
-    supabase
-      .from("candidates")
-      .select("profile_data")
-      .eq("id", candidateId)
-      .single(),
+    getApplicationCompleteness(application.id, supabase),
   ]);
 
   const history = (historyRes.data ?? []) as Array<{
@@ -88,17 +69,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     changed_at: string;
     public_note: string | null;
   }>;
-  const formFields = (formFieldsRes.data ?? []) as FormFieldRow[];
-  const credentials = (((candidateRes.data?.profile_data as Record<string, unknown>) ?? {})
-    .credentials ?? {}) as Record<string, string>;
 
   const position = application.positions;
-
-  const { requirements, score_pct, hard_pass } = await getRequirementsWithStatus(
-    candidateId,
-    position.slug,
-    supabase
-  );
+  const { fields: requirements, score_pct, hard_pass } = completeness;
   const totalReqs = requirements.length;
   const passedReqs = requirements.filter((r) => r.passed).length;
   const openCount = totalReqs - passedReqs;
@@ -110,27 +83,22 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const isRejected = status.key === "rejected";
   const showLengkapi = !isRejected && openCount > 0;
 
-  // Find first missing hard requirement for inline message
-  const firstMissingHard = requirements.find((r) => !r.passed && r.importance === "hard");
+  // First missing required (= hard) for inline message
+  const firstMissingHard = requirements.find(
+    (r) => !r.passed && r.importance === "required",
+  );
 
-  const answers = (application.answers ?? {}) as Record<string, string>;
-
-  // Display rows for "Jawaban kamu". Source of truth is live credentials in
-  // candidates.profile_data (what readiness sees right now); fall back to the
-  // immutable applications.answers snapshot for values not lifted into
-  // credentials. We render only fields the position actually asks for —
-  // not a hardcoded list — so the section reflects the position's real form.
-  const answerRows = formFields.map((f) => {
-    const raw =
-      resolveCredentialValue(credentials, f.field_key) ??
-      answers[f.field_key] ??
-      "";
+  // Display rows for "Jawaban kamu" — sourced from per-application
+  // completeness (applications.answers + position_application_fields). Per
+  // Fase 5: no longer merges candidates.profile_data.credentials.
+  const answerRows = requirements.map((f) => {
+    const raw = f.value ?? "";
     const opt = f.options?.find((o) => o.value === raw);
     return {
       key: f.field_key,
       label: f.field_label,
       value: opt?.label ?? raw,
-      hasValue: Boolean(raw),
+      hasValue: f.passed,
     };
   });
 
@@ -209,7 +177,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                     className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
                     style={{ background: "var(--pg-red-600)" }}
                   />
-                  <span>Tinggal {firstMissingHard.label} biar lamaran dilanjut tim recruitment.</span>
+                  <span>Tinggal {firstMissingHard.field_label} biar lamaran dilanjut tim recruitment.</span>
                 </div>
               )}
               {showLengkapi && (

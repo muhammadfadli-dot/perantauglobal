@@ -65,10 +65,18 @@ export default async function ApplyNewPage({
     redirect(`/applications/${(existing as { id: string }).id}`);
   }
 
-  // Fetch position + form fields + active job_order if any
+  // Fetch position + apply-stage fields + active job_order if any.
+  // Fields now read from position_application_fields (canonical post Fase 5).
+  // Filter section='syarat_utama' = LP-stage questions for this portal apply
+  // form. importance=required → required boolean for ApplyWizard props.
   const [{ data: positionData }, { data: fieldsData }, { data: jobOrderData }, { data: docsData }] = await Promise.all([
     supabase.from("positions").select("slug, name, country, description, requirements").eq("slug", positionSlug).maybeSingle(),
-    supabase.from("position_form_fields").select("id, field_key, field_label, field_help, field_type, options, required, sort_order").eq("position_slug", positionSlug).order("sort_order"),
+    supabase
+      .from("position_application_fields")
+      .select("id, field_key, field_label, field_help, field_type, options, importance, sort_order")
+      .eq("position_slug", positionSlug)
+      .eq("section", "syarat_utama")
+      .order("sort_order"),
     jobOrderId
       ? supabase.from("job_orders").select("id, intake_label, slot_count, slot_filled, deadline").eq("id", jobOrderId).eq("status", "open").maybeSingle()
       : supabase.from("job_orders").select("id, intake_label, slot_count, slot_filled, deadline").eq("position_slug", positionSlug).eq("status", "open").order("created_at", { ascending: false }).limit(1).maybeSingle(),
@@ -78,7 +86,26 @@ export default async function ApplyNewPage({
   const position = positionData as Position | null;
   if (!position) redirect("/explore");
 
-  const fields = (fieldsData ?? []) as FormField[];
+  const rawFields = (fieldsData ?? []) as Array<{
+    id: string;
+    field_key: string;
+    field_label: string;
+    field_help: string | null;
+    field_type: string;
+    options: { value: string; label: string }[] | null;
+    importance: "required" | "optional";
+    sort_order: number;
+  }>;
+  const fields: FormField[] = rawFields.map((f) => ({
+    id: f.id,
+    field_key: f.field_key,
+    field_label: f.field_label,
+    field_help: f.field_help,
+    field_type: f.field_type,
+    options: f.options,
+    required: f.importance === "required",
+    sort_order: f.sort_order,
+  }));
   const jobOrder = (jobOrderData ?? null) as JobOrder | null;
   const docsRows = (docsData ?? []) as Array<{ doc_type: string; verified: boolean; rejected_at: string | null }>;
 

@@ -20,14 +20,97 @@ export type CustomFieldDraft = {
   collect_at_stage?: "applied" | "screening" | "document_check";
 };
 
+/**
+ * Library-curated requirement shape produced by PositionWizard Step 2.
+ * Each key maps to a single application field — see translation below.
+ */
+type LibraryRequirement = {
+  label?: string;
+  category?: string;
+  importance?: "hard" | "soft";
+  evidence_mode?: "self_declared" | "document" | "either";
+  allowed_values?: string[];
+  value_labels?: Record<string, string>;
+  document_type?: string;
+  document_filter?: Record<string, unknown>;
+  collect_at_stage?: "applied" | "screening" | "document_check";
+  description?: string;
+};
+
 export type CreatePositionInput = {
   name: string;
   slug: string;
   country: string;
   description: string;
+  /** Library-curated requirements; keyed by slug, value is LibraryRequirement-shaped. */
   requirements: Record<string, unknown>;
   custom_fields: CustomFieldDraft[];
 };
+
+type Section = "syarat_utama" | "kualifikasi" | "screening";
+
+function stageToSection(
+  stage: "applied" | "screening" | "document_check" | undefined,
+): Section {
+  if (stage === "applied") return "syarat_utama";
+  if (stage === "document_check") return "screening";
+  return "kualifikasi";
+}
+
+/**
+ * Map a library requirement (from REQUIREMENT_LIBRARY catalog) into a
+ * position_application_fields row. document_type → file field; allowed_values
+ * → radio with options; else free-text.
+ */
+function libRequirementToField(
+  slug: string,
+  key: string,
+  req: LibraryRequirement,
+  sortOrder: number,
+): {
+  position_slug: string;
+  field_key: string;
+  field_label: string;
+  field_help: string | null;
+  field_type: "radio" | "file" | "text";
+  options: { value: string; label: string }[] | null;
+  importance: "required" | "optional";
+  section: Section;
+  tier_weight: number;
+  sort_order: number;
+  collect_at_stage: "applied" | "screening" | "document_check";
+  document_type: string | null;
+} {
+  const fieldType: "radio" | "file" | "text" =
+    req.evidence_mode === "document" && req.document_type
+      ? "file"
+      : req.allowed_values && req.allowed_values.length > 0
+        ? "radio"
+        : "text";
+
+  const options =
+    req.allowed_values && req.allowed_values.length > 0
+      ? req.allowed_values.map((v) => ({
+          value: v,
+          label: req.value_labels?.[v] ?? v,
+        }))
+      : null;
+
+  return {
+    position_slug: slug,
+    field_key: key,
+    field_label: req.label ?? key,
+    field_help: req.description ?? null,
+    field_type: fieldType,
+    options,
+    importance: req.importance === "hard" ? "required" : "optional",
+    section: stageToSection(req.collect_at_stage),
+    tier_weight: 0,
+    sort_order: sortOrder,
+    collect_at_stage: req.collect_at_stage ?? "applied",
+    document_type: req.document_type ?? null,
+  };
+}
 
 export async function createPosition(input: CreatePositionInput) {
   await assertAdmin();
@@ -42,68 +125,51 @@ export async function createPosition(input: CreatePositionInput) {
 
   const supabase = await createServerClient();
 
+  // Insert position shell — no longer writing to positions.requirements
+  // (deprecated in Fase 5, drop in Fase 5D). Library + custom_fields all
+  // go straight into position_application_fields below.
   const { error: posErr } = await supabase.from("positions").insert({
     slug: input.slug,
     name: input.name.trim(),
     country: input.country,
     description: input.description?.trim() || null,
     active: true,
-    requirements: input.requirements,
   } as never);
   if (posErr) throw new Error(posErr.message);
 
-  if (input.custom_fields.length > 0) {
-    // Write to NEW position_application_fields (canonical source post Fase 2).
-    // Old position_form_fields still gets a parallel write until Fase 4
-    // sunset — keeps web /lowongan apply form working while the candidate
-    // side hasn't flipped yet.
-    const stageToSection = (
-      stage: CustomFieldDraft["collect_at_stage"] | undefined,
-    ): "syarat_utama" | "kualifikasi" | "screening" => {
-      if (stage === "applied") return "syarat_utama";
-      if (stage === "document_check") return "screening";
-      return "kualifikasi";
-    };
+  // Merge library-curated requirements + admin custom fields into one
+  // position_application_fields insert. Library reqs go first (sort_order
+  // 0…N-1), custom fields after (sort_order N…N+M-1). Both write to the
+  // same canonical table — no more dual-write to position_form_fields.
+  const libEntries = Object.entries(input.requirements ?? {});
+  const libRows = libEntries.map(([key, req], idx) =>
+    libRequirementToField(input.slug, key, (req ?? {}) as LibraryRequirement, idx),
+  );
 
-    const pafRows = input.custom_fields.map((f, idx) => ({
-      position_slug: input.slug,
-      field_key: f.field_key,
-      field_label: f.field_label,
-      field_type: f.field_type,
-      options: f.options ?? null,
-      importance: f.required ? "required" : "optional",
-      section: stageToSection(f.collect_at_stage),
-      tier_weight: f.tier_weight ?? 0,
-      sort_order: idx,
-      collect_at_stage: f.collect_at_stage ?? "applied",
-    }));
+  const customRows = input.custom_fields.map((f, idx) => ({
+    position_slug: input.slug,
+    field_key: f.field_key,
+    field_label: f.field_label,
+    field_help: null,
+    field_type: f.field_type,
+    options: f.options ?? null,
+    importance: (f.required ? "required" : "optional") as "required" | "optional",
+    section: stageToSection(f.collect_at_stage),
+    tier_weight: f.tier_weight ?? 0,
+    sort_order: libRows.length + idx,
+    collect_at_stage: f.collect_at_stage ?? "applied",
+    document_type: null,
+  }));
+
+  const allRows = [...libRows, ...customRows];
+  if (allRows.length > 0) {
     const { error: pafErr } = await supabase
       .from("position_application_fields")
-      .insert(pafRows as never);
+      .insert(allRows as never);
     if (pafErr) {
+      // best-effort cleanup
       await supabase.from("positions").delete().eq("slug", input.slug);
       throw new Error(`Application field error: ${pafErr.message}`);
-    }
-
-    const legacyRows = input.custom_fields.map((f, idx) => ({
-      position_slug: input.slug,
-      field_key: f.field_key,
-      field_label: f.field_label,
-      field_type: f.field_type,
-      options: f.options ?? null,
-      required: f.required ?? false,
-      tier_weight: f.tier_weight ?? 0,
-      sort_order: idx,
-      collect_at_stage: f.collect_at_stage ?? "applied",
-    }));
-    const { error: legacyErr } = await supabase
-      .from("position_form_fields")
-      .insert(legacyRows as never);
-    if (legacyErr) {
-      // best-effort cleanup
-      await supabase.from("position_application_fields").delete().eq("position_slug", input.slug);
-      await supabase.from("positions").delete().eq("slug", input.slug);
-      throw new Error(`Legacy custom field error: ${legacyErr.message}`);
     }
   }
 

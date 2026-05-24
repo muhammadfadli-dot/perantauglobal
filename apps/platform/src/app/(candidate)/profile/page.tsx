@@ -72,13 +72,6 @@ export default async function ProfilePage() {
   const docsVerified = REQUIRED_DOCS.filter((t) => docsLatestByType.get(t)?.verified).length;
   const docsTotal = REQUIRED_DOCS.length;
 
-  // Credentials count
-  const profileData = (candidate.profile_data ?? {}) as Record<string, unknown>;
-  const credentials = (profileData.credentials ?? {}) as Record<string, string>;
-  const credentialsFilled = Object.values(credentials).filter(
-    (v) => typeof v === "string" && v.trim() !== "",
-  ).length;
-
   const memberId = formatMemberId(candidate.id, candidate.created_at);
   const subline = [
     candidate.city,
@@ -194,22 +187,6 @@ export default async function ProfilePage() {
               docsVerified === docsTotal
                 ? { text: "Lengkap", tone: "ok" }
                 : { text: `${docsVerified}/${docsTotal}`, tone: "warn" }
-            }
-          />
-          <ListRow
-            href="/profile/kualifikasi"
-            iconBg="var(--pg-info-bg)"
-            iconColor="var(--pg-info)"
-            iconSvg={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 2L9 7l-5.5.8L7.5 12l-1 5.5L12 15l5.5 2.5-1-5.5 4-4.2L15 7z" />
-              </svg>
-            }
-            label="Kualifikasi"
-            badge={
-              credentialsFilled > 0
-                ? { text: `${credentialsFilled} terisi`, tone: "ok" }
-                : { text: "Belum ada", tone: "mute" }
             }
             isLast
           />

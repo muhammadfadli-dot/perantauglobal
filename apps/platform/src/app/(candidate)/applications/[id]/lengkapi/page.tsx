@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
-import { getRequirementsWithStatus } from "@/lib/readiness";
-import RequirementInlineForm from "./RequirementInlineForm";
+import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
+import ApplicationFieldForm from "./ApplicationFieldForm";
 
 export const dynamic = "force-dynamic";
 
@@ -39,41 +39,13 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
   } | null;
   if (!application || !application.positions) notFound();
 
-  const { requirements, score_pct, hard_pass } = await getRequirementsWithStatus(
-    candidateId,
-    application.position_slug,
-    supabase
-  );
+  const { fields, hard_pass, score_pct } = await getApplicationCompleteness(id, supabase);
 
-  const { data: candData } = await supabase
-    .from("candidates")
-    .select("profile_data")
-    .eq("id", candidateId)
-    .single();
-  const credentials = (((candData?.profile_data as Record<string, unknown>) ?? {})
-    .credentials ?? {}) as Record<string, string>;
-
-  // Group requirements by stage:
-  // - "Sekarang" — hard requirements that block the apply (collect_at_stage = 'applied')
-  // - "Berikutnya" — soft/screening requirements (collect_at_stage = 'screening' or undefined+soft)
-  // - "Nanti" — document_check or remaining
-  const sekarang: typeof requirements = [];
-  const berikutnya: typeof requirements = [];
-  const nanti: typeof requirements = [];
-
-  for (const r of requirements) {
-    if (r.passed) continue; // already done — don't show in lengkapi
-    const stage = (r as unknown as { collect_at_stage?: string }).collect_at_stage;
-    if (r.importance === "hard" || stage === "applied") {
-      sekarang.push(r);
-    } else if (stage === "document_check") {
-      nanti.push(r);
-    } else {
-      berikutnya.push(r);
-    }
-  }
-
-  const completed = requirements.filter((r) => r.passed);
+  // Group by section. Each section = a step in the candidate's mental model.
+  const sekarang = fields.filter((f) => f.section === "syarat_utama" && !f.passed);
+  const berikutnya = fields.filter((f) => f.section === "kualifikasi" && !f.passed);
+  const nanti = fields.filter((f) => f.section === "screening" && !f.passed);
+  const completed = fields.filter((f) => f.passed);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
@@ -91,7 +63,7 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
           </div>
         </section>
 
-        {/* Progress card — red soft */}
+        {/* Progress card */}
         <section className="px-5 pt-4">
           <div
             className="rounded-2xl p-5 flex flex-col gap-2.5"
@@ -109,7 +81,7 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
                   {completed.length}
                 </span>
                 <span className="text-[16px] font-semibold text-pg-ink-tertiary">
-                  / {requirements.length} selesai
+                  / {fields.length} selesai
                 </span>
               </div>
               <span
@@ -125,81 +97,83 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
             >
               <div
                 className="h-full"
-                style={{
-                  width: `${score_pct}%`,
-                  background: "var(--pg-red-600)",
-                }}
+                style={{ width: `${score_pct}%`, background: "var(--pg-red-600)" }}
               />
             </div>
             <p className="text-[13px] text-pg-ink-secondary mt-1 leading-tight">
               {hard_pass
                 ? "Semua syarat utama udah terpenuhi. Tambahkan kualifikasi tambahan biar peluang makin gede."
                 : sekarang.length > 0
-                ? `Tinggal ${sekarang.length} hal wajib biar lamaran lanjut ke tahap berikutnya.`
-                : "Lengkapi syarat tambahan biar makin kompetitif."}
+                  ? `Tinggal ${sekarang.length} hal wajib biar lamaran lanjut ke tahap berikutnya.`
+                  : "Lengkapi syarat tambahan biar makin kompetitif."}
             </p>
           </div>
         </section>
 
-        {/* SEKARANG */}
+        {/* Section 1 — syarat utama */}
         {sekarang.length > 0 && (
-          <NumberedSection num={1} eyebrow="Sekarang" title="Lamaran" subtitle={`${sekarang.length} hal wajib · ${completed.filter((r) => r.importance === "hard").length} sudah diisi`}>
+          <NumberedSection
+            num={1}
+            eyebrow="Sekarang"
+            title="Syarat utama"
+            subtitle={`${sekarang.length} hal wajib`}
+          >
             <div className="flex flex-col gap-3">
-              {sekarang.map((req) => (
-                <RequirementInlineForm
-                  key={req.key}
-                  req={req}
+              {sekarang.map((field) => (
+                <ApplicationFieldForm
+                  key={field.field_key}
+                  field={field}
+                  applicationId={id}
                   candidateId={candidateId}
-                  initialValue={credentials[req.key] ?? ""}
                 />
               ))}
             </div>
           </NumberedSection>
         )}
 
-        {/* BERIKUTNYA */}
+        {/* Section 2 — kualifikasi */}
         {berikutnya.length > 0 && (
           <NumberedSection
             num={2}
             eyebrow="Berikutnya"
-            title="Screening"
+            title="Kualifikasi"
             subtitle="Diisi kalau lolos seleksi awal — atau isi sekarang biar lebih cepat."
           >
             <div className="flex flex-col gap-3">
-              {berikutnya.map((req) => (
-                <RequirementInlineForm
-                  key={req.key}
-                  req={req}
+              {berikutnya.map((field) => (
+                <ApplicationFieldForm
+                  key={field.field_key}
+                  field={field}
+                  applicationId={id}
                   candidateId={candidateId}
-                  initialValue={credentials[req.key] ?? ""}
                 />
               ))}
             </div>
           </NumberedSection>
         )}
 
-        {/* NANTI */}
+        {/* Section 3 — screening (later) */}
         {nanti.length > 0 && (
           <NumberedSection
             num={3}
             eyebrow="Nanti"
-            title="Cek dokumen"
-            subtitle="Diminta kalau lolos screening — atau upload sekarang biar siap."
+            title="Screening"
+            subtitle="Diminta kalau lolos kualifikasi — atau isi sekarang biar siap."
           >
             <div className="flex flex-col gap-2">
-              {nanti.map((req) => (
-                <RequirementInlineForm
-                  key={req.key}
-                  req={req}
+              {nanti.map((field) => (
+                <ApplicationFieldForm
+                  key={field.field_key}
+                  field={field}
+                  applicationId={id}
                   candidateId={candidateId}
-                  initialValue={credentials[req.key] ?? ""}
                 />
               ))}
             </div>
           </NumberedSection>
         )}
 
-        {/* SUDAH TERPENUHI — collapsed */}
+        {/* Completed — collapsed */}
         {completed.length > 0 && (
           <section className="px-5 pt-6">
             <div
@@ -209,9 +183,9 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
               Sudah terpenuhi · {completed.length}
             </div>
             <div className="flex flex-col gap-2">
-              {completed.map((req) => (
+              {completed.map((field) => (
                 <div
-                  key={req.key}
+                  key={field.field_key}
                   className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-pg-white"
                   style={{ border: "1px solid var(--pg-border)" }}
                 >
@@ -223,15 +197,10 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-[14px] font-bold truncate text-pg-ink-primary">
-                      {req.label}
+                      {field.field_label}
                     </div>
-                    <div
-                      className="text-[11px] mt-0.5"
-                      style={{ color: "var(--pg-ok-soft-fg)" }}
-                    >
-                      {req.doc_passed
-                        ? "Terverifikasi · diambil dari profil"
-                        : "Sudah diisi"}
+                    <div className="text-[11px] mt-0.5" style={{ color: "var(--pg-ok-soft-fg)" }}>
+                      {field.doc_uploaded ? "Dokumen diupload" : "Sudah diisi"}
                     </div>
                   </div>
                 </div>
@@ -240,7 +209,6 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
           </section>
         )}
 
-        {/* Footer hint */}
         <section className="px-5 pt-6">
           <div
             className="text-[12px] font-semibold flex items-center justify-center gap-1.5"

@@ -183,7 +183,7 @@ export default async function CandidateDetailPage({
     ).then((entries) => new Map(entries)),
     positionSlugs.length > 0
       ? supabase
-          .from("position_form_fields")
+          .from("position_application_fields")
           .select("position_slug, field_key, field_label, field_type, options, collect_at_stage")
           .in("position_slug", positionSlugs)
           .order("sort_order")

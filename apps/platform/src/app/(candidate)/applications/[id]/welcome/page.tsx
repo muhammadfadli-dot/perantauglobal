@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { Icon } from "@/components/pg/Icon";
-import { getRequirementsWithStatus } from "@/lib/readiness";
+import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
 
 export const dynamic = "force-dynamic";
 
@@ -76,12 +76,9 @@ export default async function ApplyWelcomePage({ params }: PageProps) {
     .single();
   const firstName = (candData?.full_name ?? session.email ?? "kamu").split(" ")[0];
 
-  const { score_pct, requirements } = await getRequirementsWithStatus(
-    candidateId,
-    application.position_slug,
-    supabase
-  );
-  const missing = requirements.filter((r) => !r.passed).length;
+  const { score_pct, fields } = await getApplicationCompleteness(application.id, supabase);
+  const missing = fields.filter((f) => !f.passed).length;
+  const requirements = fields; // alias for downstream usage below
 
   return (
     <main className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
