@@ -78,13 +78,30 @@ Magic link flow: form → `pending_submissions` (nonce) → magic link sent → 
 
 - [x] Monorepo scaffolded
 - [x] Supabase project `perantauglobal` created (Dayalima Pro)
-- [ ] Schema migration 0001 applied
-- [ ] Positions seeded (16 slots)
-- [ ] apps/web ported from legacy repo
-- [ ] apps/platform candidate portal built
-- [ ] apps/platform admin ported from legacy dashboard
-- [ ] Data backfill from gt-tools
-- [ ] Production cutover
+- [x] Schema migration 0001 applied
+- [x] Positions seeded (17 active)
+- [x] apps/web ported from legacy repo
+- [x] apps/platform candidate portal built
+- [x] apps/platform admin ported from legacy dashboard
+- [x] Data backfill from gt-tools
+- [x] Production cutover (2026-04-22)
+- [x] Position model rework — Fase 0–4 (2026-05-24/25)
+- [ ] Position model rework — Fase 5 (lengkapi flip + schema drop)
+
+### Position model rework progress (Fase 0–4 done)
+
+- **Fase 0** — Meta CAPI cross-domain attribution (PR #45)
+- **Fase 1** — schema migrations 0031–0033 (PR #47): `position_application_fields`, `positions.content` JSONB, `candidate_documents.application_id`
+- **Fase 2** — unified Position Editor + live preview (PR #48): replaces raw-JSON edit + 4 fragmented widgets; new `ContentEditor`, `PositionPreview`, `ApplicationFieldsEditor`
+- **Fase 3** — candidate-side flip (PR #49): `/lowongan` reads `positions.content` from DB (fallback to static), apply form reads from `position_application_fields`, LP form trimmed to 3 required fields, WA OTP sketch route
+- **Fase 4** — code sunset (this PR): delete dead editors, dead actions; PositionWizard dual-write retained until Fase 5
+
+**Fase 5 (deferred):**
+1. Rewrite `/applications/[id]/lengkapi` to read from `position_application_fields` + `applications.answers` (no longer `profile_data.credentials`)
+2. Stop `handle_new_auth_user` trigger from writing `profile_data.credentials`
+3. Sunset `/profile/kualifikasi` page
+4. Migration 0034: drop `position_form_fields` table, drop `positions.requirements` column
+5. Wire up WhatsApp / SMS OTP (Twilio bridge) per [project-wa-otp-promoted](.claude/memory/project_wa_otp_promoted.md)
 
 ## Related
 

@@ -2,11 +2,41 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-05-11 (Phase 4 — Admin UX restructure: lamaran=talent-pool, job_orders=pipeline. Branch: `claude/trusting-northcutt-1810ec`, NOT YET MERGED to main.)
+**Last updated:** 2026-05-25 (Position model rework Fase 0–4 DONE & MERGED. Fase 5 deferred.)
 
-## Phase 4 — Admin UX restructure: talent-pool ↔ pipeline split (2026-05-11) 🚧 IN BRANCH
+## Position model rework — Fase 0–4 ✅ DONE (2026-05-24/25)
 
-**Branch:** `claude/trusting-northcutt-1810ec` (worktree). Dev server tested live by Panji. NOT YET PR'd or merged. Next session should ship/PR this branch.
+5-phase plan locked in earlier sessions to fix: admin can't edit positions (raw JSON textarea), no live preview, no admin authoring of landing page content, shared credentials cross-application bleed. See [project-rework-position-model](.claude/memory/project_rework_position_model.md).
+
+**Merged in order:**
+- PR [#45](https://github.com/panji-firmansyah/perantauglobal/pull/45) — **Fase 0** Meta CAPI cross-domain attribution (apps/platform gets GTM + meta-capi lib; `_fbc`/`_fbp` forwarded via magic-link redirect; `CompleteRegistration` fires from auth/callback)
+- PR [#47](https://github.com/panji-firmansyah/perantauglobal/pull/47) — **Fase 1** schema migrations 0031–0033 (`position_application_fields`, `positions.content` JSONB + 100KB guard, `candidate_documents.application_id`); content backfill script + 17 positions backfilled
+- PR [#48](https://github.com/panji-firmansyah/perantauglobal/pull/48) — **Fase 2** unified Position Editor (replaces raw JSON + 4 widgets); new `ContentEditor`, `PositionPreview`, `ApplicationFieldsEditor`, `PositionEditorShell`; live preview side-by-side
+- PR [#49](https://github.com/panji-firmansyah/perantauglobal/pull/49) — **Fase 3** candidate-side flip (`/lowongan` reads `positions.content`; apply form reads `position_application_fields`; LP form trimmed 5→3 required fields; WA OTP sketch route)
+- PR #50 (this) — **Fase 4** code sunset (delete RequirementsEditor / RequirementLibraryPanel / FormFieldsEditor + dead server actions)
+
+**Schema state on prod Supabase `jeadtvxgxmqnsqwxjmhj`:**
+- New: `position_application_fields` (88 rows backfilled), `positions.content` JSONB (17 backfilled), `candidate_documents.application_id` nullable FK
+- Old still alive (read by lengkapi flow, deferred drop): `positions.requirements` JSONB, `position_form_fields` table, `candidates.profile_data.credentials`
+
+## Fase 5 (deferred) — finish the credential sunset + drop legacy schema
+
+Required before dropping legacy: rewrite the candidate completion flow that still reads `positions.requirements` + `profile_data.credentials`.
+
+1. **Rewrite `/applications/[id]/lengkapi`** to read `position_application_fields` + write to `applications.answers` (no longer touches `profile_data.credentials`). Affects: `lib/readiness.ts`, `RequirementInlineForm.tsx`, candidate `/applications/[id]/page.tsx`.
+2. **Update `handle_new_auth_user` trigger** to stop writing `profile_data.credentials` from `pending_submissions.form_data.role_data`. Answers should land in `applications.answers` instead.
+3. **Sunset `/profile/kualifikasi`** — repurpose to "Riwayat jawaban" read-only view OR delete entirely.
+4. **Migration 0034** — drop `position_form_fields` table; drop `positions.requirements` column; drop `application_tiers` if no longer used; clean up `compute_readiness_v3` + `migrate_requirement_v2_to_v3` helpers.
+5. **PositionWizard simplification** — drop dual-write to `position_form_fields`; new positions write only to `position_application_fields`.
+6. **WhatsApp / SMS OTP wire-up** — Twilio SMS bridge then Meta WA Business API (per [project-wa-otp-promoted](.claude/memory/project_wa_otp_promoted.md)). Sketch route already at `/auth/whatsapp`.
+
+Estimated effort: 5-7 days. Do NOT start until production telemetry on Fase 0-4 stabilizes (1-2 weeks observation).
+
+---
+
+## Historical: Phase 4 — Admin UX restructure: talent-pool ↔ pipeline split (2026-05-11) ✅ MERGED PR [#44](https://github.com/panji-firmansyah/perantauglobal/pull/44)
+
+**Branch:** `claude/trusting-northcutt-1810ec` (worktree) — MERGED via PR #44 on 2026-05-24.
 
 **Conceptual shift driving the work:**
 - `applications` (lamaran) = **talent pool entries**, no pipeline. The lamaran admin page is the inbox/triage surface.
