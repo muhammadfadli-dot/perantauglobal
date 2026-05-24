@@ -13,7 +13,6 @@ type AppCard = {
   pipeline_stage: string;
   created_at: string;
   candidates: { full_name: string; city: string | null } | null;
-  application_tiers: { tier: "A" | "B" | "C" | "D" | "rejected" } | null;
 };
 
 type JobOrder = {
@@ -50,7 +49,7 @@ export default async function KanbanPage({
 
   const [{ data: joData }, { data: appsData }] = await Promise.all([
     supabase.from("job_orders").select("id, intake_label, position_slug, positions (name, country)").eq("id", id).maybeSingle(),
-    supabase.from("applications").select("id, candidate_id, pipeline_stage, created_at, candidates (full_name, city), application_tiers (tier)").eq("job_order_id", id).order("created_at", { ascending: false }),
+    supabase.from("applications").select("id, candidate_id, pipeline_stage, created_at, candidates (full_name, city)").eq("job_order_id", id).order("created_at", { ascending: false }),
   ]);
 
   const jo = joData as unknown as JobOrder | null;

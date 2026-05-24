@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Icon } from "@/components/pg/Icon";
-import { Badge } from "@/components/pg/primitives";
 import { updateApplicationStage } from "@/app/(admin)/admin/actions";
 
 type Card = {
@@ -12,7 +11,6 @@ type Card = {
   pipeline_stage: string;
   created_at: string;
   candidates: { full_name: string; city: string | null } | null;
-  application_tiers: { tier: "A" | "B" | "C" | "D" | "rejected" } | null;
 };
 
 type Column = {
@@ -29,10 +27,6 @@ const TONE_COLOR: Record<Column["tone"], { bg: string; fg: string }> = {
   ok: { bg: "var(--pg-ok-bg)", fg: "var(--pg-ok)" },
   err: { bg: "var(--pg-err-bg)", fg: "var(--pg-err)" },
   mute: { bg: "var(--pg-ink-100)", fg: "var(--pg-ink-500)" },
-};
-
-const TIER_VARIANT: Record<"A" | "B" | "C" | "D" | "rejected", "ok" | "info" | "warn" | "mute" | "err"> = {
-  A: "ok", B: "info", C: "warn", D: "mute", rejected: "err",
 };
 
 export default function KanbanColumn({ column }: { column: Column }) {
@@ -64,7 +58,6 @@ function CardRow({ card, columnStages }: { card: Card; columnStages: string[] })
   const [pending, start] = useTransition();
   const [stage, setStage] = useState(card.pipeline_stage);
   const [error, setError] = useState<string | null>(null);
-  const tier = card.application_tiers?.tier ?? null;
 
   function changeStage(next: string) {
     setError(null);
@@ -90,9 +83,6 @@ function CardRow({ card, columnStages }: { card: Card; columnStages: string[] })
       </Link>
       <div className="text-[11px] text-pg-ink-500 mt-0.5">
         {card.candidates?.city ?? "—"} · {new Date(card.created_at).toLocaleDateString("id-ID")}
-      </div>
-      <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-        {tier && <Badge variant={TIER_VARIANT[tier]}>Tier {tier}</Badge>}
       </div>
       <div className="mt-2.5">
         <select

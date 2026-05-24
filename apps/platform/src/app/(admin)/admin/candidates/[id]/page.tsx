@@ -4,7 +4,8 @@ import { createServerClient } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import ApplicationCard from "@/components/admin/ApplicationCard";
 import { Icon } from "@/components/pg/Icon";
-import { getReadinessV3, type ReadinessResultV3 } from "@/lib/readiness";
+import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
+import type { ReadinessResultV3 } from "@/lib/readiness";
 
 export const dynamic = "force-dynamic";
 
@@ -40,9 +41,7 @@ type AppRow = {
   positions: {
     name: string;
     country: string;
-    requirements: Record<string, unknown> | null;
   } | null;
-  application_tiers: { tier: "A" | "B" | "C" | "D" | "rejected" } | null;
   job_orders: {
     id: string;
     intake_label: string;
@@ -140,7 +139,7 @@ export default async function CandidateDetailPage({
     supabase
       .from("applications")
       .select(
-        "id, position_slug, pipeline_stage, answers, po_notes, reached_out, reached_out_at, score, created_at, job_order_id, positions (name, country, requirements), application_tiers (tier), job_orders (id, intake_label, internal_employer_name, status)"
+        "id, position_slug, pipeline_stage, answers, po_notes, reached_out, reached_out_at, score, created_at, job_order_id, positions (name, country), job_orders (id, intake_label, internal_employer_name, status)"
       )
       .eq("candidate_id", id)
       .order("created_at", { ascending: false }),
@@ -172,35 +171,78 @@ export default async function CandidateDetailPage({
   const allInJobOrder =
     applications.length > 0 && applications.every((a) => a.job_order_id);
 
-  // Per-application readiness + position form fields, fetched in parallel.
-  const positionSlugs = [...new Set(applications.map((a) => a.position_slug))];
-  const [readinessByApp, formFieldsByPosition] = await Promise.all([
-    Promise.all(
-      applications.map(async (a) => {
-        const r = await getReadinessV3(cand.id, a.position_slug, supabase);
-        return [a.id, r] as [string, ReadinessResultV3];
-      }),
-    ).then((entries) => new Map(entries)),
-    positionSlugs.length > 0
-      ? supabase
-          .from("position_application_fields")
-          .select("position_slug, field_key, field_label, field_type, options, collect_at_stage")
-          .in("position_slug", positionSlugs)
-          .order("sort_order")
-          .then(({ data }) => {
-            const map = new Map<string, FormField[]>();
-            for (const f of (data ?? []) as FormField[]) {
-              const arr = map.get(f.position_slug) ?? [];
-              arr.push(f);
-              map.set(f.position_slug, arr);
-            }
-            return map;
-          })
-      : Promise.resolve(new Map<string, FormField[]>()),
-  ]);
+  // Per-application completeness (Fase 6: replaces legacy getReadinessV3 which
+  // depended on candidates.profile_data.credentials + positions.requirements).
+  // Single fetch per application — internally pulls position_application_fields
+  // + answers + documents.
+  const completenessByApp = new Map<
+    string,
+    Awaited<ReturnType<typeof getApplicationCompleteness>>
+  >();
+  await Promise.all(
+    applications.map(async (a) => {
+      const c = await getApplicationCompleteness(a.id, supabase);
+      completenessByApp.set(a.id, c);
+    }),
+  );
+
+  // Adapter — ApplicationCard still expects the legacy ReadinessResultV3 shape.
+  // Map ApplicationCompleteness.fields → per_field record keyed by field_key.
+  function asReadinessV3(
+    c: Awaited<ReturnType<typeof getApplicationCompleteness>>,
+  ): ReadinessResultV3 {
+    return {
+      per_field: Object.fromEntries(
+        c.fields.map((f) => [
+          f.field_key,
+          {
+            passed: f.passed,
+            self_passed: f.passed && f.field_type !== "file",
+            doc_passed: f.doc_uploaded,
+            importance: (f.importance === "required" ? "hard" : "soft") as
+              | "hard"
+              | "soft",
+            category: "personal" as const,
+            evidence_mode:
+              f.field_type === "file"
+                ? ("document" as const)
+                : ("self_declared" as const),
+            label: f.field_label,
+            collect_at_stage: f.collect_at_stage,
+          },
+        ]),
+      ),
+      hard_pass: c.hard_pass,
+      score_pct: c.score_pct,
+      schema_version: 3,
+    };
+  }
+
+  const readinessByApp = new Map<string, ReadinessResultV3>();
+  for (const [appId, c] of completenessByApp) {
+    readinessByApp.set(appId, asReadinessV3(c));
+  }
+
+  // formFields per position derived from completeness (avoids a second query).
+  const formFieldsByPosition = new Map<string, FormField[]>();
+  for (const a of applications) {
+    const c = completenessByApp.get(a.id);
+    if (!c) continue;
+    formFieldsByPosition.set(
+      a.position_slug,
+      c.fields.map((f) => ({
+        position_slug: a.position_slug,
+        field_key: f.field_key,
+        field_label: f.field_label,
+        field_type: f.field_type,
+        options: f.options,
+        collect_at_stage: f.collect_at_stage,
+      })),
+    );
+  }
 
   const qualifiedPositionsCount = applications.filter(
-    (a) => readinessByApp.get(a.id)?.hard_pass,
+    (a) => completenessByApp.get(a.id)?.hard_pass,
   ).length;
 
   const initials = cand.full_name

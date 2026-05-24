@@ -54,7 +54,6 @@ export interface ApplicationCardProps {
     positions: {
       name: string;
       country: string;
-      requirements: Record<string, unknown> | null;
     } | null;
     job_orders?: {
       id: string;

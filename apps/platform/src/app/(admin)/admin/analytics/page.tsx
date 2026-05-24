@@ -30,7 +30,7 @@ export default async function AnalyticsPage({
   const since = rangeToDate(range);
   const supabase = await createServerClient();
 
-  // Funnel: pending → candidates → applications → tier'd → placed
+  // Funnel: pending → candidates → applications → placed
   const sinceFilter = since ? `.gte("created_at", "${since}")` : "";
   void sinceFilter;
 
@@ -38,12 +38,10 @@ export default async function AnalyticsPage({
     { count: pendingTotal },
     { count: candidateTotal },
     { count: applicationTotal },
-    { count: tieredTotal },
     { count: placedTotal },
     { data: utmData },
     { data: countryData },
     { data: stageData },
-    { data: tierData },
     { data: openJobOrders },
   ] = await Promise.all([
     since
@@ -55,14 +53,12 @@ export default async function AnalyticsPage({
     since
       ? supabase.from("applications").select("*", { count: "exact", head: true }).gte("created_at", since)
       : supabase.from("applications").select("*", { count: "exact", head: true }),
-    supabase.from("application_tiers").select("*", { count: "exact", head: true }),
     supabase.from("applications").select("*", { count: "exact", head: true }).in("pipeline_stage", ["selected", "training", "deployed", "active"]),
     since
       ? supabase.from("candidates").select("utm_source, source").gte("created_at", since)
       : supabase.from("candidates").select("utm_source, source"),
     supabase.from("candidates").select("city"),
     supabase.from("applications").select("pipeline_stage"),
-    supabase.from("application_tiers").select("tier"),
     supabase.from("job_orders").select("id, intake_label, slot_count, slot_filled, status, position_slug, positions (name)").eq("status", "open").order("created_at", { ascending: false }),
   ]);
 
@@ -92,13 +88,6 @@ export default async function AnalyticsPage({
   }
   const stageRanked = Array.from(stageCounts.entries()).sort((a, b) => b[1] - a[1]);
 
-  // Tier breakdown
-  const tiers = (tierData ?? []) as Array<{ tier: "A" | "B" | "C" | "D" | "rejected" }>;
-  const tierCounts = new Map<string, number>();
-  for (const t of tiers) {
-    tierCounts.set(t.tier, (tierCounts.get(t.tier) ?? 0) + 1);
-  }
-
   type JOStat = { id: string; intake_label: string; slot_count: number; slot_filled: number; positions: { name: string } | null };
   const jos = (openJobOrders ?? []) as unknown as JOStat[];
 
@@ -107,7 +96,6 @@ export default async function AnalyticsPage({
     { label: "Form submit", value: pendingTotal ?? 0 },
     { label: "Candidate created", value: candidateTotal ?? 0 },
     { label: "Lamaran dibuat", value: applicationTotal ?? 0 },
-    { label: "Di-tier admin", value: tieredTotal ?? 0 },
     { label: "Diterima", value: placedTotal ?? 0 },
   ];
   const funnelMax = Math.max(...funnel.map((f) => f.value), 1);
@@ -196,15 +184,6 @@ export default async function AnalyticsPage({
           <DataList items={stageRanked} />
         </section>
 
-        {/* Tier breakdown */}
-        <section>
-          <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-2.5">
-            Distribusi tier
-          </div>
-          <DataList
-            items={(["A", "B", "C", "D", "rejected"] as const).map((t) => [t, tierCounts.get(t) ?? 0])}
-          />
-        </section>
       </div>
 
       {/* Open job orders performance */}

@@ -82,30 +82,8 @@ export async function toggleReachedOut(
   revalidatePath("/admin/applications", "layout");
 }
 
-export async function assignTier(
-  applicationId: string,
-  tier: "A" | "B" | "C" | "D" | "rejected",
-  notes?: string,
-) {
-  const { reviewedBy } = await assertAdmin();
-  await logAdminAction("assign_tier", "application", applicationId, {
-    tier,
-    has_notes: Boolean(notes && notes.trim()),
-  });
-  const supabase = await createServerClient();
-  const { error } = await supabase
-    .from("application_tiers")
-    .upsert({
-      application_id: applicationId,
-      tier,
-      notes: notes ?? null,
-      assigned_by: reviewedBy,
-      assigned_at: new Date().toISOString(),
-    } as never);
-  if (error) throw new Error(error.message);
-  revalidatePath("/admin/candidates", "layout");
-  revalidatePath("/admin/applications", "layout");
-}
+// assignTier / clearTier — removed in Fase 6A (tier feature sunset).
+// application_tiers table dropped in migration 0036.
 
 /**
  * Move a talent-pool application into a specific job order, entering its
@@ -182,15 +160,3 @@ export async function moveApplicationToJobOrder(
   revalidatePath(`/admin/job-orders/${jobOrderId}`, "layout");
 }
 
-export async function clearTier(applicationId: string) {
-  await assertAdmin();
-  await logAdminAction("clear_tier", "application", applicationId);
-  const supabase = await createServerClient();
-  const { error } = await supabase
-    .from("application_tiers")
-    .delete()
-    .eq("application_id", applicationId);
-  if (error) throw new Error(error.message);
-  revalidatePath("/admin/candidates", "layout");
-  revalidatePath("/admin/applications", "layout");
-}

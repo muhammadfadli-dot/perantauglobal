@@ -33,7 +33,6 @@ type LinkedApp = {
     email: string | null;
     city: string | null;
   } | null;
-  application_tiers: { tier: string }[] | null;
 };
 
 const STATUS_LABEL: Record<string, string> = {
@@ -113,7 +112,7 @@ export default async function JobOrderDetailPage({
     supabase
       .from("applications")
       .select(
-        "id, candidate_id, pipeline_stage, created_at, candidates (full_name, email, city), application_tiers (tier)"
+        "id, candidate_id, pipeline_stage, created_at, candidates (full_name, email, city)"
       )
       .eq("job_order_id", id)
       .order("created_at", { ascending: false }),
@@ -389,7 +388,6 @@ export default async function JobOrderDetailPage({
 
 function KanbanCard({ app, muted }: { app: LinkedApp; muted?: boolean }) {
   const c = app.candidates;
-  const tier = app.application_tiers?.[0]?.tier;
   const initials =
     c?.full_name
       ?.split(" ")
@@ -423,18 +421,6 @@ function KanbanCard({ app, muted }: { app: LinkedApp; muted?: boolean }) {
             <div className="text-[13px] font-bold text-pg-ink-primary leading-tight truncate">
               {c?.full_name ?? "—"}
             </div>
-            {tier && (
-              <span
-                className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase shrink-0"
-                style={{
-                  background: tier === "A" ? "var(--pg-red-soft-bg)" : "var(--pg-ink-50)",
-                  color: tier === "A" ? "var(--pg-red-600)" : "var(--pg-ink-tertiary)",
-                  fontFamily: "var(--font-mono)",
-                }}
-              >
-                {tier}
-              </span>
-            )}
           </div>
           <div
             className="text-[11px] mt-0.5 leading-tight truncate"

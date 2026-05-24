@@ -119,41 +119,6 @@ export type Database = {
           },
         ]
       }
-      application_tiers: {
-        Row: {
-          application_id: string
-          assigned_at: string
-          assigned_by: string | null
-          notes: string | null
-          score: number | null
-          tier: Database["public"]["Enums"]["tier_label"]
-        }
-        Insert: {
-          application_id: string
-          assigned_at?: string
-          assigned_by?: string | null
-          notes?: string | null
-          score?: number | null
-          tier: Database["public"]["Enums"]["tier_label"]
-        }
-        Update: {
-          application_id?: string
-          assigned_at?: string
-          assigned_by?: string | null
-          notes?: string | null
-          score?: number | null
-          tier?: Database["public"]["Enums"]["tier_label"]
-        }
-        Relationships: [
-          {
-            foreignKeyName: "application_tiers_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: true
-            referencedRelation: "applications"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       applications: {
         Row: {
           answers: Json
@@ -901,7 +866,6 @@ export type Database = {
         | "active"
         | "rejected"
         | "exit"
-      tier_label: "A" | "B" | "C" | "D" | "rejected"
       user_role: "candidate" | "admin" | "recruiter"
     }
     CompositeTypes: {
@@ -1035,7 +999,6 @@ export type PipelineStage = Database["public"]["Enums"]["pipeline_stage"]
 export type DocType = Database["public"]["Enums"]["doc_type"]
 export type FormFieldType = Database["public"]["Enums"]["form_field_type"]
 export type JobOrderStatus = Database["public"]["Enums"]["job_order_status"]
-export type TierLabel = Database["public"]["Enums"]["tier_label"]
 export type UserRole = Database["public"]["Enums"]["user_role"]
 export type ApplicationFieldImportance = Database["public"]["Enums"]["application_field_importance"]
 export type ApplicationFieldSection = Database["public"]["Enums"]["application_field_section"]
@@ -1092,7 +1055,6 @@ export const Constants = {
         "rejected",
         "exit",
       ],
-      tier_label: ["A", "B", "C", "D", "rejected"],
       user_role: ["candidate", "admin", "recruiter"],
     },
   },
