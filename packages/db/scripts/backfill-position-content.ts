@@ -20,11 +20,9 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-// Cross-package import. tsx handles TS compilation at runtime; tsc strict
-// mode complains but it's not a build artifact, just a one-shot script.
-// @ts-expect-error tsx resolves cross-package TS imports at runtime
+// Cross-package imports — tsx resolves these at runtime. Not part of
+// packages/db's tsc build (scripts/ is excluded from tsconfig).
 import { POSITIONS } from "../../../apps/web/src/lib/positions";
-// @ts-expect-error tsx resolves cross-package TS imports at runtime
 import { POSITION_DETAILS } from "../../../apps/web/src/lib/positionDetails";
 
 // ---------------------------------------------------------------------------
