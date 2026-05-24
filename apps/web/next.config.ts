@@ -85,12 +85,14 @@ const nextConfig: NextConfig = {
       { source: "/program/global-nurse", destination: "/lowongan/perawat-saudi-arabia", permanent: true },
       { source: "/id/program/global-nurse", destination: "/lowongan/perawat-saudi-arabia", permanent: true },
       { source: "/en/program/global-nurse", destination: "/lowongan/perawat-saudi-arabia", permanent: true },
-      // Generic /daftar retired — funnel to talent hub
-      { source: "/daftar", destination: "/talent-hub", permanent: true },
-      { source: "/id/daftar", destination: "/talent-hub", permanent: true },
-      // GTH program → /talent-hub (THE app, not a separate program)
-      { source: "/program/global-talent-hub", destination: "/talent-hub", permanent: true },
-      { source: "/id/program/global-talent-hub", destination: "/talent-hub", permanent: true },
+      // /talent-hub retired — naming folded into "Perantau Global" (the app);
+      // its content merged into the homepage. All entry points → homepage.
+      { source: "/talent-hub", destination: "/", permanent: true },
+      { source: "/id/talent-hub", destination: "/", permanent: true },
+      { source: "/daftar", destination: "/", permanent: true },
+      { source: "/id/daftar", destination: "/", permanent: true },
+      { source: "/program/global-talent-hub", destination: "/", permanent: true },
+      { source: "/id/program/global-talent-hub", destination: "/", permanent: true },
       // SPG program → /lowongan/spg-indonesia (treated as a domestic lowongan now)
       { source: "/program/spg", destination: "/lowongan/spg-indonesia", permanent: true },
       { source: "/id/program/spg", destination: "/lowongan/spg-indonesia", permanent: true },

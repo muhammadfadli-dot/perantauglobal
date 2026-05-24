@@ -4,10 +4,10 @@ import Image from "next/image";
 
 const COLS = [
   {
-    title: "Lowongan",
+    title: "Produk",
     items: [
-      { label: "Semua lowongan", href: "/lowongan" },
-      { label: "Talent Hub", href: "/talent-hub" },
+      { label: "Lowongan", href: "/lowongan" },
+      { label: "Sertifikasi", href: "/sertifikasi" },
     ],
   },
   {
@@ -46,7 +46,9 @@ export function Footer() {
                 Perantau<span style={{ color: "var(--pg-red-500)" }}>Global</span>
               </div>
             </div>
-            <div className="text-[13px] text-white/60 mt-2">Lisensi P3MI · Sejak 1998</div>
+            <div className="text-[13px] text-white/60 mt-2">
+              Lisensi P3MI Kemnaker · Bagian DayaLima Group
+            </div>
             <div className="flex flex-col gap-2 mt-4 text-[14px]">
               <a
                 href="mailto:halo@perantauglobal.com"

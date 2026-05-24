@@ -7,7 +7,7 @@ import { Icon } from "./Icon";
 
 const NAV_LINKS = [
   { label: "Lowongan", href: "/lowongan" },
-  { label: "Talent Hub", href: "/talent-hub" },
+  { label: "Sertifikasi", href: "/sertifikasi" },
   { label: "Tentang", href: "/tentang" },
   { label: "FAQ", href: "/faq" },
 ];
@@ -55,7 +55,7 @@ export function TopBarWWW() {
             className="inline-flex items-center justify-center min-h-[36px] md:min-h-[40px] px-2.5 sm:px-3.5 text-[13px] sm:text-sm font-semibold rounded-xl bg-pg-red-600 text-white hover:bg-pg-red-700 no-underline transition-colors whitespace-nowrap"
           >
             <span className="sm:hidden">Daftar</span>
-            <span className="hidden sm:inline">Buka Talent Hub</span>
+            <span className="hidden sm:inline">Buka Perantau Global</span>
           </a>
           <button
             type="button"

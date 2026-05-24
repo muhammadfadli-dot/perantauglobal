@@ -18,7 +18,7 @@ export function ExistingUserShortcut({ positionSlug }: { positionSlug: string })
         <div className="flex-1">
           <div className="text-sm font-bold">Sudah punya akun?</div>
           <div className="text-[12px] text-pg-ink-500 mt-0.5">
-            Langsung apply via Talent Hub — skip form bio.
+            Langsung apply via Perantau Global — skip form bio.
           </div>
         </div>
         <Icon name="arrow_right" size={18} className="text-pg-ink-400" />

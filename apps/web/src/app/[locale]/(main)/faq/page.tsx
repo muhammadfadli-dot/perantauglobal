@@ -45,8 +45,8 @@ const FAQ_GROUPS = [
         a: "5 tahap: (1) Daftar & lengkapi profil, (2) Seleksi awal, (3) Wawancara dengan employer, (4) Dokumen & medical check-up, (5) Berangkat.",
       },
       {
-        q: "Apakah saya akan dapat training dari DTG?",
-        a: "Untuk saat ini, DTG fokus pada penempatan, bukan pelatihan bahasa. Training Global Talent Ready sedang kami siapkan dan akan diumumkan di Talent Hub.",
+        q: "Apakah ada sertifikasi atau pelatihan dari Perantau Global?",
+        a: "Ada. Perantau Global menyediakan Paspor Perantau Global — sertifikasi siap kerja (psikotes yang diakui formal + pelatihan fundamental) per negara tujuan, tersedia untuk Saudi Arabia & Jepang. Ini berbayar dan bukan syarat dari kami, tapi membantu kamu siap berangkat. Sertifikasi skill-specific (bahasa, SIM) sedang kami siapkan lewat mitra resmi.",
       },
     ],
   },

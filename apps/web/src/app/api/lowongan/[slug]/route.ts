@@ -204,7 +204,7 @@ export async function POST(
         return NextResponse.json(
           {
             error:
-              "Email sudah terdaftar. Masuk ke Talent Hub pakai password kamu untuk lanjutkan lamaran.",
+              "Email sudah terdaftar. Masuk ke Perantau Global pakai password kamu untuk lanjutkan lamaran.",
             code: "email_exists",
           },
           { status: 409 }

@@ -41,7 +41,7 @@ export default async function TimPage({ params }: { params: Promise<{ locale: st
           <div>
             <div className="text-base md:text-lg font-bold tracking-tight">Profil tim lengkap</div>
             <div className="text-sm md:text-base text-pg-ink-700 mt-1 leading-relaxed">
-              Daftar lengkap tim & PIC kami akan diumumkan secara berkala di Talent Hub. Untuk
+              Daftar lengkap tim & PIC kami akan diumumkan secara berkala di aplikasi Perantau Global. Untuk
               pertanyaan spesifik, email{" "}
               <a href="mailto:halo@perantauglobal.com" className="text-pg-red-600 font-semibold">
                 halo@perantauglobal.com

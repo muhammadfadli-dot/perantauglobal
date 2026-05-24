@@ -169,13 +169,13 @@ export function ApplyForm({
           link di email untuk aktifkan akun kamu.
         </p>
         <p className="text-sm text-pg-ink-500 mt-3">
-          Setelah verifikasi, masuk ke Talent Hub pakai email dan password yang baru kamu buat.
+          Setelah verifikasi, masuk ke Perantau Global pakai email dan password yang baru kamu buat.
         </p>
         <a
           href={`${APP_URL}/auth/sign-in?email=${encodeURIComponent(submittedEmail)}`}
           className="mt-5 inline-flex items-center gap-2 font-bold text-pg-red-600 no-underline"
         >
-          Masuk ke Talent Hub <Icon name="arrow_right" size={18} />
+          Masuk ke Perantau Global <Icon name="arrow_right" size={18} />
         </a>
         <div
           className="mt-4 px-4 py-3 rounded-lg text-left text-[13px]"
@@ -368,7 +368,7 @@ export function ApplyForm({
             <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-1">
               Buat akun
             </div>
-            <div className="text-sm font-bold text-pg-ink-900 mb-3">Pilih password Talent Hub</div>
+            <div className="text-sm font-bold text-pg-ink-900 mb-3">Pilih password Perantau Global</div>
             <div className="grid gap-3">
               <Field label="Password" required>
                 <div className="relative">
@@ -450,7 +450,7 @@ export function ApplyForm({
             <Icon name="info" size={16} className="shrink-0 mt-0.5" />
             <div className="text-[12px] leading-relaxed">
               <b>Cek email setelah daftar</b> — kamu perlu klik link verifikasi di email untuk
-              aktifkan akun Talent Hub.
+              aktifkan akun Perantau Global.
             </div>
           </div>
 
@@ -718,7 +718,7 @@ function SingleStepForm({
       </div>
       <h3 className="text-xl md:text-2xl font-extrabold tracking-tight mt-1">Mulai dari sini.</h3>
       <p className="text-sm text-pg-ink-500 mt-1.5">
-        Isi data + pilih password. Kami buatkan akun Talent Hub kamu sekaligus.
+        Isi data + pilih password. Kami buatkan akun Perantau Global kamu sekaligus.
       </p>
 
       <div className="grid gap-3 mt-5">
@@ -810,7 +810,7 @@ function SingleStepForm({
 
       <div className="mt-5 border-t border-pg-ink-100 pt-5">
         <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-3">
-          Akun Talent Hub
+          Akun Perantau Global
         </div>
         <div className="grid gap-3">
           <Field label="Password" required>

@@ -19,7 +19,7 @@ const STEPS = [
   {
     n: "01",
     t: "Daftar & lengkapi profil",
-    d: "Isi form singkat (nama, email, kota, pendidikan). Kami kirim tautan ke email — tinggal klik untuk masuk Talent Hub. Lengkapi profil dan upload dokumen (KTP, passport, foto, CV).",
+    d: "Isi form singkat (nama, email, kota, pendidikan). Kami kirim tautan ke email — tinggal klik untuk masuk Perantau Global. Lengkapi profil dan upload dokumen (KTP, passport, foto, CV).",
     duration: "1–7 hari",
   },
   {

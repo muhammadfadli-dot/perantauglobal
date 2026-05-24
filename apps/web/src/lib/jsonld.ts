@@ -31,7 +31,7 @@ export function organizationJsonLd() {
     ],
     parentOrganization: {
       "@type": "Organization",
-      name: "Dayalima Group",
+      name: "DayaLima Group",
       url: "https://dayalima.com",
     },
   };

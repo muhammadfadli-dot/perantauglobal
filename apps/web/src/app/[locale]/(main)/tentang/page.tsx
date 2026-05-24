@@ -7,7 +7,7 @@ import { ButtonLink } from "@/components/pg/primitives";
 export const metadata: Metadata = {
   title: "Tentang Kami — Perantau Global",
   description:
-    "PT Daya Talenta Global (Perantau Global) — bagian dari Dayalima Group, P3MI resmi Kemnaker. 28 tahun bantu PMI Indonesia kerja di luar negeri secara legal dan terjamin.",
+    "PT Daya Talenta Global (Perantau Global) — P3MI resmi Kemnaker, bagian dari DayaLima Group (grup SDM Indonesia sejak 1998). Kerja luar negeri legal, transparan, tanpa calo.",
 };
 
 export const dynamic = "force-static";
@@ -46,15 +46,16 @@ export default async function TentangPage({ params }: { params: Promise<{ locale
             Tentang kami
           </div>
           <h1 className="text-[34px] md:text-6xl font-extrabold tracking-tight mt-2 leading-[1.05]">
-            DTG — 28 tahun bantu
+            Kerja luar negeri,
             <br />
-            <span className="text-pg-red-600">PMI Indonesia.</span>
+            <span className="text-pg-red-600">aman & jelas.</span>
           </h1>
           <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed mt-5 max-w-prose">
             PT Daya Talenta Global (DTG) adalah perusahaan penempatan PMI dengan lisensi resmi
-            P3MI dari Kementerian Tenaga Kerja Republik Indonesia. Kami bagian dari{" "}
-            <b className="text-pg-ink-900">Dayalima Group</b> — grup HR Indonesia yang sudah
-            beroperasi sejak 1998.
+            P3MI (No. 1810240237512001) dari Kementerian Tenaga Kerja Republik Indonesia. DTG
+            adalah unit penempatan kerja luar negeri, bagian dari{" "}
+            <b className="text-pg-ink-900">DayaLima Group</b> — grup pengembangan SDM Indonesia
+            yang sudah beroperasi sejak 1998.
           </p>
           <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed mt-4 max-w-prose">
             Misi kami sederhana: kerja luar negeri harus aman, legal, dan jelas — bukan janji
@@ -95,14 +96,14 @@ export default async function TentangPage({ params }: { params: Promise<{ locale
             Siap mulai perjalanan kamu?
           </h2>
           <p className="text-base md:text-lg text-pg-ink-700 mt-3 leading-relaxed">
-            Lihat lowongan yang lagi buka, atau buka Talent Hub untuk daftar dan lengkapi profil.
+            Lihat lowongan yang lagi buka, atau jelajahi sertifikasi siap kerja untuk persiapan berangkat.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
             <ButtonLink href="/lowongan" variant="primary">
               Lihat lowongan <Icon name="arrow_right" size={18} />
             </ButtonLink>
-            <ButtonLink href="/talent-hub" variant="ghost">
-              Buka Talent Hub
+            <ButtonLink href="/sertifikasi" variant="ghost">
+              Lihat sertifikasi
             </ButtonLink>
           </div>
         </div>

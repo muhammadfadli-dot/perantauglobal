@@ -2,20 +2,15 @@
  * Sticky WhatsApp contact button. Floats bottom-right on every public
  * page — primary contact channel for the PMI audience.
  *
- * `phone` defaults to NEXT_PUBLIC_WA_NUMBER env var; falls back to
- * placeholder so build never breaks.
+ * Number/link centralized in lib/contact (NEXT_PUBLIC_WA_NUMBER).
  */
 
-const WA_NUMBER =
-  process.env.NEXT_PUBLIC_WA_NUMBER?.replace(/\D/g, "") || "6281200000000";
-const WA_MESSAGE = encodeURIComponent(
-  "Halo Perantau Global, saya mau tanya tentang lowongan kerja luar negeri."
-);
+import { waLink } from "@/lib/contact";
 
 export function WhatsAppFab() {
   return (
     <a
-      href={`https://wa.me/${WA_NUMBER}?text=${WA_MESSAGE}`}
+      href={waLink()}
       target="_blank"
       rel="noopener noreferrer"
       className="fixed bottom-5 right-5 md:bottom-7 md:right-7 z-50 inline-flex items-center gap-2.5 px-4 md:px-5 py-3 md:py-3.5 rounded-full text-white font-bold text-[13px] md:text-sm no-underline transition-all"
