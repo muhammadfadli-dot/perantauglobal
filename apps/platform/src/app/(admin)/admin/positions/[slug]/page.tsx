@@ -5,9 +5,11 @@ import AdminTopBar from "@/components/admin/TopBar";
 import { Badge } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
 import PositionMetaEditor from "./PositionMetaEditor";
-import RequirementsEditor from "./RequirementsEditor";
-import RequirementLibraryPanel from "./RequirementLibraryPanel";
-import FormFieldsEditor from "./FormFieldsEditor";
+import PositionEditorShell from "@/components/admin/PositionEditorShell";
+import ApplicationFieldsEditor, {
+  type Field as ApplicationField,
+} from "@/components/admin/ApplicationFieldsEditor";
+import { parseContent } from "@/lib/position-content";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +19,7 @@ type Position = {
   country: string;
   description: string | null;
   active: boolean;
-  requirements: Record<string, { type?: "hard" | "soft"; label?: string; allowed_values?: string[] }> | null;
+  content: unknown;
 };
 
 type JobOrder = {
@@ -29,19 +31,6 @@ type JobOrder = {
   status: "open" | "closed" | "filled" | "cancelled";
   deadline: string | null;
   created_at: string;
-};
-
-type FormField = {
-  id: string;
-  field_key: string;
-  field_label: string;
-  field_help: string | null;
-  field_type: string;
-  options: { value: string; label: string }[] | null;
-  required: boolean;
-  tier_weight: number;
-  sort_order: number;
-  collect_at_stage: "applied" | "screening" | "document_check" | string;
 };
 
 const COUNTRY_LABEL: Record<string, string> = {
@@ -59,17 +48,35 @@ export default async function PositionDetailPage({
   const { slug } = await params;
   const supabase = await createServerClient();
 
-  const [{ data: positionData }, { data: jobOrdersData }, { data: fieldsData }] = await Promise.all([
-    supabase.from("positions").select("slug, name, country, description, active, requirements").eq("slug", slug).maybeSingle(),
-    supabase.from("job_orders").select("id, intake_label, internal_employer_name, slot_count, slot_filled, status, deadline, created_at").eq("position_slug", slug).order("created_at", { ascending: false }),
-    supabase.from("position_form_fields").select("id, field_key, field_label, field_help, field_type, options, required, tier_weight, sort_order, collect_at_stage").eq("position_slug", slug).order("sort_order"),
-  ]);
+  const [{ data: positionData }, { data: jobOrdersData }, { data: fieldsData }] =
+    await Promise.all([
+      supabase
+        .from("positions")
+        .select("slug, name, country, description, active, content")
+        .eq("slug", slug)
+        .maybeSingle(),
+      supabase
+        .from("job_orders")
+        .select(
+          "id, intake_label, internal_employer_name, slot_count, slot_filled, status, deadline, created_at",
+        )
+        .eq("position_slug", slug)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("position_application_fields")
+        .select(
+          "id, field_key, field_label, field_help, field_type, options, importance, section, tier_weight, sort_order, collect_at_stage",
+        )
+        .eq("position_slug", slug)
+        .order("sort_order"),
+    ]);
 
   const position = positionData as Position | null;
   if (!position) return notFound();
 
   const jobOrders = (jobOrdersData ?? []) as JobOrder[];
-  const fields = (fieldsData ?? []) as FormField[];
+  const fields = (fieldsData ?? []) as ApplicationField[];
+  const content = parseContent(position.content as never);
 
   return (
     <>
@@ -86,7 +93,11 @@ export default async function PositionDetailPage({
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold"
                 style={{ background: "var(--pg-ok-soft-bg)", color: "var(--pg-ok-soft-fg)" }}
               >
-                <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--pg-ok-soft-fg)" }} /> Aktif
+                <span
+                  className="w-1.5 h-1.5 rounded-full"
+                  style={{ background: "var(--pg-ok-soft-fg)" }}
+                />{" "}
+                Aktif
               </span>
             ) : (
               <Badge variant="mute">Nonaktif</Badge>
@@ -101,120 +112,133 @@ export default async function PositionDetailPage({
           </div>
         }
       />
-    <main className="px-8 py-7 max-w-6xl">
-      <div className="flex flex-col gap-1.5 mb-6">
-        <div className="text-[11px] font-semibold tracking-[0.12em] uppercase" style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}>
-          {COUNTRY_LABEL[position.country] ?? position.country}
-        </div>
-        <h1 className="text-[32px] font-extrabold leading-[36px] tracking-[-0.025em]">
-          {position.name}
-        </h1>
-        <div className="text-[12px] text-pg-ink-tertiary" style={{ fontFamily: "var(--font-mono)" }}>{position.slug}</div>
-        {position.description && (
-          <p className="text-[14px] text-pg-ink-tertiary mt-2 leading-tight max-w-2xl">
-            {position.description}
-          </p>
-        )}
-      </div>
-
-      <div className="mt-8 grid gap-5">
-        <PositionMetaEditor
-          slug={position.slug}
-          initial={{
-            name: position.name,
-            description: position.description,
-            active: position.active,
-          }}
-        />
-
-        <div className="grid gap-5 lg:grid-cols-2">
-          <section>
-            <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-2.5">
-              Requirements default
-            </div>
-            <RequirementsEditor slug={position.slug} initial={position.requirements} />
-          </section>
-
-          <section>
-            <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-2.5">
-              Tambah dari library
-            </div>
-            <RequirementLibraryPanel
-              slug={position.slug}
-              active={new Set(Object.keys(position.requirements ?? {}))}
-            />
-          </section>
-        </div>
-
-        <section>
-          <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-2.5">
-            Pertanyaan tambahan (custom form fields)
-          </div>
-          <FormFieldsEditor positionSlug={position.slug} initial={fields} />
-        </section>
-      </div>
-
-      {/* Job orders for this position */}
-      <section className="mt-8">
-        <div className="flex items-center justify-between mb-3">
-          <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-ink-500">
-            Job orders ({jobOrders.length})
-          </div>
-          <Link
-            href={`/admin/job-orders/new?position=${position.slug}`}
-            className="inline-flex items-center gap-1 text-pg-red-600 font-bold text-[13px] no-underline"
+      <main className="px-6 lg:px-8 py-6 max-w-[1600px]">
+        <div className="flex flex-col gap-1.5 mb-5">
+          <div
+            className="text-[11px] font-semibold tracking-[0.12em] uppercase"
+            style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
           >
-            <Icon name="plus" size={14} stroke={2.4} /> Tambah
-          </Link>
+            {COUNTRY_LABEL[position.country] ?? position.country}
+          </div>
+          <h1 className="text-[28px] font-extrabold leading-[32px] tracking-[-0.025em]">
+            {position.name}
+          </h1>
+          <div
+            className="text-[12px] text-pg-ink-tertiary"
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            {position.slug}
+          </div>
         </div>
-        {jobOrders.length === 0 ? (
-          <div className="bg-pg-white border border-pg-ink-100 rounded-2xl p-6 text-center text-sm text-pg-ink-500">
-            Belum ada job order. Buat satu untuk mulai terima lamaran.
+
+        {/* Meta editor (name / desc / active) — narrow card */}
+        <div className="mb-6 max-w-3xl">
+          <PositionMetaEditor
+            slug={position.slug}
+            initial={{
+              name: position.name,
+              description: position.description,
+              active: position.active,
+            }}
+          />
+        </div>
+
+        {/* Content editor + live preview side-by-side */}
+        <section className="mb-8">
+          <div className="text-[10px] font-bold tracking-[0.12em] uppercase font-mono text-pg-ink-tertiary mb-3">
+            Konten landing page
           </div>
-        ) : (
-          <div className="grid gap-3">
-            {jobOrders.map((jo) => (
-              <Link
-                key={jo.id}
-                href={`/admin/job-orders/${jo.id}`}
-                className="block bg-pg-white border border-pg-ink-100 rounded-2xl p-4 no-underline text-pg-ink-900 hover:border-pg-ink-200"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <div className="text-base font-bold">{jo.intake_label}</div>
-                    <div className="text-[13px] text-pg-ink-500 mt-0.5">
-                      {jo.internal_employer_name}
-                      {jo.deadline && ` · deadline ${new Date(jo.deadline).toLocaleDateString("id-ID")}`}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="text-right">
-                      <div className="text-base font-extrabold tracking-tight">
-                        {jo.slot_filled}/{jo.slot_count}
+          <PositionEditorShell
+            slug={position.slug}
+            name={position.name}
+            country={COUNTRY_LABEL[position.country] ?? position.country}
+            description={position.description}
+            initialContent={content}
+            initialFields={fields.map((f) => ({
+              field_key: f.field_key,
+              field_label: f.field_label,
+              field_help: f.field_help,
+              field_type: f.field_type,
+              importance: f.importance,
+              section: f.section,
+            }))}
+          />
+        </section>
+
+        {/* Application form fields editor */}
+        <section className="mb-8">
+          <div className="text-[10px] font-bold tracking-[0.12em] uppercase font-mono text-pg-ink-tertiary mb-3">
+            Form pertanyaan candidate
+          </div>
+          <ApplicationFieldsEditor positionSlug={position.slug} initial={fields} />
+        </section>
+
+        {/* Job orders for this position */}
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <div className="text-[10px] font-bold tracking-[0.12em] uppercase font-mono text-pg-ink-tertiary">
+              Job orders ({jobOrders.length})
+            </div>
+            <Link
+              href={`/admin/job-orders/new?position=${position.slug}`}
+              className="inline-flex items-center gap-1 text-pg-red-600 font-bold text-[13px] no-underline"
+            >
+              <Icon name="plus" size={14} stroke={2.4} /> Tambah
+            </Link>
+          </div>
+          {jobOrders.length === 0 ? (
+            <div
+              className="bg-pg-white rounded-2xl p-6 text-center text-sm text-pg-ink-tertiary"
+              style={{ border: "1px solid var(--pg-border)" }}
+            >
+              Belum ada job order. Buat satu untuk mulai terima lamaran.
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {jobOrders.map((jo) => (
+                <Link
+                  key={jo.id}
+                  href={`/admin/job-orders/${jo.id}`}
+                  className="block bg-pg-white rounded-2xl p-4 no-underline text-pg-ink-primary"
+                  style={{ border: "1px solid var(--pg-border)" }}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-base font-bold">{jo.intake_label}</div>
+                      <div className="text-[13px] text-pg-ink-tertiary mt-0.5">
+                        {jo.internal_employer_name}
+                        {jo.deadline &&
+                          ` · deadline ${new Date(jo.deadline).toLocaleDateString("id-ID")}`}
                       </div>
-                      <div className="text-[11px] text-pg-ink-500">slot terisi</div>
                     </div>
-                    <Badge
-                      variant={
-                        jo.status === "open"
-                          ? "ok"
-                          : jo.status === "filled"
-                            ? "info"
-                            : jo.status === "cancelled"
-                              ? "err"
-                              : "mute"
-                      }
-                    >
-                      {jo.status}
-                    </Badge>
+                    <div className="flex items-center gap-3">
+                      <div className="text-right">
+                        <div className="text-base font-extrabold tracking-tight">
+                          {jo.slot_filled}/{jo.slot_count}
+                        </div>
+                        <div className="text-[11px] text-pg-ink-tertiary">slot terisi</div>
+                      </div>
+                      <Badge
+                        variant={
+                          jo.status === "open"
+                            ? "ok"
+                            : jo.status === "filled"
+                              ? "info"
+                              : jo.status === "cancelled"
+                                ? "err"
+                                : "mute"
+                        }
+                      >
+                        {jo.status}
+                      </Badge>
+                    </div>
                   </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-    </main>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+      </main>
     </>
   );
 }

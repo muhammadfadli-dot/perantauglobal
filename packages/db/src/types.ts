@@ -252,6 +252,7 @@ export type Database = {
       }
       candidate_documents: {
         Row: {
+          application_id: string | null
           candidate_id: string
           display_name: string | null
           doc_type: Database["public"]["Enums"]["doc_type"]
@@ -271,6 +272,7 @@ export type Database = {
           verified_by: string | null
         }
         Insert: {
+          application_id?: string | null
           candidate_id: string
           display_name?: string | null
           doc_type: Database["public"]["Enums"]["doc_type"]
@@ -290,6 +292,7 @@ export type Database = {
           verified_by?: string | null
         }
         Update: {
+          application_id?: string | null
           candidate_id?: string
           display_name?: string | null
           doc_type?: Database["public"]["Enums"]["doc_type"]
@@ -309,6 +312,13 @@ export type Database = {
           verified_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "candidate_documents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "candidate_documents_candidate_id_fkey"
             columns: ["candidate_id"]
@@ -662,6 +672,75 @@ export type Database = {
           },
         ]
       }
+      position_application_fields: {
+        Row: {
+          collect_at_stage: Database["public"]["Enums"]["pipeline_stage"]
+          created_at: string
+          document_type: Database["public"]["Enums"]["doc_type"] | null
+          field_help: string | null
+          field_key: string
+          field_label: string
+          field_type: Database["public"]["Enums"]["form_field_type"]
+          id: string
+          importance: Database["public"]["Enums"]["application_field_importance"]
+          options: Json | null
+          position_slug: string
+          section: Database["public"]["Enums"]["application_field_section"]
+          sort_order: number
+          tier_weight: number
+          updated_at: string
+        }
+        Insert: {
+          collect_at_stage?: Database["public"]["Enums"]["pipeline_stage"]
+          created_at?: string
+          document_type?: Database["public"]["Enums"]["doc_type"] | null
+          field_help?: string | null
+          field_key: string
+          field_label: string
+          field_type: Database["public"]["Enums"]["form_field_type"]
+          id?: string
+          importance?: Database["public"]["Enums"]["application_field_importance"]
+          options?: Json | null
+          position_slug: string
+          section?: Database["public"]["Enums"]["application_field_section"]
+          sort_order?: number
+          tier_weight?: number
+          updated_at?: string
+        }
+        Update: {
+          collect_at_stage?: Database["public"]["Enums"]["pipeline_stage"]
+          created_at?: string
+          document_type?: Database["public"]["Enums"]["doc_type"] | null
+          field_help?: string | null
+          field_key?: string
+          field_label?: string
+          field_type?: Database["public"]["Enums"]["form_field_type"]
+          id?: string
+          importance?: Database["public"]["Enums"]["application_field_importance"]
+          options?: Json | null
+          position_slug?: string
+          section?: Database["public"]["Enums"]["application_field_section"]
+          sort_order?: number
+          tier_weight?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "position_application_fields_position_slug_fkey"
+            columns: ["position_slug"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "position_application_fields_position_slug_fkey"
+            columns: ["position_slug"]
+            isOneToOne: false
+            referencedRelation: "readiness_view"
+            referencedColumns: ["position_slug"]
+          },
+        ]
+      }
       position_form_fields: {
         Row: {
           collect_at_stage: Database["public"]["Enums"]["pipeline_stage"]
@@ -728,6 +807,7 @@ export type Database = {
       positions: {
         Row: {
           active: boolean
+          content: Json
           country: string
           created_at: string
           description: string | null
@@ -741,6 +821,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          content?: Json
           country: string
           created_at?: string
           description?: string | null
@@ -754,6 +835,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          content?: Json
           country?: string
           created_at?: string
           description?: string | null
@@ -815,8 +897,8 @@ export type Database = {
           candidate_phone: string
           created_at: string
           id: string
-          job_order_id: string | null
-          job_order_intake_label: string | null
+          job_order_id: string
+          job_order_intake_label: string
           pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
           position_country: string
           position_name: string
@@ -841,6 +923,8 @@ export type Database = {
       migrate_requirement_v2_to_v3: { Args: { req: Json }; Returns: Json }
     }
     Enums: {
+      application_field_importance: "required" | "optional"
+      application_field_section: "syarat_utama" | "kualifikasi" | "screening"
       doc_type:
         | "ktp"
         | "passport"
@@ -1006,16 +1090,24 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
-// Convenience aliases for enum values exported as TS string-union types.
+// =========================================================================
+// Convenience aliases — hand-added (not regenerated).
+// Re-add these if generate_typescript_types overwrites this file.
+// =========================================================================
 export type PipelineStage = Database["public"]["Enums"]["pipeline_stage"]
 export type DocType = Database["public"]["Enums"]["doc_type"]
-export type TierLabel = Database["public"]["Enums"]["tier_label"]
-export type JobOrderStatus = Database["public"]["Enums"]["job_order_status"]
 export type FormFieldType = Database["public"]["Enums"]["form_field_type"]
+export type JobOrderStatus = Database["public"]["Enums"]["job_order_status"]
+export type TierLabel = Database["public"]["Enums"]["tier_label"]
+export type UserRole = Database["public"]["Enums"]["user_role"]
+export type ApplicationFieldImportance = Database["public"]["Enums"]["application_field_importance"]
+export type ApplicationFieldSection = Database["public"]["Enums"]["application_field_section"]
 
 export const Constants = {
   public: {
     Enums: {
+      application_field_importance: ["required", "optional"],
+      application_field_section: ["syarat_utama", "kualifikasi", "screening"],
       doc_type: [
         "ktp",
         "passport",
@@ -1042,7 +1134,12 @@ export const Constants = {
         "file",
         "multiselect",
       ],
-      job_order_status: ["open", "closed", "filled", "cancelled"],
+      job_order_status: [
+        "open",
+        "closed",
+        "filled",
+        "cancelled",
+      ],
       pipeline_stage: [
         "applied",
         "screening",

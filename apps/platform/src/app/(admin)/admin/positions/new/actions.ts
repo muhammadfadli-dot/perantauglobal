@@ -53,7 +53,39 @@ export async function createPosition(input: CreatePositionInput) {
   if (posErr) throw new Error(posErr.message);
 
   if (input.custom_fields.length > 0) {
-    const rows = input.custom_fields.map((f, idx) => ({
+    // Write to NEW position_application_fields (canonical source post Fase 2).
+    // Old position_form_fields still gets a parallel write until Fase 4
+    // sunset — keeps web /lowongan apply form working while the candidate
+    // side hasn't flipped yet.
+    const stageToSection = (
+      stage: CustomFieldDraft["collect_at_stage"] | undefined,
+    ): "syarat_utama" | "kualifikasi" | "screening" => {
+      if (stage === "applied") return "syarat_utama";
+      if (stage === "document_check") return "screening";
+      return "kualifikasi";
+    };
+
+    const pafRows = input.custom_fields.map((f, idx) => ({
+      position_slug: input.slug,
+      field_key: f.field_key,
+      field_label: f.field_label,
+      field_type: f.field_type,
+      options: f.options ?? null,
+      importance: f.required ? "required" : "optional",
+      section: stageToSection(f.collect_at_stage),
+      tier_weight: f.tier_weight ?? 0,
+      sort_order: idx,
+      collect_at_stage: f.collect_at_stage ?? "applied",
+    }));
+    const { error: pafErr } = await supabase
+      .from("position_application_fields")
+      .insert(pafRows as never);
+    if (pafErr) {
+      await supabase.from("positions").delete().eq("slug", input.slug);
+      throw new Error(`Application field error: ${pafErr.message}`);
+    }
+
+    const legacyRows = input.custom_fields.map((f, idx) => ({
       position_slug: input.slug,
       field_key: f.field_key,
       field_label: f.field_label,
@@ -62,15 +94,16 @@ export async function createPosition(input: CreatePositionInput) {
       required: f.required ?? false,
       tier_weight: f.tier_weight ?? 0,
       sort_order: idx,
-      collect_at_stage: f.collect_at_stage ?? "screening",
+      collect_at_stage: f.collect_at_stage ?? "applied",
     }));
-    const { error: fieldErr } = await supabase
+    const { error: legacyErr } = await supabase
       .from("position_form_fields")
-      .insert(rows as never);
-    if (fieldErr) {
+      .insert(legacyRows as never);
+    if (legacyErr) {
       // best-effort cleanup
+      await supabase.from("position_application_fields").delete().eq("position_slug", input.slug);
       await supabase.from("positions").delete().eq("slug", input.slug);
-      throw new Error(`Custom field error: ${fieldErr.message}`);
+      throw new Error(`Legacy custom field error: ${legacyErr.message}`);
     }
   }
 
