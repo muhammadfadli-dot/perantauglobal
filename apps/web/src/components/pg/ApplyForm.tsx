@@ -72,7 +72,10 @@ export function ApplyForm({
 
   function validateIdentityAndAdvance() {
     setErrorMsg("");
-    const required: Array<keyof Identity> = ["fullName", "email", "whatsapp", "city", "education"];
+    // Sub-5-field LP capture (recruitment CRO research): required = name + WA
+    // + email. City + education + birth_date + gender ditanya post-apply di
+    // portal onboarding biar drop-off di LP minim.
+    const required: Array<keyof Identity> = ["fullName", "email", "whatsapp"];
     const missing = required.filter((k) => !identity[k].trim());
     if (missing.length > 0) {
       setErrorMsg("Lengkapi dulu data wajib (yang ada tanda *).");
@@ -262,52 +265,14 @@ export function ApplyForm({
                 className={INPUT_CLASS}
               />
             </Field>
-            <Field label="Kota tinggal" required>
+            <Field label="Kota tinggal">
               <input
                 type="text"
-                required
                 placeholder="Jakarta"
                 value={identity.city}
                 onChange={(e) => setIdentityField("city", e.target.value)}
                 className={INPUT_CLASS}
               />
-            </Field>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Tanggal lahir">
-                <input
-                  type="date"
-                  value={identity.birthDate}
-                  onChange={(e) => setIdentityField("birthDate", e.target.value)}
-                  className={INPUT_CLASS}
-                />
-              </Field>
-              <Field label="Gender">
-                <select
-                  value={identity.gender}
-                  onChange={(e) => setIdentityField("gender", e.target.value)}
-                  className={INPUT_CLASS}
-                >
-                  <option value="">— Pilih —</option>
-                  <option value="male">Laki-laki</option>
-                  <option value="female">Wanita</option>
-                </select>
-              </Field>
-            </div>
-            <Field label="Pendidikan terakhir" required>
-              <select
-                required
-                value={identity.education}
-                onChange={(e) => setIdentityField("education", e.target.value)}
-                className={INPUT_CLASS}
-              >
-                <option value="" disabled>
-                  — Pilih —
-                </option>
-                <option value="sma">SMA / SMK</option>
-                <option value="d3">D3 / D4</option>
-                <option value="s1">S1</option>
-                <option value="s2">S2</option>
-              </select>
             </Field>
           </div>
 
@@ -757,55 +722,15 @@ function SingleStepForm({
             />
           </Field>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Kota" required>
-            <input
-              type="text"
-              required
-              placeholder="Jakarta"
-              value={identity.city}
-              onChange={(e) => setIdentityField("city", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-          <Field label="Tanggal lahir">
-            <input
-              type="date"
-              value={identity.birthDate}
-              onChange={(e) => setIdentityField("birthDate", e.target.value)}
-              className={INPUT_CLASS}
-            />
-          </Field>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Gender">
-            <select
-              value={identity.gender}
-              onChange={(e) => setIdentityField("gender", e.target.value)}
-              className={INPUT_CLASS}
-            >
-              <option value="">— Pilih —</option>
-              <option value="male">Laki-laki</option>
-              <option value="female">Wanita</option>
-            </select>
-          </Field>
-          <Field label="Pendidikan terakhir" required>
-            <select
-              required
-              value={identity.education}
-              onChange={(e) => setIdentityField("education", e.target.value)}
-              className={INPUT_CLASS}
-            >
-              <option value="" disabled>
-                — Pilih —
-              </option>
-              <option value="sma">SMA / SMK</option>
-              <option value="d3">D3 / D4</option>
-              <option value="s1">S1</option>
-              <option value="s2">S2</option>
-            </select>
-          </Field>
-        </div>
+        <Field label="Kota tinggal">
+          <input
+            type="text"
+            placeholder="Jakarta (opsional, bisa diisi nanti di portal)"
+            value={identity.city}
+            onChange={(e) => setIdentityField("city", e.target.value)}
+            className={INPUT_CLASS}
+          />
+        </Field>
       </div>
 
       <div className="mt-5 border-t border-pg-ink-100 pt-5">

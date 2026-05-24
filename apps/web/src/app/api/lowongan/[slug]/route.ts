@@ -32,10 +32,12 @@ interface CandidatePayload {
   full_name: string;
   whatsapp: string;
   email: string;
-  city: string;
+  // City + birth_date + gender + education are optional post-Fase 3 trim;
+  // they're now collected in /onboarding at the portal instead.
+  city?: string;
   birth_date?: string | null;
   gender?: string | null;
-  education: string;
+  education?: string;
   password: string;
   role: string;
   country: string;
@@ -102,7 +104,10 @@ export async function POST(
 
     const body = (await request.json()) as CandidatePayload;
 
-    const required = ["full_name", "whatsapp", "email", "city", "education", "password"] as const;
+    // Sub-5-field LP capture (Fase 3 trim): only name + WA + email + password
+    // are required. City + birth_date + gender + education ditanya post-apply
+    // di portal /onboarding biar drop-off di LP minim.
+    const required = ["full_name", "whatsapp", "email", "password"] as const;
     for (const field of required) {
       if (!body[field]) {
         return NextResponse.json(
@@ -143,10 +148,10 @@ export async function POST(
           full_name: body.full_name,
           whatsapp: body.whatsapp,
           email,
-          city: body.city,
+          city: body.city ?? null,
           birth_date: body.birth_date ?? null,
           gender: body.gender ?? null,
-          education: body.education,
+          education: body.education ?? null,
           role: mapping.role,
           country: mapping.country,
           source_url: body.source_url ?? null,

@@ -8,8 +8,8 @@ import { RedHero } from "@/components/pg/RedHero";
 import { ApplyForm } from "@/components/pg/ApplyForm";
 import { ExistingUserShortcut } from "@/components/pg/ExistingUserShortcut";
 import { getPosition, POSITIONS } from "@/lib/positions";
-import { getPositionDetail } from "@/lib/positionDetails";
-import { fetchOpenJobOrders, fetchAppliedFields } from "@/lib/positions-db";
+import { fetchOpenJobOrders, fetchAppliedFields, fetchPositionContent } from "@/lib/positions-db";
+import { resolvePositionDetail } from "@/lib/positionContent";
 
 type RouteParams = { locale: string; slug: string };
 
@@ -43,14 +43,18 @@ export default async function LowonganDetailPage({
   setRequestLocale(locale);
 
   const baseStatic = getPosition(slug);
-  const detail = getPositionDetail(slug);
-  if (!baseStatic || !detail) notFound();
+  if (!baseStatic) notFound();
 
-  // Overlay live job_order if open + fetch apply-stage qualifying fields in parallel
-  const [jobOrders, appliedFields] = await Promise.all([
+  // Overlay live job_order, fetch apply-stage qualifying fields, and admin-
+  // authored landing content in parallel. positions.content takes priority
+  // over static lib/positionDetails (fallback if not yet authored).
+  const [jobOrders, appliedFields, dbContent] = await Promise.all([
     fetchOpenJobOrders(),
     fetchAppliedFields(slug),
+    fetchPositionContent(slug),
   ]);
+  const detail = resolvePositionDetail(slug, dbContent);
+  if (!detail) notFound();
   const jo = jobOrders.get(slug);
   const position = jo
     ? {
