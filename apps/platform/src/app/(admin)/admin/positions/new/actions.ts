@@ -39,10 +39,18 @@ export async function createPosition(input: CreatePositionInput) {
 
   const supabase = await createServerClient();
 
+  // positions.role is NOT NULL — historically picked from a fixed list in the
+  // old wizard. The new editor doesn't surface it (apps/web reads `role` from
+  // the static lib/positions catalog, not from DB), so we seed it as the
+  // canonical role-segment of the slug (best-effort: first hyphen-segment, or
+  // the whole slug if no hyphen). Admin can revisit if needed.
+  const role = input.slug.split("-")[0] || input.slug;
+
   const { error } = await supabase.from("positions").insert({
     slug: input.slug,
     name: input.name.trim(),
     country: input.country,
+    role,
     description: null,
     active: true,
   } as never);
