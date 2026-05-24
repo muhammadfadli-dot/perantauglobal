@@ -8,6 +8,14 @@ export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 25;
 
+const COUNTRY_LABEL: Record<string, string> = {
+  saudi_arabia: "Arab Saudi",
+  japan: "Jepang",
+  taiwan: "Taiwan",
+  indonesia: "Indonesia",
+  any: "Global",
+};
+
 type Search = {
   q?: string;
   page?: string;
@@ -92,25 +100,39 @@ export default async function CandidatesListPage({
     ((pendingDocsData ?? []) as { candidate_id: string }[]).map((d) => d.candidate_id)
   );
 
-  // Apps per candidate — for the displayed page only
+  // Apps per candidate — for the displayed page only.
+  // Tracks count + latest position name/country for the "Posisi terbaru"
+  // column (post-rework: shared "match terkuat" cross-position concept no
+  // longer applies since each apply is fresh — see migration 0037).
   const appsByCandidate = new Map<
     string,
-    { count: number; latest_position: string | null }
+    {
+      count: number;
+      latest_position_slug: string | null;
+      latest_position_name: string | null;
+      latest_position_country: string | null;
+    }
   >();
   if (ids.length > 0) {
     const { data: appsData } = await supabase
       .from("applications")
-      .select("candidate_id, position_slug, created_at")
+      .select("candidate_id, position_slug, created_at, positions(name, country)")
       .in("candidate_id", ids)
       .order("created_at", { ascending: false });
-    for (const a of (appsData ?? []) as {
+    for (const a of (appsData ?? []) as Array<{
       candidate_id: string;
       position_slug: string;
       created_at: string;
-    }[]) {
+      positions: { name: string; country: string } | null;
+    }>) {
       const prev = appsByCandidate.get(a.candidate_id);
       if (!prev) {
-        appsByCandidate.set(a.candidate_id, { count: 1, latest_position: a.position_slug });
+        appsByCandidate.set(a.candidate_id, {
+          count: 1,
+          latest_position_slug: a.position_slug,
+          latest_position_name: a.positions?.name ?? null,
+          latest_position_country: a.positions?.country ?? null,
+        });
       } else {
         appsByCandidate.set(a.candidate_id, { ...prev, count: prev.count + 1 });
       }
@@ -244,7 +266,7 @@ export default async function CandidatesListPage({
           >
             <span>Kandidat</span>
             <span>Lamaran</span>
-            <span>Match terkuat</span>
+            <span>Posisi terbaru</span>
             <span>Aktivitas</span>
             <span className="text-right">Aksi</span>
           </div>
@@ -262,6 +284,7 @@ export default async function CandidatesListPage({
               .slice(0, 2)
               .map((s) => s[0]?.toUpperCase())
               .join("");
+            const isQualified = (qf?.count ?? 0) > 0;
             return (
               <div
                 key={r.id}
@@ -301,19 +324,37 @@ export default async function CandidatesListPage({
                 <span className="text-[14px] font-semibold text-pg-ink-secondary tabular-nums">
                   {apps?.count ?? 0}
                 </span>
-                <span className="min-w-0">
-                  {(qf?.count ?? 0) > 0 ? (
-                    <span
-                      className="inline-flex items-center gap-1 text-[12px] font-bold"
-                      style={{ color: "var(--pg-ok-soft-fg)", fontFamily: "var(--font-mono)" }}
-                    >
-                      <Icon name="check" size={12} stroke={2.4} />
-                      {qf!.count} qualified
-                    </span>
-                  ) : apps ? (
-                    <span className="text-[12px] text-pg-ink-tertiary italic">
-                      Belum match
-                    </span>
+                <span className="min-w-0 flex items-center gap-2">
+                  {apps && apps.latest_position_name ? (
+                    <>
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-semibold text-pg-ink-primary truncate leading-tight">
+                          {apps.latest_position_name}
+                        </div>
+                        <div
+                          className="text-[11px] mt-0.5 leading-tight truncate"
+                          style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
+                        >
+                          {COUNTRY_LABEL[apps.latest_position_country ?? ""] ??
+                            apps.latest_position_country ??
+                            "—"}
+                          {apps.count > 1 ? ` · +${apps.count - 1} lain` : ""}
+                        </div>
+                      </div>
+                      {isQualified && (
+                        <span
+                          className="inline-flex items-center gap-1 text-[10px] font-bold tracking-[0.04em] uppercase px-1.5 py-0.5 rounded shrink-0"
+                          style={{
+                            background: "var(--pg-ok-soft-bg)",
+                            color: "var(--pg-ok-soft-fg)",
+                            fontFamily: "var(--font-mono)",
+                          }}
+                          title={`Lolos syarat di ${qf!.count} posisi`}
+                        >
+                          <Icon name="check" size={10} stroke={2.4} /> Qual
+                        </span>
+                      )}
+                    </>
                   ) : (
                     <span
                       className="inline-flex items-center gap-1 text-[12px] text-pg-warn-soft-fg italic"

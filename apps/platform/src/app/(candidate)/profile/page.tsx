@@ -240,7 +240,7 @@ export default async function ProfilePage() {
 
         <section className="px-5 pt-4 pb-2">
           <p className="text-[11px] text-pg-ink-quaternary text-center font-mono tracking-[0.06em]">
-            v0.1 · Global Talent Hub
+            v0.1 · Perantau Global
           </p>
         </section>
       </main>

@@ -114,7 +114,7 @@ export async function requireCandidate(): Promise<{
       auth_user_id: session.userId,
       email: email ? email.toLowerCase() : null,
       full_name: placeholderName,
-      profile_data: { schema_version: 1, credentials: {}, onboarding: {} },
+      profile_data: { schema_version: 1, onboarding: {} },
       source: "direct_signup",
     } as never)
     .select("id")
