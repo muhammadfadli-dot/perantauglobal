@@ -15,8 +15,11 @@
  * not via runtime DB writes — keeps the catalog opinionated and reviewable.
  *
  * Used by:
- *   - apps/platform/(admin)/positions/_shared/RequirementLibraryPanel.tsx
- *   - apps/platform/(admin)/positions/new/PositionWizard.tsx (Step 2)
+ *   - apps/platform/(admin)/positions/[slug] editor (planned: "Add from
+ *     library" button in ApplicationFieldsEditor)
+ *
+ * Previously consumed by the 4-step PositionWizard at /admin/positions/new,
+ * which was retired in favor of the unified live-preview editor.
  */
 
 import type { PipelineStage } from "../../src/types";

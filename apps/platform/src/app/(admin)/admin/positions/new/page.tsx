@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AdminTopBar from "@/components/admin/TopBar";
-import PositionWizard from "./PositionWizard";
+import PositionCreateForm from "./PositionCreateForm";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ export default function NewPositionPage() {
           </Link>
         }
       />
-      <PositionWizard />
+      <PositionCreateForm />
     </>
   );
 }
