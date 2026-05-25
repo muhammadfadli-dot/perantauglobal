@@ -13,8 +13,8 @@
 
 const FIELDS: { label: string; value: string }[] = [
   { label: "Lisensi", value: "P3MI Kemnaker" },
-  { label: "Biaya di awal", value: "Bebas / Rp 0" },
-  { label: "Grup", value: "DayaLima · 1998" },
+  { label: "Biaya awal", value: "Rp 0" },
+  { label: "Anggota", value: "Asosiasi P3MI" },
   { label: "Hotline", value: "WhatsApp 24/7" },
 ];
 
@@ -220,7 +220,7 @@ export function TrustStrip() {
       {/* Mobile: marquee */}
       <div
         className="md:hidden pg-trust-marquee-track flex items-center w-max"
-        aria-label="Perantau Global — lisensi P3MI Kemnaker, bebas biaya di awal, bagian DayaLima Group sejak 1998, WhatsApp 24/7"
+        aria-label="Perantau Global — lisensi P3MI Kemnaker, bebas biaya di awal, anggota Asosiasi P3MI, WhatsApp 24/7"
       >
         <MarqueeTrack k="a" />
         <MarqueeTrack k="b" />

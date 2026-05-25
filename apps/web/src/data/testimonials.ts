@@ -3,13 +3,9 @@
  * (2026-05-12), keep as data file until volume >10 — only then migrate
  * to a `testimonials` table with admin CRUD + image storage.
  *
- * Real names/photos require PMI's written consent. Until then, names
- * are realistic placeholders — replace per piece as real cleared
- * testimonials become available.
- *
- * Photo paths reference /public/images/testimonials/{slug}.jpg.
- * Until real photos are provided, the UI renders gradient placeholders
- * keyed by the `accent` color.
+ * Real names/photos require PMI's written consent. Until cleared real
+ * cases land, photoPath stays empty and the UI renders a gradient
+ * placeholder keyed by the `accent` color.
  */
 
 export type Testimonial = {
@@ -45,7 +41,6 @@ export const TESTIMONIALS: Testimonial[] = [
     sinceYear: 2024,
     contractYears: 2,
     accent: "amber",
-    photoPath: "/images/testimonials/sari-perawat-saudi.jpg",
   },
   {
     slug: "budi-driver-jepang",
@@ -61,7 +56,6 @@ export const TESTIMONIALS: Testimonial[] = [
     sinceYear: 2025,
     contractYears: 3,
     accent: "blue",
-    photoPath: "/images/testimonials/budi-driver-jepang.jpg",
   },
   {
     slug: "rini-caregiver-taiwan",
@@ -77,6 +71,5 @@ export const TESTIMONIALS: Testimonial[] = [
     sinceYear: 2024,
     contractYears: 3,
     accent: "rose",
-    photoPath: "/images/testimonials/rini-caregiver-taiwan.jpg",
   },
 ];

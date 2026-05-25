@@ -5,6 +5,7 @@ import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
 import { getApplicationStatus } from "@/lib/applicationStatus";
+import { waLink } from "@/lib/contact";
 
 export const dynamic = "force-dynamic";
 
@@ -310,7 +311,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             </p>
             <div className="grid grid-cols-2 gap-2.5">
               <a
-                href="https://wa.me/6281234567890"
+                href={waLink("Halo, saya mau tanya soal lamaran saya.")}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl text-[13px] font-bold text-pg-ink-primary no-underline"

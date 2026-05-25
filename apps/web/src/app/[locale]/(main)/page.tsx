@@ -17,46 +17,16 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return generateMeta({
     title: "Perantau Global — Aplikasi Kerja Luar Negeri Resmi (P3MI)",
     description:
-      "Perantau Global (PT Daya Talenta Global) — P3MI berlisensi Kemnaker, bagian dari DayaLima Group (sejak 1998). Lowongan & sertifikasi siap kerja: bebas biaya sebelum offering letter, proses transparan, tanpa calo.",
+      "Perantau Global (PT Daya Talenta Global) — P3MI resmi Kemnaker, bagian dari DayaLima yang sudah jalan sejak 1998. Lowongan & sertifikasi siap kerja: bebas biaya sebelum offering letter, proses transparan, tanpa calo.",
     locale: "id",
   });
 }
 
 const COUNTRIES = [
-  { name: "Saudi Arabia", short: "Saudi", flag: "🇸🇦", img: "/images/countries/saudi.jpg" },
-  { name: "Jepang", short: "Jepang", flag: "🇯🇵", img: "/images/countries/jepang.jpg" },
-  { name: "Taiwan", short: "Taiwan", flag: "🇹🇼", img: "/images/countries/taiwan.jpg" },
-  { name: "Indonesia", short: "Indonesia", flag: "🇮🇩", img: "/images/countries/indonesia.jpg" },
-];
-
-const TESTIMONIALS = [
-  {
-    img: "/images/testimonials/sari-perawat-saudi.jpg",
-    name: "Sari",
-    role: "Perawat",
-    country: "Saudi Arabia",
-    year: "2025",
-    quote:
-      "Dari nol, nggak punya paspor. Sekarang kerja perawat di Riyadh. Nggak ada calo, semua jelas 🙏",
-  },
-  {
-    img: "/images/testimonials/budi-driver-jepang.jpg",
-    name: "Budi",
-    role: "Truck Driver",
-    country: "Jepang",
-    year: "2025",
-    quote:
-      "4 bulan dari daftar sampai terbang ke Osaka. Tiap tahap dikabarin PIC. Gaji sesuai kontrak.",
-  },
-  {
-    img: "/images/testimonials/rini-caregiver-taiwan.jpg",
-    name: "Rini",
-    role: "Caregiver",
-    country: "Taiwan",
-    year: "2025",
-    quote:
-      "Awalnya takut ketipu calo. Ternyata semua transparan, bisa dicek sendiri. Sekarang udah di Taipei.",
-  },
+  { name: "Saudi Arabia", short: "Saudi", flag: "🇸🇦" },
+  { name: "Jepang", short: "Jepang", flag: "🇯🇵" },
+  { name: "Taiwan", short: "Taiwan", flag: "🇹🇼" },
+  { name: "Indonesia", short: "Indonesia", flag: "🇮🇩" },
 ];
 
 const FAQS = [
@@ -226,72 +196,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           </div>
         </section>
 
-        {/* BEAT 3 — ORANG NYATA (gaya komen sosmed) */}
-        <section className="px-5 md:px-8 py-14 md:py-20 bg-white border-b border-pg-ink-100">
-          <div className="max-w-2xl mx-auto flex flex-col gap-5">
-            <div className="flex flex-col gap-1.5 items-center text-center">
-              <div className={EYEBROW}>Kata mereka yang udah berangkat</div>
-              <h2 className={H2}>Orang biasa, sekarang kerja di luar negeri.</h2>
-            </div>
-            <div className="flex flex-col gap-3.5">
-              {TESTIMONIALS.map((t, i) => (
-                <div
-                  key={t.name}
-                  className="bg-white rounded-2xl p-4 md:p-5"
-                  style={{
-                    border: "1px solid #f0f0ee",
-                    boxShadow: "0 6px 22px rgba(20,20,20,0.08)",
-                    transform: i % 2 === 0 ? "rotate(-0.5deg)" : "rotate(0.6deg)",
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <Image
-                      src={t.img}
-                      alt={t.name}
-                      width={48}
-                      height={48}
-                      className="rounded-full object-cover w-12 h-12 shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[14.5px] font-extrabold text-pg-ink-900">
-                          {t.name}
-                        </span>
-                        <span
-                          className="inline-flex items-center justify-center w-4 h-4 rounded-full shrink-0"
-                          style={{ background: "#0f8a4a" }}
-                        >
-                          <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                            <path d="M5 13l4 4L19 7" />
-                          </svg>
-                        </span>
-                      </div>
-                      <div className="text-[11.5px] font-medium text-pg-ink-400">
-                        {t.role} · {t.country}
-                      </div>
-                    </div>
-                    <span
-                      className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono"
-                      style={{ background: "#e6f4ec", color: "#0a6e3a" }}
-                    >
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#0a6e3a" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                        <path d="M5 13l4 4L19 7" />
-                      </svg>
-                      Berangkat {t.year}
-                    </span>
-                  </div>
-                  <p className="mt-3 text-[14px] md:text-[15px] leading-relaxed text-pg-ink-700">
-                    {t.quote}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div className="text-[11.5px] font-medium italic text-center text-pg-ink-300">
-              Komentar contoh — diganti cerita kandidat asli sebelum rilis
-            </div>
-          </div>
-        </section>
-
         {/* BEAT 4 — KENAPA BISA DIPERCAYA (lineage, akurasi) */}
         <section className="px-5 md:px-8 py-14 md:py-20">
           <div className={SHELL}>
@@ -302,14 +206,17 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <div className="flex flex-col gap-2.5 md:flex-1">
                 <div className={EYEBROW}>Kenapa bisa dipercaya</div>
                 <h2 className="text-[22px] md:text-[32px] font-extrabold tracking-[-0.02em] leading-[1.15] text-pg-ink-900">
-                  Bukan pemain baru. Bagian dari DayaLima Group.
+                  Perusahaan baru. Tapi nggak mulai dari nol.
                 </h2>
                 <p className="text-[13.5px] md:text-[15px] font-medium leading-relaxed text-pg-ink-500">
-                  Perantau Global dijalankan PT Daya Talenta Global — unit penempatan kerja luar
-                  negeri dari{" "}
-                  <b className="text-pg-ink-900">DayaLima Group</b>, grup layanan SDM Indonesia yang
-                  sudah berpengalaman <b className="text-pg-ink-900">sejak 1998</b>. Resmi berizin
-                  P3MI Kemnaker.
+                  PT Daya Talenta Global resmi berdiri{" "}
+                  <b className="text-pg-ink-900">Oktober 2024</b> sebagai perusahaan penempatan
+                  kerja luar negeri. Kami bagian dari{" "}
+                  <b className="text-pg-ink-900">DayaLima</b> — perusahaan Indonesia yang sudah
+                  jalan di bidang rekrutmen sejak{" "}
+                  <b className="text-pg-ink-900">1998</b>. Jadi walaupun nama Perantau Global
+                  baru, tim &amp; sistem kami punya pengalaman puluhan tahun ngurus orang yang
+                  lagi cari kerja.
                 </p>
               </div>
               <div className="flex flex-col gap-2 md:w-[300px] shrink-0">
@@ -358,43 +265,43 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               </Link>
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-5">
-              {COUNTRIES.map((c) => (
-                <Link
-                  key={c.name}
-                  href={`/lowongan?country=${encodeURIComponent(c.name)}`}
-                  className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-pg-ink-100 no-underline transition-transform hover:-translate-y-0.5"
-                  style={{ boxShadow: "0 1px 2px rgba(20,20,20,0.04), 0 8px 24px rgba(20,20,20,0.06)" }}
-                >
-                  <div className="relative h-44 md:h-52">
-                    <Image src={c.img} alt={c.name} fill sizes="(min-width:1024px) 25vw, 50vw" className="object-cover" />
-                    <div
-                      className="absolute inset-0"
-                      style={{
-                        background:
-                          "linear-gradient(180deg, rgba(0,0,0,0.18) 0%, rgba(0,0,0,0.34) 45%, rgba(0,0,0,0.72) 100%)",
-                      }}
-                    />
-                    <span
-                      className="absolute left-3 top-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-[0.12em] uppercase text-white font-mono"
-                      style={{ background: "rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.18)", backdropFilter: "blur(4px)" }}
-                    >
-                      <span className="text-[12px] leading-none">{c.flag}</span>
-                      {c.short}
-                    </span>
-                    <div className="absolute left-4 bottom-3 text-[24px] md:text-[30px] font-extrabold leading-[1.05] tracking-[-0.02em] text-white">
-                      {c.name}
+              {COUNTRIES.map((c) => {
+                const count = POSITIONS.filter((p) => p.country === c.name).length;
+                return (
+                  <Link
+                    key={c.name}
+                    href={`/lowongan?country=${encodeURIComponent(c.name)}`}
+                    className="group flex flex-col rounded-2xl overflow-hidden bg-white border border-pg-ink-100 no-underline transition-transform hover:-translate-y-0.5"
+                    style={{ boxShadow: "0 1px 2px rgba(20,20,20,0.04), 0 8px 24px rgba(20,20,20,0.06)" }}
+                  >
+                    <div className="relative h-44 md:h-52 flex flex-col items-center justify-center gap-3 bg-pg-paper border-b border-pg-ink-100">
+                      <div
+                        className="leading-none select-none"
+                        style={{ fontSize: 72 }}
+                        aria-hidden
+                      >
+                        {c.flag}
+                      </div>
+                      <div className="text-[22px] md:text-[26px] font-extrabold leading-[1.05] tracking-[-0.02em] text-pg-ink-900 text-center px-2">
+                        {c.name}
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-between gap-2 p-4">
-                    <span className="text-[14px] md:text-[15px] font-bold text-pg-ink-900">
-                      Lihat lowongan
-                    </span>
-                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-pg-ink-900 shrink-0 transition-transform group-hover:translate-x-0.5">
-                      <ArrowRight size={14} color="#fff" />
-                    </span>
-                  </div>
-                </Link>
-              ))}
+                    <div className="flex items-center justify-between gap-2 p-4">
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[14px] md:text-[15px] font-bold text-pg-ink-900">
+                          Lihat lowongan
+                        </span>
+                        <span className="text-[11.5px] font-medium text-pg-ink-500 font-mono">
+                          {count} lowongan aktif
+                        </span>
+                      </div>
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-pg-ink-900 shrink-0 transition-transform group-hover:translate-x-0.5">
+                        <ArrowRight size={14} color="#fff" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -422,13 +329,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
 
         {/* BEAT 7 — LANGKAHNYA (final CTA, blok merah — bookend hero) */}
         <section className="relative overflow-hidden" style={{ background: "#c4202a" }}>
-          <Image
-            src="/images/cta/cta-globe-red-v43.jpg"
-            alt=""
-            fill
-            sizes="100vw"
-            className="object-cover object-bottom select-none"
-          />
           <div className="relative z-10 max-w-3xl mx-auto px-5 md:px-8 min-h-[500px] md:min-h-[580px] flex flex-col items-center text-center pt-16 md:pt-24 pb-16 md:pb-24">
             <div
               className="text-[10.5px] md:text-[12px] font-bold tracking-[0.18em] uppercase font-mono"

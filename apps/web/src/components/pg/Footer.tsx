@@ -1,6 +1,7 @@
 import { Icon } from "./Icon";
 import Link from "next/link";
 import Image from "next/image";
+import { waLink } from "@/lib/contact";
 
 const COLS = [
   {
@@ -47,9 +48,22 @@ export function Footer() {
               </div>
             </div>
             <div className="text-[13px] text-white/60 mt-2">
-              Lisensi P3MI Kemnaker · Bagian DayaLima Group
+              Izin P3MI Kemnaker · No. 1810240237512001
             </div>
             <div className="flex flex-col gap-2 mt-4 text-[14px]">
+              <a
+                href={waLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-white/85 hover:text-white no-underline"
+              >
+                <span
+                  aria-hidden
+                  className="inline-block w-2.5 h-2.5 rounded-full"
+                  style={{ background: "#25D366" }}
+                />
+                Tanya via WhatsApp
+              </a>
               <a
                 href="mailto:halo@perantauglobal.com"
                 className="flex items-center gap-2 text-white/85 hover:text-white no-underline"
@@ -87,8 +101,8 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-10 pt-5 border-t border-white/10 text-xs text-white/50 flex flex-col md:flex-row gap-2 justify-between">
-          <div>© {new Date().getFullYear()} PT Daya Talenta Global. All rights reserved.</div>
-          <div>Lisensi P3MI Kemnaker · Anggota Asosiasi P3MI</div>
+          <div>© {new Date().getFullYear()} PT Daya Talenta Global · Bagian dari DayaLima (sejak 1998)</div>
+          <div>Anggota Asosiasi P3MI</div>
         </div>
       </div>
     </footer>
