@@ -9,26 +9,49 @@ export const dynamic = "force-dynamic";
 const HOUR_NAMES = (h: number) =>
   h < 11 ? "pagi" : h < 15 ? "siang" : h < 18 ? "sore" : "malam";
 
-export default async function AdminHomePage() {
+type Range = "7d" | "14d" | "30d";
+
+const RANGE_DAYS: Record<Range, number> = { "7d": 7, "14d": 14, "30d": 30 };
+const RANGE_LABEL: Record<Range, string> = {
+  "7d": "7 hari",
+  "14d": "14 hari",
+  "30d": "30 hari",
+};
+
+function dayKey(d: Date): string {
+  // Local-date key (YYYY-MM-DD) so day buckets reflect Asia/Jakarta-style local time
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+export default async function AdminHomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
   const { session, role } = await getSessionAndRole();
   if (!session) redirect("/");
   if (role !== "admin") redirect("/dashboard");
 
   const supabase = await createServerClient();
 
+  const sp = await searchParams;
+  const range: Range =
+    sp.range === "14d" || sp.range === "30d" || sp.range === "7d" ? sp.range : "7d";
+  const days = RANGE_DAYS[range];
+
   const now = new Date();
-  const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-  const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
+  const rangeAgo = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+  const priorAgo = new Date(now.getTime() - 2 * days * 24 * 60 * 60 * 1000);
+  const priorAgoIso = priorAgo.toISOString();
 
   const [
     { count: pendingDocs },
     { count: openJobOrders },
-    { count: applicationsThisWeek },
-    { count: applicationsLastWeek },
-    { count: screeningStage },
-    { count: acceptedStage },
+    { data: inflowRows },
     { data: openJOWithPosition },
-    { data: positionVelocity },
     { data: pendingDocsRecent },
   ] = await Promise.all([
     supabase
@@ -39,33 +62,14 @@ export default async function AdminHomePage() {
     supabase.from("job_orders").select("*", { count: "exact", head: true }).eq("status", "open"),
     supabase
       .from("applications")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", weekAgo),
-    supabase
-      .from("applications")
-      .select("*", { count: "exact", head: true })
-      .gte("created_at", twoWeeksAgo)
-      .lt("created_at", weekAgo),
-    supabase
-      .from("applications")
-      .select("*", { count: "exact", head: true })
-      .eq("pipeline_stage", "screening")
-      .gte("created_at", weekAgo),
-    supabase
-      .from("applications")
-      .select("*", { count: "exact", head: true })
-      .eq("pipeline_stage", "selected")
-      .gte("created_at", weekAgo),
+      .select("created_at, pipeline_stage, position_slug")
+      .gte("created_at", priorAgoIso),
     supabase
       .from("job_orders")
       .select("id, position_slug, public_employer_name, slot_count, slot_filled, deadline, positions(name, country)")
       .eq("status", "open")
       .order("deadline", { ascending: true })
       .limit(3),
-    supabase
-      .from("applications")
-      .select("position_slug")
-      .gte("created_at", weekAgo),
     supabase
       .from("candidate_documents")
       .select("doc_type, candidates(full_name)")
@@ -75,11 +79,50 @@ export default async function AdminHomePage() {
       .limit(2),
   ]);
 
-  // Velocity (top performer): count apps per position last week
+  // Bucket inflow rows into current vs prior period; derive stats + daily series + top positions
+  const inflow = (inflowRows ?? []) as Array<{
+    created_at: string;
+    pipeline_stage: string;
+    position_slug: string;
+  }>;
+
+  const dailyCounts = new Map<string, number>();
   const velocityMap = new Map<string, number>();
-  for (const a of (positionVelocity ?? []) as { position_slug: string }[]) {
-    velocityMap.set(a.position_slug, (velocityMap.get(a.position_slug) ?? 0) + 1);
+  let applicationsThisRange = 0;
+  let applicationsPriorRange = 0;
+  let screeningStage = 0;
+  let acceptedStage = 0;
+
+  for (const row of inflow) {
+    const ts = new Date(row.created_at);
+    if (ts >= rangeAgo) {
+      applicationsThisRange++;
+      if (row.pipeline_stage === "screening") screeningStage++;
+      if (row.pipeline_stage === "selected") acceptedStage++;
+      velocityMap.set(row.position_slug, (velocityMap.get(row.position_slug) ?? 0) + 1);
+      const key = dayKey(ts);
+      dailyCounts.set(key, (dailyCounts.get(key) ?? 0) + 1);
+    } else {
+      applicationsPriorRange++;
+    }
   }
+
+  // Build day-by-day series, filling zero days, oldest first
+  const dailySeries: { date: Date; count: number }[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    dailySeries.push({ date: d, count: dailyCounts.get(dayKey(d)) ?? 0 });
+  }
+  const dailyMax = Math.max(...dailySeries.map((d) => d.count), 1);
+  const dailyAvg =
+    dailySeries.length > 0
+      ? Math.round((applicationsThisRange / dailySeries.length) * 10) / 10
+      : 0;
+  const peakDay = dailySeries.reduce(
+    (best, d) => (d.count > best.count ? d : best),
+    dailySeries[0]
+  );
+
   const topPositionSlugs = [...velocityMap.entries()]
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
@@ -107,10 +150,10 @@ export default async function AdminHomePage() {
     });
   }
 
-  const thisWeek = applicationsThisWeek ?? 0;
-  const lastWeek = applicationsLastWeek ?? 0;
-  const wowDelta = thisWeek - lastWeek;
-  const wowPct = lastWeek > 0 ? Math.round((wowDelta / lastWeek) * 100) : null;
+  const thisRange = applicationsThisRange;
+  const priorRange = applicationsPriorRange;
+  const wowDelta = thisRange - priorRange;
+  const wowPct = priorRange > 0 ? Math.round((wowDelta / priorRange) * 100) : null;
 
   const greetingName = session.email?.split("@")[0]?.split(".")[0] ?? "admin";
   const greeting = `Selamat ${HOUR_NAMES(now.getHours())}, ${
@@ -162,11 +205,11 @@ export default async function AdminHomePage() {
       ctaLabel: "Buka pool",
     });
   }
-  if ((screeningStage ?? 0) > 0) {
+  if (screeningStage > 0) {
     attentions.push({
       tone: "warn",
-      label: "MINGGU INI",
-      count: screeningStage ?? 0,
+      label: range === "7d" ? "7 HARI TERAKHIR" : range === "14d" ? "14 HARI TERAKHIR" : "30 HARI TERAKHIR",
+      count: screeningStage,
       title: "Lamaran maju ke screening",
       desc: `${screeningStage} kandidat udah lengkap dokumen — review buat masuk wawancara`,
       href: "/admin/applications?stage=screening",
@@ -219,35 +262,35 @@ export default async function AdminHomePage() {
             className="lg:col-span-2 bg-pg-white rounded-2xl p-6 flex flex-col gap-3.5"
             style={{ border: "1px solid var(--pg-border)" }}
           >
-            <div className="flex items-center justify-between">
+            <div className="flex items-start justify-between gap-3 flex-wrap">
               <div className="flex flex-col gap-0.5">
-                <Eyebrow>Minggu ini · {weekRange()}</Eyebrow>
+                <Eyebrow>{RANGE_LABEL[range]} · {rangeDateRange(rangeAgo, now)}</Eyebrow>
                 <div className="text-[18px] font-extrabold leading-[22px] tracking-[-0.01em] text-pg-ink-primary">
-                  Pipeline activity
+                  Talent inflow
                 </div>
               </div>
+              <RangeFilter range={range} />
             </div>
-            <div className="flex gap-6 py-3">
+            <div className="flex flex-wrap gap-6 py-3">
               <Stat
-                value={`${wowDelta >= 0 ? "+" : ""}${thisWeek}`}
+                value={String(thisRange)}
                 label="Lamaran masuk"
                 delta={wowPct != null ? `${wowPct >= 0 ? "↑" : "↓"} ${Math.abs(wowPct)}%` : undefined}
                 deltaPositive={wowPct == null ? undefined : wowPct >= 0}
               />
-              <Stat
-                value={String(screeningStage ?? 0)}
-                label="Maju ke screening"
-              />
-              <Stat value={String(acceptedStage ?? 0)} label="Diterima" />
+              <Stat value={`${dailyAvg}`} label="Rata-rata/hari" />
+              <Stat value={String(screeningStage)} label="Maju ke screening" />
+              <Stat value={String(acceptedStage)} label="Diterima" />
               <Stat
                 value={
-                  thisWeek > 0
-                    ? `${Math.round(((screeningStage ?? 0) / thisWeek) * 100)}%`
+                  thisRange > 0
+                    ? `${Math.round((screeningStage / thisRange) * 100)}%`
                     : "—"
                 }
                 label="Conv applied → screen"
               />
             </div>
+            <DailyInflowChart series={dailySeries} max={dailyMax} peak={peakDay} />
           </div>
 
           <div
@@ -263,7 +306,7 @@ export default async function AdminHomePage() {
             <div className="flex flex-col gap-2.5">
               {topPositions.length === 0 ? (
                 <div className="text-[13px] text-pg-ink-tertiary py-2">
-                  Belum ada lamaran minggu ini.
+                  Belum ada lamaran dalam {RANGE_LABEL[range]} terakhir.
                 </div>
               ) : (
                 topPositions.map((p) => (
@@ -287,7 +330,7 @@ export default async function AdminHomePage() {
                         className="text-[10px] mt-0.5 leading-tight"
                         style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
                       >
-                        {p.count} lamaran/minggu
+                        {p.count} lamaran / {RANGE_LABEL[range]}
                       </div>
                     </div>
                   </Link>
@@ -474,14 +517,125 @@ function QuickAction({
   );
 }
 
-function weekRange(): string {
-  const now = new Date();
-  const day = now.getDay() || 7; // Mon=1..Sun=7
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - (day - 1));
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
+function rangeDateRange(from: Date, to: Date): string {
   const fmt = (d: Date) =>
     d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
-  return `${fmt(monday)}–${fmt(sunday)}`;
+  return `${fmt(from)}–${fmt(to)}`;
+}
+
+function RangeFilter({ range }: { range: Range }) {
+  const ranges: Range[] = ["7d", "14d", "30d"];
+  return (
+    <div
+      className="inline-flex gap-0.5 rounded-full p-0.5"
+      style={{ background: "var(--pg-paper)" }}
+    >
+      {ranges.map((r) => {
+        const active = range === r;
+        return (
+          <Link
+            key={r}
+            href={`/admin?range=${r}`}
+            scroll={false}
+            className="inline-flex items-center justify-center min-h-[28px] px-3 text-[11px] font-bold rounded-full no-underline tabular-nums transition-colors"
+            style={{
+              background: active ? "var(--pg-white)" : "transparent",
+              color: active ? "var(--pg-ink-primary)" : "var(--pg-ink-tertiary)",
+              boxShadow: active ? "0 1px 2px rgba(0,0,0,0.06)" : "none",
+              fontFamily: "var(--font-mono)",
+            }}
+          >
+            {RANGE_LABEL[r]}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
+function DailyInflowChart({
+  series,
+  max,
+  peak,
+}: {
+  series: { date: Date; count: number }[];
+  max: number;
+  peak: { date: Date; count: number };
+}) {
+  const dayLabel = (d: Date) =>
+    d.toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" });
+  const shortDay = (d: Date) =>
+    d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+
+  // Label every Nth bar so labels don't crowd
+  const n = series.length;
+  const labelEvery = n <= 7 ? 1 : n <= 14 ? 2 : 5;
+
+  return (
+    <div className="flex flex-col gap-2 pt-1">
+      <div className="flex items-center justify-between">
+        <div
+          className="text-[10px] font-semibold tracking-[0.08em] uppercase leading-[12px]"
+          style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
+        >
+          Inflow per hari
+        </div>
+        {peak.count > 0 && (
+          <div
+            className="text-[10px] tabular-nums"
+            style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
+          >
+            Puncak: {shortDay(peak.date)} · {peak.count}
+          </div>
+        )}
+      </div>
+      <div className="flex items-end gap-[3px]" style={{ height: 72 }}>
+        {series.map((d, i) => {
+          const pct = max > 0 ? d.count / max : 0;
+          const heightPx = d.count > 0 ? Math.max(pct * 64, 6) : 2;
+          const isPeak = d.count === peak.count && d.count > 0;
+          return (
+            <div
+              key={i}
+              className="flex-1 flex items-end justify-center"
+              style={{ height: 64 }}
+              title={`${dayLabel(d.date)}: ${d.count} lamaran`}
+            >
+              <div
+                className="w-full rounded-[3px]"
+                style={{
+                  height: `${heightPx}px`,
+                  background:
+                    d.count === 0
+                      ? "var(--pg-ink-100)"
+                      : isPeak
+                      ? "var(--pg-red-600)"
+                      : "var(--pg-red-400, var(--pg-red-600))",
+                  opacity: d.count === 0 ? 1 : isPeak ? 1 : 0.7,
+                }}
+              />
+            </div>
+          );
+        })}
+      </div>
+      <div className="flex items-start gap-[3px]">
+        {series.map((d, i) => {
+          const show = i === 0 || i === series.length - 1 || i % labelEvery === 0;
+          return (
+            <div
+              key={i}
+              className="flex-1 text-center text-[9px] tabular-nums leading-[10px]"
+              style={{
+                color: "var(--pg-ink-tertiary)",
+                fontFamily: "var(--font-mono)",
+                visibility: show ? "visible" : "hidden",
+              }}
+            >
+              {d.date.getDate()}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
