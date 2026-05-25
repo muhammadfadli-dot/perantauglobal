@@ -5,6 +5,7 @@ import AdminTopBar from "@/components/admin/TopBar";
 import { Badge } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
 import PositionMetaEditor from "./PositionMetaEditor";
+import DeletePositionCard from "./DeletePositionCard";
 import PositionEditorShell from "@/components/admin/PositionEditorShell";
 import ApplicationFieldsEditor, {
   type Field as ApplicationField,
@@ -48,28 +49,36 @@ export default async function PositionDetailPage({
   const { slug } = await params;
   const supabase = await createServerClient();
 
-  const [{ data: positionData }, { data: jobOrdersData }, { data: fieldsData }] =
-    await Promise.all([
-      supabase
-        .from("positions")
-        .select("slug, name, country, description, active, content")
-        .eq("slug", slug)
-        .maybeSingle(),
-      supabase
-        .from("job_orders")
-        .select(
-          "id, intake_label, internal_employer_name, slot_count, slot_filled, status, deadline, created_at",
-        )
-        .eq("position_slug", slug)
-        .order("created_at", { ascending: false }),
-      supabase
-        .from("position_application_fields")
-        .select(
-          "id, field_key, field_label, field_help, field_type, options, importance, section, tier_weight, sort_order, collect_at_stage",
-        )
-        .eq("position_slug", slug)
-        .order("sort_order"),
-    ]);
+  const [
+    { data: positionData },
+    { data: jobOrdersData },
+    { data: fieldsData },
+    { count: appCount },
+  ] = await Promise.all([
+    supabase
+      .from("positions")
+      .select("slug, name, country, description, active, content")
+      .eq("slug", slug)
+      .maybeSingle(),
+    supabase
+      .from("job_orders")
+      .select(
+        "id, intake_label, internal_employer_name, slot_count, slot_filled, status, deadline, created_at",
+      )
+      .eq("position_slug", slug)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("position_application_fields")
+      .select(
+        "id, field_key, field_label, field_help, field_type, options, importance, section, tier_weight, sort_order, collect_at_stage",
+      )
+      .eq("position_slug", slug)
+      .order("sort_order"),
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .eq("position_slug", slug),
+  ]);
 
   const position = positionData as Position | null;
   if (!position) return notFound();
@@ -77,6 +86,8 @@ export default async function PositionDetailPage({
   const jobOrders = (jobOrdersData ?? []) as JobOrder[];
   const fields = (fieldsData ?? []) as ApplicationField[];
   const content = parseContent(position.content as never);
+  const applicationsCount = appCount ?? 0;
+  const jobOrdersCount = jobOrders.length;
 
   return (
     <>
@@ -238,6 +249,14 @@ export default async function PositionDetailPage({
             </div>
           )}
         </section>
+
+        {/* Danger zone — hard delete (refuses if linked apps/JOs exist) */}
+        <DeletePositionCard
+          slug={position.slug}
+          name={position.name}
+          appCount={applicationsCount}
+          joCount={jobOrdersCount}
+        />
       </main>
     </>
   );

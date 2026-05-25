@@ -58,6 +58,64 @@ export async function updatePositionMeta(
   revalidatePath(`/admin/positions/${slug}`);
 }
 
+/**
+ * Hard delete a position. Refuses if any applications or job orders exist
+ * for this slug — those carry candidate / employer history we don't want
+ * to orphan. Admin should nonaktifkan via PositionMetaEditor in that case.
+ *
+ * Cascading effects on hard delete (handled by FK constraints):
+ *   - position_application_fields rows are auto-removed (ON DELETE CASCADE)
+ *   - pending_submissions for this slug are auto-removed (ON DELETE CASCADE)
+ *   - applications.position_slug + job_orders.position_slug are RESTRICT,
+ *     so the DB itself would refuse the delete — we pre-check for a
+ *     friendlier error than the raw Postgres FK violation.
+ */
+export async function deletePosition(slug: string): Promise<void> {
+  await assertAdmin();
+  const supabase = await createServerClient();
+
+  const [{ count: appCount, error: appCountErr }, { count: joCount, error: joCountErr }] =
+    await Promise.all([
+      supabase
+        .from("applications")
+        .select("*", { count: "exact", head: true })
+        .eq("position_slug", slug),
+      supabase
+        .from("job_orders")
+        .select("*", { count: "exact", head: true })
+        .eq("position_slug", slug),
+    ]);
+  if (appCountErr) throw new Error(`Gagal cek lamaran: ${appCountErr.message}`);
+  if (joCountErr) throw new Error(`Gagal cek job order: ${joCountErr.message}`);
+
+  if ((appCount ?? 0) > 0) {
+    throw new Error(
+      `Posisi ini punya ${appCount} lamaran. Hapus permanen tidak diizinkan — nonaktifkan aja kalau ga mau muncul di listing publik.`,
+    );
+  }
+  if ((joCount ?? 0) > 0) {
+    throw new Error(
+      `Posisi ini punya ${joCount} job order. Hapus permanen tidak diizinkan — tutup / cancel JO-nya dulu.`,
+    );
+  }
+
+  const { error } = await supabase.from("positions").delete().eq("slug", slug);
+  if (error) {
+    // Defense in depth: in case a record slipped in between our count check
+    // and the DELETE, Postgres FK RESTRICT would surface as a "violates
+    // foreign key constraint" error here. Translate to a friendly message.
+    if (error.message.toLowerCase().includes("foreign key")) {
+      throw new Error(
+        "Tidak bisa hapus — ada data lain (lamaran / job order) yang masih mereferensikan posisi ini.",
+      );
+    }
+    throw new Error(error.message);
+  }
+
+  revalidatePath("/admin/positions");
+  await notifyWebRevalidate(slug);
+}
+
 // =========================================================================
 // Removed in Fase 4 sunset (2026-05-25):
 //   - updatePositionRequirements (raw JSON textarea for positions.requirements)
