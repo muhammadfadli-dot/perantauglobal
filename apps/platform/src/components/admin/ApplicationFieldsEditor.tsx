@@ -12,15 +12,13 @@ import {
 } from "../../app/(admin)/admin/positions/actions";
 
 /**
- * Edits position_application_fields for a slug. Replaces the legacy
- * FormFieldsEditor (which talked to position_form_fields).
+ * Edits position_application_fields for a slug — admin-facing UX is
+ * designed for non-technical authors. Six friendly field types map to
+ * the storage enum; field_key is auto-derived from the label; options
+ * are edited as a list, not pipe-separated text.
  *
- * Sections matter for grouping in candidate UI:
- *   - syarat_utama → hard filters asked on apply form (LP)
- *   - kualifikasi  → soft / tier-scoring, asked post-apply in portal
- *   - screening    → deeper questions at later stage
- *
- * Inline add/edit/delete/reorder. No modal.
+ * Sections still map 1:1 to the storage enum (syarat_utama / kualifikasi
+ * / screening) — the labels and hints are plain Indonesian.
  */
 
 export type Field = {
@@ -37,29 +35,121 @@ export type Field = {
   collect_at_stage: string;
 };
 
-const SECTION_LABEL: Record<string, string> = {
-  syarat_utama: "Syarat utama",
-  kualifikasi: "Kualifikasi",
-  screening: "Screening",
+// ─── Section copy ─────────────────────────────────────────────────────────
+
+const SECTION_META: Record<
+  Field["section"],
+  { label: string; hint: string; tone: string }
+> = {
+  syarat_utama: {
+    label: "Syarat utama",
+    hint: "Ditanya saat kandidat klik Lamar di lowongan. Pakai untuk syarat yang menentukan kelayakan — kalau jawabannya nggak cocok, kandidat ga lanjut.",
+    tone: "var(--pg-red-600)",
+  },
+  kualifikasi: {
+    label: "Kualifikasi tambahan",
+    hint: "Ditanya setelah daftar, di dalam portal kandidat. Buat ngumpulin info bonus yang ngebantu kamu pertimbangkan.",
+    tone: "var(--pg-info)",
+  },
+  screening: {
+    label: "Screening lanjutan",
+    hint: "Ditanya pas tahap lanjut — biasanya menjelang interview atau cek dokumen.",
+    tone: "var(--pg-ink-secondary)",
+  },
 };
 
-const SECTION_HINT: Record<string, string> = {
-  syarat_utama:
-    "Ditanya di apply form (LP). Disqualifier kalau jawaban salah. Pilih 'required' untuk hard-pass.",
-  kualifikasi:
-    "Ditanya post-apply di portal. Bobot kontribusi ke tier scoring (A/B/C/D).",
-  screening: "Pertanyaan mendalam di tahap doc-check / interview.",
+// ─── Field type catalog ───────────────────────────────────────────────────
+
+type FieldTypeKey =
+  | "radio"
+  | "multiselect"
+  | "text"
+  | "textarea"
+  | "number"
+  | "file";
+
+type FieldTypeMeta = {
+  key: FieldTypeKey;
+  label: string;
+  description: string;
+  example: string;
+  emoji: string;
+  hasOptions: boolean;
 };
 
-const TYPE_OPTIONS: ApplicationFieldInput["field_type"][] = [
-  "radio",
-  "select",
-  "multiselect",
-  "text",
-  "textarea",
-  "number",
-  "file",
+const FIELD_TYPES: FieldTypeMeta[] = [
+  {
+    key: "radio",
+    label: "Pilihan tunggal",
+    description: "Kandidat pilih 1 dari beberapa opsi.",
+    example: "Status STR? · Aktif / Sedang proses / Belum ada",
+    emoji: "◉",
+    hasOptions: true,
+  },
+  {
+    key: "multiselect",
+    label: "Pilihan ganda",
+    description: "Kandidat bisa pilih lebih dari 1 opsi.",
+    example: "Bahasa yang dikuasai · Inggris, Arab, Mandarin",
+    emoji: "☷",
+    hasOptions: true,
+  },
+  {
+    key: "text",
+    label: "Jawaban singkat",
+    description: "Satu baris — nama, nomor, alamat, dll.",
+    example: "Nomor STR keperawatan kamu?",
+    emoji: "—",
+    hasOptions: false,
+  },
+  {
+    key: "textarea",
+    label: "Jawaban panjang",
+    description: "Beberapa baris — cerita atau alasan.",
+    example: "Kenapa kamu pilih posisi ini?",
+    emoji: "≡",
+    hasOptions: false,
+  },
+  {
+    key: "number",
+    label: "Angka",
+    description: "Jumlah, umur, tahun pengalaman.",
+    example: "Berapa tahun pengalaman jadi perawat?",
+    emoji: "#",
+    hasOptions: false,
+  },
+  {
+    key: "file",
+    label: "Upload dokumen",
+    description: "Kandidat upload file (PDF / foto).",
+    example: "Upload scan STR keperawatan kamu",
+    emoji: "⇪",
+    hasOptions: false,
+  },
 ];
+
+const TYPE_BY_KEY = new Map(FIELD_TYPES.map((t) => [t.key, t]));
+
+// Storage may have legacy "select" — show it as "radio" in admin UI.
+function normalizeType(stored: string): FieldTypeKey {
+  if (stored === "select") return "radio";
+  if (TYPE_BY_KEY.has(stored as FieldTypeKey)) return stored as FieldTypeKey;
+  return "text";
+}
+
+// ─── Slugify helper for auto-derive field_key + option value ──────────────
+
+function slugify(s: string): string {
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 60);
+}
+
+// ─── Main editor ──────────────────────────────────────────────────────────
 
 export default function ApplicationFieldsEditor({
   positionSlug,
@@ -70,8 +160,9 @@ export default function ApplicationFieldsEditor({
 }) {
   const [showAdd, setShowAdd] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [addInSection, setAddInSection] = useState<Field["section"]>("kualifikasi");
 
-  const grouped: Record<string, Field[]> = {
+  const grouped: Record<Field["section"], Field[]> = {
     syarat_utama: [],
     kualifikasi: [],
     screening: [],
@@ -80,7 +171,18 @@ export default function ApplicationFieldsEditor({
 
   return (
     <div className="grid gap-4">
+      <div className="px-4 py-3 rounded-xl flex items-start gap-2.5 text-[12px] leading-relaxed"
+        style={{ background: "var(--pg-info-bg)", color: "var(--pg-info)" }}>
+        <Icon name="info" size={14} className="shrink-0 mt-0.5" />
+        <div>
+          <b>Cara baca:</b> 3 section di bawah ini menentukan <i>kapan</i> pertanyaan ditanya
+          ke kandidat. Semua pertanyaan masuk ke aplikasi yang sama — section cuma ngatur
+          timing-nya.
+        </div>
+      </div>
+
       {(["syarat_utama", "kualifikasi", "screening"] as const).map((section) => {
+        const meta = SECTION_META[section];
         const fields = grouped[section];
         return (
           <div
@@ -89,28 +191,46 @@ export default function ApplicationFieldsEditor({
             style={{ border: "1px solid var(--pg-border)" }}
           >
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="text-[14px] font-bold text-pg-ink-primary">
-                  {SECTION_LABEL[section]}
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className="text-[10px] font-bold tracking-[0.1em] uppercase px-2 py-0.5 rounded-md"
+                    style={{
+                      background: "var(--pg-paper)",
+                      color: meta.tone,
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
+                    {fields.length} pertanyaan
+                  </span>
                 </div>
-                <div className="text-[12px] text-pg-ink-tertiary mt-0.5 leading-snug">
-                  {SECTION_HINT[section]}
+                <div className="text-[16px] font-extrabold text-pg-ink-primary mt-1.5">
+                  {meta.label}
+                </div>
+                <div className="text-[12px] text-pg-ink-tertiary mt-1 leading-relaxed max-w-2xl">
+                  {meta.hint}
                 </div>
               </div>
-              <span
-                className="text-[10px] font-bold tracking-[0.08em] uppercase px-2 py-0.5 rounded shrink-0"
+              <button
+                type="button"
+                onClick={() => {
+                  setAddInSection(section);
+                  setShowAdd(true);
+                }}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] font-bold"
                 style={{
-                  background: "var(--pg-ink-50)",
-                  color: "var(--pg-ink-tertiary)",
-                  fontFamily: "var(--font-mono)",
+                  border: "1px solid var(--pg-border)",
+                  background: "var(--pg-white)",
+                  color: meta.tone,
                 }}
               >
-                {fields.length}
-              </span>
+                <Icon name="plus" size={12} stroke={2.4} />
+                Tambah di sini
+              </button>
             </div>
 
             {fields.length > 0 && (
-              <div className="mt-3 grid gap-2">
+              <div className="mt-4 grid gap-2">
                 {fields.map((f, idx) =>
                   editingId === f.id ? (
                     <FieldForm
@@ -134,25 +254,26 @@ export default function ApplicationFieldsEditor({
                 )}
               </div>
             )}
+
+            {fields.length === 0 && (
+              <div className="mt-4 px-4 py-6 rounded-xl text-center text-[12px] text-pg-ink-tertiary"
+                style={{ background: "var(--pg-paper)", border: "1px dashed var(--pg-border)" }}>
+                Belum ada pertanyaan di section ini.
+              </div>
+            )}
           </div>
         );
       })}
 
-      <div>
-        {showAdd ? (
-          <FieldForm
-            positionSlug={positionSlug}
-            mode="add"
-            defaultSection="kualifikasi"
-            sortOrder={(initial[initial.length - 1]?.sort_order ?? 0) + 10}
-            onClose={() => setShowAdd(false)}
-          />
-        ) : (
-          <Button onClick={() => setShowAdd(true)} variant="ghost" small>
-            <Icon name="plus" size={14} stroke={2.4} /> Tambah pertanyaan
-          </Button>
-        )}
-      </div>
+      {showAdd && (
+        <FieldForm
+          positionSlug={positionSlug}
+          mode="add"
+          defaultSection={addInSection}
+          sortOrder={(initial[initial.length - 1]?.sort_order ?? 0) + 10}
+          onClose={() => setShowAdd(false)}
+        />
+      )}
     </div>
   );
 }
@@ -174,6 +295,8 @@ function FieldRow({
 }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  const typeMeta = TYPE_BY_KEY.get(normalizeType(field.field_type));
 
   function remove() {
     if (!confirm(`Hapus pertanyaan "${field.field_label}"?`)) return;
@@ -204,7 +327,7 @@ function FieldRow({
       style={{ border: "1px solid var(--pg-border-soft)" }}
     >
       <div className="flex items-start gap-3">
-        <div className="flex flex-col gap-0.5 shrink-0">
+        <div className="flex flex-col gap-0.5 shrink-0 pt-0.5">
           <button
             type="button"
             onClick={() => move("up")}
@@ -229,42 +352,56 @@ function FieldRow({
           </button>
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-[13px] font-bold text-pg-ink-primary truncate">
-            {field.field_label}
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <div className="text-[14px] font-bold text-pg-ink-primary">
+              {field.field_label}
+            </div>
+            {field.importance === "required" && (
+              <span
+                className="text-[9px] font-bold tracking-[0.1em] uppercase px-1.5 py-0.5 rounded"
+                style={{
+                  background: "var(--pg-red-soft-bg)",
+                  color: "var(--pg-red-600)",
+                  fontFamily: "var(--font-mono)",
+                }}
+              >
+                Wajib
+              </span>
+            )}
           </div>
-          <div
-            className="text-[11px] text-pg-ink-tertiary font-mono mt-0.5 truncate"
-          >
-            {field.field_key} · {field.field_type}
-            {field.options && field.options.length > 0 ? ` · ${field.options.length} options` : ""}
+          <div className="text-[11px] text-pg-ink-tertiary mt-1 flex items-center gap-2 flex-wrap">
+            <span className="inline-flex items-center gap-1">
+              <span style={{ fontFamily: "var(--font-mono)" }}>{typeMeta?.emoji ?? "—"}</span>
+              {typeMeta?.label ?? field.field_type}
+            </span>
+            {field.options && field.options.length > 0 && (
+              <span>· {field.options.length} pilihan</span>
+            )}
+            {field.tier_weight > 0 && (
+              <span>· bobot {field.tier_weight}</span>
+            )}
           </div>
           {field.field_help && (
-            <div className="text-[12px] text-pg-ink-tertiary mt-1 truncate">{field.field_help}</div>
+            <div className="text-[12px] text-pg-ink-tertiary mt-1.5 italic">{field.field_help}</div>
           )}
         </div>
-        <div className="flex flex-col items-end gap-1.5 shrink-0">
-          <div className="flex gap-1.5">
-            {field.importance === "required" && <Badge variant="err">Wajib</Badge>}
-            {field.tier_weight > 0 && <Badge variant="info">Bobot {field.tier_weight}</Badge>}
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onEdit}
-              disabled={pending}
-              className="text-[12px] font-bold text-pg-ink-secondary hover:text-pg-red-600"
-            >
-              <Icon name="edit" size={11} /> Edit
-            </button>
-            <button
-              type="button"
-              onClick={remove}
-              disabled={pending}
-              className="text-[12px] font-bold text-pg-red-600 hover:underline"
-            >
-              <Icon name="trash" size={11} /> Hapus
-            </button>
-          </div>
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <button
+            type="button"
+            onClick={onEdit}
+            disabled={pending}
+            className="text-[12px] font-bold text-pg-ink-secondary hover:text-pg-red-600 inline-flex items-center gap-1"
+          >
+            <Icon name="edit" size={11} /> Edit
+          </button>
+          <button
+            type="button"
+            onClick={remove}
+            disabled={pending}
+            className="text-[12px] font-bold text-pg-red-600 hover:underline inline-flex items-center gap-1"
+          >
+            <Icon name="trash" size={11} /> Hapus
+          </button>
         </div>
       </div>
       {error && (
@@ -282,7 +419,7 @@ type FieldFormProps =
   | {
       mode: "add";
       positionSlug: string;
-      defaultSection: "syarat_utama" | "kualifikasi" | "screening";
+      defaultSection: Field["section"];
       sortOrder: number;
       onClose: () => void;
       initial?: undefined;
@@ -290,11 +427,13 @@ type FieldFormProps =
   | {
       mode: "edit";
       positionSlug: string;
-      defaultSection: "syarat_utama" | "kualifikasi" | "screening";
+      defaultSection: Field["section"];
       initial: Field;
       onClose: () => void;
       sortOrder?: undefined;
     };
+
+type OptionRow = { value: string; label: string };
 
 function FieldForm(props: FieldFormProps) {
   const { mode, positionSlug, onClose } = props;
@@ -302,48 +441,75 @@ function FieldForm(props: FieldFormProps) {
 
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [fieldType, setFieldType] = useState<ApplicationFieldInput["field_type"]>(
-    (initial?.field_type as ApplicationFieldInput["field_type"]) ?? "radio",
+
+  // Primary inputs
+  const [label, setLabel] = useState<string>(initial?.field_label ?? "");
+  const [help, setHelp] = useState<string>(initial?.field_help ?? "");
+  const [fieldType, setFieldType] = useState<FieldTypeKey>(
+    normalizeType(initial?.field_type ?? "radio"),
   );
-  const [section, setSection] = useState<ApplicationFieldInput["section"]>(
+  const [options, setOptions] = useState<OptionRow[]>(
+    initial?.options && initial.options.length > 0
+      ? initial.options.map((o) => ({ value: o.value, label: o.label }))
+      : [
+          { value: "", label: "" },
+          { value: "", label: "" },
+        ],
+  );
+  const [section, setSection] = useState<Field["section"]>(
     initial?.section ?? props.defaultSection,
   );
-  const [importance, setImportance] = useState<ApplicationFieldInput["importance"]>(
+  const [importance, setImportance] = useState<Field["importance"]>(
     initial?.importance ?? (props.defaultSection === "syarat_utama" ? "required" : "optional"),
   );
 
+  // Advanced (collapsed)
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [fieldKey, setFieldKey] = useState<string>(initial?.field_key ?? "");
+  const [fieldKeyTouched, setFieldKeyTouched] = useState(false);
+  const [tierWeight, setTierWeight] = useState<number>(initial?.tier_weight ?? 0);
+
+  const typeMeta = TYPE_BY_KEY.get(fieldType)!;
+  const effectiveKey = fieldKeyTouched || mode === "edit"
+    ? fieldKey
+    : slugify(label) || "";
+
+  const canSubmit =
+    label.trim().length >= 2 &&
+    (mode === "edit" || effectiveKey.length > 0) &&
+    (!typeMeta.hasOptions || options.some((o) => o.label.trim().length > 0));
+
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!canSubmit) return;
     setError(null);
-    const fd = new FormData(e.currentTarget);
-    const optionsRaw = String(fd.get("options") ?? "").trim();
-    let options: { value: string; label: string }[] | null = null;
-    if (
-      optionsRaw &&
-      (fieldType === "select" || fieldType === "radio" || fieldType === "multiselect")
-    ) {
-      options = optionsRaw
-        .split("\n")
-        .filter(Boolean)
-        .map((line) => {
-          const [value, ...labelParts] = line.split("|");
-          const label = labelParts.join("|").trim() || value!.trim();
-          return { value: value!.trim(), label };
-        });
-    }
+
+    const finalOptions: { value: string; label: string }[] | null = typeMeta.hasOptions
+      ? options
+          .filter((o) => o.label.trim().length > 0)
+          .map((o) => {
+            const cleanLabel = o.label.trim();
+            const cleanValue = o.value.trim() || slugify(cleanLabel);
+            return { value: cleanValue, label: cleanLabel };
+          })
+      : null;
 
     const collectStage =
-      section === "syarat_utama" ? "applied" : section === "screening" ? "document_check" : "screening";
+      section === "syarat_utama"
+        ? "applied"
+        : section === "screening"
+          ? "document_check"
+          : "screening";
 
     const payload: ApplicationFieldInput = {
-      field_key: String(fd.get("field_key") ?? "").trim(),
-      field_label: String(fd.get("field_label") ?? "").trim(),
-      field_help: (fd.get("field_help") as string) || undefined,
+      field_key: mode === "edit" ? initial!.field_key : effectiveKey,
+      field_label: label.trim(),
+      field_help: help.trim() || undefined,
       field_type: fieldType,
-      options,
+      options: finalOptions,
       importance,
       section,
-      tier_weight: Number(fd.get("tier_weight") ?? 0),
+      tier_weight: tierWeight,
       sort_order: mode === "add" ? props.sortOrder : initial!.sort_order,
       collect_at_stage: collectStage,
     };
@@ -364,107 +530,176 @@ function FieldForm(props: FieldFormProps) {
     });
   }
 
-  const optionsDefault =
-    initial?.options?.map((o) => `${o.value}|${o.label}`).join("\n") ?? "";
-
   return (
     <form
       onSubmit={submit}
       className="bg-pg-white rounded-2xl p-5"
       style={{ border: "1.5px solid var(--pg-red-200)" }}
     >
-      <div className="text-[12px] font-bold tracking-[0.1em] uppercase text-pg-red-600 mb-3">
-        {mode === "add" ? "Tambah pertanyaan" : "Edit pertanyaan"}
+      <div className="text-[11px] font-bold tracking-[0.12em] uppercase text-pg-red-600 mb-4"
+        style={{ fontFamily: "var(--font-mono)" }}>
+        {mode === "add" ? "Pertanyaan baru" : "Edit pertanyaan"}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
-        <label>
-          <div className="text-[12px] font-bold text-pg-ink-tertiary mb-1">
-            Field key (snake_case){mode === "edit" && " · read-only"}
-          </div>
-          <input
-            name="field_key"
-            type="text"
-            required
-            pattern="[a-z][a-z0-9_]*"
-            placeholder="jlpt_level"
-            defaultValue={initial?.field_key ?? ""}
-            readOnly={mode === "edit"}
-            className={`${INPUT_CLASS} font-mono ${mode === "edit" ? "bg-pg-ink-50 text-pg-ink-tertiary" : ""}`}
-          />
-        </label>
-        <label>
-          <div className="text-[12px] font-bold text-pg-ink-tertiary mb-1">Tipe field</div>
-          <select
-            value={fieldType}
-            onChange={(e) => setFieldType(e.target.value as ApplicationFieldInput["field_type"])}
-            className={INPUT_CLASS}
-          >
-            {TYPE_OPTIONS.map((t) => (
-              <option key={t} value={t}>
-                {t}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      <label className="block mt-3">
-        <div className="text-[12px] font-bold text-pg-ink-tertiary mb-1">Label (yang user lihat)</div>
-        <input
-          name="field_label"
-          type="text"
-          required
-          placeholder="Berapa level JLPT kamu?"
-          defaultValue={initial?.field_label ?? ""}
-          className={INPUT_CLASS}
-        />
-      </label>
-
-      <label className="block mt-3">
-        <div className="text-[12px] font-bold text-pg-ink-tertiary mb-1">
-          Help text <span className="font-normal">(opsional)</span>
+      {/* Step 1: Question label */}
+      <label className="block">
+        <div className="text-[13px] font-bold text-pg-ink-primary mb-1">
+          1. Apa pertanyaan untuk kandidat?
         </div>
         <input
-          name="field_help"
           type="text"
-          placeholder="Jelaskan kenapa pertanyaan ini ditanya."
-          defaultValue={initial?.field_help ?? ""}
+          required
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+          placeholder="Contoh: Berapa level JLPT kamu?"
           className={INPUT_CLASS}
+          autoFocus={mode === "add"}
         />
       </label>
 
-      {(fieldType === "select" || fieldType === "radio" || fieldType === "multiselect") && (
-        <label className="block mt-3">
-          <div className="text-[12px] font-bold text-pg-ink-tertiary mb-1">
-            Options <span className="font-normal">(satu per baris, format `value|label`)</span>
+      {/* Step 2: Field type picker */}
+      <div className="mt-5">
+        <div className="text-[13px] font-bold text-pg-ink-primary mb-2">
+          2. Jenis jawaban yang kamu mau
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {FIELD_TYPES.map((t) => {
+            const active = fieldType === t.key;
+            return (
+              <button
+                type="button"
+                key={t.key}
+                onClick={() => setFieldType(t.key)}
+                className="text-left px-3 py-3 rounded-lg transition-colors"
+                style={{
+                  border: active
+                    ? "1.5px solid var(--pg-red-600)"
+                    : "1.5px solid var(--pg-border)",
+                  background: active ? "var(--pg-red-soft-bg)" : "var(--pg-white)",
+                }}
+              >
+                <div className="flex items-center gap-2">
+                  <span
+                    className="text-[15px] font-bold"
+                    style={{
+                      color: active ? "var(--pg-red-600)" : "var(--pg-ink-secondary)",
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
+                    {t.emoji}
+                  </span>
+                  <div
+                    className="text-[12.5px] font-bold"
+                    style={{
+                      color: active ? "var(--pg-red-600)" : "var(--pg-ink-primary)",
+                    }}
+                  >
+                    {t.label}
+                  </div>
+                </div>
+                <div className="text-[11px] text-pg-ink-tertiary mt-1 leading-tight">
+                  {t.description}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-2 text-[11px] text-pg-ink-tertiary italic">
+          Contoh: {typeMeta.example}
+        </div>
+      </div>
+
+      {/* Step 3 (conditional): Options editor for choice types */}
+      {typeMeta.hasOptions && (
+        <div className="mt-5">
+          <div className="text-[13px] font-bold text-pg-ink-primary mb-2">
+            3. Pilihan jawaban yang tersedia
           </div>
-          <textarea
-            name="options"
-            rows={4}
-            placeholder={`n2|JLPT N2\nn3|JLPT N3\nn4|JLPT N4\nnone|Belum punya`}
-            defaultValue={optionsDefault}
-            className={`${INPUT_CLASS} font-mono`}
-          />
-        </label>
+          <div
+            className="rounded-xl p-3 flex flex-col gap-1.5"
+            style={{ background: "var(--pg-paper)", border: "1px dashed var(--pg-border)" }}
+          >
+            {options.map((opt, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <span
+                  className="w-7 h-7 grid place-items-center text-[11px] font-bold text-pg-ink-tertiary shrink-0"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  {idx + 1}.
+                </span>
+                <input
+                  type="text"
+                  value={opt.label}
+                  onChange={(e) =>
+                    setOptions((prev) => {
+                      const next = [...prev];
+                      next[idx] = { ...next[idx], label: e.target.value };
+                      return next;
+                    })
+                  }
+                  placeholder={`Pilihan ${idx + 1}`}
+                  className={`${INPUT_CLASS} flex-1`}
+                />
+                {options.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOptions((prev) => prev.filter((_, i) => i !== idx))
+                    }
+                    className="w-7 h-7 grid place-items-center text-pg-ink-tertiary hover:text-pg-red-600 shrink-0"
+                    aria-label="Hapus pilihan"
+                  >
+                    <Icon name="trash" size={12} />
+                  </button>
+                )}
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() =>
+                setOptions((prev) => [...prev, { value: "", label: "" }])
+              }
+              className="self-start inline-flex items-center gap-1.5 px-2.5 py-1.5 mt-1 text-[12px] font-bold text-pg-red-600 rounded-lg"
+              style={{ background: "var(--pg-white)" }}
+            >
+              <Icon name="plus" size={12} stroke={2.4} /> Tambah pilihan
+            </button>
+          </div>
+        </div>
       )}
 
-      <div className="mt-4">
-        <div className="text-[12px] font-bold text-pg-ink-tertiary mb-1.5">Section</div>
+      {/* Section picker */}
+      <div className="mt-5">
+        <div className="text-[13px] font-bold text-pg-ink-primary mb-2">
+          {typeMeta.hasOptions ? "4." : "3."} Kapan ini ditanya ke kandidat?
+        </div>
         <div className="grid gap-1.5">
           {(["syarat_utama", "kualifikasi", "screening"] as const).map((s) => {
             const selected = section === s;
+            const meta = SECTION_META[s];
             return (
               <button
                 type="button"
                 key={s}
                 onClick={() => setSection(s)}
-                className={`text-left px-3 py-2 rounded-lg ${selected ? "border-pg-red-600 bg-pg-red-50" : "border-pg-ink-200 hover:border-pg-ink-300"}`}
-                style={{ borderWidth: 1.5, borderStyle: "solid" }}
+                className="text-left px-3 py-2.5 rounded-lg"
+                style={{
+                  border: selected
+                    ? "1.5px solid var(--pg-red-600)"
+                    : "1.5px solid var(--pg-border)",
+                  background: selected ? "var(--pg-red-soft-bg)" : "var(--pg-white)",
+                }}
               >
-                <div className="text-[13px] font-bold text-pg-ink-primary">{SECTION_LABEL[s]}</div>
-                <div className="text-[11px] text-pg-ink-tertiary mt-0.5 leading-snug">
-                  {SECTION_HINT[s]}
+                <div
+                  className="text-[13px] font-bold"
+                  style={{
+                    color: selected ? "var(--pg-red-600)" : "var(--pg-ink-primary)",
+                  }}
+                >
+                  {meta.label}
+                </div>
+                <div className="text-[11.5px] text-pg-ink-tertiary mt-0.5 leading-snug">
+                  {meta.hint}
                 </div>
               </button>
             );
@@ -472,53 +707,142 @@ function FieldForm(props: FieldFormProps) {
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-        <div>
-          <div className="text-[12px] font-bold text-pg-ink-tertiary mb-1.5">Importance</div>
-          <div className="inline-flex rounded-lg overflow-hidden" style={{ border: "1.5px solid var(--pg-ink-200)" }}>
-            {(["required", "optional"] as const).map((val) => {
-              const selected = importance === val;
-              return (
-                <button
-                  type="button"
-                  key={val}
-                  onClick={() => setImportance(val)}
-                  className="px-3 py-1.5 text-[12px] font-bold"
+      {/* Required toggle */}
+      <div className="mt-5">
+        <div className="text-[13px] font-bold text-pg-ink-primary mb-2">
+          {typeMeta.hasOptions ? "5." : "4."} Wajib diisi atau opsional?
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          {(["required", "optional"] as const).map((val) => {
+            const selected = importance === val;
+            const isReq = val === "required";
+            return (
+              <button
+                type="button"
+                key={val}
+                onClick={() => setImportance(val)}
+                className="text-left px-3 py-2.5 rounded-lg"
+                style={{
+                  border: selected
+                    ? `1.5px solid ${isReq ? "var(--pg-red-600)" : "var(--pg-info)"}`
+                    : "1.5px solid var(--pg-border)",
+                  background: selected
+                    ? isReq
+                      ? "var(--pg-red-soft-bg)"
+                      : "var(--pg-info-bg)"
+                    : "var(--pg-white)",
+                }}
+              >
+                <div
+                  className="text-[13px] font-bold"
                   style={{
-                    background: selected ? "var(--pg-red-600)" : "var(--pg-white)",
-                    color: selected ? "white" : "var(--pg-ink-secondary)",
+                    color: selected
+                      ? isReq
+                        ? "var(--pg-red-600)"
+                        : "var(--pg-info)"
+                      : "var(--pg-ink-primary)",
                   }}
                 >
-                  {val === "required" ? "Wajib" : "Bonus"}
-                </button>
-              );
-            })}
-          </div>
+                  {isReq ? "Wajib" : "Opsional / bonus"}
+                </div>
+                <div className="text-[11.5px] text-pg-ink-tertiary mt-0.5">
+                  {isReq
+                    ? "Kandidat ga bisa lanjut kalau ga isi."
+                    : "Boleh dilewat. Bantu ngangkat skor saja."}
+                </div>
+              </button>
+            );
+          })}
         </div>
-        <label>
-          <div className="text-[12px] font-bold text-pg-ink-tertiary mb-1.5">
-            Tier weight <span className="font-normal">(0–10)</span>
-          </div>
-          <input
-            name="tier_weight"
-            type="number"
-            min={0}
-            max={10}
-            defaultValue={initial?.tier_weight ?? 0}
-            className={INPUT_CLASS}
+      </div>
+
+      {/* Help text (optional) */}
+      <label className="block mt-5">
+        <div className="text-[13px] font-bold text-pg-ink-primary mb-1">
+          Catatan untuk kandidat <span className="font-normal text-pg-ink-tertiary">(opsional)</span>
+        </div>
+        <input
+          type="text"
+          value={help}
+          onChange={(e) => setHelp(e.target.value)}
+          placeholder="Mis. Cantumkan nomor STR yang masih aktif."
+          className={INPUT_CLASS}
+        />
+      </label>
+
+      {/* Advanced (collapsed) */}
+      <div className="mt-5">
+        <button
+          type="button"
+          onClick={() => setAdvancedOpen((v) => !v)}
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold text-pg-ink-secondary"
+        >
+          <Icon
+            name={advancedOpen ? "chevron_down" : "chevron_right"}
+            size={12}
+            stroke={2.4}
           />
-        </label>
+          Lanjutan
+        </button>
+        {advancedOpen && (
+          <div
+            className="mt-2 p-4 rounded-xl grid gap-3"
+            style={{ background: "var(--pg-paper)", border: "1px solid var(--pg-border)" }}
+          >
+            <label className="block">
+              <div className="text-[12px] font-bold text-pg-ink-tertiary mb-1">
+                ID teknis (field_key)
+                {mode === "edit" && (
+                  <span className="font-normal"> · ga bisa diubah setelah dibuat</span>
+                )}
+              </div>
+              <input
+                type="text"
+                pattern="[a-z][a-z0-9_]*"
+                value={mode === "edit" ? initial!.field_key : effectiveKey}
+                onChange={(e) => {
+                  setFieldKeyTouched(true);
+                  setFieldKey(slugify(e.target.value));
+                }}
+                placeholder="jlpt_level"
+                readOnly={mode === "edit"}
+                className={`${INPUT_CLASS} font-mono ${mode === "edit" ? "bg-pg-ink-50 text-pg-ink-tertiary cursor-not-allowed" : ""}`}
+                style={{ fontFamily: "var(--font-mono)" }}
+              />
+              <div className="text-[10.5px] text-pg-ink-tertiary mt-1 leading-snug">
+                Otomatis dari label. Buat penyimpanan internal — kandidat ga lihat ini.
+              </div>
+            </label>
+            <label className="block">
+              <div className="text-[12px] font-bold text-pg-ink-tertiary mb-1">
+                Bobot scoring <span className="font-normal">(0–10)</span>
+              </div>
+              <input
+                type="number"
+                min={0}
+                max={10}
+                value={tierWeight}
+                onChange={(e) => setTierWeight(Number(e.target.value) || 0)}
+                className={INPUT_CLASS}
+              />
+              <div className="text-[10.5px] text-pg-ink-tertiary mt-1 leading-snug">
+                Cuma efek di kualifikasi — bobotin skor ranking kandidat. 0 = ga ngaruh.
+              </div>
+            </label>
+          </div>
+        )}
       </div>
 
       {error && (
-        <div className="mt-3 text-[12px] text-pg-red-600 flex items-center gap-1">
-          <Icon name="warn" size={12} /> {error}
+        <div className="mt-4 px-3 py-2.5 rounded-lg text-[12px] flex items-start gap-2"
+          style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}>
+          <Icon name="warn" size={12} className="shrink-0 mt-0.5" /> {error}
         </div>
       )}
 
-      <div className="mt-4 flex gap-2">
-        <Button type="submit" small disabled={pending}>
-          {pending ? "Menyimpan…" : mode === "add" ? "Tambah" : "Update"}
+      <div className="mt-5 flex gap-2 pt-4" style={{ borderTop: "1px solid var(--pg-border-soft)" }}>
+        <Button type="submit" small disabled={pending || !canSubmit}>
+          {pending ? "Menyimpan…" : mode === "add" ? "Tambah pertanyaan" : "Simpan perubahan"}
         </Button>
         <button
           type="button"
@@ -533,4 +857,4 @@ function FieldForm(props: FieldFormProps) {
 }
 
 const INPUT_CLASS =
-  "w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3 py-2 text-sm text-pg-ink-primary placeholder:text-pg-ink-quaternary focus:border-pg-red-600 outline-none";
+  "w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3 py-2 text-[14px] text-pg-ink-primary placeholder:text-pg-ink-quaternary focus:border-pg-red-600 outline-none";
