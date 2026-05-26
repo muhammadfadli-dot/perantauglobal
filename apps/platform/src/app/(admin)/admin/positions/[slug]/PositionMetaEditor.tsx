@@ -5,17 +5,22 @@ import { Icon } from "@/components/pg/Icon";
 import { Button } from "@/components/pg/primitives";
 import { updatePositionMeta } from "../actions";
 
+/**
+ * Edits position name + description. The publish/active toggle lives in a
+ * separate PositionActiveToggle card above this one — it was extracted in
+ * 2026-05-26 because the old pill button inside this card looked like a
+ * status badge instead of an interactive switch.
+ */
 export default function PositionMetaEditor({
   slug,
   initial,
 }: {
   slug: string;
-  initial: { name: string; description: string | null; active: boolean };
+  initial: { name: string; description: string | null };
 }) {
   const [pending, start] = useTransition();
   const [name, setName] = useState(initial.name);
   const [desc, setDesc] = useState(initial.description ?? "");
-  const [active, setActive] = useState(initial.active);
   const [saved, setSaved] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,25 +31,10 @@ export default function PositionMetaEditor({
         await updatePositionMeta(slug, {
           name: name.trim(),
           description: desc.trim() || undefined,
-          active,
         });
         setSaved(true);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Gagal menyimpan");
-      }
-    });
-  }
-
-  function toggleActive() {
-    setError(null);
-    const next = !active;
-    setActive(next);
-    start(async () => {
-      try {
-        await updatePositionMeta(slug, { active: next });
-      } catch (err) {
-        setActive(!next);
-        setError(err instanceof Error ? err.message : "Gagal toggle active");
       }
     });
   }
@@ -83,19 +73,6 @@ export default function PositionMetaEditor({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-3 pt-4 border-t border-pg-ink-100">
-        <button
-          type="button"
-          onClick={toggleActive}
-          disabled={pending}
-          className={`inline-flex items-center gap-2 min-h-[36px] px-3.5 text-[13px] font-bold tracking-wide uppercase rounded-lg border-[1.5px] disabled:opacity-50 ${
-            active
-              ? "bg-pg-ok-bg border-pg-ok text-pg-ok"
-              : "bg-pg-ink-100 border-pg-ink-300 text-pg-ink-500"
-          }`}
-        >
-          <span className={`inline-block w-2 h-2 rounded-full ${active ? "bg-pg-ok" : "bg-pg-ink-400"}`} />
-          {active ? "Aktif" : "Nonaktif"}
-        </button>
         <div className="flex-1" />
         <Button onClick={save} disabled={pending || saved} small>
           {pending ? "Menyimpan…" : saved ? (

@@ -4,6 +4,7 @@ import { createServerClient } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import { Badge } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
+import PositionActiveToggle from "./PositionActiveToggle";
 import PositionMetaEditor from "./PositionMetaEditor";
 import DeletePositionCard from "./DeletePositionCard";
 import PositionEditorShell from "@/components/admin/PositionEditorShell";
@@ -142,14 +143,18 @@ export default async function PositionDetailPage({
           </div>
         </div>
 
-        {/* Meta editor (name / desc / active) — narrow card */}
+        {/* Publish toggle — own card on top so the switch is unmistakable */}
+        <div className="mb-4 max-w-3xl">
+          <PositionActiveToggle slug={position.slug} initialActive={position.active} />
+        </div>
+
+        {/* Meta editor (name / desc) — narrow card */}
         <div className="mb-6 max-w-3xl">
           <PositionMetaEditor
             slug={position.slug}
             initial={{
               name: position.name,
               description: position.description,
-              active: position.active,
             }}
           />
         </div>
