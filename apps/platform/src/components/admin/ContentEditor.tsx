@@ -6,6 +6,7 @@ import { Button } from "@/components/pg/primitives";
 import type {
   PositionContent,
   ContentBenefit,
+  ContentCardMeta,
   ContentDetailRow,
 } from "@/lib/position-content";
 
@@ -32,6 +33,35 @@ import type {
  */
 
 // ─── Essentials catalog ──────────────────────────────────────────────────────
+
+// Curated icon options for position cards. Keep in sync with apps/web Icon.tsx.
+// Limited set surfaced to admin to keep the picker scannable — admin can add
+// more by editing this list if a new category needs an icon.
+const CARD_ICON_OPTIONS: { value: string; label: string }[] = [
+  { value: "briefcase", label: "Kerja umum" },
+  { value: "stethoscope", label: "Medis / perawat" },
+  { value: "heart", label: "Caregiver" },
+  { value: "coffee", label: "Barista / cafe" },
+  { value: "bowl", label: "Food / dapur" },
+  { value: "truck", label: "Driver" },
+  { value: "home", label: "Domestic" },
+  { value: "shield", label: "Security" },
+  { value: "user", label: "Personal" },
+  { value: "sparkle", label: "SPG / retail" },
+  { value: "passport", label: "Mobilitas" },
+];
+
+const CARD_GENDER_OPTIONS = ["Laki-laki", "Wanita", "L/P"] as const;
+
+function emptyCardMeta(): ContentCardMeta {
+  return {
+    icon: "briefcase",
+    salary: "",
+    salaryNote: "",
+    gender: "L/P",
+    age: "",
+  };
+}
 
 const ESSENTIALS_DETAILS: { label: string; example: string }[] = [
   { label: "Lokasi", example: "Saudi Arabia" },
@@ -176,6 +206,16 @@ export default function ContentEditor({
       </div>
 
       <SectionCard
+        title="Card di katalog /lowongan"
+        hint="Tampilan kartu kecil yang muncul di halaman lowongan publik (perantauglobal.com/lowongan). Wajib diisi biar posisi tampil dengan info gaji, umur, gender."
+      >
+        <CardMetaEditor
+          value={content.cardMeta ?? emptyCardMeta()}
+          onChange={(next) => patch({ ...content, cardMeta: next })}
+        />
+      </SectionCard>
+
+      <SectionCard
         title="Hero"
         hint="Garis info di bagian atas landing page (gaji + jenis kontrak)."
       >
@@ -300,6 +340,118 @@ export default function ContentEditor({
         <Button onClick={save} disabled={!isDirty || pending} small>
           {pending ? "Menyimpan…" : "Simpan konten"}
         </Button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Card meta editor ──────────────────────────────────────────────────────
+
+function CardMetaEditor({
+  value,
+  onChange,
+}: {
+  value: ContentCardMeta;
+  onChange: (next: ContentCardMeta) => void;
+}) {
+  function patch(partial: Partial<ContentCardMeta>) {
+    onChange({ ...value, ...partial });
+  }
+  return (
+    <div className="grid gap-4">
+      <div>
+        <div className="text-[12px] font-semibold text-pg-ink-secondary mb-1.5">Icon</div>
+        <div className="flex gap-1.5 flex-wrap">
+          {CARD_ICON_OPTIONS.map((opt) => {
+            const selected = value.icon === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => patch({ icon: opt.value })}
+                className={`inline-flex items-center gap-1.5 h-8 px-2.5 rounded-full border-[1.5px] text-[12px] font-semibold transition-colors ${
+                  selected
+                    ? "bg-pg-ink-900 text-white border-pg-ink-900"
+                    : "bg-pg-white text-pg-ink-700 border-pg-ink-200 hover:border-pg-ink-300"
+                }`}
+              >
+                <Icon name={opt.value as Parameters<typeof Icon>[0]["name"]} size={14} />
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <div className="text-[12px] font-semibold text-pg-ink-secondary mb-1.5">Gaji utama</div>
+          <input
+            type="text"
+            value={value.salary}
+            onChange={(e) => patch({ salary: e.target.value })}
+            placeholder="SAR 3.200"
+            className={INPUT_CLASS}
+          />
+        </div>
+        <div>
+          <div className="text-[12px] font-semibold text-pg-ink-secondary mb-1.5">Embel-embel gaji</div>
+          <input
+            type="text"
+            value={value.salaryNote}
+            onChange={(e) => patch({ salaryNote: e.target.value })}
+            placeholder="/bulan atau + makan SAR 200"
+            className={INPUT_CLASS}
+          />
+        </div>
+      </div>
+
+      <div>
+        <div className="text-[12px] font-semibold text-pg-ink-secondary mb-1.5">Gender</div>
+        <div className="flex gap-1.5 flex-wrap">
+          {CARD_GENDER_OPTIONS.map((opt) => {
+            const selected = value.gender === opt;
+            return (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => patch({ gender: opt })}
+                className={`inline-flex items-center h-8 px-3 rounded-full border-[1.5px] text-[12px] font-semibold transition-colors ${
+                  selected
+                    ? "bg-pg-ink-900 text-white border-pg-ink-900"
+                    : "bg-pg-white text-pg-ink-700 border-pg-ink-200 hover:border-pg-ink-300"
+                }`}
+              >
+                {opt}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <div className="text-[12px] font-semibold text-pg-ink-secondary mb-1.5">Umur</div>
+          <input
+            type="text"
+            value={value.age}
+            onChange={(e) => patch({ age: e.target.value })}
+            placeholder="21–38 atau max 35"
+            className={INPUT_CLASS}
+          />
+        </div>
+        <div>
+          <div className="text-[12px] font-semibold text-pg-ink-secondary mb-1.5">
+            Label kontrak <span className="text-pg-ink-quaternary font-normal">(opsional)</span>
+          </div>
+          <input
+            type="text"
+            value={value.contractLabel ?? ""}
+            onChange={(e) => patch({ contractLabel: e.target.value })}
+            placeholder="Kontrak 2 tahun"
+            className={INPUT_CLASS}
+          />
+        </div>
       </div>
     </div>
   );

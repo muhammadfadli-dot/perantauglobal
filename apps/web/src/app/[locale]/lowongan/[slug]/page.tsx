@@ -7,16 +7,22 @@ import { StatusDot } from "@/components/pg/primitives";
 import { RedHero } from "@/components/pg/RedHero";
 import { ApplyForm } from "@/components/pg/ApplyForm";
 import { ExistingUserShortcut } from "@/components/pg/ExistingUserShortcut";
-import { getPosition, POSITIONS } from "@/lib/positions";
-import { fetchOpenJobOrders, fetchAppliedFields, fetchPositionContent } from "@/lib/positions-db";
+import {
+  fetchOpenJobOrders,
+  fetchAppliedFields,
+  fetchPositionContent,
+  fetchPositionForDetail,
+  fetchPositionSlugsForBuild,
+} from "@/lib/positions-db";
 import { resolvePositionDetail } from "@/lib/positionContent";
 
 type RouteParams = { locale: string; slug: string };
 
 export const revalidate = 60;
 
-export function generateStaticParams() {
-  return POSITIONS.map((p) => ({ locale: "id", slug: p.slug }));
+export async function generateStaticParams() {
+  const slugs = await fetchPositionSlugsForBuild();
+  return slugs.map((slug) => ({ locale: "id", slug }));
 }
 
 export async function generateMetadata({
@@ -25,7 +31,7 @@ export async function generateMetadata({
   params: Promise<RouteParams>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const p = getPosition(slug);
+  const p = await fetchPositionForDetail(slug);
   if (!p) return { title: "Lowongan tidak ditemukan" };
   return {
     title: `Lowongan ${p.role} ${p.country} — ${p.salary}/bulan`,
@@ -42,17 +48,16 @@ export default async function LowonganDetailPage({
   if (locale !== "id") notFound();
   setRequestLocale(locale);
 
-  const baseStatic = getPosition(slug);
-  if (!baseStatic) notFound();
-
-  // Overlay live job_order, fetch apply-stage qualifying fields, and admin-
-  // authored landing content in parallel. positions.content takes priority
-  // over static lib/positionDetails (fallback if not yet authored).
-  const [jobOrders, appliedFields, dbContent] = await Promise.all([
+  // Fetch position (DB → static fallback), apply-stage fields, content blob,
+  // and live job orders in parallel.
+  const [baseStatic, jobOrders, appliedFields, dbContent] = await Promise.all([
+    fetchPositionForDetail(slug),
     fetchOpenJobOrders(),
     fetchAppliedFields(slug),
     fetchPositionContent(slug),
   ]);
+  if (!baseStatic) notFound();
+
   const detail = resolvePositionDetail(slug, dbContent);
   if (!detail) notFound();
   const jo = jobOrders.get(slug);

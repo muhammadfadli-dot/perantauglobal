@@ -6,8 +6,8 @@ import { Icon } from "@/components/pg/Icon";
 import { PositionCard } from "@/components/pg/PositionCard";
 import { TrustStrip } from "@/components/pg/TrustStrip";
 import { WhatsAppFab } from "@/components/pg/WhatsAppFab";
-import { POSITIONS, type PositionCountry } from "@/lib/positions";
-import { fetchOpenJobOrders, mergePositionsWithJobOrders } from "@/lib/positions-db";
+import { type PositionCountry } from "@/lib/positions";
+import { fetchPositionsForCatalog } from "@/lib/positions-db";
 
 export const metadata: Metadata = {
   title: "Lowongan Kerja Luar Negeri — Saudi Arabia, Jepang, Taiwan",
@@ -60,8 +60,7 @@ export default async function LowonganIndexPage({
       ? (country as PositionCountry)
       : "Semua";
 
-  const jobOrders = await fetchOpenJobOrders();
-  const merged = mergePositionsWithJobOrders(jobOrders);
+  const merged = await fetchPositionsForCatalog();
   const visible =
     activeCountry === "Semua"
       ? merged
@@ -82,7 +81,7 @@ export default async function LowonganIndexPage({
               <span className="text-pg-red-600">yang resmi.</span>
             </h1>
             <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed mt-4 max-w-prose">
-              {POSITIONS.length} posisi di Saudi Arabia, Jepang, Taiwan &
+              {merged.length} posisi di Saudi Arabia, Jepang, Taiwan &
               Indonesia — semua dari employer terverifikasi P3MI. Satu profil,
               apply ke banyak posisi, pantau status real-time. Bebas biaya
               sebelum offering letter.

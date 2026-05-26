@@ -15,6 +15,24 @@ export type ContentDetailRow = { label: string; value: string };
 
 export type ContentBenefit = { icon: string; label: string; value: string };
 
+/**
+ * Card meta authored by admin and rendered as the position's catalog card
+ * on apps/web /lowongan. Required for a DB-created position to appear on
+ * the public site with a complete card (fallback path: static catalog or
+ * sensible defaults if cardMeta is missing).
+ *
+ * Persisted at positions.content.cardMeta so admin owns the full
+ * presentation layer without touching code.
+ */
+export type ContentCardMeta = {
+  icon: string;
+  salary: string;
+  salaryNote: string;
+  gender: string;
+  age: string;
+  contractLabel?: string;
+};
+
 export type ContentFee = {
   amount: string;
   breakdown: string[];
@@ -42,6 +60,7 @@ export type ContentTrustSignals = {
 
 export type PositionContent = {
   hero?: { metaLine?: string };
+  cardMeta?: ContentCardMeta;
   jobDescription?: string[];
   details?: ContentDetailRow[];
   benefits?: ContentBenefit[];
@@ -63,6 +82,25 @@ export function parseContent(raw: Json | null | undefined): PositionContent {
   if (obj.hero && typeof obj.hero === "object" && !Array.isArray(obj.hero)) {
     const h = obj.hero as Record<string, unknown>;
     if (typeof h.metaLine === "string") out.hero = { metaLine: h.metaLine };
+  }
+  if (obj.cardMeta && typeof obj.cardMeta === "object" && !Array.isArray(obj.cardMeta)) {
+    const c = obj.cardMeta as Record<string, unknown>;
+    if (
+      typeof c.icon === "string" &&
+      typeof c.salary === "string" &&
+      typeof c.salaryNote === "string" &&
+      typeof c.gender === "string" &&
+      typeof c.age === "string"
+    ) {
+      out.cardMeta = {
+        icon: c.icon,
+        salary: c.salary,
+        salaryNote: c.salaryNote,
+        gender: c.gender,
+        age: c.age,
+        ...(typeof c.contractLabel === "string" ? { contractLabel: c.contractLabel } : {}),
+      };
+    }
   }
   if (Array.isArray(obj.jobDescription)) {
     out.jobDescription = obj.jobDescription.filter((v): v is string => typeof v === "string");
