@@ -227,6 +227,18 @@ export const POSITIONS: Position[] = [
     age: "20–35",
     contractLabel: "Sistem SSW",
   },
+  {
+    slug: "manufaktur-pengelasan",
+    role: "Manufaktur (Pengelasan)",
+    country: "Jepang",
+    icon: "briefcase",
+    status: "queue",
+    salary: "¥244.200",
+    salaryNote: "/bulan",
+    gender: "Laki-laki",
+    age: "max 35",
+    contractLabel: "Sistem SSW",
+  },
   // === Taiwan ===
   {
     slug: "caregiver-taiwan",
