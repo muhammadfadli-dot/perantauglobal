@@ -222,7 +222,7 @@ export default function PositionPreview({
                   <span className="shrink-0 mt-0.5">
                     <Icon name="info" size={14} />
                   </span>
-                  <div className="text-[12px]">{content.fee.note}</div>
+                  <div className="text-[12px] whitespace-pre-wrap">{content.fee.note}</div>
                 </div>
               )}
             </div>

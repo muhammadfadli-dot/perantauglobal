@@ -224,9 +224,8 @@ export default async function LowonganDetailPage({
                     style={{ background: "var(--pg-info-bg)" }}
                   >
                     <Icon name="info" size={18} className="text-pg-info shrink-0 mt-0.5" />
-                    <div className="text-[13px] leading-relaxed text-pg-info">
-                      <b>Gratis sampai kamu terima offering letter.</b> Biaya baru muncul setelah
-                      employer menerima kamu.
+                    <div className="text-[13px] leading-relaxed text-pg-info whitespace-pre-wrap">
+                      {detail.fee.note}
                     </div>
                   </div>
                 )}
