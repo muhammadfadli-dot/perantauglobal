@@ -7,6 +7,7 @@ import { Icon } from "@/components/pg/Icon";
 import PositionActiveToggle from "./PositionActiveToggle";
 import PositionMetaEditor from "./PositionMetaEditor";
 import DeletePositionCard from "./DeletePositionCard";
+import PublishBarMount from "./PublishBarMount";
 import PositionEditorShell from "@/components/admin/PositionEditorShell";
 import ApplicationFieldsEditor, {
   type Field as ApplicationField,
@@ -23,6 +24,7 @@ type Position = {
   description: string | null;
   active: boolean;
   content: unknown;
+  updated_at: string | null;
 };
 
 type JobOrder = {
@@ -59,7 +61,7 @@ export default async function PositionDetailPage({
   ] = await Promise.all([
     supabase
       .from("positions")
-      .select("slug, name, country, description, active, content")
+      .select("slug, name, country, description, active, content, updated_at")
       .eq("slug", slug)
       .maybeSingle(),
     supabase
@@ -195,6 +197,11 @@ export default async function PositionDetailPage({
           />
         </section>
 
+        {/* PublishBar lives at the bottom of <main> so it sticks to the
+            viewport bottom while admin scrolls editor content. The Settings
+            tab still has PositionActiveToggle for the detailed explainer
+            copy; PublishBar is the persistent action UI consistent with
+            Sanity/Notion-style editors. */}
         {/* === Tab: Job orders === */}
         <section data-tab="jobs" className="mb-8">
           <div className="flex items-center justify-between mb-3">
@@ -261,6 +268,13 @@ export default async function PositionDetailPage({
           )}
         </section>
       </main>
+
+      <PublishBarMount
+        slug={position.slug}
+        positionName={position.name}
+        initialActive={position.active}
+        lastUpdatedAt={position.updated_at}
+      />
     </>
   );
 }
