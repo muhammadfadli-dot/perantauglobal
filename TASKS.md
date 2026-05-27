@@ -2,7 +2,36 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-05-27 (Phases 0–7 + Phase 6 admin integration 6e–6h SHIPPED, 25 PRs, live in prod)
+**Last updated:** 2026-05-27 (Phases 0–8 ALL SHIPPED, 31 PRs total, design-C admin publish flow live in prod)
+
+## 2026-05-27 (evening) — Phase 8 design-C publish flow ✅ SHIPPED
+
+Real draft/publish model + missing tab structure + overlay preview UX. Closes
+every gap identified in the design-C analysis (Match design C publishing flow
+spec from `~/Downloads/web redesign perantau global (1)/admin-editor-c.jsx`).
+
+**Schema (applied to prod Supabase `jeadtvxgxmqnsqwxjmhj` 2026-05-27):**
+- Migration 0043 — `positions.draft_content jsonb` + `positions.published_at timestamptz`. Additive only, 22 rows backfilled (`published_at = updated_at where active`).
+
+**Backend:**
+- PR [#99](https://github.com/panji-firmansyah/perantauglobal/pull/99) — **8a** Schema migration 0043 + types.ts hand-edit
+- PR [#100](https://github.com/panji-firmansyah/perantauglobal/pull/100) — **8b** Server actions `saveDraft` / `publishPosition` / `discardDraft` + editor page reads `draft_content ?? content` + "Draft belum dipublish" banner
+
+**Editor UX:**
+- PR [#101](https://github.com/panji-firmansyah/perantauglobal/pull/101) — **8c** PublishBar v2 (3 states: client-dirty / server-draft / clean; 4 actions; 30s debounced auto-save; `pg-editor-state` window event bus to bridge client state to server-rendered bar)
+- PR [#102](https://github.com/panji-firmansyah/perantauglobal/pull/102) — **8d** Media & SEO 5th tab (hero / employer logo / OG image URLs + meta title with 60-char counter + meta description with 160-char counter; cross-tab safety via latestContent ref)
+- PR [#103](https://github.com/panji-firmansyah/perantauglobal/pull/103) — **8e** Settings tab → "Settings & publish" + new `PublishHistoryCard` (2×2 metadata grid: Live versi / Draft pending / Visibility / URL publik)
+- PR [#104](https://github.com/panji-firmansyah/perantauglobal/pull/104) — **8f** PreviewOverlay (full-screen modal with desktop/mobile viewport toggle) + PreviewToggleStrip (sticky above PublishBar) + BannerMetric (3 KPI tiles in editor header: Lamaran 7 hari with sparkline / Apply→screen conv% / Total lamaran). Side-by-side preview removed from PositionEditorShell — overlay-only per design C.
+
+**Editor flow now (matches design C 1:1):**
+```
+[ AdminTopBar — Operasi → Catalog → {Position name} ]
+[ Title block ────────────────── BannerMetric ×3 ]
+[ Tabs: Konten · Form · Media & SEO · Settings & publish · Job orders ]
+[ ─── Editor content (full-width, no side preview) ─── ]
+[ PreviewToggleStrip — "Lihat preview full-screen" ]
+[ PublishBar — status (dirty/draft/clean) + Riwayat / Preview tab baru / Simpan draft / Publish ke live ]
+```
 
 ## 2026-05-27 (afternoon) — Phase 6 admin integration ✅ SHIPPED
 
