@@ -84,7 +84,7 @@ export function WhatIs() {
               ))}
             </div>
 
-            <div className="grid grid-cols-3 gap-3 pt-3 border-t border-dashed border-pg-ink-100">
+            <div className="grid grid-cols-3 gap-3 pt-3 mt-auto border-t border-dashed border-pg-ink-100">
               {[
                 { num: "17", label: "posisi aktif" },
                 { num: "4", label: "negara tujuan" },
@@ -153,7 +153,7 @@ export function WhatIs() {
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 pt-3 border-t border-dashed border-[rgba(201,138,20,0.25)]">
+            <div className="grid grid-cols-3 gap-3 pt-3 mt-auto border-t border-dashed border-[rgba(201,138,20,0.25)]">
               {[
                 { num: "3", label: "modul utama" },
                 { num: "4", label: "bahasa fundamental" },

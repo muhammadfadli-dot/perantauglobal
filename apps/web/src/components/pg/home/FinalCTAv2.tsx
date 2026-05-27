@@ -1,3 +1,4 @@
+import * as React from "react";
 import Link from "next/link";
 import { Icon } from "@/components/pg/Icon";
 import { waLink } from "@/lib/contact";
@@ -63,17 +64,26 @@ export function FinalCTAv2() {
       className="relative overflow-hidden border-t border-pg-ink-100"
       style={{ background: "var(--pg-red-900)" }}
     >
-      {/* Decoration: dashed flight paths */}
+      {/* Decoration: animated dashed flight paths */}
       <div
         aria-hidden
         className="absolute inset-0 pointer-events-none opacity-30"
         style={{ color: "rgba(255,255,255,0.4)" }}
       >
         <svg viewBox="0 0 1200 600" preserveAspectRatio="xMidYMid slice" className="w-full h-full">
-          <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 6" strokeLinecap="round">
-            <path d="M 0,420 C 200,360 400,310 600,290 S 1000,260 1200,200" />
-            <path d="M 0,500 C 250,440 450,400 650,360 S 1050,300 1200,280" />
-            <path d="M 0,340 C 180,300 380,260 580,240 S 980,210 1200,160" />
+          <g fill="none" stroke="currentColor" strokeWidth="1.5" strokeDasharray="4 8" strokeLinecap="round">
+            <path
+              d="M 0,420 C 200,360 400,310 600,290 S 1000,260 1200,200"
+              style={{ animation: "pg-flight-path 14s linear infinite" }}
+            />
+            <path
+              d="M 0,500 C 250,440 450,400 650,360 S 1050,300 1200,280"
+              style={{ animation: "pg-flight-path 18s linear infinite", animationDelay: "-4s" }}
+            />
+            <path
+              d="M 0,340 C 180,300 380,260 580,240 S 980,210 1200,160"
+              style={{ animation: "pg-flight-path 22s linear infinite", animationDelay: "-9s" }}
+            />
           </g>
           <g fill="currentColor">
             <circle cx="120" cy="430" r="3" />
@@ -156,20 +166,26 @@ export function FinalCTAv2() {
             </div>
           </div>
 
-          {/* Right: postcard stack */}
+          {/* Right: postcard stack — interactive, idle drift */}
           <div
-            aria-hidden
             className="relative grid grid-cols-2 gap-3 md:gap-4 max-w-md mx-auto lg:ml-auto lg:mr-0"
           >
             {POSTCARDS.map((p, i) => (
               <div
                 key={p.flag}
-                className="relative flex flex-col gap-2 p-4 bg-pg-cream/95 rounded-2xl transition-transform"
-                style={{
-                  transform: `rotate(${p.rotate}deg)`,
-                  boxShadow: "0 18px 36px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06)",
-                  zIndex: i + 1,
-                }}
+                tabIndex={0}
+                role="img"
+                aria-label={`${p.from} → ${p.to} · ${p.role}`}
+                className="group relative flex flex-col gap-2 p-4 bg-pg-cream/95 rounded-2xl transition-all duration-300 cursor-pointer hover:!translate-y-[-6px] hover:!rotate-0 hover:shadow-[0_24px_50px_rgba(0,0,0,0.30)] hover:z-20 focus-visible:!translate-y-[-6px] focus-visible:!rotate-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pg-gold-200"
+                style={
+                  {
+                    "--pc-rot": `${p.rotate}deg`,
+                    transform: `rotate(${p.rotate}deg)`,
+                    boxShadow: "0 18px 36px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06)",
+                    zIndex: i + 1,
+                    animation: `pg-postcard-drift ${5 + i * 0.7}s ease-in-out ${i * 0.4}s infinite`,
+                  } as React.CSSProperties
+                }
               >
                 <span
                   className="absolute -top-2 -right-2 inline-grid place-items-center w-9 h-9 rounded-full bg-pg-white"

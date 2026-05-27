@@ -134,14 +134,14 @@ export function HomeHero({
             className="relative w-full mx-auto"
             style={{ maxWidth: 520, aspectRatio: "5/5" }}
           >
-            {/* Floating destination tag (background layer) */}
+            {/* Floating destination tag — front of cards */}
             <div
               className="absolute inline-flex items-center gap-2 px-3.5 py-2 bg-pg-ink-900 text-white rounded-full font-mono text-[11.5px] font-bold tracking-[0.06em] uppercase"
               style={{
-                top: "38%",
-                left: "-8%",
+                top: "5%",
+                left: "-4%",
                 transform: "rotate(-6deg)",
-                zIndex: 1,
+                zIndex: 10,
                 boxShadow: "0 8px 20px rgba(20,20,20,0.18)",
               }}
             >
@@ -200,15 +200,15 @@ export function HomeHero({
               );
             })}
 
-            {/* Floating "Bebas calo" pill */}
+            {/* Floating "Bebas calo" pill — front of cards */}
             <div
               className="absolute inline-flex items-center gap-1.5 px-3 py-1.5 bg-pg-white border border-pg-ink-100 rounded-full font-mono text-[11px] font-semibold text-pg-ink-700"
               style={{
-                bottom: "8%",
-                right: "-2%",
+                bottom: "4%",
+                right: "-4%",
                 transform: "rotate(4deg)",
-                zIndex: 1,
-                boxShadow: "0 6px 16px rgba(20,20,20,0.08)",
+                zIndex: 10,
+                boxShadow: "0 12px 28px rgba(20,20,20,0.16)",
               }}
             >
               <span
@@ -242,36 +242,62 @@ export function HomeHero({
                 <Link
                   key={c.name}
                   href={`/lowongan?country=${encodeURIComponent(c.name)}`}
-                  className="group relative flex flex-col overflow-hidden rounded-[18px] bg-pg-white border border-pg-ink-100 no-underline transition-all hover:-translate-y-1 hover:border-pg-ink-200"
+                  className="group relative aspect-[4/5] overflow-hidden rounded-[18px] bg-pg-ink-900 text-white no-underline transition-all hover:-translate-y-1 isolate"
                   style={{ boxShadow: "var(--pg-shadow-1)" }}
                   aria-label={`Lowongan di ${c.name}`}
                 >
-                  <div className="relative h-32 md:h-36 overflow-hidden">
-                    <Image
-                      src={c.img}
-                      alt={c.name}
-                      fill
-                      sizes="(min-width:1024px) 25vw, 50vw"
-                      className="object-cover transition-transform group-hover:scale-105"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-2 p-4">
-                    <span className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 bg-pg-ink-50 rounded-full font-mono text-[10.5px] font-bold tracking-[0.04em] text-pg-ink-700">
-                      <span className="text-[11px] leading-none">{c.flag}</span>
+                  <Image
+                    src={c.img}
+                    alt={c.name}
+                    fill
+                    sizes="(min-width:1024px) 25vw, 50vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                  />
+                  {/* Bottom-anchored dark scrim so white text stays legible on photo */}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 z-[1]"
+                    style={{
+                      background:
+                        "linear-gradient(180deg, rgba(20,20,20,0) 30%, rgba(20,20,20,0.62) 75%, rgba(20,20,20,0.88) 100%)",
+                    }}
+                  />
+                  {/* Content overlay */}
+                  <div className="absolute inset-0 z-[2] p-4 md:p-5 flex flex-col justify-between">
+                    {/* Top-left flag pill (glass) */}
+                    <span
+                      className="self-start inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full font-mono text-[10px] md:text-[10.5px] font-bold uppercase tracking-[0.06em] text-white"
+                      style={{
+                        background: "rgba(255,255,255,0.16)",
+                        border: "1px solid rgba(255,255,255,0.22)",
+                        backdropFilter: "blur(10px)",
+                        WebkitBackdropFilter: "blur(10px)",
+                      }}
+                    >
+                      <span
+                        aria-hidden
+                        className="inline-grid place-items-center w-[18px] h-[18px] rounded-full bg-pg-white text-[11px] leading-none"
+                      >
+                        {c.flag}
+                      </span>
                       {c.short}
                     </span>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex flex-col">
-                        <span className="text-[15px] font-extrabold text-pg-ink-900 tracking-[-0.01em]">
-                          {c.name}
-                        </span>
-                        <span className="font-mono text-[11.5px] text-pg-ink-500 mt-0.5">
+                    {/* Bottom: country name (on photo) + meta + arrow */}
+                    <div className="flex flex-col gap-1">
+                      <span
+                        className="font-extrabold tracking-[-0.025em] leading-none text-white"
+                        style={{ fontSize: "clamp(22px, 2.4vw, 28px)" }}
+                      >
+                        {c.name}
+                      </span>
+                      <div className="flex items-baseline justify-between gap-2 mt-1">
+                        <span className="font-mono text-[12px] md:text-[12.5px] tracking-[0.02em] text-white/85">
                           {count} posisi · {c.currency}
                         </span>
+                        <span className="w-8 h-8 rounded-full bg-pg-white text-pg-ink-900 grid place-items-center shrink-0 transition-transform group-hover:translate-x-0.5">
+                          <Icon name="arrow_right" size={14} stroke={2.4} />
+                        </span>
                       </div>
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-pg-ink-900 text-white shrink-0 transition-transform group-hover:translate-x-0.5">
-                        <Icon name="arrow_right" size={12} stroke={2.4} />
-                      </span>
                     </div>
                   </div>
                 </Link>

@@ -115,15 +115,39 @@ export function JobPortalDeep({ totalPositions }: { totalPositions: number }) {
                     </span>
                   ))}
                 </div>
-                {/* Job list */}
-                <div className="flex flex-col gap-2 p-3 overflow-hidden">
+                {/* Job list — asymmetric stack with idle float */}
+                <div className="relative flex flex-col gap-2 p-3 overflow-hidden">
+                  {/* Top fade hint that more content extends above */}
+                  <div
+                    aria-hidden
+                    className="absolute top-0 left-0 right-0 h-4 pointer-events-none z-[1]"
+                    style={{ background: "linear-gradient(180deg, var(--pg-paper) 0%, transparent 100%)" }}
+                  />
                   {[
-                    { pic: "/images/lowongan/perawat-saudi-arabia.jpg", role: "Perawat", meta: "🇸🇦 Riyadh · Wanita · 21-38", salary: "SAR 3.200", open: true },
-                    { pic: "/images/lowongan/kaigo-jepang.jpg", role: "Caregiver Kaigo", meta: "🇯🇵 Nagoya · Wanita · 18-35", salary: "¥190K", open: false },
-                    { pic: "/images/lowongan/truck-driver-jepang.jpg", role: "Truck Driver", meta: "🇯🇵 Osaka · L · maks 44", salary: "¥250K", open: false },
-                    { pic: "/images/lowongan/barista-saudi-arabia.jpg", role: "Barista", meta: "🇸🇦 Jeddah · L/P · 21-30", salary: "SAR 1.500", open: false },
-                  ].map((j) => (
-                    <div key={j.role} className="flex items-center gap-2.5 p-2 bg-pg-white border border-pg-ink-100 rounded-[12px]">
+                    { pic: "/images/lowongan/perawat-saudi-arabia.jpg", role: "Perawat", meta: "🇸🇦 Riyadh · Wanita · 21-38", salary: "SAR 3.200", open: true,  lift: true },
+                    { pic: "/images/lowongan/kaigo-jepang.jpg",          role: "Caregiver Kaigo", meta: "🇯🇵 Nagoya · Wanita · 18-35", salary: "¥190K", open: false, lift: false },
+                    { pic: "/images/lowongan/truck-driver-jepang.jpg",   role: "Truck Driver", meta: "🇯🇵 Osaka · L · maks 44", salary: "¥250K", open: false, lift: false },
+                    { pic: "/images/lowongan/barista-saudi-arabia.jpg",  role: "Barista", meta: "🇸🇦 Jeddah · L/P · 21-30", salary: "SAR 1.500", open: false, lift: false },
+                  ].map((j, i) => (
+                    <div
+                      key={j.role}
+                      className={`flex items-center gap-2.5 p-2 rounded-[12px] transition-transform ${
+                        j.lift
+                          ? "bg-pg-white relative z-[2]"
+                          : "bg-pg-white"
+                      }`}
+                      style={{
+                        border: j.lift
+                          ? "1.5px solid var(--pg-red-200)"
+                          : "1px solid var(--pg-ink-100)",
+                        boxShadow: j.lift
+                          ? "0 8px 22px rgba(215,38,47,0.18), 0 0 0 4px rgba(215,38,47,0.06)"
+                          : "var(--pg-shadow-1)",
+                        transform: j.lift ? "scale(1.025)" : "scale(0.985)",
+                        opacity: i >= 3 ? 0.92 : 1,
+                        animation: `pg-card-float 4s ease-in-out ${i * 0.5}s infinite`,
+                      }}
+                    >
                       <div
                         className="w-9 h-9 rounded-[8px] bg-cover bg-center bg-pg-ink-50 shrink-0"
                         style={{ backgroundImage: `url(${j.pic})` }}
@@ -135,15 +159,27 @@ export function JobPortalDeep({ totalPositions }: { totalPositions: number }) {
                       <div className="flex flex-col items-end shrink-0">
                         <span className="font-mono text-[10.5px] font-extrabold text-pg-ink-900">{j.salary}</span>
                         <span
-                          className={`font-mono text-[8px] font-bold uppercase tracking-[0.08em] mt-0.5 ${
+                          className={`inline-flex items-center gap-1 font-mono text-[8px] font-bold uppercase tracking-[0.08em] mt-0.5 ${
                             j.open ? "text-pg-ok" : "text-pg-ink-500"
                           }`}
                         >
+                          {j.open && (
+                            <span
+                              aria-hidden
+                              className="w-1 h-1 rounded-full bg-pg-ok animate-pulse"
+                            />
+                          )}
                           {j.open ? "Buka" : "Antrian"}
                         </span>
                       </div>
                     </div>
                   ))}
+                  {/* Bottom fade hint that more content extends below */}
+                  <div
+                    aria-hidden
+                    className="absolute bottom-0 left-0 right-0 h-6 pointer-events-none z-[1]"
+                    style={{ background: "linear-gradient(0deg, var(--pg-paper) 0%, transparent 100%)" }}
+                  />
                 </div>
               </div>
 

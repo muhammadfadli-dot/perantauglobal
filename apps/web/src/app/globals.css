@@ -191,6 +191,24 @@ article p {
   100% { opacity: 1; transform: translateY(0); }
 }
 
+/* Phone-mockup card float — subtle vertical drift to suggest live content. */
+@keyframes pg-card-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* FinalCTA flight path — dashed stroke flows from left to right. */
+@keyframes pg-flight-path {
+  0%   { stroke-dashoffset: 200; }
+  100% { stroke-dashoffset: 0; }
+}
+
+/* FinalCTA postcard — gentle idle float so the stack feels alive. */
+@keyframes pg-postcard-drift {
+  0%, 100% { transform: rotate(var(--pc-rot, 0deg)) translateY(0); }
+  50%      { transform: rotate(var(--pc-rot, 0deg)) translateY(-4px); }
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

@@ -1,6 +1,5 @@
 import { TopBarWWW } from "@/components/pg/TopBarWWW";
 import { TrustStrip } from "@/components/pg/TrustStrip";
-import { CountryStrip } from "@/components/pg/CountryStrip";
 import { Footer } from "@/components/pg/Footer";
 
 export default function MainLayout({
@@ -12,7 +11,6 @@ export default function MainLayout({
     <>
       <TopBarWWW />
       <TrustStrip />
-      <CountryStrip />
       {children}
       <Footer />
     </>
