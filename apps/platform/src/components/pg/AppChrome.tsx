@@ -96,24 +96,38 @@ function BrandMark() {
   );
 }
 
+/**
+ * Bottom nav — Portal v2 design (Phase 5a).
+ *
+ * 4 tabs per design: Beranda · Lowongan · Paspor · Saya.
+ *
+ * Replaces the old "Jelajah / Lamaran / Profil" labels with the v2 names.
+ * /applications route still exists but is reached from the Beranda hero
+ * card (the active lamaran lives inline on home). The "apps" tab is gone.
+ *
+ * Active state: top-anchored 3px red bar (cleaner indicator than text-only
+ * color) + red icon + red label.
+ */
 const NAV_ITEMS: { key: string; label: string; icon: IconName; href: string }[] = [
-  { key: "home", label: "Beranda", icon: "home", href: "/dashboard" },
-  { key: "explore", label: "Jelajah", icon: "compass", href: "/explore" },
-  { key: "apps", label: "Lamaran", icon: "briefcase", href: "/applications" },
-  { key: "profile", label: "Profil", icon: "user", href: "/profile" },
+  { key: "home",   label: "Beranda",  icon: "home",     href: "/dashboard" },
+  { key: "search", label: "Lowongan", icon: "search",   href: "/explore" },
+  { key: "learn",  label: "Paspor",   icon: "passport", href: "/paspor" },
+  { key: "me",     label: "Saya",     icon: "user",     href: "/profile" },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
   const activeKey =
-    pathname?.startsWith("/profile") ? "profile" :
-    pathname?.startsWith("/explore") ? "explore" :
-    pathname?.startsWith("/applications") ? "apps" :
+    pathname?.startsWith("/profile") ? "me" :
+    pathname?.startsWith("/paspor") ? "learn" :
+    pathname?.startsWith("/explore") ? "search" :
+    // /applications/* still maps to Beranda since lamaran lives there post-v2
     "home";
   return (
     <nav
-      className="sticky bottom-0 z-30 grid grid-cols-4 px-2 pt-2 pb-3.5 border-t border-pg-ink-100"
+      className="sticky bottom-0 z-30 grid grid-cols-4 px-2 pt-0 pb-4 border-t border-pg-ink-100"
       style={{ background: "var(--pg-white)" }}
+      aria-label="Navigasi utama"
     >
       {NAV_ITEMS.map((it) => {
         const on = it.key === activeKey;
@@ -121,10 +135,20 @@ export function BottomNav() {
           <Link
             key={it.key}
             href={it.href}
-            className={`flex flex-col items-center gap-1 py-2 px-1 no-underline text-[11px] font-bold tracking-wide ${
+            aria-current={on ? "page" : undefined}
+            className={`relative flex flex-col items-center gap-1 pt-3 pb-1 px-1 no-underline text-[10.5px] font-bold tracking-[0.02em] transition-colors ${
               on ? "text-pg-red-600" : "text-pg-ink-400"
             }`}
           >
+            {/* Top-anchored active indicator */}
+            <span
+              aria-hidden
+              className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-b-[4px] transition-opacity"
+              style={{
+                background: "var(--pg-red-600)",
+                opacity: on ? 1 : 0,
+              }}
+            />
             <Icon name={it.icon} size={22} stroke={on ? 2.2 : 1.8} />
             <span>{it.label}</span>
           </Link>

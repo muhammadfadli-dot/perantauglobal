@@ -120,6 +120,20 @@
   --pg-amber-600: #a16d0c;
   --pg-amber-700: #6e4906;
 
+  /* Portal v2 (Phase 5) — alias for `--pa-amber-*` design names + supplemental tokens.
+     The design's portal-v2 components use `--pa-amber-*`; we alias to the existing
+     pg-amber palette to keep one source of truth. */
+  --pa-amber-50:  var(--pg-amber-50);
+  --pa-amber-100: var(--pg-amber-100);
+  --pa-amber-200: var(--pg-amber-200);
+  --pa-amber-500: var(--pg-amber-500);
+  --pa-amber-600: var(--pg-amber-600);
+  --pa-amber-700: var(--pg-amber-700);
+  --pa-cream:     #f7f1e6;
+  --pa-paperwarm: #f6f1e6;
+  --pa-shadow-card: 0 1px 2px rgba(20,16,12,0.04), 0 8px 24px rgba(20,16,12,0.06);
+  --pa-shadow-lift: 0 2px 6px rgba(20,16,12,0.06), 0 18px 42px rgba(20,16,12,0.10);
+
   /* Country tints — IMAGE OVERLAYS ONLY, not UI accent.
      Used in CSS filters on country chapter bands + position hero images.
      Never apply as background/foreground in UI surfaces. */
