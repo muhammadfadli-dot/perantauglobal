@@ -33,6 +33,10 @@ export type PositionDetail = {
   process?: string[];
   /** Public job description */
   jobDescription?: string[];
+  /** Rough IDR conversion of salary (e.g. "Rp 13,8 juta / bulan") — optional */
+  salaryIdr?: string;
+  /** Process duration label (e.g. "±4 bulan dari daftar sampai berangkat") — optional */
+  processDuration?: string;
 };
 
 const COMMON_PROCESS = [

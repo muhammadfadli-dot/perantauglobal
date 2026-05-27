@@ -67,6 +67,12 @@ function fromContent(raw: unknown): PositionDetail | null {
   if (Array.isArray(obj.process)) {
     detail.process = (obj.process as unknown[]).filter((s): s is string => typeof s === "string");
   }
+  if (typeof obj.salaryIdr === "string" && obj.salaryIdr.trim().length > 0) {
+    detail.salaryIdr = obj.salaryIdr.trim();
+  }
+  if (typeof obj.processDuration === "string" && obj.processDuration.trim().length > 0) {
+    detail.processDuration = obj.processDuration.trim();
+  }
   if (obj.fee && typeof obj.fee === "object" && !Array.isArray(obj.fee)) {
     const f = obj.fee as FeeJson;
     if (typeof f.amount === "string") {
