@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
-import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
-import { Icon } from "@/components/pg/Icon";
+import { BottomNav } from "@/components/pg/AppChrome";
+import { Icon, type IconName } from "@/components/pg/Icon";
 import SignOutButton from "@/components/SignOutButton";
 import { formatMemberId, EDUCATION_LABEL } from "@/lib/candidate";
+import {
+  BerandaTopBar,
+  SectionHead,
+  ProfileRing,
+} from "@/components/pg/candidate/BerandaShared";
 
 export const dynamic = "force-dynamic";
 
@@ -16,39 +21,44 @@ type CandidateRow = {
   birth_date: string | null;
   gender: string | null;
   education: string | null;
-  profile_data: unknown;
   created_at: string;
 };
+
+const REQUIRED_DOCS = ["ktp", "passport", "formal_photo", "cv"];
 
 export default async function ProfilePage() {
   const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  const [{ data: candidateData }, { data: docsData }] = await Promise.all([
+  const [candRes, docsRes, appsRes] = await Promise.all([
     supabase
       .from("candidates")
       .select(
-        "id, full_name, email, phone, city, birth_date, gender, education, profile_data, created_at",
+        "id, full_name, email, phone, city, birth_date, gender, education, created_at",
       )
       .eq("id", candidateId)
       .single(),
     supabase
       .from("candidate_documents")
-      .select("doc_type, verified, rejected_at, uploaded_at")
+      .select("doc_type, verified, uploaded_at")
       .eq("candidate_id", candidateId)
       .order("uploaded_at", { ascending: false }),
+    supabase
+      .from("applications")
+      .select("id, pipeline_stage")
+      .eq("candidate_id", candidateId),
   ]);
 
-  const candidate = candidateData as CandidateRow | null;
+  const candidate = candRes.data as CandidateRow | null;
   if (!candidate) throw new Error(`Candidate ${candidateId} disappeared`);
 
-  const docsRows = (docsData ?? []) as Array<{
+  const docsRows = (docsRes.data ?? []) as Array<{
     doc_type: string;
     verified: boolean;
-    rejected_at: string | null;
   }>;
+  const appsRows = (appsRes.data ?? []) as Array<{ id: string; pipeline_stage: string }>;
 
-  // Identity completion: 5 fields beyond email (which is locked to auth account)
+  // Identity completion
   const identityFields = [
     candidate.phone,
     candidate.city,
@@ -60,19 +70,29 @@ export default async function ProfilePage() {
   const identityTotal = identityFields.length;
   const identityComplete = identityFilled === identityTotal;
 
-  // Documents — count latest verified per required type
-  const REQUIRED_DOCS = ["ktp", "passport", "formal_photo", "cv"];
-  const docsLatestByType = new Map<string, { verified: boolean; rejected: boolean }>();
+  // Documents
+  const docsLatestByType = new Map<string, boolean>();
   for (const d of docsRows) {
     const key = d.doc_type === "photo" ? "formal_photo" : d.doc_type;
-    if (!docsLatestByType.has(key)) {
-      docsLatestByType.set(key, { verified: d.verified, rejected: !!d.rejected_at });
-    }
+    if (!docsLatestByType.has(key)) docsLatestByType.set(key, d.verified);
   }
-  const docsVerified = REQUIRED_DOCS.filter((t) => docsLatestByType.get(t)?.verified).length;
+  const docsVerified = REQUIRED_DOCS.filter((t) => docsLatestByType.get(t)).length;
   const docsTotal = REQUIRED_DOCS.length;
 
+  // Applications
+  const appsActive = appsRows.filter(
+    (a) => !["rejected", "exit"].includes(a.pipeline_stage),
+  ).length;
+
+  // Overall completion (avg of identity + docs)
+  const overallPct = Math.round(
+    ((identityFilled / identityTotal) * 0.5 +
+      (docsVerified / docsTotal) * 0.5) *
+      100,
+  );
+
   const memberId = formatMemberId(candidate.id, candidate.created_at);
+
   const subline = [
     candidate.city,
     candidate.education
@@ -91,257 +111,287 @@ export default async function ProfilePage() {
       .join("") || "??";
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <TopBarApp title="Profil" />
-
-      <main className="flex-1 pb-6">
-        {/* Header card — avatar + name + member ID */}
-        <section
-          className="px-5 pt-4 pb-5"
-          style={{
-            background: "linear-gradient(180deg, var(--pg-surface-subtle) 0%, transparent 100%)",
-            borderBottom: "1px solid var(--pg-border)",
-          }}
-        >
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
+      <BerandaTopBar />
+      <main className="flex-1 pb-8 pt-1">
+        {/* Profile header with progress ring */}
+        <div className="px-5 pb-3">
           <div className="flex items-center gap-3.5">
-            <div
-              className="w-14 h-14 rounded-full grid place-items-center text-white text-[18px] font-extrabold shrink-0"
-              style={{
-                background: "linear-gradient(135deg, var(--pg-red-600) 0%, var(--pg-red-700) 100%)",
-                boxShadow:
-                  "0 3px 10px rgba(215,38,47,0.25), inset 0 1px 0 rgba(255,255,255,0.25)",
-              }}
-            >
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[19px] font-extrabold tracking-[-0.02em] leading-tight truncate">
+            <ProfileRing pct={overallPct} size={72}>
+              <span
+                className="grid place-items-center w-14 h-14 rounded-full text-white text-[18px] font-extrabold"
+                style={{
+                  background:
+                    "linear-gradient(135deg, var(--pg-red-600) 0%, var(--pg-red-700) 100%)",
+                  boxShadow:
+                    "0 3px 10px rgba(215,38,47,0.25), inset 0 1px 0 rgba(255,255,255,0.25)",
+                }}
+              >
+                {initials}
+              </span>
+            </ProfileRing>
+            <div className="flex flex-col gap-1 flex-1 min-w-0">
+              <span
+                className="font-extrabold tracking-[-0.022em] leading-tight text-pg-ink-900 truncate"
+                style={{ fontSize: 20 }}
+              >
                 {candidate.full_name}
-              </div>
+              </span>
               {subline && (
-                <div className="text-[12px] text-pg-ink-tertiary mt-0.5 truncate">
+                <span className="text-[12.5px] text-pg-ink-500 truncate">
                   {subline}
-                </div>
+                </span>
               )}
+              <span
+                className="inline-flex items-center w-fit gap-1.5 mt-1 px-2 py-0.5 rounded font-mono text-[9.5px] font-bold uppercase tracking-[0.06em]"
+                style={
+                  overallPct >= 100
+                    ? { background: "var(--pg-ok-bg)", color: "var(--pg-ok)" }
+                    : { background: "var(--pg-warn-bg)", color: "var(--pg-warn)" }
+                }
+              >
+                {overallPct >= 100 ? (
+                  <>
+                    <Icon name="check" size={9} stroke={3} /> Lengkap
+                  </>
+                ) : (
+                  <>{overallPct}% lengkap</>
+                )}
+              </span>
             </div>
           </div>
 
           {/* Member ID pill */}
-          <div className="mt-3 flex items-center gap-2">
+          <div
+            className="flex items-center gap-2 mt-3.5 px-3 py-2 rounded-[10px] font-mono text-[10.5px] font-bold uppercase tracking-[0.06em]"
+            style={{
+              background: "var(--pg-paper)",
+              border: "1px solid var(--pg-ink-100)",
+              color: "var(--pg-ink-500)",
+            }}
+          >
+            ID Anggota
             <span
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono"
-              style={{
-                background: "var(--pg-white)",
-                border: "1px solid var(--pg-border)",
-                boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
-              }}
+              className="tracking-[0.04em]"
+              style={{ color: "var(--pg-ink-900)" }}
             >
-              <Icon name="check" size={12} className="text-pg-red-600" />
-              <span
-                className="text-[11px] font-bold tracking-[0.08em] uppercase"
-                style={{ color: "var(--pg-ink-tertiary)" }}
-              >
-                Anggota
-              </span>
-              <span
-                className="text-[11px] font-extrabold tracking-[0.06em]"
-                style={{ color: "var(--pg-ink-primary)" }}
-              >
-                {memberId}
-              </span>
+              {memberId}
             </span>
           </div>
-        </section>
+        </div>
 
-        {/* Group: Data kamu */}
-        <Group label="Data kamu">
-          <ListRow
-            href="/profile/identitas"
-            iconBg="var(--pg-red-soft-bg)"
-            iconColor="var(--pg-red-600)"
-            iconSvg={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 21c0-4 4-7 8-7s8 3 8 7" />
-              </svg>
-            }
-            label="Data diri"
-            badge={
-              identityComplete
-                ? { text: "Lengkap", tone: "ok" }
-                : { text: `${identityFilled}/${identityTotal}`, tone: "warn" }
-            }
-          />
-          <ListRow
-            href="/profile/dokumen"
-            iconBg="var(--pg-amber-100)"
-            iconColor="var(--pg-amber-700)"
-            iconSvg={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <path d="M14 2v6h6" />
-              </svg>
-            }
-            label="Dokumen"
-            badge={
-              docsVerified === docsTotal
-                ? { text: "Lengkap", tone: "ok" }
-                : { text: `${docsVerified}/${docsTotal}`, tone: "warn" }
-            }
-            isLast
-          />
-        </Group>
+        {/* Journey stats — 4 tiles */}
+        <div className="px-5 pt-3">
+          <SectionHead title="Perjalanan kamu" sub="Ringkasan progres" />
+          <div className="grid grid-cols-2 gap-2.5">
+            <StatTile
+              icon="briefcase"
+              tone="red"
+              label="Lamaran aktif"
+              value={String(appsActive)}
+              caption={appsActive === 0 ? "Belum ada" : "Sedang berjalan"}
+            />
+            <StatTile
+              icon="passport"
+              tone="amber"
+              label="Paspor"
+              value="40%"
+              caption="3 modul lagi"
+            />
+            <StatTile
+              icon="check"
+              tone="ok"
+              label="Dokumen"
+              value={`${docsVerified}/${docsTotal}`}
+              caption={
+                docsVerified === docsTotal
+                  ? "Lengkap"
+                  : `${docsTotal - docsVerified} belum upload`
+              }
+            />
+            <StatTile
+              icon="user"
+              tone="info"
+              label="Data diri"
+              value={`${identityFilled}/${identityTotal}`}
+              caption={identityComplete ? "Lengkap" : "Lengkapi profil"}
+            />
+          </div>
+        </div>
 
-        {/* Group: Akun */}
-        <Group label="Akun">
-          <ListRow
-            href="/profile/password"
-            iconBg="var(--pg-ink-50)"
-            iconColor="var(--pg-ink-secondary)"
-            iconSvg={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="11" width="18" height="11" rx="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-            }
-            label="Password"
-          />
-          <ListRow
-            iconBg="var(--pg-ink-50)"
-            iconColor="var(--pg-ink-secondary)"
-            iconSvg={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-              </svg>
-            }
-            label="Notifikasi"
-            badge={{ text: "Soon", tone: "mute" }}
-            disabled
-          />
-          <ListRow
-            iconBg="var(--pg-ink-50)"
-            iconColor="var(--pg-ink-secondary)"
-            iconSvg={
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 22s8-4 8-12V5l-8-3-8 3v5c0 8 8 12 8 12z" />
-              </svg>
-            }
-            label="Privasi & data"
-            badge={{ text: "Soon", tone: "mute" }}
-            disabled
-            isLast
-          />
-        </Group>
+        {/* Settings list */}
+        <div className="px-5 pt-5">
+          <SectionHead title="Akun" />
+          <div
+            className="rounded-[14px] overflow-hidden bg-pg-white"
+            style={{
+              border: "1px solid var(--pg-ink-100)",
+              boxShadow:
+                "0 1px 2px rgba(20,16,12,0.04), 0 4px 12px rgba(20,16,12,0.04)",
+            }}
+          >
+            <SettingRow
+              icon="user"
+              label="Data diri"
+              detail={identityComplete ? "Lengkap" : `${identityFilled} dari ${identityTotal}`}
+              tone={identityComplete ? "ok" : "warn"}
+              href="/profile/identitas"
+            />
+            <SettingRow
+              icon="passport"
+              label="Dokumen"
+              detail={`${docsVerified} dari ${docsTotal}`}
+              tone={docsVerified === docsTotal ? "ok" : "warn"}
+              href="/profile/dokumen"
+            />
+            <SettingRow
+              icon="shield"
+              label="Privasi & izin data"
+            />
+            <SettingRow
+              icon="info"
+              label="Notifikasi"
+              detail="Aktif"
+            />
+            {candidate.phone && (
+              <SettingRow
+                icon="phone"
+                label="Nomor WhatsApp"
+                detail={maskPhone(candidate.phone)}
+                tone="ok"
+              />
+            )}
+            <SettingRow
+              icon="lock"
+              label="Ubah password"
+              href="/profile/password"
+              last
+            />
+          </div>
+        </div>
 
-        <section className="px-5 pt-4">
+        {/* Sign out */}
+        <div className="px-5 pt-5">
           <SignOutButton variant="ghost" />
-        </section>
+        </div>
 
-        <section className="px-5 pt-4 pb-2">
-          <p className="text-[11px] text-pg-ink-quaternary text-center font-mono tracking-[0.06em]">
-            v0.1 · Perantau Global
-          </p>
-        </section>
+        <div
+          className="text-center mt-4 px-5 font-mono text-[10.5px] tracking-[0.06em] text-pg-ink-400"
+        >
+          v2 · Portal Perantau Global
+        </div>
       </main>
-
       <BottomNav />
     </div>
   );
 }
 
-// ─── Helpers ───────────────────────────────────────────────────────────────
-
-function Group({
+function StatTile({
+  icon,
+  tone,
   label,
-  children,
+  value,
+  caption,
 }: {
+  icon: IconName;
+  tone: "red" | "amber" | "ok" | "info";
   label: string;
-  children: React.ReactNode;
+  value: string;
+  caption: string;
 }) {
+  const palette: Record<typeof tone, { bg: string; fg: string }> = {
+    red: { bg: "var(--pg-red-50)", fg: "var(--pg-red-600)" },
+    amber: { bg: "var(--pa-amber-100)", fg: "var(--pa-amber-700)" },
+    ok: { bg: "var(--pg-ok-bg)", fg: "var(--pg-ok)" },
+    info: { bg: "var(--pg-info-bg)", fg: "var(--pg-info)" },
+  };
   return (
-    <section className="px-5 pt-5">
-      <div
-        className="text-[10px] font-bold tracking-[0.12em] uppercase font-mono mb-2 ml-1"
-        style={{ color: "var(--pg-ink-tertiary)" }}
+    <div
+      className="p-3.5 rounded-[14px] bg-pg-white"
+      style={{
+        border: "1px solid var(--pg-ink-100)",
+        boxShadow: "0 1px 2px rgba(20,16,12,0.04), 0 4px 12px rgba(20,16,12,0.04)",
+      }}
+    >
+      <span
+        className="inline-grid place-items-center w-8 h-8 rounded-[9px] mb-2.5"
+        style={{ background: palette[tone].bg, color: palette[tone].fg }}
       >
+        <Icon name={icon} size={16} stroke={2} />
+      </span>
+      <div className="font-mono text-[10px] font-bold uppercase tracking-[0.06em] text-pg-ink-500">
         {label}
       </div>
-      <div
-        className="rounded-2xl overflow-hidden"
-        style={{
-          background: "var(--pg-white)",
-          border: "1px solid var(--pg-border)",
-          boxShadow: "0 1px 2px rgba(20,20,20,0.04), 0 4px 16px rgba(20,20,20,0.06)",
-        }}
-      >
-        {children}
+      <div className="text-[20px] font-extrabold tracking-[-0.02em] mt-0.5 text-pg-ink-900">
+        {value}
       </div>
-    </section>
+      <div className="text-[11px] text-pg-ink-500 mt-0.5 leading-snug">
+        {caption}
+      </div>
+    </div>
   );
 }
 
-function ListRow({
-  href,
-  iconBg,
-  iconColor,
-  iconSvg,
+function SettingRow({
+  icon,
   label,
-  badge,
-  disabled,
-  isLast,
+  detail,
+  tone,
+  href,
+  last,
 }: {
-  href?: string;
-  iconBg: string;
-  iconColor: string;
-  iconSvg: React.ReactNode;
+  icon: IconName;
   label: string;
-  badge?: { text: string; tone: "ok" | "warn" | "mute" };
-  disabled?: boolean;
-  isLast?: boolean;
+  detail?: string;
+  tone?: "ok" | "warn";
+  href?: string;
+  last?: boolean;
 }) {
-  const badgeStyles =
-    badge?.tone === "ok"
-      ? { background: "var(--pg-ok-soft-bg)", color: "var(--pg-ok-soft-fg)" }
-      : badge?.tone === "warn"
-      ? { background: "var(--pg-warn-soft-bg)", color: "var(--pg-warn-soft-fg)" }
-      : { background: "var(--pg-ink-50)", color: "var(--pg-ink-tertiary)" };
+  const detailColor =
+    tone === "ok"
+      ? "var(--pg-ok)"
+      : tone === "warn"
+      ? "var(--pg-warn)"
+      : "var(--pg-ink-500)";
 
   const inner = (
     <div
       className="flex items-center gap-3 px-4 py-3.5"
       style={{
-        borderBottom: isLast ? "none" : "1px solid var(--pg-border-soft)",
-        opacity: disabled ? 0.6 : 1,
+        borderBottom: last ? "none" : "1px solid var(--pg-ink-100)",
       }}
     >
-      <div
-        className="w-8 h-8 rounded-lg grid place-items-center shrink-0"
-        style={{ background: iconBg, color: iconColor }}
+      <span
+        className="w-9 h-9 rounded-[10px] grid place-items-center shrink-0"
+        style={{ background: "var(--pg-ink-50)", color: "var(--pg-ink-700)" }}
       >
-        <span style={{ width: 18, height: 18, display: "block" }}>
-          {iconSvg}
+        <Icon name={icon} size={16} stroke={2} />
+      </span>
+      <span className="flex-1 text-[13.5px] font-bold tracking-[-0.005em] text-pg-ink-900">
+        {label}
+      </span>
+      {detail && (
+        <span
+          className="font-mono text-[10.5px] font-bold tracking-[0.04em]"
+          style={{ color: detailColor }}
+        >
+          {detail}
         </span>
-      </div>
-      <span className="flex-1 text-[14px] font-bold text-pg-ink-primary">{label}</span>
-      <div className="flex items-center gap-2 shrink-0">
-        {badge && (
-          <span
-            className="text-[9px] font-bold uppercase tracking-[0.06em] px-2 py-0.5 rounded font-mono"
-            style={badgeStyles}
-          >
-            {badge.text}
-          </span>
-        )}
-        <Icon name="chevron_right" size={16} className="text-pg-ink-quaternary" />
-      </div>
+      )}
+      <Icon name="chevron_right" size={15} className="text-pg-ink-400 shrink-0" />
     </div>
   );
 
-  if (disabled || !href) return inner;
+  if (!href) return inner;
   return (
-    <Link href={href} className="block no-underline text-pg-ink-primary">
+    <Link href={href} className="block no-underline text-pg-ink-900">
       {inner}
     </Link>
   );
+}
+
+function maskPhone(phone: string): string {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length < 8) return phone;
+  return `+${digits.slice(0, 2)} ${digits.slice(2, 5)}•••${digits.slice(-2)}`;
 }

@@ -239,12 +239,9 @@ function PasporHero() {
             background: "rgba(255,255,255,0.65)",
           }}
         >
-          <Icon
-            name="sparkle"
-            size={16}
-            className=""
-            style={{ color: "var(--pa-amber-700)" }}
-          />
+          <span style={{ color: "var(--pa-amber-700)", display: "inline-flex" }}>
+            <Icon name="sparkle" size={16} />
+          </span>
           <span className="text-[12px] text-pg-ink-700 leading-snug">
             Selesai semua → <strong>Sertifikat Paspor Jepang</strong>
           </span>
