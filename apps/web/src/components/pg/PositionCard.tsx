@@ -72,9 +72,12 @@ function StatusChip({ status, inline }: { status: Position["status"]; inline?: b
 }
 
 function CardImg({ slug, icon, countryKey }: { slug: string; icon: Position["icon"]; countryKey: ReturnType<typeof countryKeyFromName> }) {
-  // Use background-image so a missing file degrades gracefully to the country-
-  // tinted placeholder behind (no broken-image icon). next/image is overkill
-  // for these decorative thumbnails and would error on missing files.
+  // 3-layer stack (bottom → top):
+  // 1. Country tint + icon — shows when nothing else loads
+  // 2. Country photo (always exists per countryKey) — shows when position photo missing
+  // 3. Position-specific photo — top layer, only renders if file exists
+  //
+  // Using background-image (not next/image) so missing files degrade silently.
   return (
     <>
       <div
@@ -92,6 +95,16 @@ function CardImg({ slug, icon, countryKey }: { slug: string; icon: Position["ico
           <Icon name={icon} size={32} stroke={1.8} />
         </div>
       </div>
+      {/* Country photo fallback — always present at /images/countries/<key>.jpg */}
+      <div
+        aria-hidden
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url(/images/countries/${countryKey}.jpg)`,
+          filter: "saturate(0.95) contrast(1.05) brightness(0.85)",
+        }}
+      />
+      {/* Position-specific photo — top layer; transparent if file missing */}
       <div
         aria-hidden
         className="absolute inset-0 bg-cover bg-center"

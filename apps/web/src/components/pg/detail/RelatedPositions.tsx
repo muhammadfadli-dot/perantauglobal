@@ -54,7 +54,10 @@ export function RelatedPositions({
               >
                 <div
                   className="relative h-32 bg-cover bg-center bg-pg-ink-100"
-                  style={{ backgroundImage: `url(/images/lowongan/${p.slug}.jpg)` }}
+                  style={{
+                    // Stack: country photo fallback (always exists) + position photo on top.
+                    backgroundImage: `url(/images/lowongan/${p.slug}.jpg), url(/images/countries/${countryKey}.jpg)`,
+                  }}
                 >
                   <div
                     aria-hidden
