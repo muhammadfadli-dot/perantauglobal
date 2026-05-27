@@ -298,8 +298,9 @@ export default async function PositionDetailPage({
       <PublishBarMount
         slug={position.slug}
         positionName={position.name}
-        initialActive={position.active}
-        lastUpdatedAt={position.updated_at}
+        hasPendingDraft={hasPendingDraft}
+        draftSavedAt={hasPendingDraft ? position.updated_at : null}
+        publishedAt={position.published_at}
       />
     </>
   );
