@@ -16,26 +16,41 @@ export type CreatePositionInput = {
   country: string;
 };
 
+export type CreatePositionResult =
+  | { ok: true; slug: string }
+  | { ok: false; error: string };
+
 /**
  * Create an empty position shell. Admin lands in the unified editor at
  * /admin/positions/[slug] after this returns to fill content + add
  * application fields. The previous 4-step wizard is sunset — content +
  * fields belong in the live-preview editor, not a separate create flow.
  *
- * REQUIREMENT_LIBRARY (the catalog of common requirement templates) is no
- * longer auto-applied; it can still be exposed inside ApplicationFieldsEditor
- * as a per-field "add from library" affordance in a follow-up.
+ * Returns a discriminated union instead of throwing for user-facing errors.
+ * Why: Next.js production builds strip server-action exception messages to
+ * avoid leaking sensitive data, which turns our friendly Indonesian copy
+ * into the generic "An error occurred in the Server Components render"
+ * page-wide error. Returning errors as DATA lets the client show the real
+ * message inline. We still `throw` for actual programming errors (auth,
+ * unexpected DB failures) so they surface as 500s in logs.
  */
-export async function createPosition(input: CreatePositionInput) {
+export async function createPosition(
+  input: CreatePositionInput,
+): Promise<CreatePositionResult> {
   await assertAdmin();
 
   if (!input.name || input.name.trim().length < 2) {
-    throw new Error("Nama posisi minimum 2 karakter.");
+    return { ok: false, error: "Nama posisi minimum 2 karakter." };
   }
   if (!SLUG_RE.test(input.slug)) {
-    throw new Error("Slug invalid (hanya huruf kecil, angka, tanda hubung).");
+    return {
+      ok: false,
+      error: "Slug invalid (hanya huruf kecil, angka, tanda hubung).",
+    };
   }
-  if (!input.country) throw new Error("Pilih negara penempatan.");
+  if (!input.country) {
+    return { ok: false, error: "Pilih negara penempatan." };
+  }
 
   const supabase = await createServerClient();
 
@@ -58,11 +73,15 @@ export async function createPosition(input: CreatePositionInput) {
   if (error) {
     const msg = error.message.toLowerCase();
     if (msg.includes("duplicate") || msg.includes("unique")) {
-      throw new Error(
-        `Slug "${input.slug}" sudah dipakai posisi lain. Pilih slug lain.`,
-      );
+      return {
+        ok: false,
+        error: `Slug "${input.slug}" sudah dipakai posisi lain. Pilih slug lain.`,
+      };
     }
-    throw new Error(error.message);
+    // Unexpected DB error: log via throw so it surfaces in Vercel logs as a
+    // 500 + propagate to the client as the generic Server Components error.
+    // Worth alerting on; user can retry while we investigate.
+    throw new Error(`DB error: ${error.message}`);
   }
 
   revalidatePath("/admin/positions");

@@ -52,9 +52,20 @@ export default function PositionCreateForm() {
           slug: effectiveSlug,
           country: country as Country,
         });
+        if (!result.ok) {
+          // Expected validation / duplicate slug — show inline, don't navigate.
+          setError(result.error);
+          return;
+        }
         router.push(`/admin/positions/${result.slug}`);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Gagal membuat posisi");
+        // Unexpected throw (auth failure, DB outage). Message is opaque in
+        // production by design — surface a generic note + suggest reload.
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Gagal membuat posisi. Coba reload halaman & ulangi.",
+        );
       }
     });
   }
