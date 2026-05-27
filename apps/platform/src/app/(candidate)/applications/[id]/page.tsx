@@ -1,11 +1,24 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
-import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
+import { BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
 import { getApplicationStatus } from "@/lib/applicationStatus";
 import { waLink } from "@/lib/contact";
+import { BerandaTopBar, SectionHead } from "@/components/pg/candidate/BerandaShared";
+import {
+  PIPELINE_STEPS,
+  PipelineTimeline,
+  DocStateBadge,
+} from "@/components/pg/candidate/PipelineTimeline";
+import { PendampingCard } from "@/components/pg/candidate/PendampingCard";
+import {
+  COUNTRY_FLAG,
+  COUNTRY_LABEL as COUNTRY_LABEL_PORTAL,
+  COUNTRY_TINT,
+  normalizeCountry,
+} from "@/components/pg/candidate/LowonganTiles";
 
 export const dynamic = "force-dynamic";
 
@@ -21,18 +34,33 @@ type ApplicationRow = {
   candidate_id: string;
   position_slug: string;
   pipeline_stage: string;
+  job_order_id: string | null;
   created_at: string;
-  answers: unknown;
   positions: PositionRow | null;
 };
 
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Arab Saudi",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-  any: "Global",
-};
+// Map pipeline_stage → timeline currentIdx (0-4)
+function deriveTimelineIdx(stage: string, jobOrderId: string | null, hardPass: boolean): number {
+  // Terminal stages — move to step 5 (Keputusan)
+  if (["selected", "training", "deployed", "active"].includes(stage)) return 4;
+  if (["rejected", "exit"].includes(stage)) return 4;
+  // Has job order = past verification, currently in pipeline review
+  if (jobOrderId) {
+    if (stage === "wawancara" || stage === "interview") return 3;
+    if (stage === "screening" || stage === "review") return 2;
+    return 2;
+  }
+  // No job order yet = talent pool stage
+  if (!hardPass) return 2; // needs docs — at step 3 "Lengkapi dokumen"
+  return 1; // verified, waiting for job_order assignment
+}
+
+const REQUIRED_DOCS = [
+  { key: "ktp", label: "KTP" },
+  { key: "passport", label: "Paspor" },
+  { key: "formal_photo", label: "Foto formal" },
+  { key: "cv", label: "CV" },
+];
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -46,7 +74,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const { data: appData } = await supabase
     .from("applications")
     .select(
-      "id, candidate_id, position_slug, pipeline_stage, created_at, answers, positions (slug, name, country, description)"
+      "id, candidate_id, position_slug, pipeline_stage, job_order_id, created_at, positions (slug, name, country, description)"
     )
     .eq("id", id)
     .eq("candidate_id", candidateId)
@@ -54,25 +82,24 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const application = appData as unknown as ApplicationRow | null;
   if (!application || !application.positions) notFound();
 
-  const [historyRes, completeness] = await Promise.all([
-    supabase
-      .from("application_status_history")
-      .select("id, from_stage, to_stage, changed_at, public_note")
-      .eq("application_id", application.id)
-      .order("changed_at", { ascending: false }),
+  const [completenessRes, docsRes] = await Promise.all([
     getApplicationCompleteness(application.id, supabase),
+    supabase
+      .from("candidate_documents")
+      .select("doc_type, verified, rejected_at, uploaded_at")
+      .eq("candidate_id", candidateId)
+      .order("uploaded_at", { ascending: false }),
   ]);
-
-  const history = (historyRes.data ?? []) as Array<{
-    id: string;
-    from_stage: string | null;
-    to_stage: string;
-    changed_at: string;
-    public_note: string | null;
+  const completeness = completenessRes;
+  const docsRows = (docsRes.data ?? []) as Array<{
+    doc_type: string;
+    verified: boolean;
+    rejected_at: string | null;
+    uploaded_at: string;
   }>;
 
   const position = application.positions;
-  const { fields: requirements, score_pct, hard_pass } = completeness;
+  const { fields: requirements, hard_pass } = completeness;
   const totalReqs = requirements.length;
   const passedReqs = requirements.filter((r) => r.passed).length;
   const openCount = totalReqs - passedReqs;
@@ -82,341 +109,285 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     hardPass: hard_pass,
   });
   const isRejected = status.key === "rejected";
+  const isAccepted = status.key === "accepted";
   const showLengkapi = !isRejected && openCount > 0;
 
-  // First missing required (= hard) for inline message
-  const firstMissingHard = requirements.find(
-    (r) => !r.passed && r.importance === "required",
+  const countryKey = normalizeCountry(position.country);
+  const countryLabel = countryKey
+    ? COUNTRY_LABEL_PORTAL[countryKey]
+    : position.country;
+  const flag = countryKey ? COUNTRY_FLAG[countryKey] : "🌐";
+  const tint = countryKey ? COUNTRY_TINT[countryKey] : "#36598c";
+
+  const timelineIdx = deriveTimelineIdx(
+    application.pipeline_stage,
+    application.job_order_id,
+    hard_pass,
   );
 
-  // Display rows for "Jawaban kamu" — sourced from per-application
-  // completeness (applications.answers + position_application_fields). Per
-  // Fase 5: no longer merges candidates.profile_data.credentials.
-  const answerRows = requirements.map((f) => {
-    const raw = f.value ?? "";
-    const opt = f.options?.find((o) => o.value === raw);
-    return {
-      key: f.field_key,
-      label: f.field_label,
-      value: opt?.label ?? raw,
-      hasValue: f.passed,
-    };
+  // Doc state lookup
+  const docsLatestByType = new Map<string, { verified: boolean; rejected: boolean }>();
+  for (const d of docsRows) {
+    const key = d.doc_type === "photo" ? "formal_photo" : d.doc_type;
+    if (!docsLatestByType.has(key)) {
+      docsLatestByType.set(key, {
+        verified: d.verified,
+        rejected: !!d.rejected_at,
+      });
+    }
+  }
+  const docsVerifiedCount = REQUIRED_DOCS.filter(
+    (d) => docsLatestByType.get(d.key)?.verified,
+  ).length;
+
+  const appliedDate = new Date(application.created_at).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 
-  // Public timeline: only entries with a public note from the recruitment team.
-  // Internal pipeline_stage transitions are deliberately hidden from candidates.
-  const publicHistory = history.filter((h) => h.public_note);
+  const waMsg = `Halo Perantau Global, saya mau tanya tentang lamaran ${position.name} (ID #${application.id.slice(0, 8)}).`;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
-      <TopBarApp title="Status lamaran" back backHref="/applications" />
-
-      <main className="flex-1 pb-8">
-        {/* Header */}
-        <section className="px-5 pt-3">
-          <div
-            className="text-[11px] font-semibold tracking-[0.1em] uppercase"
-            style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
+      <BerandaTopBar />
+      <main className="flex-1 pb-32 pt-1">
+        {/* Back button row */}
+        <div className="px-5 pb-2">
+          <Link
+            href="/applications"
+            className="inline-flex items-center gap-1.5 text-[12.5px] font-bold text-pg-ink-700 no-underline"
           >
-            {position.name} — {COUNTRY_LABEL[position.country] ?? position.country}
-          </div>
-          <StatusBadge tone={status.tone} className="mt-3">
-            {status.label}
-          </StatusBadge>
-          <h1 className="text-[28px] font-extrabold tracking-[-0.025em] mt-2 text-pg-ink-primary leading-tight">
-            {status.headline}
-          </h1>
-          <p className="text-[14px] text-pg-ink-tertiary mt-2 leading-relaxed">
-            {status.description}
-          </p>
-        </section>
+            <Icon name="arrow_left" size={14} stroke={2.4} />
+            Semua lamaran
+          </Link>
+        </div>
 
-        {/* Persyaratan posisi — red soft card */}
-        {!isRejected && totalReqs > 0 && (
-          <section className="px-5 pt-6">
+        {/* Position hero — photo tile with country tint */}
+        <div className="px-5 pb-4">
+          <div
+            className="relative overflow-hidden rounded-[18px] text-white isolate"
+            style={{
+              minHeight: 140,
+              background: tint,
+              boxShadow:
+                "0 2px 6px rgba(20,16,12,0.06), 0 18px 42px rgba(20,16,12,0.10)",
+            }}
+          >
             <div
-              className="rounded-2xl p-5 flex flex-col gap-3"
-              style={{ background: "var(--pg-red-soft-bg)" }}
-            >
-              <div className="flex items-baseline justify-between">
-                <div
-                  className="text-[10px] font-semibold tracking-[0.12em] uppercase"
-                  style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
-                >
-                  Persyaratan posisi
-                </div>
-                <div
-                  className="text-[10px] font-bold"
-                  style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
-                >
-                  {score_pct}%
-                </div>
-              </div>
-              <div className="flex items-baseline gap-1">
-                <span className="text-[36px] font-extrabold leading-[40px] text-pg-red-700 tabular-nums">
-                  {passedReqs}
-                </span>
-                <span className="text-[16px] font-semibold text-pg-ink-tertiary">
-                  / {totalReqs} syarat lengkap
-                </span>
-              </div>
+              aria-hidden
+              className="absolute inset-0 z-0 bg-cover bg-center"
+              style={{
+                backgroundImage: `url(/images/lowongan/${application.position_slug}.jpg)`,
+              }}
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 z-[1]"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(20,16,12,0.10) 0%, rgba(20,16,12,0.20) 35%, rgba(20,16,12,0.62) 100%)",
+              }}
+            />
+            <div className="relative z-[2] p-4">
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-white/92">
+                {flag} {countryLabel}
+              </span>
               <div
-                className="h-1.5 rounded-full overflow-hidden"
-                style={{ background: "rgba(215,38,47,0.15)" }}
+                className="mt-1.5 text-[22px] font-extrabold tracking-[-0.02em] leading-tight"
+                style={{ textShadow: "0 2px 6px rgba(0,0,0,0.30)" }}
               >
-                <div
-                  className="h-full"
-                  style={{
-                    width: `${(passedReqs / totalReqs) * 100}%`,
-                    background: "var(--pg-red-600)",
-                  }}
-                />
+                {position.name}
               </div>
-              {firstMissingHard && (
-                <div className="flex items-start gap-2 text-[13px] text-pg-ink-secondary">
-                  <span
-                    className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0"
-                    style={{ background: "var(--pg-red-600)" }}
-                  />
-                  <span>Tinggal {firstMissingHard.field_label} biar lamaran dilanjut tim recruitment.</span>
-                </div>
-              )}
-              {showLengkapi && (
-                <Link
-                  href={`/applications/${id}/lengkapi`}
-                  className="inline-flex items-center justify-center gap-1.5 px-4 py-3 mt-1 rounded-xl text-[14px] font-bold text-white no-underline"
-                  style={{ background: "var(--pg-red-600)" }}
+              <div className="mt-3 flex items-center justify-between gap-2">
+                <span className="font-mono text-[10.5px] tracking-[0.04em] text-white/85">
+                  Dilamar {appliedDate}
+                </span>
+                <span
+                  className="inline-flex items-center px-2 py-0.5 rounded font-mono text-[9.5px] font-bold uppercase tracking-[0.06em]"
+                  style={{
+                    background:
+                      status.tone === "ok"
+                        ? "rgba(15,138,74,0.92)"
+                        : isRejected
+                        ? "rgba(185,29,36,0.92)"
+                        : "rgba(255,255,255,0.20)",
+                    color: "#fff",
+                  }}
                 >
-                  Lengkapi sekarang <Icon name="arrow_right" size={14} />
-                </Link>
-              )}
-              {hard_pass && (
-                <div
-                  className="px-3 py-2 rounded-lg text-[12px] font-semibold flex items-center gap-2"
-                  style={{ background: "var(--pg-ok-soft-bg)", color: "var(--pg-ok-soft-fg)" }}
-                >
-                  <Icon name="check" size={13} stroke={2.5} />
-                  Semua syarat utama terpenuhi
-                </div>
-              )}
+                  {status.label}
+                </span>
+              </div>
             </div>
-          </section>
-        )}
+          </div>
+        </div>
 
-        {/* Perjalanan lamaran — only public-facing events, never internal stages */}
-        <section className="px-5 pt-6">
+        {/* Timeline */}
+        <div className="px-5">
+          <SectionHead
+            title="Tahap progres"
+            sub={
+              isAccepted
+                ? "Selamat! Tahap berikutnya: persiapan keberangkatan."
+                : isRejected
+                ? "Lamaran ini belum cocok. Cari posisi lain di Lowongan."
+                : `Tahap ${timelineIdx + 1} dari 5 · biasanya total 4-6 minggu`
+            }
+          />
           <div
-            className="text-[10px] font-semibold tracking-[0.12em] uppercase mb-1"
-            style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
+            className="rounded-[14px] p-4 bg-pg-white"
+            style={{
+              border: "1px solid var(--pg-ink-100)",
+              boxShadow:
+                "0 1px 2px rgba(20,16,12,0.04), 0 8px 24px rgba(20,16,12,0.06)",
+            }}
           >
-            Perjalanan lamaran
-          </div>
-          <div className="text-[13px] text-pg-ink-tertiary mb-3">
-            Update dari tim recruitment akan muncul di sini.
-          </div>
-          <div
-            className="bg-pg-white rounded-2xl p-5 flex flex-col gap-3.5"
-            style={{ border: "1px solid var(--pg-border)" }}
-          >
-            {publicHistory.map((h, i) => {
-              const isLatest = i === 0;
-              const isToday =
-                new Date(h.changed_at).toDateString() === new Date().toDateString();
-              return (
-                <TimelineItem
-                  key={h.id}
-                  date={h.changed_at}
-                  isLatest={isLatest}
-                  isToday={isToday}
-                  title="Update dari tim recruitment"
-                  note={h.public_note}
-                />
-              );
-            })}
-            <TimelineItem
-              date={application.created_at}
-              isLatest={publicHistory.length === 0}
-              isToday={
-                new Date(application.created_at).toDateString() ===
-                new Date().toDateString()
-              }
-              title="Lamaran terkirim"
-              note={
-                publicHistory.length === 0
-                  ? "Tim akan update setelah review profil kamu."
-                  : null
+            <PipelineTimeline
+              currentIdx={timelineIdx}
+              customMeta={{
+                0: `Dilamar ${appliedDate}`,
+              }}
+              insets={
+                showLengkapi
+                  ? {
+                      [timelineIdx]: (
+                        <div
+                          className="rounded-[10px] px-3 py-2.5 flex items-center gap-2 text-[12.5px] font-semibold text-pg-red-700"
+                          style={{
+                            background:
+                              "linear-gradient(180deg, #fff 0%, var(--pg-red-50) 100%)",
+                            border: "1px solid var(--pg-red-100)",
+                          }}
+                        >
+                          <Icon name="info" size={14} stroke={2.2} />
+                          <span className="flex-1">
+                            {openCount} syarat belum lengkap.
+                          </span>
+                          <Link
+                            href={`/applications/${application.id}/lengkapi`}
+                            className="text-[12px] font-extrabold text-pg-red-600 no-underline"
+                          >
+                            Lengkapi ›
+                          </Link>
+                        </div>
+                      ),
+                    }
+                  : undefined
               }
             />
           </div>
-        </section>
+        </div>
 
-        {/* Jawaban kamu — driven by position_application_fields, hidden if none */}
-        {answerRows.length > 0 && (
-          <section className="px-5 pt-6">
-            <div className="flex items-baseline justify-between mb-1">
-              <div
-                className="text-[10px] font-semibold tracking-[0.12em] uppercase"
-                style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
-              >
-                Jawaban kamu
-              </div>
-              <Link
-                href="/profile"
-                className="text-[12px] font-bold text-pg-red-600 no-underline"
-              >
-                Edit di profil
-              </Link>
-            </div>
-            <div className="text-[13px] text-pg-ink-tertiary mb-3">
-              Diambil dari profil kamu. Update profil untuk ubah.
-            </div>
-            <div
-              className="bg-pg-white rounded-2xl overflow-hidden"
-              style={{ border: "1px solid var(--pg-border)" }}
-            >
-              {answerRows.map((row, i) => (
-                <div
-                  key={row.key}
-                  className="flex items-center justify-between px-4 py-3.5"
+        {/* Documents */}
+        <div className="px-5 pt-5">
+          <SectionHead
+            title="Dokumen kamu"
+            sub={`${docsVerifiedCount} dari ${REQUIRED_DOCS.length} lengkap`}
+            allHref="/profile/dokumen"
+          />
+          <div className="flex flex-col gap-2">
+            {REQUIRED_DOCS.map((d) => {
+              const row = docsLatestByType.get(d.key);
+              const state: "verified" | "review" | "missing" =
+                row?.verified
+                  ? "verified"
+                  : row
+                  ? "review"
+                  : "missing";
+              return (
+                <Link
+                  key={d.key}
+                  href="/profile/dokumen"
+                  className="flex items-center gap-3 p-3 rounded-[12px] bg-pg-white no-underline text-pg-ink-900"
                   style={{
-                    borderTop: i === 0 ? "none" : "1px solid var(--pg-border-soft)",
+                    border:
+                      state === "missing"
+                        ? "1px solid var(--pg-red-200)"
+                        : "1px solid var(--pg-ink-100)",
+                    boxShadow:
+                      "0 1px 2px rgba(20,16,12,0.04), 0 4px 12px rgba(20,16,12,0.04)",
+                    background:
+                      state === "missing"
+                        ? "linear-gradient(180deg, #fff 0%, var(--pg-red-50) 100%)"
+                        : "var(--pg-white)",
                   }}
                 >
-                  <span className="text-[13px] text-pg-ink-secondary">{row.label}</span>
                   <span
-                    className={`text-[13px] font-semibold text-right ml-3 truncate max-w-[60%] ${
-                      row.hasValue ? "text-pg-ink-primary" : "italic"
-                    }`}
-                    style={{ color: row.hasValue ? undefined : "var(--pg-ink-quaternary)" }}
+                    className="w-9 h-9 rounded-[10px] grid place-items-center shrink-0"
+                    style={
+                      state === "verified"
+                        ? { background: "var(--pg-ok-bg)", color: "var(--pg-ok)" }
+                        : state === "review"
+                        ? { background: "var(--pg-info-bg)", color: "var(--pg-info)" }
+                        : { background: "var(--pg-red-600)", color: "#fff" }
+                    }
                   >
-                    {row.hasValue ? row.value : "Belum diisi"}
+                    <Icon
+                      name={state === "verified" ? "check" : state === "review" ? "clock" : "upload"}
+                      size={16}
+                      stroke={state === "missing" ? 2.5 : 2}
+                    />
                   </span>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Ada pertanyaan? */}
-        <section className="px-5 pt-6">
-          <div
-            className="bg-pg-white rounded-2xl p-5 flex flex-col gap-3"
-            style={{ border: "1px solid var(--pg-border)" }}
-          >
-            <h3 className="text-[16px] font-extrabold tracking-[-0.01em] text-pg-ink-primary">
-              Ada pertanyaan?
-            </h3>
-            <p className="text-[13px] text-pg-ink-tertiary">
-              Tim recruitment Perantau Global siap bantu kamu via WhatsApp atau email.
-            </p>
-            <div className="grid grid-cols-2 gap-2.5">
-              <a
-                href={waLink("Halo, saya mau tanya soal lamaran saya.")}
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl text-[13px] font-bold text-pg-ink-primary no-underline"
-                style={{ border: "1.5px solid var(--pg-border)" }}
-              >
-                <Icon name="phone" size={14} />
-                WhatsApp
-              </a>
-              <a
-                href="mailto:halo@perantauglobal.com"
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl text-[13px] font-bold text-pg-ink-primary no-underline"
-                style={{ border: "1.5px solid var(--pg-border)" }}
-              >
-                <Icon name="mail" size={14} />
-                Email
-              </a>
-            </div>
+                  <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                    <span className="text-[13.5px] font-extrabold tracking-[-0.01em]">
+                      {d.label}
+                    </span>
+                    <DocStateBadge state={state} />
+                  </div>
+                  <span
+                    className="text-[12px] font-extrabold"
+                    style={{
+                      color:
+                        state === "missing"
+                          ? "var(--pg-red-600)"
+                          : "var(--pg-ink-700)",
+                    }}
+                  >
+                    {state === "missing" ? "Upload ›" : "Lihat ›"}
+                  </span>
+                </Link>
+              );
+            })}
           </div>
-        </section>
+        </div>
+
+        {/* Pendamping */}
+        <div className="px-5 pt-5">
+          <SectionHead title="Pendamping kamu" />
+          <PendampingCard
+            name="Tim Perantau Global"
+            initials="PG"
+            msg="Halo! Kami pantau lamaran kamu di sini. Kalau ada pertanyaan, chat lewat WhatsApp ya."
+            time="Online"
+            whatsappHref={waLink(waMsg)}
+          />
+        </div>
       </main>
 
-      <BottomNav />
-    </div>
-  );
-}
-
-function StatusBadge({
-  tone,
-  className,
-  children,
-}: {
-  tone: "warn" | "info" | "ok" | "mute";
-  className?: string;
-  children: React.ReactNode;
-}) {
-  const colors =
-    tone === "warn"
-      ? { bg: "var(--pg-warn-soft-bg)", fg: "var(--pg-warn-soft-fg)", dot: "var(--pg-warn-soft-fg)" }
-      : tone === "ok"
-      ? { bg: "var(--pg-ok-soft-bg)", fg: "var(--pg-ok-soft-fg)", dot: "var(--pg-ok-soft-fg)" }
-      : tone === "mute"
-      ? { bg: "var(--pg-ink-50)", fg: "var(--pg-ink-tertiary)", dot: "var(--pg-ink-tertiary)" }
-      : { bg: "var(--pg-red-soft-bg)", fg: "var(--pg-red-600)", dot: "var(--pg-red-600)" };
-  return (
-    <div
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-[0.06em] uppercase ${className ?? ""}`}
-      style={{ background: colors.bg, color: colors.fg, fontFamily: "var(--font-mono)" }}
-    >
-      <span className="w-1.5 h-1.5 rounded-full" style={{ background: colors.dot }} />
-      {children}
-    </div>
-  );
-}
-
-function TimelineItem({
-  date,
-  isLatest,
-  isToday,
-  title,
-  note,
-}: {
-  date: string;
-  isLatest: boolean;
-  isToday: boolean;
-  title: string;
-  note: string | null;
-}) {
-  return (
-    <div className="grid grid-cols-[16px_1fr] gap-3">
-      <div className="relative pt-1.5">
+      {/* Sticky CTA — Lengkapi if needed */}
+      {showLengkapi && (
         <div
-          className="w-3 h-3 rounded-full"
+          className="fixed bottom-[68px] left-0 right-0 z-30 px-5 py-3 border-t border-pg-ink-100"
           style={{
-            background: isLatest ? "var(--pg-red-600)" : "transparent",
-            border: isLatest ? "none" : "1.5px solid var(--pg-ink-300)",
+            background: "rgba(255,255,255,0.96)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
           }}
-        />
-      </div>
-      <div className="min-w-0">
-        <div
-          className="text-[11px] font-semibold flex items-center gap-2"
-          style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
         >
-          {new Date(date).toLocaleDateString("id-ID", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-          })}
-          {isToday && (
-            <span
-              className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-[0.04em] uppercase"
-              style={{
-                background: "var(--pg-red-soft-bg)",
-                color: "var(--pg-red-600)",
-              }}
-            >
-              Hari ini
-            </span>
-          )}
+          <Link
+            href={`/applications/${application.id}/lengkapi`}
+            className="inline-flex items-center justify-center gap-2 w-full px-5 py-3.5 rounded-[12px] font-extrabold text-[14px] text-white no-underline"
+            style={{
+              background: "var(--pg-red-600)",
+              boxShadow: "0 4px 12px rgba(215,38,47,0.20)",
+            }}
+          >
+            Lengkapi {openCount} syarat <Icon name="arrow_right" size={16} />
+          </Link>
         </div>
-        <div className="text-[15px] font-bold text-pg-ink-primary mt-0.5">{title}</div>
-        {note && (
-          <div className="text-[13px] text-pg-ink-secondary mt-1.5 leading-tight">{note}</div>
-        )}
-      </div>
+      )}
+
+      <BottomNav />
     </div>
   );
 }
