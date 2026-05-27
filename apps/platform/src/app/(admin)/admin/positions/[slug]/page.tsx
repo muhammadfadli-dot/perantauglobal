@@ -9,6 +9,7 @@ import PositionMetaEditor from "./PositionMetaEditor";
 import DeletePositionCard from "./DeletePositionCard";
 import PublishBarMount from "./PublishBarMount";
 import PositionEditorShell from "@/components/admin/PositionEditorShell";
+import MediaSeoTab from "@/components/admin/MediaSeoTab";
 import ApplicationFieldsEditor, {
   type Field as ApplicationField,
 } from "@/components/admin/ApplicationFieldsEditor";
@@ -203,6 +204,11 @@ export default async function PositionDetailPage({
             Pertanyaan untuk kandidat
           </div>
           <ApplicationFieldsEditor positionSlug={position.slug} initial={fields} />
+        </section>
+
+        {/* === Tab: Media & SEO === */}
+        <section data-tab="media" className="mb-8">
+          <MediaSeoTab slug={position.slug} initialContent={editorContent} />
         </section>
 
         {/* === Tab: Settings === */}

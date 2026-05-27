@@ -58,6 +58,32 @@ export type ContentTrustSignals = {
   employer?: ContentTrustEmployer;
 };
 
+/**
+ * Visual asset URLs for the position landing page. URLs only for MVP —
+ * file upload to Supabase Storage is deferred to a later phase. Admin
+ * pastes URLs from external hosting (Cloudinary, employer-provided, etc.)
+ * or leaves blank for sensible fallbacks.
+ */
+export type ContentMedia = {
+  /** Full-bleed hero image at top of /lowongan/[slug]. Recommended 2400×1080 (21:9). */
+  heroUrl?: string;
+  /** Employer logo, square, shown in trust signals. SVG/PNG. */
+  employerLogoUrl?: string;
+  /** OG / sharing card image, 1200×630 (1.91:1). If empty, hero is auto-used. */
+  ogImageUrl?: string;
+};
+
+/**
+ * SEO meta tags for the position landing page. All optional — apps/web
+ * falls back to auto-generated text from name + country if empty.
+ */
+export type ContentSeo = {
+  /** <title> tag (recommended ≤ 60 chars). */
+  metaTitle?: string;
+  /** <meta name="description"> (recommended ≤ 160 chars). */
+  metaDescription?: string;
+};
+
 export type PositionContent = {
   hero?: { metaLine?: string };
   cardMeta?: ContentCardMeta;
@@ -68,6 +94,8 @@ export type PositionContent = {
   fee?: ContentFee;
   process?: string[];
   trustSignals?: ContentTrustSignals;
+  media?: ContentMedia;
+  seo?: ContentSeo;
 };
 
 /**
@@ -165,6 +193,21 @@ export function parseContent(raw: Json | null | undefined): PositionContent {
       };
     }
     if (Object.keys(trustSignals).length > 0) out.trustSignals = trustSignals;
+  }
+  if (obj.media && typeof obj.media === "object" && !Array.isArray(obj.media)) {
+    const m = obj.media as Record<string, unknown>;
+    const media: ContentMedia = {};
+    if (typeof m.heroUrl === "string") media.heroUrl = m.heroUrl;
+    if (typeof m.employerLogoUrl === "string") media.employerLogoUrl = m.employerLogoUrl;
+    if (typeof m.ogImageUrl === "string") media.ogImageUrl = m.ogImageUrl;
+    if (Object.keys(media).length > 0) out.media = media;
+  }
+  if (obj.seo && typeof obj.seo === "object" && !Array.isArray(obj.seo)) {
+    const s = obj.seo as Record<string, unknown>;
+    const seo: ContentSeo = {};
+    if (typeof s.metaTitle === "string") seo.metaTitle = s.metaTitle;
+    if (typeof s.metaDescription === "string") seo.metaDescription = s.metaDescription;
+    if (Object.keys(seo).length > 0) out.seo = seo;
   }
 
   return out;

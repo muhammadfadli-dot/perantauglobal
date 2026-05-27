@@ -52,14 +52,16 @@ export default function PositionEditorShell({
 
   const isDirty = JSON.stringify(content) !== JSON.stringify(savedSnapshot);
 
-  // Dispatch dirty/saving state to the PublishBar
+  // Dispatch dirty/saving state + latest content to PublishBar + MediaSeoTab.
+  // MediaSeoTab keeps its own ref to the latest content so its saves don't
+  // clobber pending edits from this tab.
   useEffect(() => {
     window.dispatchEvent(
       new CustomEvent("pg-editor-state", {
-        detail: { dirty: isDirty, saving },
+        detail: { dirty: isDirty, saving, content },
       }),
     );
-  }, [isDirty, saving]);
+  }, [isDirty, saving, content]);
 
   // Auto-save: every content change starts a 30s timer; if user stops typing,
   // saveDraft fires. We bypass the timer entirely on `pg-editor-save-now`.

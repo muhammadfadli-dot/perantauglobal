@@ -22,11 +22,12 @@ import { Icon, type IconName } from "@/components/pg/Icon";
  *   <section data-tab="jobs">...Job orders list...</section>
  */
 
-type TabKey = "konten" | "form" | "settings" | "jobs";
+type TabKey = "konten" | "form" | "media" | "settings" | "jobs";
 
 const TABS: Array<{ key: TabKey; label: string; icon: IconName }> = [
   { key: "konten", label: "Konten landing", icon: "doc" },
   { key: "form", label: "Form lamaran", icon: "compass" },
+  { key: "media", label: "Media & SEO", icon: "globe" },
   { key: "settings", label: "Settings", icon: "shield" },
   { key: "jobs", label: "Job orders", icon: "briefcase" },
 ];
@@ -77,6 +78,7 @@ export function EditorTabsHeader({
       <style>{`
         [data-editor-tab="konten"]   section[data-tab]:not([data-tab="konten"])   { display: none; }
         [data-editor-tab="form"]     section[data-tab]:not([data-tab="form"])     { display: none; }
+        [data-editor-tab="media"]    section[data-tab]:not([data-tab="media"])    { display: none; }
         [data-editor-tab="settings"] section[data-tab]:not([data-tab="settings"]) { display: none; }
         [data-editor-tab="jobs"]     section[data-tab]:not([data-tab="jobs"])     { display: none; }
       `}</style>
