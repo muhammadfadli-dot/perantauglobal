@@ -2,9 +2,19 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-05-27 (Full design system redesign Phases 0–7 SHIPPED, 20 PRs, live in prod)
+**Last updated:** 2026-05-27 (Phases 0–7 + Phase 6 admin integration 6e–6h SHIPPED, 25 PRs, live in prod)
 
-## 2026-05-27 — Full redesign sprint Phases 0–7 ✅ SHIPPED
+## 2026-05-27 (afternoon) — Phase 6 admin integration ✅ SHIPPED
+
+Scaffolds from PRs #85–87 wired into the live admin pages, plus 1 design revision on apps/web lowongan mobile.
+
+- PR [#93](https://github.com/panji-firmansyah/perantauglobal/pull/93) — **lowongan mobile + pill revision** (hero stats 1-row at 390px with thin border, country pills drop flag emoji bubble + currency subtitle, mobile uses `country.short`)
+- PR [#94](https://github.com/panji-firmansyah/perantauglobal/pull/94) — **6e** Wire PublishBar to `/admin/positions/[slug]` as sticky footer (`PublishBarMount.tsx` thin client wrapper binds existing `updatePositionMeta` server action; `positions.updated_at` added to select for "Update terakhir" timestamp; `PositionActiveToggle` in Settings tab retained for explainer copy)
+- PR [#95](https://github.com/panji-firmansyah/perantauglobal/pull/95) — **6f** Wire KpiStat hero row to `/admin` dashboard (5-up grid above attention cards: Lamaran masuk + WoW delta, Maju ke screening + conv %, Diterima, JO open, Doc pending; daily-bucketed sparklines per KPI; existing Talent inflow card preserved for detail)
+- PR [#96](https://github.com/panji-firmansyah/perantauglobal/pull/96) — **6g** Add weekly Sparkline column to `/admin/positions` catalog table (new "Apply / minggu" column between Lamaran and Talent ready; 7-day bucketed per slug; `+N` mono badge; `gridTemplateColumns` updated 7→8 cols)
+- PR [#97](https://github.com/panji-firmansyah/perantauglobal/pull/97) — **6h** Rebuild `/admin/analytics` as deep-dive page (AdminTopBar breadcrumb; 5-up KPI hero with daily sparklines; 12-week historical trend always-on; range-bound funnel; top 5 performer leaderboard; existing source/cities/stage/JO preserved)
+
+## 2026-05-27 (morning) — Full redesign sprint Phases 0–7 ✅ SHIPPED
 
 20 PRs squash-merged to main, both apps deployed to production. Plan locked
 in `~/.claude/plans/federated-wondering-boole.md`; source design folder
@@ -47,11 +57,7 @@ in `~/.claude/plans/federated-wondering-boole.md`; source design folder
 - BerandaS5 boarding-pass + pre-departure checklist (needs `pre_departure_checklist` table + admin checklist UI)
 - Paspor real lesson player (needs `paspor_courses`/`modules`/`lessons` tables + admin CMS UI)
 
-**Phase 6 admin redesign — full UI integration (scaffolds shipped, integration deferred):**
-- Wire `KpiStat` + `Sparkline` (PR #87) into `/admin` dashboard hero KPIs
-- Use `Sparkline` in catalog table "Apply / minggu" column
-- Wire `PublishBar` (PR #85) into `/admin/positions/[slug]` as sticky footer
-- Build `/admin/analytics` deep-dive page (5 KPI hero + 12-week trend + funnel + leaderboard)
+**Phase 6 admin redesign — ✅ DONE** (integration PRs #94–97 merged 2026-05-27)
 
 **Phase 7 application — only after 1-2 weeks prod observation + admin CMS:**
 1. Apply migration 0040 + build admin Paspor course CMS
