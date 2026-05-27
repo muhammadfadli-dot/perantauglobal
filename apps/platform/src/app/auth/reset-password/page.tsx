@@ -24,7 +24,7 @@ export default function ResetPasswordPage() {
         </h1>
         <p className="text-base text-pg-ink-700 leading-relaxed mt-3">
           Masukkan password baru untuk akun kamu. Nanti bisa dipakai untuk masuk
-          ke Talent Hub.
+          ke Perantau Global.
         </p>
       </section>
 

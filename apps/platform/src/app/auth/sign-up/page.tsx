@@ -21,7 +21,7 @@ export default function SignUpPage() {
           Daftar akun<br />baru.
         </h1>
         <p className="text-base text-pg-ink-700 leading-relaxed mt-3">
-          Bikin akun untuk akses Talent Hub dan lamar posisi kerja ke luar negeri.
+          Bikin akun untuk akses Perantau Global dan lamar posisi kerja ke luar negeri.
         </p>
       </section>
 

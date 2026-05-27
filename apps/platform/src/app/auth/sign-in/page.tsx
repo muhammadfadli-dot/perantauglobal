@@ -20,7 +20,7 @@ export default function SignInPage() {
 
       <section className="px-6 pt-8 pb-2 max-w-md mx-auto w-full">
         <h1 className="text-[34px] font-extrabold tracking-tight leading-[1.1]">
-          Masuk ke<br />Talent Hub.
+          Masuk ke<br />Perantau Global.
         </h1>
         <p className="text-base text-pg-ink-700 leading-relaxed mt-3">
           Masukkan email dan password kamu untuk masuk.
