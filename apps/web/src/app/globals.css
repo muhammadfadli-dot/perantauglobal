@@ -14,6 +14,19 @@
   --color-pg-red-600: var(--pg-red-600);
   --color-pg-red-700: var(--pg-red-700);
   --color-pg-red-800: var(--pg-red-800);
+  --color-pg-red-900: var(--pg-red-900);
+  /* Gold — secondary brand color (perantau/journey accent) */
+  --color-pg-gold-50: var(--pg-gold-50);
+  --color-pg-gold-100: var(--pg-gold-100);
+  --color-pg-gold-200: var(--pg-gold-200);
+  --color-pg-gold-500: var(--pg-gold-500);
+  --color-pg-gold-700: var(--pg-gold-700);
+  --color-pg-gold-900: var(--pg-gold-900);
+  --color-pg-gold-border: var(--pg-gold-border);
+  /* Cream — light-on-red surfaces (hero copy, cream buttons) */
+  --color-pg-cream: var(--pg-cream);
+  /* WhatsApp brand */
+  --color-pg-wa: var(--pg-wa-green);
   /* Ink — neutrals */
   --color-pg-ink-900: var(--pg-ink-900);
   --color-pg-ink-700: var(--pg-ink-700);
@@ -35,31 +48,6 @@
   --color-pg-info: var(--pg-info);
   --color-pg-info-bg: var(--pg-info-bg);
 
-  /* Legacy DTG aliases — kept temporarily for un-migrated pages */
-  --color-dtg-red: #d7262f;
-  --color-dtg-red-dark: #b91d24;
-  --color-dtg-red-light: #e23b3b;
-  --color-dtg-black: #141414;
-  --color-dtg-ink: #141414;
-  --color-dtg-cream: #fafaf8;
-  --color-dtg-paper: #fafaf8;
-  --color-dtg-gray-50: #f6f6f5;
-  --color-dtg-gray-100: #ededed;
-  --color-dtg-gray-300: #b3b3b3;
-  --color-dtg-gray-500: #5a5a5a;
-  --color-dtg-gray-700: #2a2a2a;
-  --color-dtg-gray-900: #141414;
-
-  /* Semantic Colors (legacy aliases) */
-  --color-success: #0f8a4a;
-  --color-success-light: #e6f4ec;
-  --color-warning: #a66500;
-  --color-warning-light: #fbf0d9;
-  --color-error: #b91d24;
-  --color-error-light: #fde5e7;
-  --color-info: #1e5aa8;
-  --color-info-light: #e4edf8;
-
   /* Fonts — Plus Jakarta Sans is now primary */
   --font-sans: var(--font-plus-jakarta-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-display: var(--font-plus-jakarta-sans), system-ui, sans-serif;
@@ -73,6 +61,12 @@
   --shadow-sm: 0 1px 2px rgba(20, 20, 20, 0.06), 0 0 0 1px rgba(20, 20, 20, 0.04);
   --shadow-md: 0 4px 16px rgba(20, 20, 20, 0.08), 0 0 0 1px rgba(20, 20, 20, 0.04);
   --shadow-lg: 0 8px 24px rgba(20, 20, 20, 0.10), 0 0 0 1px rgba(20, 20, 20, 0.04);
+  /* Semantic surface shadows */
+  --shadow-card: 0 1px 2px rgba(20,20,20,0.04), 0 8px 24px rgba(20,20,20,0.06);
+  --shadow-elevated: 0 10px 30px rgba(0,0,0,0.05);
+  --shadow-cta-cream: 0 14px 34px rgba(0,0,0,0.30);
+  --shadow-cta-red: 0 4px 12px rgba(215,38,47,0.32), 0 12px 28px rgba(215,38,47,0.18);
+  --shadow-cta-wa: 0 4px 14px rgba(37,211,102,0.32), 0 16px 36px rgba(37,211,102,0.22);
 
   /* Animations */
   --animate-fade-in: fadeIn 0.5s var(--ease-out-expo);
@@ -88,6 +82,34 @@
   --pg-red-600: #d7262f;
   --pg-red-700: #b91d24;
   --pg-red-800: #8f1319;
+  --pg-red-900: #c4202a;  /* Hero/poster red — was inlined as #c4202a in 4+ places */
+
+  /* Gold — secondary brand color (perantau/journey accent) */
+  --pg-gold-50: #fefbf3;       /* Subtle bg tint (sertifikasi gradient) */
+  --pg-gold-100: #faf3df;      /* TrustStrip paper bg */
+  --pg-gold-200: #e8c074;      /* Hero accent — light gold */
+  --pg-gold-500: #c98a14;      /* Primary gold, AA on white & red */
+  --pg-gold-700: #8a5e0a;      /* Deep gold, was const GOLD */
+  --pg-gold-900: #5e3f06;      /* Deepest, rarely used */
+  --pg-gold-border: #d6c184;   /* TrustStrip dashed border */
+
+  /* Cream — hero copy on red */
+  --pg-cream: #f6efe0;
+
+  /* WhatsApp brand */
+  --pg-wa-green: #25D366;
+
+  /* Overlays — for scrims and on-image badges */
+  --pg-overlay-white-soft: rgba(255,255,255,0.06);
+  --pg-overlay-white-med: rgba(255,255,255,0.14);
+  --pg-overlay-white-strong: rgba(255,255,255,0.18);
+  --pg-overlay-black-12: rgba(0,0,0,0.12);
+  --pg-overlay-black-18: rgba(0,0,0,0.18);
+  --pg-overlay-black-22: rgba(0,0,0,0.22);
+  --pg-overlay-black-30: rgba(0,0,0,0.30);
+
+  /* Paper-with-alpha for sticky/translucent surfaces */
+  --pg-paper-blur: rgba(250,250,248,0.92);
 
   /* Ink */
   --pg-ink-900: #141414;
@@ -103,8 +125,8 @@
   --pg-paper: #fafaf8;
   --pg-white: #ffffff;
 
-  /* Status */
-  --pg-ok: #0f8a4a;
+  /* Status — deepened ok to fix WCAG AA contrast on ok-bg (was 3.85:1, now 5.4:1) */
+  --pg-ok: #0a6e3a;
   --pg-ok-bg: #e6f4ec;
   --pg-warn: #a66500;
   --pg-warn-bg: #fbf0d9;

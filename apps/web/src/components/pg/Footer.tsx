@@ -60,7 +60,7 @@ export function Footer() {
                 <span
                   aria-hidden
                   className="inline-block w-2.5 h-2.5 rounded-full"
-                  style={{ background: "#25D366" }}
+                  style={{ background: "var(--pg-wa-green)" }}
                 />
                 Tanya via WhatsApp
               </a>

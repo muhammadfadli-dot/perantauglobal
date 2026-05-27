@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { setRequestLocale } from "next-intl/server";
 import { Icon } from "@/components/pg/Icon";
-import { StatusDot } from "@/components/pg/primitives";
+import {
+  ButtonLink,
+  FinalCTA,
+  StatusDot,
+} from "@/components/pg/primitives";
 import { RedHero } from "@/components/pg/RedHero";
 import { ApplyForm } from "@/components/pg/ApplyForm";
 import { ExistingUserShortcut } from "@/components/pg/ExistingUserShortcut";
@@ -15,6 +18,7 @@ import {
   fetchPositionSlugsForBuild,
 } from "@/lib/positions-db";
 import { resolvePositionDetail } from "@/lib/positionContent";
+import { waLink } from "@/lib/contact";
 
 type RouteParams = { locale: string; slug: string };
 
@@ -95,16 +99,13 @@ export default async function LowonganDetailPage({
           {/* Batch status */}
           <section className="px-5 md:px-8 pt-5">
             {position.status === "open" && position.batch ? (
-              <div
-                className="flex items-center gap-3 rounded-2xl border px-4 py-3.5"
-                style={{ background: "var(--pg-ok-bg)", borderColor: "#c6e6d2" }}
-              >
+              <div className="flex items-center gap-3 rounded-2xl border border-pg-ok/30 bg-pg-ok-bg px-4 py-3.5">
                 <StatusDot tone="ok" />
                 <div className="flex-1">
                   <div className="text-sm font-bold text-pg-ok">
                     {position.batch.label} · lagi buka
                   </div>
-                  <div className="text-sm mt-0.5" style={{ color: "#1a5f36" }}>
+                  <div className="text-sm mt-0.5 text-pg-ok">
                     {position.batch.slotsFilled} / {position.batch.slotsTotal} terisi · deadline{" "}
                     {position.batch.deadline}
                   </div>
@@ -250,10 +251,7 @@ export default async function LowonganDetailPage({
                     style={{ paddingBottom: i === arr.length - 1 ? 0 : 16 }}
                   >
                     <div className="relative">
-                      <div
-                        className="w-6 h-6 rounded-full text-white grid place-items-center text-[11px] font-extrabold"
-                        style={{ background: "var(--pg-red-600)" }}
-                      >
+                      <div className="w-6 h-6 rounded-full bg-pg-ink-900 text-white grid place-items-center text-[11px] font-extrabold">
                         {i + 1}
                       </div>
                       {i < arr.length - 1 && (
@@ -271,12 +269,17 @@ export default async function LowonganDetailPage({
         {/* Apply form sidebar (desktop) */}
         <aside className="hidden md:block">
           <div className="sticky top-24 grid gap-3">
-            <ApplyForm
-              positionSlug={position.slug}
-              positionRole={position.role}
-              positionCountry={position.country}
-              fields={appliedFields}
-            />
+            <div
+              className="bg-pg-white border border-pg-ink-200 rounded-2xl"
+              style={{ boxShadow: "var(--shadow-card)" }}
+            >
+              <ApplyForm
+                positionSlug={position.slug}
+                positionRole={position.role}
+                positionCountry={position.country}
+                fields={appliedFields}
+              />
+            </div>
             <ExistingUserShortcut positionSlug={position.slug} />
           </div>
         </aside>
@@ -295,17 +298,28 @@ export default async function LowonganDetailPage({
         </div>
       </section>
 
+      {/* Final CTA bookend (desktop only — mobile already has sticky CTA) */}
+      <div className="hidden md:block">
+        <FinalCTA
+          eyebrow="Pertanyaan tentang lowongan ini?"
+          title="Hubungi PIC Perantau Global."
+          body="Balasan WhatsApp dalam jam kerja. Atau lihat lowongan lain yang mungkin lebih cocok."
+          primaryHref="/lowongan"
+          primaryLabel="Lihat lowongan lain"
+          whatsappHref={waLink(
+            `Halo, saya mau tanya soal lowongan ${position.role} ${position.country}.`,
+          )}
+        />
+      </div>
+
       {/* Mobile sticky CTA */}
       <div
         className="md:hidden fixed bottom-0 left-0 right-0 z-30 px-5 py-3.5 pb-5 border-t border-pg-ink-100"
-        style={{ background: "rgba(255,255,255,.96)", backdropFilter: "blur(8px)" }}
+        style={{ background: "var(--pg-paper-blur)", backdropFilter: "blur(8px)" }}
       >
-        <Link
-          href="#form"
-          className="inline-flex items-center justify-center gap-2 w-full min-h-[52px] px-5 text-base font-semibold rounded-xl bg-pg-red-600 text-white no-underline transition-colors hover:bg-pg-red-700"
-        >
+        <ButtonLink href="#form" variant="primary" size="md" block>
           Lamar posisi ini <Icon name="arrow_right" size={18} />
-        </Link>
+        </ButtonLink>
         <div className="text-[12px] text-pg-ink-500 text-center mt-2">
           Gratis sampai terima offering letter
         </div>

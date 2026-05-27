@@ -6,8 +6,8 @@ import { useState } from "react";
 import { Icon } from "./Icon";
 
 const NAV_LINKS = [
-  { label: "Lowongan", href: "/lowongan" },
-  { label: "Sertifikasi", href: "/sertifikasi" },
+  { label: "Cari Kerja", href: "/lowongan" },
+  { label: "Cara Daftar", href: "/proses" },
   { label: "Tentang", href: "/tentang" },
   { label: "FAQ", href: "/faq" },
 ];
@@ -19,9 +19,9 @@ export function TopBarWWW() {
   return (
     <>
       <header
-        className="sticky top-0 z-30 flex items-center justify-between px-5 md:px-8 py-3.5 border-b border-pg-ink-100"
+        className="sticky top-0 z-30 flex items-center justify-between px-5 md:px-8 py-4 border-b border-pg-ink-100"
         style={{
-          background: "rgba(250,250,248,.92)",
+          background: "var(--pg-paper-blur)",
           backdropFilter: "saturate(140%) blur(8px)",
         }}
       >

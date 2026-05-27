@@ -54,7 +54,7 @@ export function TestimonialMobileSwitcher({ items }: { items: Testimonial[] }) {
                   width: i === idx ? 22 : 8,
                   height: 8,
                   background:
-                    i === idx ? "var(--pg-red-600)" : "rgba(14,14,14,0.18)",
+                    i === idx ? "var(--pg-red-600)" : "var(--pg-overlay-black-18)",
                 }}
               />
             ))}
@@ -71,7 +71,7 @@ export function TestimonialMobileSwitcher({ items }: { items: Testimonial[] }) {
           className="w-11 h-11 rounded-full grid place-items-center text-white transition-opacity hover:opacity-90 active:opacity-80 flex-shrink-0"
           style={{
             background: "var(--pg-red-600)",
-            boxShadow: "0 4px 12px rgba(215,38,47,0.32)",
+            boxShadow: "var(--shadow-cta-red)",
           }}
         >
           <Icon name="arrow_right" size={18} stroke={2.5} />

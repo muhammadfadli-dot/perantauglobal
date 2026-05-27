@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Icon } from "./Icon";
-import { Button } from "./primitives";
+import { Button, Field, Input, Textarea } from "./primitives";
 import { trackEvent, generateEventId, getMetaCookies } from "@/lib/tracking";
 import type { AppliedFormField } from "@/lib/positions-db";
 
@@ -233,45 +233,41 @@ export function ApplyForm({
 
           <div className="grid gap-3 mt-5">
             <Field label="Nama lengkap" required>
-              <input
+              <Input
                 type="text"
                 required
                 autoComplete="name"
                 placeholder="Sesuai KTP"
                 value={identity.fullName}
                 onChange={(e) => setIdentityField("fullName", e.target.value)}
-                className={INPUT_CLASS}
               />
             </Field>
             <Field label="Email" required>
-              <input
+              <Input
                 type="email"
                 required
                 autoComplete="email"
                 placeholder="nama@email.com"
                 value={identity.email}
                 onChange={(e) => setIdentityField("email", e.target.value)}
-                className={INPUT_CLASS}
               />
             </Field>
             <Field label="No. HP / WhatsApp" required>
-              <input
+              <Input
                 type="tel"
                 required
                 autoComplete="tel"
                 placeholder="08xxxxxxxxxx"
                 value={identity.whatsapp}
                 onChange={(e) => setIdentityField("whatsapp", e.target.value)}
-                className={INPUT_CLASS}
               />
             </Field>
             <Field label="Kota tinggal">
-              <input
+              <Input
                 type="text"
                 placeholder="Jakarta"
                 value={identity.city}
                 onChange={(e) => setIdentityField("city", e.target.value)}
-                className={INPUT_CLASS}
               />
             </Field>
           </div>
@@ -337,7 +333,7 @@ export function ApplyForm({
             <div className="grid gap-3">
               <Field label="Password" required>
                 <div className="relative">
-                  <input
+                  <Input
                     type={showPw ? "text" : "password"}
                     required
                     autoComplete="new-password"
@@ -345,7 +341,6 @@ export function ApplyForm({
                     placeholder="Minimal 10 karakter"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className={INPUT_CLASS}
                   />
                   <button
                     type="button"
@@ -358,7 +353,7 @@ export function ApplyForm({
                 </div>
               </Field>
               <Field label="Konfirmasi password" required>
-                <input
+                <Input
                   type={showPw ? "text" : "password"}
                   required
                   autoComplete="new-password"
@@ -366,7 +361,6 @@ export function ApplyForm({
                   placeholder="Ketik ulang password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className={INPUT_CLASS}
                 />
               </Field>
               <div className="text-[12px] text-pg-ink-500 leading-relaxed">
@@ -622,19 +616,17 @@ function FieldQuestion({
           </div>
         )}
         {(field.field_type === "text" || field.field_type === "number") && (
-          <input
+          <Input
             type={field.field_type === "number" ? "number" : "text"}
             value={typeof value === "string" ? value : ""}
             onChange={(e) => setValue(e.target.value)}
-            className={INPUT_CLASS}
           />
         )}
         {field.field_type === "textarea" && (
-          <textarea
+          <Textarea
             value={typeof value === "string" ? value : ""}
             onChange={(e) => setValue(e.target.value)}
             rows={4}
-            className="w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3.5 py-3 text-base text-pg-ink-900 font-medium placeholder:text-pg-ink-400 focus:border-pg-red-600 outline-none transition-colors"
           />
         )}
       </div>
@@ -688,47 +680,43 @@ function SingleStepForm({
 
       <div className="grid gap-3 mt-5">
         <Field label="Nama lengkap" required>
-          <input
+          <Input
             type="text"
             required
             autoComplete="name"
             placeholder="Maya Sari"
             value={identity.fullName}
             onChange={(e) => setIdentityField("fullName", e.target.value)}
-            className={INPUT_CLASS}
           />
         </Field>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Email" required>
-            <input
+            <Input
               type="email"
               required
               autoComplete="email"
               placeholder="maya@email.com"
               value={identity.email}
               onChange={(e) => setIdentityField("email", e.target.value)}
-              className={INPUT_CLASS}
             />
           </Field>
           <Field label="Nomor HP" required>
-            <input
+            <Input
               type="tel"
               required
               autoComplete="tel"
               placeholder="+62 812 …"
               value={identity.whatsapp}
               onChange={(e) => setIdentityField("whatsapp", e.target.value)}
-              className={INPUT_CLASS}
             />
           </Field>
         </div>
         <Field label="Kota tinggal">
-          <input
+          <Input
             type="text"
             placeholder="Jakarta (opsional, bisa diisi nanti di portal)"
             value={identity.city}
             onChange={(e) => setIdentityField("city", e.target.value)}
-            className={INPUT_CLASS}
           />
         </Field>
       </div>
@@ -740,7 +728,7 @@ function SingleStepForm({
         <div className="grid gap-3">
           <Field label="Password" required>
             <div className="relative">
-              <input
+              <Input
                 type={showPw ? "text" : "password"}
                 required
                 autoComplete="new-password"
@@ -748,7 +736,6 @@ function SingleStepForm({
                 placeholder="Minimal 10 karakter"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={INPUT_CLASS}
               />
               <button
                 type="button"
@@ -761,7 +748,7 @@ function SingleStepForm({
             </div>
           </Field>
           <Field label="Konfirmasi password" required>
-            <input
+            <Input
               type={showPw ? "text" : "password"}
               required
               autoComplete="new-password"
@@ -769,7 +756,6 @@ function SingleStepForm({
               placeholder="Ketik ulang password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className={INPUT_CLASS}
             />
           </Field>
           <div className="text-[12px] text-pg-ink-500 leading-relaxed">
@@ -831,25 +817,3 @@ function validatePassword(pw: string): boolean {
   return true;
 }
 
-const INPUT_CLASS =
-  "w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3.5 py-3 text-base text-pg-ink-900 font-medium placeholder:text-pg-ink-400 focus:border-pg-red-600 outline-none transition-colors";
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <div className="text-[13px] font-bold text-pg-ink-500 mb-1.5">
-        {label}
-        {required && <span className="ml-1 text-pg-red-600">*</span>}
-      </div>
-      {children}
-    </label>
-  );
-}

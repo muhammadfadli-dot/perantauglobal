@@ -4,6 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { localBusinessJsonLd } from "@/lib/jsonld";
 import { Icon } from "@/components/pg/Icon";
 import { ContactForm } from "@/components/pg/ContactForm";
+import { Eyebrow } from "@/components/pg/primitives";
 
 export const metadata: Metadata = {
   title: "Kontak — Hubungi Perantau Global",
@@ -30,10 +31,8 @@ export default async function KontakPage({ params }: { params: Promise<{ locale:
       <main className="px-5 md:px-8 py-10 md:py-16">
         <div className="max-w-6xl mx-auto md:grid md:grid-cols-2 md:gap-12">
           <div>
-            <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-red-600">
-              Kontak
-            </div>
-            <h1 className="text-[34px] md:text-6xl font-extrabold tracking-tight mt-2">
+            <Eyebrow>Kontak</Eyebrow>
+            <h1 className="text-[34px] md:text-6xl font-extrabold tracking-tight mt-2 leading-[1.05]">
               Hubungi kami.
             </h1>
             <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed mt-3">
@@ -41,10 +40,10 @@ export default async function KontakPage({ params }: { params: Promise<{ locale:
               form di samping. Kami balas dalam 1×24 jam kerja.
             </p>
 
-            <div className="mt-6 space-y-3.5">
+            <div className="mt-6 space-y-3">
               <a
                 href="mailto:halo@perantauglobal.com"
-                className="flex items-center gap-3 bg-pg-white border border-pg-ink-100 rounded-xl px-4 py-3.5 no-underline text-pg-ink-900 hover:border-pg-ink-200"
+                className="flex items-center gap-3 bg-pg-white border border-pg-ink-100 rounded-xl px-4 py-3 no-underline text-pg-ink-900 hover:border-pg-ink-200"
               >
                 <div
                   className="w-10 h-10 rounded-[10px] grid place-items-center shrink-0"
@@ -58,7 +57,7 @@ export default async function KontakPage({ params }: { params: Promise<{ locale:
                 </div>
                 <Icon name="arrow_right" size={18} className="text-pg-ink-400" />
               </a>
-              <div className="flex items-start gap-3 bg-pg-white border border-pg-ink-100 rounded-xl px-4 py-3.5">
+              <div className="flex items-start gap-3 bg-pg-white border border-pg-ink-100 rounded-xl px-4 py-3">
                 <div
                   className="w-10 h-10 rounded-[10px] grid place-items-center shrink-0"
                   style={{ background: "var(--pg-red-50)", color: "var(--pg-red-700)" }}

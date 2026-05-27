@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Icon } from "./Icon";
-import { Button } from "./primitives";
+import { Button, Field, Input, Select, Textarea } from "./primitives";
 
 export function ContactForm() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -60,30 +60,29 @@ export function ContactForm() {
 
       <div className="grid gap-3 mt-5">
         <Field label="Nama" required>
-          <input name="name" type="text" required className={INPUT_CLASS} />
+          <Input name="name" type="text" required />
         </Field>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Email" required>
-            <input name="email" type="email" required className={INPUT_CLASS} />
+            <Input name="email" type="email" required />
           </Field>
           <Field label="Nomor HP">
-            <input name="phone" type="tel" className={INPUT_CLASS} placeholder="+62 …" />
+            <Input name="phone" type="tel" placeholder="+62 …" />
           </Field>
         </div>
         <Field label="Subjek">
-          <select name="subject" defaultValue="Pertanyaan umum" className={INPUT_CLASS}>
+          <Select name="subject" defaultValue="Pertanyaan umum">
             <option>Pertanyaan umum</option>
             <option>Tanya lowongan</option>
             <option>Tanya biaya & proses</option>
             <option>Lainnya</option>
-          </select>
+          </Select>
         </Field>
         <Field label="Pesan" required>
-          <textarea
+          <Textarea
             name="message"
             required
             rows={5}
-            className={INPUT_CLASS}
             placeholder="Tulis pertanyaan atau kebutuhan kamu di sini…"
           />
         </Field>
@@ -109,28 +108,5 @@ export function ContactForm() {
         </Button>
       </div>
     </form>
-  );
-}
-
-const INPUT_CLASS =
-  "w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3.5 py-3 text-base text-pg-ink-900 font-medium placeholder:text-pg-ink-400 focus:border-pg-red-600 outline-none transition-colors";
-
-function Field({
-  label,
-  required,
-  children,
-}: {
-  label: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <label className="block">
-      <div className="text-[13px] font-bold text-pg-ink-500 mb-1.5">
-        {label}
-        {required && <span className="ml-1 text-pg-red-600">*</span>}
-      </div>
-      {children}
-    </label>
   );
 }

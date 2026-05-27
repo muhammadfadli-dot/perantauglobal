@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { Icon } from "@/components/pg/Icon";
-import { ButtonLink } from "@/components/pg/primitives";
+import { FinalCTA, PageHero, Section, SectionHeader } from "@/components/pg/primitives";
+import { waLink } from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Tentang Kami — Perantau Global",
@@ -40,74 +41,58 @@ export default async function TentangPage({ params }: { params: Promise<{ locale
 
   return (
     <main>
-      <section className="px-5 md:px-8 pt-10 md:pt-16 pb-10">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-red-600">
-            Tentang kami
-          </div>
-          <h1 className="text-[34px] md:text-6xl font-extrabold tracking-tight mt-2 leading-[1.05]">
+      <PageHero
+        eyebrow="Tentang kami"
+        title={
+          <>
             Kerja luar negeri,
             <br />
             <span className="text-pg-red-600">aman & jelas.</span>
-          </h1>
-          <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed mt-5 max-w-prose">
-            PT Daya Talenta Global (DTG) resmi berdiri Oktober 2024 sebagai perusahaan
-            penempatan kerja luar negeri, dengan izin P3MI No. 1810240237512001 dari
-            Kementerian Tenaga Kerja. Walaupun nama Perantau Global terbilang baru, kami
-            bagian dari <b className="text-pg-ink-900">DayaLima</b> — perusahaan Indonesia
-            yang sudah jalan di bidang rekrutmen & pengembangan tenaga kerja sejak 1998.
-          </p>
-          <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed mt-4 max-w-prose">
-            Misi kami sederhana: kerja luar negeri harus aman, legal, dan jelas — bukan janji
-            manis tanpa back-up. Kami percaya transparansi soal proses dan biaya adalah hak setiap
-            PMI.
-          </p>
-        </div>
-      </section>
+          </>
+        }
+      >
+        <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed max-w-prose">
+          PT Daya Talenta Global (DTG) resmi berdiri Oktober 2024 sebagai perusahaan
+          penempatan kerja luar negeri, dengan izin P3MI No. 1810240237512001 dari
+          Kementerian Tenaga Kerja. Walaupun nama Perantau Global terbilang baru, kami
+          bagian dari <b className="text-pg-ink-900">DayaLima</b> — perusahaan Indonesia
+          yang sudah jalan di bidang rekrutmen & pengembangan tenaga kerja sejak 1998.
+        </p>
+        <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed mt-4 max-w-prose">
+          Misi kami sederhana: kerja luar negeri harus aman, legal, dan jelas — bukan janji
+          manis tanpa back-up. Kami percaya transparansi soal proses dan biaya adalah hak setiap
+          PMI.
+        </p>
+      </PageHero>
 
-      <section className="px-5 md:px-8 py-10 md:py-12 bg-pg-ink-50 border-y border-pg-ink-100">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-red-600">
-            Nilai kami
-          </div>
-          <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight mt-1.5 mb-6 md:mb-8">
-            Yang kami pegang teguh.
-          </h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {VALUES.map((v) => (
-              <div key={v.title} className="bg-pg-white border border-pg-ink-100 rounded-2xl p-5">
-                <div
-                  className="w-12 h-12 rounded-xl grid place-items-center"
-                  style={{ background: "var(--pg-red-50)", color: "var(--pg-red-700)" }}
-                >
-                  <Icon name={v.icon} size={24} stroke={2} />
-                </div>
-                <div className="text-lg font-bold tracking-tight mt-3.5">{v.title}</div>
-                <div className="text-base text-pg-ink-700 mt-1.5 leading-relaxed">{v.desc}</div>
+      <Section tone="ink" size="md" border="both">
+        <SectionHeader
+          eyebrow="Nilai kami"
+          title="Yang kami pegang teguh."
+        />
+        <div className="grid md:grid-cols-3 gap-4 mt-6 md:mt-8">
+          {VALUES.map((v) => (
+            <div key={v.title} className="bg-pg-white border border-pg-ink-100 rounded-2xl p-5">
+              <div
+                className="w-12 h-12 rounded-xl grid place-items-center"
+                style={{ background: "var(--pg-red-50)", color: "var(--pg-red-700)" }}
+              >
+                <Icon name={v.icon} size={24} stroke={2} />
               </div>
-            ))}
-          </div>
+              <div className="text-lg font-bold tracking-tight mt-3">{v.title}</div>
+              <div className="text-base text-pg-ink-700 mt-2 leading-relaxed">{v.desc}</div>
+            </div>
+          ))}
         </div>
-      </section>
+      </Section>
 
-      <section className="px-5 md:px-8 py-10 md:py-16">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl md:text-4xl font-extrabold tracking-tight">
-            Siap mulai perjalanan kamu?
-          </h2>
-          <p className="text-base md:text-lg text-pg-ink-700 mt-3 leading-relaxed">
-            Lihat lowongan yang lagi buka, atau jelajahi sertifikasi siap kerja untuk persiapan berangkat.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center mt-6">
-            <ButtonLink href="/lowongan" variant="primary">
-              Lihat lowongan <Icon name="arrow_right" size={18} />
-            </ButtonLink>
-            <ButtonLink href="/sertifikasi" variant="ghost">
-              Lihat sertifikasi
-            </ButtonLink>
-          </div>
-        </div>
-      </section>
+      <FinalCTA
+        title={<>Siap mulai perjalanan kamu?</>}
+        body="Lihat lowongan yang lagi buka, atau jelajahi sertifikasi siap kerja."
+        primaryHref="/lowongan"
+        primaryLabel="Lihat lowongan"
+        whatsappHref={waLink("Halo, saya mau tanya tentang Perantau Global.")}
+      />
     </main>
   );
 }

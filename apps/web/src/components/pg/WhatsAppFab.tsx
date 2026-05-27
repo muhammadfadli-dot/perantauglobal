@@ -13,11 +13,10 @@ export function WhatsAppFab() {
       href={waLink()}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-5 right-5 md:bottom-7 md:right-7 z-50 inline-flex items-center gap-2.5 px-4 md:px-5 py-3 md:py-3.5 rounded-full text-white font-bold text-[13px] md:text-sm no-underline transition-all"
+      className="fixed bottom-5 right-5 md:bottom-7 md:right-7 z-50 inline-flex items-center gap-2 px-4 md:px-5 py-3 md:py-4 rounded-full text-white font-bold text-[13px] md:text-sm no-underline transition-all"
       style={{
-        background: "#25D366",
-        boxShadow:
-          "0 4px 14px rgba(37,211,102,0.32), 0 16px 36px rgba(37,211,102,0.22)",
+        background: "var(--pg-wa-green)",
+        boxShadow: "var(--shadow-cta-wa)",
       }}
       aria-label="Tanya via WhatsApp"
     >

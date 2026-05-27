@@ -1,4 +1,6 @@
 import { TopBarWWW } from "@/components/pg/TopBarWWW";
+import { TrustStrip } from "@/components/pg/TrustStrip";
+import { CountryStrip } from "@/components/pg/CountryStrip";
 import { Footer } from "@/components/pg/Footer";
 
 export default function SertifikasiLayout({
@@ -9,6 +11,8 @@ export default function SertifikasiLayout({
   return (
     <>
       <TopBarWWW />
+      <TrustStrip />
+      <CountryStrip />
       {children}
       <Footer />
     </>

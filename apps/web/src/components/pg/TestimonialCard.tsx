@@ -14,8 +14,7 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
     <article
       className="flex flex-col bg-white border border-pg-ink-100 rounded-3xl overflow-hidden"
       style={{
-        boxShadow:
-          "0 1px 2px rgba(20,20,20,0.04), 0 8px 24px rgba(20,20,20,0.06)",
+        boxShadow: "var(--shadow-card)",
       }}
     >
       <div className="relative h-56 md:h-64 overflow-hidden">
@@ -34,10 +33,10 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
             style={{
               background:
                 t.accent === "amber"
-                  ? "linear-gradient(135deg,#16a34a 0%,#0f6332 100%)"
+                  ? "linear-gradient(135deg,var(--pg-ok) 0%,var(--pg-ok) 100%)"
                   : t.accent === "blue"
-                    ? "linear-gradient(135deg,#dc2626 0%,#7f1d1d 100%)"
-                    : "linear-gradient(135deg,#2563eb 0%,#1e3a8a 100%)",
+                    ? "linear-gradient(135deg,var(--pg-red-600) 0%,var(--pg-red-800) 100%)"
+                    : "linear-gradient(135deg,var(--pg-ink-700) 0%,var(--pg-ink-900) 100%)",
             }}
           />
         )}
@@ -48,15 +47,15 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
             className="absolute inset-x-0 top-0 h-20 pointer-events-none"
             style={{
               background:
-                "linear-gradient(180deg, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0) 100%)",
+                "linear-gradient(180deg, var(--pg-overlay-black-30) 0%, rgba(0,0,0,0) 100%)",
             }}
           />
         )}
         <div
-          className="absolute top-3.5 left-3.5 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-white text-[10px] font-bold tracking-widest uppercase font-mono backdrop-blur-sm"
+          className="absolute top-4 left-4 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-white text-[10px] font-bold tracking-widest uppercase font-mono backdrop-blur-sm"
           style={{
             background: "rgba(0,0,0,0.42)",
-            border: "1px solid rgba(255,255,255,0.20)",
+            border: "1px solid var(--pg-overlay-white-strong)",
           }}
         >
           {t.country === "Saudi Arabia"
@@ -69,8 +68,8 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
           {t.city}
         </div>
         <div
-          className="absolute top-3.5 right-3.5 inline-flex items-center px-2.5 py-1.5 rounded-full bg-white/95 text-[10px] font-bold tracking-wider uppercase font-mono backdrop-blur-sm"
-          style={{ color: "#0a6e3a" }}
+          className="absolute top-4 right-4 inline-flex items-center px-2.5 py-1.5 rounded-full bg-white/95 text-[10px] font-bold tracking-wider uppercase font-mono backdrop-blur-sm"
+          style={{ color: "var(--pg-ok)" }}
         >
           Sejak {t.sinceYear} · {t.contractYears} thn
         </div>
@@ -82,10 +81,10 @@ export function TestimonialCard({ t }: { t: Testimonial }) {
             style={{
               background:
                 t.accent === "amber"
-                  ? "linear-gradient(135deg,#c98a14,#6e4906)"
+                  ? "linear-gradient(135deg,var(--pg-gold-500),var(--pg-gold-900))"
                   : t.accent === "blue"
-                    ? "linear-gradient(135deg,#6ea3ff,#1d4ed8)"
-                    : "linear-gradient(135deg,#f9a8d4,#be185d)",
+                    ? "linear-gradient(135deg,var(--pg-ink-700),var(--pg-ink-900))"
+                    : "linear-gradient(135deg,var(--pg-red-600),var(--pg-red-800))",
               border: "3px solid #fff",
               boxShadow: "0 2px 6px rgba(20,20,20,0.12)",
             }}
