@@ -1,0 +1,285 @@
+import Image from "next/image";
+import Link from "next/link";
+import { Icon } from "@/components/pg/Icon";
+import { waLink } from "@/lib/contact";
+
+type Country = {
+  name: "Saudi Arabia" | "Jepang" | "Taiwan" | "Indonesia";
+  short: string;
+  flag: string;
+  img: string;
+  currency: string;
+};
+
+const COUNTRIES: Country[] = [
+  { name: "Saudi Arabia", short: "Saudi", flag: "🇸🇦", img: "/images/countries/saudi.jpg", currency: "SAR riyal" },
+  { name: "Jepang", short: "Jepang", flag: "🇯🇵", img: "/images/countries/jepang.jpg", currency: "¥ yen" },
+  { name: "Taiwan", short: "Taiwan", flag: "🇹🇼", img: "/images/countries/taiwan.jpg", currency: "NT$ Taiwan" },
+  { name: "Indonesia", short: "Indonesia", flag: "🇮🇩", img: "/images/countries/indonesia.jpg", currency: "Rupiah" },
+];
+
+const PORTRAIT_CARDS = [
+  { src: "/images/people/sari.jpg", name: "Sari, 28", meta: "Perawat · 🇸🇦 Riyadh · 2025" },
+  { src: "/images/people/budi.jpg", name: "Budi, 32", meta: "Truck Driver · 🇯🇵 Osaka · 2025" },
+  { src: "/images/people/rini.jpg", name: "Rini, 26", meta: "Caregiver · 🇹🇼 Taipei · 2025" },
+];
+
+export function HomeHero({
+  totalPositions,
+  openCount,
+  positionsByCountry,
+}: {
+  totalPositions: number;
+  openCount: number;
+  positionsByCountry: Record<string, number>;
+}) {
+  return (
+    <section className="relative overflow-hidden pt-10 pb-8 md:pt-14 md:pb-6 px-5 md:px-8">
+      <div className="max-w-6xl mx-auto">
+        {/* License eyebrow pill */}
+        <a
+          href="https://sipptki.kemnaker.go.id"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2.5 pl-2 pr-3.5 py-2 bg-pg-white border border-pg-ink-100 rounded-full mb-7 no-underline transition-all hover:border-pg-ink-200 hover:-translate-y-0.5"
+          style={{ boxShadow: "0 1px 3px rgba(20,20,20,0.04)" }}
+        >
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-pg-red-50 text-pg-red-700 rounded-full font-mono text-[10.5px] font-bold tracking-[0.06em]">
+            <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-pg-red-600" />
+            P3MI Resmi
+          </span>
+          <span className="hidden sm:inline text-[12.5px] font-medium text-pg-ink-700">
+            No. 1810240237512001 — bisa kamu cek sendiri
+          </span>
+          <span className="font-mono text-[11.5px] font-bold text-pg-ink-900 tracking-[0.02em] inline-flex items-center gap-1">
+            Cek di Kemnaker
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" aria-hidden>
+              <path d="M7 17L17 7M9 7h8v8" />
+            </svg>
+          </span>
+        </a>
+
+        {/* Hero grid: copy left, portrait collage right */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 items-center">
+          {/* Copy column */}
+          <div className="flex flex-col gap-5">
+            <h1
+              className="font-extrabold tracking-[-0.035em] leading-[1.02] text-pg-ink-900 text-balance"
+              style={{ fontSize: "clamp(36px, 5.4vw, 64px)" }}
+            >
+              Banyak orang biasa udah berangkat.{" "}
+              <span className="text-pg-red-600">Sekarang giliranmu.</span>
+            </h1>
+            <p
+              className="text-pg-ink-700 leading-relaxed font-medium m-0"
+              style={{ fontSize: "clamp(15px, 1.3vw, 18px)", maxWidth: "48ch" }}
+            >
+              Lowongan resmi kerja luar negeri di Saudi Arabia, Jepang, Taiwan &amp; Indonesia.
+              Dari employer terverifikasi P3MI. Bebas calo. Gratis sampai offering letter.
+            </p>
+            <div className="flex flex-wrap gap-3 mt-2">
+              <Link
+                href="/lowongan"
+                className="inline-flex items-center justify-center gap-2 px-[22px] py-4 bg-pg-red-600 text-white font-bold text-[15px] rounded-[14px] no-underline transition-all hover:bg-pg-red-700 hover:-translate-y-0.5"
+                style={{ boxShadow: "0 4px 12px rgba(215,38,47,0.15)" }}
+              >
+                Lihat {totalPositions} lowongan
+                <Icon name="arrow_right" size={16} stroke={2.4} />
+              </Link>
+              <a
+                href={waLink("Halo, saya mau tanya soal kerja luar negeri.")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2.5 px-[22px] py-4 bg-pg-white text-pg-ink-900 font-bold text-[15px] rounded-[14px] border-[1.5px] border-pg-ink-200 no-underline transition-all hover:border-pg-ink-300 hover:-translate-y-0.5"
+              >
+                <span
+                  aria-hidden
+                  className="w-2 h-2 rounded-full"
+                  style={{ background: "#25D366", boxShadow: "0 0 0 4px rgba(37,211,102,0.18)" }}
+                />
+                Tanya via WhatsApp
+              </a>
+            </div>
+
+            {/* Alumni strip */}
+            <div className="flex items-center gap-3.5 mt-3">
+              <div className="flex items-center">
+                {PORTRAIT_CARDS.map((p, i) => (
+                  <Image
+                    key={p.src}
+                    src={p.src}
+                    alt={p.name}
+                    width={36}
+                    height={36}
+                    className="rounded-full object-cover border-2 border-pg-paper"
+                    style={{ marginLeft: i === 0 ? 0 : -8 }}
+                  />
+                ))}
+                <span
+                  className="w-9 h-9 rounded-full bg-pg-ink-900 text-white font-mono text-[11.5px] font-bold grid place-items-center border-2 border-pg-paper"
+                  style={{ marginLeft: -8 }}
+                >
+                  +200
+                </span>
+              </div>
+              <div className="text-[13px] text-pg-ink-700 leading-snug">
+                <b className="text-pg-ink-900 font-bold">Sari, Budi, Rini</b> + 200 alumni sejak
+                2024 — semua diberangkatkan resmi.
+              </div>
+            </div>
+          </div>
+
+          {/* Portrait collage column */}
+          <div
+            className="relative w-full mx-auto"
+            style={{ maxWidth: 520, aspectRatio: "5/5" }}
+          >
+            {/* Floating destination tag (background layer) */}
+            <div
+              className="absolute inline-flex items-center gap-2 px-3.5 py-2 bg-pg-ink-900 text-white rounded-full font-mono text-[11.5px] font-bold tracking-[0.06em] uppercase"
+              style={{
+                top: "38%",
+                left: "-8%",
+                transform: "rotate(-6deg)",
+                zIndex: 1,
+                boxShadow: "0 8px 20px rgba(20,20,20,0.18)",
+              }}
+            >
+              <span className="w-[7px] h-[7px] rounded-full bg-pg-red-500 animate-pulse" />
+              {openCount} batch lagi buka
+            </div>
+
+            {/* Portrait cards */}
+            {PORTRAIT_CARDS.map((p, i) => {
+              const positions = [
+                { top: 0, left: 0, rotate: -4, z: 2 },
+                { top: "8%", right: 0, rotate: 3, z: 3 },
+                { bottom: 0, left: "18%", rotate: -2, z: 4 },
+              ];
+              const pos = positions[i];
+              return (
+                <div
+                  key={p.src}
+                  className="absolute w-[56%] bg-pg-white rounded-[18px] p-2.5 pb-3.5 transition-transform hover:-translate-y-1 hover:rotate-0 hover:scale-[1.02] hover:z-10"
+                  style={{
+                    top: pos.top,
+                    left: pos.left,
+                    right: pos.right,
+                    bottom: pos.bottom,
+                    transform: `rotate(${pos.rotate}deg)`,
+                    zIndex: pos.z,
+                    boxShadow: "0 18px 40px rgba(20,20,20,0.10), 0 0 0 1px rgba(20,20,20,0.04)",
+                  }}
+                >
+                  <Image
+                    src={p.src}
+                    alt={p.name}
+                    width={400}
+                    height={500}
+                    className="w-full rounded-[12px] block bg-pg-ink-100"
+                    style={{ aspectRatio: "4/5", objectFit: "cover" }}
+                  />
+                  <div className="mt-2.5 flex flex-col gap-0.5">
+                    <div className="flex items-center gap-1.5 text-[14px] font-extrabold text-pg-ink-900">
+                      {p.name}
+                      <span
+                        aria-hidden
+                        className="inline-flex items-center justify-center w-[15px] h-[15px] rounded-full"
+                        style={{ background: "var(--pg-ok)" }}
+                      >
+                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M5 13l4 4L19 7" />
+                        </svg>
+                      </span>
+                    </div>
+                    <div className="font-mono text-[11.5px] text-pg-ink-500 tracking-[0.02em]">
+                      {p.meta}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Floating "Bebas calo" pill */}
+            <div
+              className="absolute inline-flex items-center gap-1.5 px-3 py-1.5 bg-pg-white border border-pg-ink-100 rounded-full font-mono text-[11px] font-semibold text-pg-ink-700"
+              style={{
+                bottom: "8%",
+                right: "-2%",
+                transform: "rotate(4deg)",
+                zIndex: 1,
+                boxShadow: "0 6px 16px rgba(20,20,20,0.08)",
+              }}
+            >
+              <span
+                aria-hidden
+                className="w-[7px] h-[7px] rounded-full"
+                style={{ background: "var(--pg-ok)" }}
+              />
+              Bebas calo
+            </div>
+          </div>
+        </div>
+
+        {/* Country tiles strip */}
+        <div className="mt-12 md:mt-16">
+          <div className="flex items-baseline justify-between mb-4 gap-3 flex-wrap">
+            <span className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-pg-ink-500">
+              Negara tujuan
+            </span>
+            <span className="text-[13px] text-pg-ink-500">
+              Pilih negara untuk lihat lowongan, atau{" "}
+              <Link href="/lowongan" className="text-pg-ink-900 font-semibold underline decoration-pg-ink-300 underline-offset-2 hover:text-pg-red-600">
+                lihat semuanya
+              </Link>
+              .
+            </span>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            {COUNTRIES.map((c) => {
+              const count = positionsByCountry[c.name] || 0;
+              return (
+                <Link
+                  key={c.name}
+                  href={`/lowongan?country=${encodeURIComponent(c.name)}`}
+                  className="group relative flex flex-col overflow-hidden rounded-[18px] bg-pg-white border border-pg-ink-100 no-underline transition-all hover:-translate-y-1 hover:border-pg-ink-200"
+                  style={{ boxShadow: "var(--pg-shadow-1)" }}
+                  aria-label={`Lowongan di ${c.name}`}
+                >
+                  <div className="relative h-32 md:h-36 overflow-hidden">
+                    <Image
+                      src={c.img}
+                      alt={c.name}
+                      fill
+                      sizes="(min-width:1024px) 25vw, 50vw"
+                      className="object-cover transition-transform group-hover:scale-105"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-2 p-4">
+                    <span className="inline-flex items-center gap-1.5 self-start px-2.5 py-1 bg-pg-ink-50 rounded-full font-mono text-[10.5px] font-bold tracking-[0.04em] text-pg-ink-700">
+                      <span className="text-[11px] leading-none">{c.flag}</span>
+                      {c.short}
+                    </span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex flex-col">
+                        <span className="text-[15px] font-extrabold text-pg-ink-900 tracking-[-0.01em]">
+                          {c.name}
+                        </span>
+                        <span className="font-mono text-[11.5px] text-pg-ink-500 mt-0.5">
+                          {count} posisi · {c.currency}
+                        </span>
+                      </div>
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-pg-ink-900 text-white shrink-0 transition-transform group-hover:translate-x-0.5">
+                        <Icon name="arrow_right" size={12} stroke={2.4} />
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
