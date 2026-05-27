@@ -9,7 +9,6 @@ export type CountryMeta = {
   contract: string;
   img: string;
   tagline: string;
-  facts: string[];
   /** CSS filter applied to chapter band hero image — country tint */
   imgFilter: string;
   /** Country tint hex used as solid background when heroImg is missing */
@@ -27,7 +26,6 @@ export const COUNTRY_META: Record<CountryMeta["key"], CountryMeta> = {
     img: "/images/countries/saudi.jpg",
     tagline:
       "Hospitality, perawat, mekanik berat — gaji riyal, makan ditanggung. Banyak posisi terbuka di Riyadh & Jeddah.",
-    facts: ["SAR riyal", "Kontrak 2 tahun", "Tiket pulang", "Asrama disediakan"],
     imgFilter: "saturate(1.05) brightness(0.96) sepia(0.18)",
     tint: "#b89358",
   },
@@ -41,7 +39,6 @@ export const COUNTRY_META: Record<CountryMeta["key"], CountryMeta> = {
     img: "/images/countries/jepang.jpg",
     tagline:
       "Sistem SSW resmi pemerintah Jepang. Caregiver (Kaigo), food service, dan pengolahan makanan — kerja terstruktur, hak penuh.",
-    facts: ["¥ yen", "Sistem SSW Jepang", "Visa resmi pemerintah", "Asrama subsidi"],
     imgFilter: "saturate(0.85) brightness(0.92) hue-rotate(-8deg)",
     tint: "#36598c",
   },
@@ -55,7 +52,6 @@ export const COUNTRY_META: Record<CountryMeta["key"], CountryMeta> = {
     img: "/images/countries/taiwan.jpg",
     tagline:
       "Caregiver di rumah tangga atau panti. Kontrak 3 tahun, lingkungan kerja yang dekat dengan keluarga Taiwan.",
-    facts: ["NT$ Taiwan dollar", "Kontrak 3 tahun", "Tiket & visa", "Pelatihan bahasa"],
     imgFilter: "saturate(1.1) brightness(0.97)",
     tint: "#3a8567",
   },
@@ -69,7 +65,6 @@ export const COUNTRY_META: Record<CountryMeta["key"], CountryMeta> = {
     img: "/images/countries/indonesia.jpg",
     tagline:
       "Penempatan SPG & posisi domestik di Indonesia — buat yang belum siap berangkat ke luar negeri, tetap dapat support resmi.",
-    facts: ["Rupiah", "Penempatan domestik", "Fleksibel umur", "Tanpa proses imigrasi"],
     imgFilter: "saturate(1.05) brightness(0.95)",
     tint: "#c4452f",
   },

@@ -3,7 +3,7 @@ import type { CountryMeta } from "@/lib/lowonganCountries";
 
 /**
  * Full-bleed country chapter band — image hero with overlay gradient,
- * facts pills top-right, tagline + title bottom-left.
+ * tagline + title bottom-left, "X batch sedang buka" pill below.
  *
  * Image is country-tinted via CSS filter (saturate/brightness/sepia/hue-rotate)
  * per country — keeps red as the only UI accent, while imagery gets a feel.
@@ -41,28 +41,6 @@ export function ChapterBand({
             "linear-gradient(180deg, rgba(20,20,20,0.05) 0%, rgba(20,20,20,0.30) 45%, rgba(20,20,20,0.75) 100%)",
         }}
       />
-
-      {/* Facts pills */}
-      <div
-        className="absolute top-5 right-6 z-[2] flex flex-wrap gap-1.5 justify-end"
-        style={{ maxWidth: "60%" }}
-      >
-        {country.facts.map((f) => (
-          <span
-            key={f}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full font-mono text-[11px] font-semibold text-white"
-            style={{
-              background: "rgba(255,255,255,0.14)",
-              border: "1px solid rgba(255,255,255,0.22)",
-              backdropFilter: "blur(8px)",
-              WebkitBackdropFilter: "blur(8px)",
-              letterSpacing: "0.02em",
-            }}
-          >
-            {f}
-          </span>
-        ))}
-      </div>
 
       {/* Bottom content */}
       <div className="absolute inset-0 z-[2] flex flex-col justify-end p-6 md:p-8 text-white">
