@@ -1,4 +1,4 @@
-import { Source_Sans_3, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Source_Sans_3, Plus_Jakarta_Sans, IBM_Plex_Mono } from "next/font/google";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
@@ -11,7 +11,11 @@ const plusJakarta = Plus_Jakarta_Sans({
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-plus-jakarta-sans",
 });
-const jetbrainsMono = JetBrains_Mono({ subsets: ["latin"], weight: ["400", "500", "700"], variable: "--font-jetbrains-mono" });
+const ibmPlexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-ibm-plex-mono",
+});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -40,7 +44,7 @@ export default async function LocaleLayout({
           }}
         />
       </head>
-      <body className={`${sourceSans.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
+      <body className={`${sourceSans.variable} ${plusJakarta.variable} ${ibmPlexMono.variable} font-sans antialiased`}>
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

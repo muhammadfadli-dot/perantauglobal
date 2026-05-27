@@ -51,13 +51,17 @@
   --color-dtg-ink: #141414;
   --color-dtg-cream: #fafaf8;
 
-  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-display: var(--font-plus-jakarta-sans), "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: var(--font-plus-jakarta-sans), "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
 
   --shadow-sm: 0 1px 2px rgba(20, 20, 20, 0.06), 0 0 0 1px rgba(20, 20, 20, 0.04);
   --shadow-md: 0 4px 16px rgba(20, 20, 20, 0.08), 0 0 0 1px rgba(20, 20, 20, 0.04);
   --shadow-lg: 0 8px 24px rgba(20, 20, 20, 0.10), 0 0 0 1px rgba(20, 20, 20, 0.04);
+  /* Design-system aliases (mirror /styles.css naming) — use in new redesign components */
+  --shadow-pg-1: var(--pg-shadow-1);
+  --shadow-pg-2: var(--pg-shadow-2);
+  --shadow-pg-3: var(--pg-shadow-3);
 }
 
 :root {
@@ -115,6 +119,19 @@
   --pg-amber-500: #c98a14;
   --pg-amber-600: #a16d0c;
   --pg-amber-700: #6e4906;
+
+  /* Country tints — IMAGE OVERLAYS ONLY, not UI accent.
+     Used in CSS filters on country chapter bands + position hero images.
+     Never apply as background/foreground in UI surfaces. */
+  --c-saudi-tint: #8a5a14;      /* warm desert gold */
+  --c-jepang-tint: #1c3d6e;     /* cool dusk blue */
+  --c-taiwan-tint: #1e6d4d;     /* warm green */
+  --c-indonesia-tint: #b8341c;  /* deep terracotta red */
+
+  /* Design-system shadow scale (mirror styles.css from redesign source) */
+  --pg-shadow-1: 0 1px 2px rgba(20,20,20,.06), 0 0 0 1px rgba(20,20,20,.04);
+  --pg-shadow-2: 0 4px 16px rgba(20,20,20,.07), 0 0 0 1px rgba(20,20,20,.03);
+  --pg-shadow-3: 0 16px 48px rgba(20,20,20,.10), 0 0 0 1px rgba(20,20,20,.03);
 }
 
 html,
