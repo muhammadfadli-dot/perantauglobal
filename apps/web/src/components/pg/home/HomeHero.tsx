@@ -19,9 +19,14 @@ const COUNTRIES: Country[] = [
 ];
 
 const PORTRAIT_CARDS = [
-  { src: "/images/people/sari.jpg", name: "Sari, 28", meta: "Perawat · 🇸🇦 Riyadh · 2025" },
-  { src: "/images/people/budi.jpg", name: "Budi, 32", meta: "Truck Driver · 🇯🇵 Osaka · 2025" },
-  { src: "/images/people/rini.jpg", name: "Rini, 26", meta: "Caregiver · 🇹🇼 Taipei · 2025" },
+  // objectPosition steers the crop on the landscape source so the subject
+  // stays centered in the portrait 4/5 polaroid frame:
+  // - sari (perawat): nurse is center-right of the hospital scene
+  // - budi (truck driver): driver is left-of-center against the truck cab
+  // - rini (caregiver): worker is center-left, elderly patient is right
+  { src: "/images/people/sari.jpg", name: "Sari, 28", meta: "Perawat · 🇸🇦 Riyadh · 2025", objectPosition: "55% center" },
+  { src: "/images/people/budi.jpg", name: "Budi, 32", meta: "Truck Driver · 🇯🇵 Osaka · 2025", objectPosition: "30% center" },
+  { src: "/images/people/rini.jpg", name: "Rini, 26", meta: "Caregiver · 🇹🇼 Taipei · 2025", objectPosition: "40% center" },
 ];
 
 export function HomeHero({
@@ -103,7 +108,7 @@ export function HomeHero({
                     width={36}
                     height={36}
                     className="rounded-full object-cover border-2 border-pg-paper"
-                    style={{ marginLeft: i === 0 ? 0 : -8 }}
+                    style={{ marginLeft: i === 0 ? 0 : -8, objectPosition: p.objectPosition }}
                   />
                 ))}
                 <span
@@ -168,7 +173,7 @@ export function HomeHero({
                     width={400}
                     height={500}
                     className="w-full rounded-[12px] block bg-pg-ink-100"
-                    style={{ aspectRatio: "4/5", objectFit: "cover" }}
+                    style={{ aspectRatio: "4/5", objectFit: "cover", objectPosition: p.objectPosition }}
                   />
                   <div className="mt-2.5 flex flex-col gap-0.5">
                     <div className="flex items-center gap-1.5 text-[14px] font-extrabold text-pg-ink-900">
