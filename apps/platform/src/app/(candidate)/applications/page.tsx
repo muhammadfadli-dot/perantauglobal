@@ -1,9 +1,16 @@
 import Link from "next/link";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
-import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
+import { BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import { getApplicationStatus } from "@/lib/applicationStatus";
 import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
+import { BerandaTopBar, SectionHead } from "@/components/pg/candidate/BerandaShared";
+import {
+  COUNTRY_FLAG,
+  COUNTRY_LABEL as COUNTRY_LABEL_PORTAL,
+  COUNTRY_TINT,
+  normalizeCountry,
+} from "@/components/pg/candidate/LowonganTiles";
 
 export const dynamic = "force-dynamic";
 
@@ -13,14 +20,6 @@ type ApplicationRow = {
   pipeline_stage: string;
   created_at: string;
   positions: { name: string; country: string } | null;
-};
-
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Arab Saudi",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-  any: "Global",
 };
 
 export default async function ApplicationsListPage() {
@@ -46,105 +45,121 @@ export default async function ApplicationsListPage() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <TopBarApp title="Lamaran kamu" />
-      <main className="flex-1 pb-6">
-        <section className="px-5 pt-4">
-          <div
-            className="text-[10px] font-semibold tracking-[0.12em] uppercase"
-            style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
+      <BerandaTopBar />
+      <main className="flex-1 pb-8 pt-1">
+        <div className="px-5 pb-3.5">
+          <h1
+            className="font-extrabold tracking-[-0.025em] leading-[1.1] text-pg-ink-900 m-0 text-balance"
+            style={{ fontSize: "clamp(22px, 6vw, 28px)" }}
           >
-            Semua lamaran
-          </div>
-          <h1 className="text-[28px] font-extrabold tracking-[-0.02em] mt-1 text-pg-ink-primary">
-            {applications.length} lamaran
+            Lamaran kamu
           </h1>
-        </section>
+          <p className="text-[13px] text-pg-ink-500 mt-1 m-0">
+            {applications.length} lamaran · semua proses kamu di Perantau Global
+          </p>
+        </div>
 
-        <section className="px-5 pt-4 flex flex-col gap-3">
+        <section className="px-5">
           {applications.length === 0 ? (
             <div
-              className="bg-pg-white rounded-2xl p-6 text-center"
-              style={{ border: "1px solid var(--pg-border)" }}
+              className="rounded-[16px] p-6 text-center bg-pg-white"
+              style={{ border: "1px dashed var(--pg-ink-200)" }}
             >
-              <div className="text-[16px] font-bold text-pg-ink-primary">Belum ada lamaran</div>
-              <div className="text-[13px] text-pg-ink-tertiary mt-1.5">
-                Mulai jelajahi posisi yang cocok untuk kamu.
+              <div className="text-[15px] font-extrabold text-pg-ink-900 tracking-[-0.01em]">
+                Belum ada lamaran
+              </div>
+              <div className="text-[13px] text-pg-ink-500 mt-1.5 leading-snug">
+                Mulai jelajahi posisi yang cocok untuk kamu di Lowongan.
               </div>
               <Link
                 href="/explore"
-                className="inline-flex items-center gap-2 px-4 py-2.5 mt-4 text-[13px] font-bold text-white no-underline rounded-xl"
+                className="inline-flex items-center gap-2 px-4 py-2.5 mt-4 text-[13px] font-extrabold text-white no-underline rounded-[10px]"
                 style={{ background: "var(--pg-red-600)" }}
               >
                 Cari lowongan <Icon name="arrow_right" size={14} />
               </Link>
             </div>
           ) : (
-            applications.map((a) => {
-              const status = getApplicationStatus({
-                pipelineStage: a.pipeline_stage,
-                hardPass: hardPassByAppId.get(a.id),
-              });
-              const muted = status.key === "rejected";
-              const needsDocs = status.key === "needs_docs";
-              return (
-                <Link
-                  key={a.id}
-                  href={`/applications/${a.id}`}
-                  className="block bg-pg-white rounded-2xl px-4 py-4 no-underline text-pg-ink-primary"
-                  style={{
-                    border: "1px solid var(--pg-border)",
-                    opacity: muted ? 0.65 : 1,
-                  }}
-                >
-                  <div className="flex justify-between items-start gap-3">
-                    <div className="min-w-0">
-                      <div
-                        className="text-[10px] font-semibold tracking-[0.1em] uppercase"
-                        style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
-                      >
-                        {COUNTRY_LABEL[a.positions?.country ?? ""] ?? a.positions?.country}
-                      </div>
-                      <div className="text-[18px] font-extrabold tracking-[-0.01em] mt-0.5 truncate">
-                        {a.positions?.name ?? a.position_slug}
-                      </div>
-                    </div>
-                    <StagePill tone={status.tone}>{status.label}</StagePill>
-                  </div>
+            <div className="flex flex-col gap-3">
+              <SectionHead title={`${applications.length} lamaran`} sub="Terbaru di atas" />
+              {applications.map((a) => {
+                const status = getApplicationStatus({
+                  pipelineStage: a.pipeline_stage,
+                  hardPass: hardPassByAppId.get(a.id),
+                });
+                const muted = status.key === "rejected";
+                const needsDocs = status.key === "needs_docs";
+                const countryKey =
+                  a.positions?.country ? normalizeCountry(a.positions.country) : null;
+                const countryLabel =
+                  countryKey ? COUNTRY_LABEL_PORTAL[countryKey] : a.positions?.country ?? "—";
+                const heroImg = `/images/lowongan/${a.position_slug}.jpg`;
+                const tintBg = countryKey ? COUNTRY_TINT[countryKey] : "var(--pg-ink-700)";
 
-                  {needsDocs && (
-                    <div
-                      className="flex items-center justify-between gap-2 mt-3 px-3 py-2.5 rounded-xl"
-                      style={{ background: "var(--pg-red-soft-bg)" }}
-                    >
-                      <div className="flex items-center gap-2 text-[13px] text-pg-red-700 font-semibold">
-                        <span
-                          className="w-1.5 h-1.5 rounded-full"
-                          style={{ background: "var(--pg-red-600)" }}
-                        />
-                        Dokumen wajib belum lengkap
-                      </div>
-                      <span className="text-[12px] font-bold text-pg-red-600">Lengkapi ›</span>
-                    </div>
-                  )}
-
-                  <div
-                    className="flex justify-between items-center mt-3 pt-3"
-                    style={{ borderTop: "1px solid var(--pg-border)" }}
+                return (
+                  <Link
+                    key={a.id}
+                    href={`/applications/${a.id}`}
+                    className="flex gap-3 p-3 rounded-[14px] bg-pg-white no-underline text-pg-ink-900 transition-transform hover:-translate-y-0.5"
+                    style={{
+                      border: "1px solid var(--pg-ink-100)",
+                      boxShadow:
+                        "0 1px 2px rgba(20,16,12,0.04), 0 8px 24px rgba(20,16,12,0.06)",
+                      opacity: muted ? 0.7 : 1,
+                    }}
                   >
-                    <div className="text-[13px] text-pg-ink-tertiary">
-                      Dilamar{" "}
-                      {new Date(a.created_at).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "numeric",
-                        year: "numeric",
-                      })}
+                    <div
+                      className="w-16 h-16 rounded-[12px] overflow-hidden shrink-0 bg-cover bg-center"
+                      style={{
+                        backgroundColor: tintBg,
+                        backgroundImage: `url(${heroImg})`,
+                      }}
+                      aria-hidden
+                    />
+                    <div className="flex flex-col gap-1 flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.06em] text-pg-ink-500">
+                            {countryKey ? `${COUNTRY_FLAG[countryKey]} ${countryLabel}` : countryLabel}
+                          </span>
+                          <span className="text-[15px] font-extrabold tracking-[-0.012em] text-pg-ink-900 truncate">
+                            {a.positions?.name ?? a.position_slug}
+                          </span>
+                        </div>
+                        <StagePill tone={status.tone}>{status.label}</StagePill>
+                      </div>
+                      {needsDocs ? (
+                        <div
+                          className="inline-flex items-center gap-2 mt-1.5 px-2.5 py-1.5 rounded-[8px] text-[11.5px] font-semibold w-fit"
+                          style={{ background: "var(--pg-red-50)", color: "var(--pg-red-700)" }}
+                        >
+                          <span
+                            aria-hidden
+                            className="inline-block w-1.5 h-1.5 rounded-full bg-pg-red-600"
+                          />
+                          Lengkapi syarat lamaran →
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between gap-2 mt-1">
+                          <span className="font-mono text-[10.5px] text-pg-ink-500 tracking-[0.02em]">
+                            Dilamar{" "}
+                            {new Date(a.created_at).toLocaleDateString("id-ID", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                            })}
+                          </span>
+                          <span className="font-mono text-[10.5px] font-bold text-pg-ink-700 tracking-[0.04em]">
+                            Detail ›
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <span className="text-[12px] font-bold text-pg-red-600">Detail ›</span>
-                  </div>
-                </Link>
-              );
-            })
+                  </Link>
+                );
+              })}
+            </div>
           )}
         </section>
       </main>
@@ -172,8 +187,12 @@ function StagePill({
       : { bg: "var(--pg-ink-50)", fg: "var(--pg-ink-tertiary)" };
   return (
     <span
-      className="inline-flex shrink-0 px-2.5 py-1 rounded-md text-[10px] font-bold tracking-[0.06em] uppercase whitespace-nowrap"
-      style={{ background: colors.bg, color: colors.fg, fontFamily: "var(--font-mono)" }}
+      className="inline-flex shrink-0 px-2 py-0.5 rounded text-[9.5px] font-bold tracking-[0.06em] uppercase whitespace-nowrap"
+      style={{
+        background: colors.bg,
+        color: colors.fg,
+        fontFamily: "var(--font-mono)",
+      }}
     >
       {children}
     </span>
