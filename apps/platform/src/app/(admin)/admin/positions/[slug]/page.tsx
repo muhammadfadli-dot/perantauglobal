@@ -8,6 +8,7 @@ import PositionActiveToggle from "./PositionActiveToggle";
 import PositionMetaEditor from "./PositionMetaEditor";
 import DeletePositionCard from "./DeletePositionCard";
 import PublishBarMount from "./PublishBarMount";
+import { PublishHistoryCard } from "./PublishHistoryCard";
 import PositionEditorShell from "@/components/admin/PositionEditorShell";
 import MediaSeoTab from "@/components/admin/MediaSeoTab";
 import ApplicationFieldsEditor, {
@@ -211,8 +212,15 @@ export default async function PositionDetailPage({
           <MediaSeoTab slug={position.slug} initialContent={editorContent} />
         </section>
 
-        {/* === Tab: Settings === */}
+        {/* === Tab: Settings & publish === */}
         <section data-tab="settings" className="mb-8 max-w-3xl flex flex-col gap-4">
+          <PublishHistoryCard
+            slug={position.slug}
+            active={position.active}
+            hasPendingDraft={hasPendingDraft}
+            draftSavedAt={hasPendingDraft ? position.updated_at : null}
+            publishedAt={position.published_at}
+          />
           <PositionActiveToggle slug={position.slug} initialActive={position.active} />
           <PositionMetaEditor
             slug={position.slug}

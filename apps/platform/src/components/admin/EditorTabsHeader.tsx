@@ -28,7 +28,7 @@ const TABS: Array<{ key: TabKey; label: string; icon: IconName }> = [
   { key: "konten", label: "Konten landing", icon: "doc" },
   { key: "form", label: "Form lamaran", icon: "compass" },
   { key: "media", label: "Media & SEO", icon: "globe" },
-  { key: "settings", label: "Settings", icon: "shield" },
+  { key: "settings", label: "Settings & publish", icon: "shield" },
   { key: "jobs", label: "Job orders", icon: "briefcase" },
 ];
 
