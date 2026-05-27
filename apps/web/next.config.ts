@@ -109,6 +109,11 @@ const nextConfig: NextConfig = {
       // /cerita-sukses retired — testimonials need to be real & legal-cleared
       { source: "/cerita-sukses", destination: "/", permanent: true },
       { source: "/id/cerita-sukses", destination: "/", permanent: true },
+      // Poster printed URL "/lowongan/diesel-mechanic-saudi-arabia" but the
+      // actual slug is "heavy-diesel-mechanic-saudi-arabia". Posters are
+      // already in circulation and can't be reprinted.
+      { source: "/lowongan/diesel-mechanic-saudi-arabia", destination: "/lowongan/heavy-diesel-mechanic-saudi-arabia", permanent: true },
+      { source: "/id/lowongan/diesel-mechanic-saudi-arabia", destination: "/lowongan/heavy-diesel-mechanic-saudi-arabia", permanent: true },
     ];
   },
   webpack(config) {
