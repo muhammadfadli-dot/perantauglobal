@@ -9,7 +9,6 @@
  *  - Mobile: same layout, content scrolls horizontally if needed.
  */
 
-const PERMIT_VERIFY_URL = "https://sipptki.kemnaker.go.id";
 const PERMIT_NO = "1810240237512001";
 
 export function TrustStrip() {
@@ -23,19 +22,14 @@ export function TrustStrip() {
           className="flex items-center gap-3 md:gap-4 h-9 font-mono text-[11px] md:text-[12px] tracking-[0.04em] overflow-x-auto whitespace-nowrap scrollbar-none"
           style={{ scrollbarWidth: "none" as const }}
         >
-          <a
-            href={PERMIT_VERIFY_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-white/92 hover:text-white no-underline transition-colors shrink-0"
-          >
+          <span className="inline-flex items-center gap-1.5 text-white/92 shrink-0">
             <span
               aria-hidden
               className="inline-block w-1.5 h-1.5 rounded-full"
               style={{ background: "var(--pg-red-500)" }}
             />
             Resmi P3MI Kemnaker · No. {PERMIT_NO}
-          </a>
+          </span>
           <span aria-hidden className="text-white/45 shrink-0">·</span>
           <span className="shrink-0">Bagian dari DayaLima Group, sejak 1998</span>
           <span aria-hidden className="text-white/45 shrink-0">·</span>

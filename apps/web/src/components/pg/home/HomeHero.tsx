@@ -37,27 +37,18 @@ export function HomeHero({
     <section className="relative overflow-hidden pt-10 pb-8 md:pt-14 md:pb-6 px-5 md:px-8">
       <div className="max-w-6xl mx-auto">
         {/* License eyebrow pill */}
-        <a
-          href="https://sipptki.kemnaker.go.id"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2.5 pl-2 pr-3.5 py-2 bg-pg-white border border-pg-ink-100 rounded-full mb-7 no-underline transition-all hover:border-pg-ink-200 hover:-translate-y-0.5"
+        <div
+          className="inline-flex items-center gap-2.5 pl-2 pr-3.5 py-2 bg-pg-white border border-pg-ink-100 rounded-full mb-7"
           style={{ boxShadow: "0 1px 3px rgba(20,20,20,0.04)" }}
         >
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-pg-red-50 text-pg-red-700 rounded-full font-mono text-[10.5px] font-bold tracking-[0.06em]">
             <span aria-hidden className="w-1.5 h-1.5 rounded-full bg-pg-red-600" />
             P3MI Resmi
           </span>
-          <span className="hidden sm:inline text-[12.5px] font-medium text-pg-ink-700">
-            No. 1810240237512001 — bisa kamu cek sendiri
+          <span className="text-[12.5px] font-medium text-pg-ink-700">
+            No. 1810240237512001
           </span>
-          <span className="font-mono text-[11.5px] font-bold text-pg-ink-900 tracking-[0.02em] inline-flex items-center gap-1">
-            Cek di Kemnaker
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" aria-hidden>
-              <path d="M7 17L17 7M9 7h8v8" />
-            </svg>
-          </span>
-        </a>
+        </div>
 
         {/* Hero grid: copy left, portrait collage right */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-14 items-center">

@@ -5,7 +5,7 @@ const FEATURES = [
   {
     icon: "shield" as const,
     title: "Resmi P3MI Kemnaker",
-    sub: "Izin No. 1810240237512001 — bisa kamu cek sendiri di sipptki.kemnaker.go.id.",
+    sub: "Izin No. 1810240237512001 — P3MI berlisensi resmi pemerintah Indonesia.",
   },
   {
     icon: "user" as const,
@@ -191,7 +191,7 @@ export function JobPortalDeep({ totalPositions }: { totalPositions: number }) {
                 <div className="w-5 h-5 rounded-full bg-pg-ok-bg text-pg-ok grid place-items-center">
                   <Icon name="shield" size={11} stroke={2.4} />
                 </div>
-                Izin bisa dicek
+                Resmi P3MI
               </div>
               <div
                 className="absolute -right-3 bottom-32 inline-flex items-center gap-1.5 px-3 py-2 bg-pg-white border border-pg-ink-100 rounded-full font-mono text-[10.5px] font-bold text-pg-ink-700"

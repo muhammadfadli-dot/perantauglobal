@@ -25,26 +25,18 @@ export function Lineage() {
             </p>
           </div>
           <div
-            className="flex flex-col gap-3 p-5 md:p-6 bg-pg-white rounded-2xl border border-pg-ink-200"
+            className="flex flex-col gap-2 p-5 md:p-6 bg-pg-white rounded-2xl border border-pg-ink-200"
             style={{ boxShadow: "var(--pg-shadow-2)" }}
           >
             <span className="font-mono text-[10.5px] font-bold uppercase tracking-[0.18em] text-pg-ink-500">
-              Izin Resmi P3MI
+              Izin Resmi P3MI Kemnaker
             </span>
             <span className="font-mono text-[19px] md:text-[22px] font-extrabold text-pg-ink-900 tracking-[0.01em]">
               No. 1810240237512001
             </span>
-            <a
-              href="https://sipptki.kemnaker.go.id"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-between gap-2 mt-1 px-4 py-3 bg-pg-red-50 rounded-xl no-underline text-pg-red-600 font-mono text-[12px] font-bold tracking-[0.02em]"
-            >
-              Cek di sipptki.kemnaker.go.id
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" aria-hidden>
-                <path d="M7 17L17 7M9 7h8v8" />
-              </svg>
-            </a>
+            <span className="text-[12.5px] text-pg-ink-700 leading-relaxed mt-1">
+              Berlisensi resmi pemerintah Indonesia.
+            </span>
           </div>
         </div>
       </div>
