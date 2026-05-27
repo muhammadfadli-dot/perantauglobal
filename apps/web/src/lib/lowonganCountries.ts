@@ -1,0 +1,121 @@
+import type { PositionCountry } from "./positions";
+
+export type CountryMeta = {
+  key: "saudi" | "jepang" | "taiwan" | "indonesia";
+  name: PositionCountry;
+  short: string;
+  flag: string;
+  currency: string;
+  contract: string;
+  img: string;
+  tagline: string;
+  facts: string[];
+  /** CSS filter applied to chapter band hero image — country tint */
+  imgFilter: string;
+  /** Country tint hex used as solid background when heroImg is missing */
+  tint: string;
+};
+
+export const COUNTRY_META: Record<CountryMeta["key"], CountryMeta> = {
+  saudi: {
+    key: "saudi",
+    name: "Saudi Arabia",
+    short: "Saudi",
+    flag: "🇸🇦",
+    currency: "SAR riyal",
+    contract: "Kontrak 2 tahun",
+    img: "/images/countries/saudi.jpg",
+    tagline:
+      "Hospitality, perawat, mekanik berat — gaji riyal, makan ditanggung. Banyak posisi terbuka di Riyadh & Jeddah.",
+    facts: ["SAR riyal", "Kontrak 2 tahun", "Tiket pulang", "Asrama disediakan"],
+    imgFilter: "saturate(1.05) brightness(0.96) sepia(0.18)",
+    tint: "#b89358",
+  },
+  jepang: {
+    key: "jepang",
+    name: "Jepang",
+    short: "Jepang",
+    flag: "🇯🇵",
+    currency: "¥ yen",
+    contract: "Sistem SSW · 5 tahun",
+    img: "/images/countries/jepang.jpg",
+    tagline:
+      "Sistem SSW resmi pemerintah Jepang. Caregiver (Kaigo), food service, dan pengolahan makanan — kerja terstruktur, hak penuh.",
+    facts: ["¥ yen", "Sistem SSW Jepang", "Visa resmi pemerintah", "Asrama subsidi"],
+    imgFilter: "saturate(0.85) brightness(0.92) hue-rotate(-8deg)",
+    tint: "#36598c",
+  },
+  taiwan: {
+    key: "taiwan",
+    name: "Taiwan",
+    short: "Taiwan",
+    flag: "🇹🇼",
+    currency: "NT$",
+    contract: "Kontrak 3 tahun",
+    img: "/images/countries/taiwan.jpg",
+    tagline:
+      "Caregiver di rumah tangga atau panti. Kontrak 3 tahun, lingkungan kerja yang dekat dengan keluarga Taiwan.",
+    facts: ["NT$ Taiwan dollar", "Kontrak 3 tahun", "Tiket & visa", "Pelatihan bahasa"],
+    imgFilter: "saturate(1.1) brightness(0.97)",
+    tint: "#3a8567",
+  },
+  indonesia: {
+    key: "indonesia",
+    name: "Indonesia",
+    short: "Indonesia",
+    flag: "🇮🇩",
+    currency: "Rupiah",
+    contract: "Penempatan domestik",
+    img: "/images/countries/indonesia.jpg",
+    tagline:
+      "Penempatan SPG & posisi domestik di Indonesia — buat yang belum siap berangkat ke luar negeri, tetap dapat support resmi.",
+    facts: ["Rupiah", "Penempatan domestik", "Fleksibel umur", "Tanpa proses imigrasi"],
+    imgFilter: "saturate(1.05) brightness(0.95)",
+    tint: "#c4452f",
+  },
+};
+
+export const COUNTRY_KEYS: CountryMeta["key"][] = ["saudi", "jepang", "taiwan", "indonesia"];
+
+export function countryKeyFromName(name: PositionCountry): CountryMeta["key"] {
+  switch (name) {
+    case "Saudi Arabia": return "saudi";
+    case "Jepang": return "jepang";
+    case "Taiwan": return "taiwan";
+    case "Indonesia": return "indonesia";
+  }
+}
+
+/** Heuristic city lookup per position slug — extracted from old static catalog notes.
+ *  Falls back to the country's primary city when slug is unknown. */
+const CITY_BY_SLUG: Record<string, string> = {
+  "perawat-saudi-arabia": "Riyadh",
+  "barista-saudi-arabia": "Jeddah",
+  "waiter-saudi-arabia": "Riyadh",
+  "waitress-saudi-arabia": "Riyadh",
+  "chef-bakery-saudi-arabia": "Jeddah",
+  "head-barista-saudi-arabia": "Riyadh",
+  "roaster-saudi-arabia": "Jeddah",
+  "chef-pastry-saudi-arabia": "Riyadh",
+  "spa-therapist-saudi-arabia": "Jeddah",
+  "laundry-worker-saudi-arabia": "Riyadh",
+  "heavy-diesel-mechanic-saudi-arabia": "Dammam",
+  "truck-driver-jepang": "Osaka",
+  "food-service-jepang": "Tokyo",
+  "kaigo-jepang": "Nagoya",
+  "pengolahan-makanan-jepang": "Hokkaido",
+  "manufaktur-pengelasan-jepang": "Aichi",
+  "caregiver-taiwan": "Taipei",
+  "spg-indonesia": "Jakarta",
+};
+
+const FALLBACK_CITY: Record<CountryMeta["key"], string> = {
+  saudi: "Riyadh",
+  jepang: "Tokyo",
+  taiwan: "Taipei",
+  indonesia: "Jakarta",
+};
+
+export function cityForSlug(slug: string, countryKey: CountryMeta["key"]): string {
+  return CITY_BY_SLUG[slug] ?? FALLBACK_CITY[countryKey];
+}

@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { Icon } from "@/components/pg/Icon";
 import { PositionCard } from "@/components/pg/PositionCard";
 import { WhatsAppFab } from "@/components/pg/WhatsAppFab";
-import {
-  Chip,
-  Eyebrow,
-  FinalCTA,
-  Section,
-} from "@/components/pg/primitives";
-import { POSITIONS, type PositionCountry } from "@/lib/positions";
-import { fetchOpenJobOrders, mergePositionsWithJobOrders } from "@/lib/positions-db";
+import { FinalCTA } from "@/components/pg/primitives";
+import { CountryTabs } from "@/components/pg/lowongan/CountryTabs";
+import { ChapterBand } from "@/components/pg/lowongan/ChapterBand";
+import { CrossLinkSertifikasi } from "@/components/pg/lowongan/CrossLinkSertifikasi";
+import { COUNTRY_META, COUNTRY_KEYS, countryKeyFromName, type CountryMeta } from "@/lib/lowonganCountries";
+import { fetchPositionsForCatalog } from "@/lib/positions-db";
 import { waLink } from "@/lib/contact";
 
 export const metadata: Metadata = {
@@ -23,31 +20,22 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-const COUNTRIES: ("Semua" | PositionCountry)[] = [
-  "Semua",
-  "Saudi Arabia",
-  "Jepang",
-  "Taiwan",
-  "Indonesia",
-];
-
-const FEATURES = [
-  {
-    icon: "shield" as const,
-    title: "Lowongan resmi P3MI",
-    body: "Setiap lowongan dikonfirmasi langsung ke employer. Bukan calo, bukan agen luar.",
-  },
-  {
-    icon: "user" as const,
-    title: "1 profil, semua lamaran",
-    body: "Lengkapi profil & dokumen sekali. Apply ke banyak posisi tanpa upload ulang.",
-  },
-  {
-    icon: "clock" as const,
-    title: "Pantau status real-time",
-    body: "Tiap tahap (Terkirim → Diproses → Hasil) update di akun Perantau Global kamu.",
-  },
-];
+function inferInitialActive(country: string | undefined): "all" | CountryMeta["key"] {
+  if (!country) return "all";
+  const lower = country.toLowerCase();
+  if (lower === "semua" || lower === "all") return "all";
+  for (const k of COUNTRY_KEYS) {
+    const c = COUNTRY_META[k];
+    if (
+      c.key === lower ||
+      c.short.toLowerCase() === lower ||
+      c.name.toLowerCase() === lower
+    ) {
+      return k;
+    }
+  }
+  return "all";
+}
 
 export default async function LowonganIndexPage({
   params,
@@ -61,118 +49,187 @@ export default async function LowonganIndexPage({
   setRequestLocale(locale);
 
   const { country } = await searchParams;
-  const activeCountry =
-    country && COUNTRIES.includes(country as PositionCountry)
-      ? (country as PositionCountry)
-      : "Semua";
+  const initialActive = inferInitialActive(country);
 
-  const jobOrders = await fetchOpenJobOrders();
-  const merged = mergePositionsWithJobOrders(jobOrders);
-  const visible =
-    activeCountry === "Semua"
-      ? merged
-      : merged.filter((p) => p.country === activeCountry);
+  const positions = await fetchPositionsForCatalog();
+  const openCountTotal = positions.filter((p) => p.status === "open").length;
+
+  // Group positions by country key (in the order COUNTRY_KEYS defines)
+  const byCountry: Record<CountryMeta["key"], typeof positions> = {
+    saudi: [],
+    jepang: [],
+    taiwan: [],
+    indonesia: [],
+  };
+  for (const p of positions) {
+    const key = countryKeyFromName(p.country);
+    byCountry[key].push(p);
+  }
+
+  const counts: Record<CountryMeta["key"], number> = {
+    saudi: byCountry.saudi.length,
+    jepang: byCountry.jepang.length,
+    taiwan: byCountry.taiwan.length,
+    indonesia: byCountry.indonesia.length,
+  };
 
   return (
     <>
       <main>
-        {/* HERO — Job Portal vision */}
-        <Section size="lg" tone="white">
-          <Eyebrow>
-            {POSITIONS.length} LOWONGAN AKTIF · 4 NEGARA
-          </Eyebrow>
-          <h1 className="text-[34px] md:text-6xl font-extrabold tracking-[-0.03em] leading-[1.04] mt-3">
-            Lowongan kerja luar negeri{" "}
-            <span className="text-pg-red-600">yang resmi.</span>
-          </h1>
-          <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed mt-4 max-w-prose">
-            {POSITIONS.length} posisi di Saudi Arabia, Jepang, Taiwan &
-            Indonesia — semua dari employer terverifikasi P3MI. Satu profil,
-            apply ke banyak posisi, pantau status real-time. Bebas biaya
-            sebelum offering letter.
-          </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mt-8">
-            {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className="flex flex-col gap-2 p-4 md:p-5 rounded-2xl bg-pg-paper border border-pg-ink-100"
-              >
-                <div
-                  className="w-10 h-10 rounded-xl grid place-items-center"
-                  style={{ background: "var(--pg-red-50)", color: "var(--pg-red-600)" }}
+        {/* Hero — Mau berangkat ke negara mana? */}
+        <section className="px-5 md:px-8 py-12 md:py-16">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-[1.15fr_1fr] gap-10 items-end">
+              <div>
+                <div className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-pg-red-600">
+                  Job Portal · Lowongan Aktif
+                </div>
+                <h1
+                  className="mt-3.5 font-extrabold leading-[1.04] tracking-[-0.03em] text-pg-ink-900 text-balance"
+                  style={{ fontSize: "clamp(36px, 5.6vw, 64px)" }}
                 >
-                  <Icon name={f.icon} size={20} stroke={2.2} />
+                  Mau berangkat <span className="text-pg-red-600">ke negara mana?</span>
+                </h1>
+                <p
+                  className="mt-4 leading-relaxed text-pg-ink-700 font-medium"
+                  style={{ fontSize: "clamp(15px, 1.3vw, 18px)", maxWidth: "56ch" }}
+                >
+                  {positions.length} posisi resmi dari employer terverifikasi P3MI di 4 negara.
+                  Pilih negaranya — gaji, syarat, dan kontrak semua jelas di depan. Bebas calo.
+                  Bebas biaya sebelum offering letter.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-8 md:gap-10">
+                <div className="flex flex-col gap-1 pl-5 border-l-[2px] border-pg-ink-900 py-2">
+                  <span
+                    className="font-mono font-extrabold leading-none tracking-[-0.025em]"
+                    style={{ fontSize: "clamp(34px, 4vw, 48px)" }}
+                  >
+                    {positions.length}
+                  </span>
+                  <span className="font-mono text-[13px] text-pg-ink-500 tracking-[0.02em]">
+                    posisi aktif
+                  </span>
                 </div>
-                <div className="text-[15px] md:text-base font-extrabold tracking-tight">
-                  {f.title}
+                <div className="flex flex-col gap-1 pl-5 border-l border-pg-ink-200 py-2">
+                  <span
+                    className="font-mono font-extrabold leading-none tracking-[-0.025em] text-pg-ok"
+                    style={{ fontSize: "clamp(34px, 4vw, 48px)" }}
+                  >
+                    {openCountTotal}
+                  </span>
+                  <span className="font-mono text-[13px] text-pg-ink-500 tracking-[0.02em]">
+                    batch lagi buka
+                  </span>
                 </div>
-                <div className="text-[13px] md:text-[14px] text-pg-ink-600 leading-relaxed">
-                  {f.body}
+                <div className="flex flex-col gap-1 pl-5 border-l border-pg-ink-200 py-2">
+                  <span
+                    className="font-mono font-extrabold leading-none tracking-[-0.025em]"
+                    style={{ fontSize: "clamp(34px, 4vw, 48px)" }}
+                  >
+                    4
+                  </span>
+                  <span className="font-mono text-[13px] text-pg-ink-500 tracking-[0.02em]">
+                    negara tujuan
+                  </span>
                 </div>
               </div>
-            ))}
-          </div>
-        </Section>
-
-        {/* Country filter */}
-        <Section size="sm" tone="white">
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {COUNTRIES.map((c) => (
-              <Chip
-                key={c}
-                active={c === activeCountry}
-                href={c === "Semua" ? "/lowongan" : `/lowongan?country=${encodeURIComponent(c)}`}
-              >
-                {c}
-              </Chip>
-            ))}
-          </div>
-        </Section>
-
-        {/* Job cards grid */}
-        <Section size="md" tone="white">
-          {visible.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {visible.map((p) => (
-                <PositionCard key={p.slug} p={p} />
-              ))}
             </div>
-          ) : (
-            <div className="text-center py-12 text-pg-ink-500">
-              Belum ada posisi untuk {activeCountry} saat ini.{" "}
-              <Link href="/lowongan" className="text-pg-red-600 font-bold no-underline">
-                Lihat semua
-              </Link>
-            </div>
-          )}
-        </Section>
+          </div>
+        </section>
 
-        {/* Cross-link to sertifikasi — enabler tone */}
-        <Section size="sm" tone="white">
-          <Link
-            href="/sertifikasi"
-            className="flex items-center gap-4 p-5 md:p-6 rounded-2xl no-underline transition-all hover:-translate-y-0.5 bg-pg-gold-100/40 border border-pg-gold-border"
-          >
-            <div
-              className="w-11 h-11 rounded-xl grid place-items-center shrink-0 bg-pg-gold-200 text-pg-gold-700"
+        {/* Sticky country tabs */}
+        <CountryTabs initialActive={initialActive} counts={counts} total={positions.length} />
+
+        {/* Country chapters */}
+        {COUNTRY_KEYS.map((k) => {
+          const list = byCountry[k];
+          if (list.length === 0) return null;
+          const open = list.filter((p) => p.status === "open");
+          const queue = list.filter((p) => p.status === "queue");
+          const country = COUNTRY_META[k];
+
+          return (
+            <section
+              key={k}
+              id={`chapter-${k}`}
+              className="px-5 md:px-8 py-12 md:py-14 scroll-mt-[140px]"
+              data-screen-label={`Chapter — ${country.name}`}
             >
-              <Icon name="passport" size={22} stroke={2.2} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[15px] md:text-base font-extrabold text-pg-ink-900">
-                Biar makin siap berangkat
+              <div className="max-w-6xl mx-auto">
+                <ChapterBand country={country} openCount={open.length} />
+
+                {/* Meta row */}
+                <div className="flex flex-wrap items-baseline justify-between gap-3 mb-4">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[18px] font-bold tracking-[-0.01em] text-pg-ink-900">
+                      {list.length} posisi di {country.name}
+                    </span>
+                    <span className="text-[13px] text-pg-ink-500">
+                      Gaji dalam {country.currency}. Semua dari employer terverifikasi, bebas calo.
+                    </span>
+                  </div>
+                </div>
+
+                {/* Open positions — Featured cards (full width) */}
+                {open.length > 0 && (
+                  <div className="flex flex-col gap-4 mb-6">
+                    {open.map((p) => (
+                      <PositionCard key={p.slug} p={p} variant="featured" />
+                    ))}
+                  </div>
+                )}
+
+                {/* Divider + Queue positions — Row cards or Themed grid */}
+                {queue.length > 0 && (
+                  <>
+                    {open.length > 0 && (
+                      <div className="flex items-center gap-3 my-6">
+                        <span className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-pg-ink-500">
+                          Daftar antrian — {queue.length} posisi
+                        </span>
+                        <span className="flex-1 h-px bg-pg-ink-100" />
+                      </div>
+                    )}
+                    {open.length > 0 ? (
+                      <div className="flex flex-col gap-2.5">
+                        {queue.map((p) => (
+                          <PositionCard key={p.slug} p={p} variant="row" />
+                        ))}
+                      </div>
+                    ) : (
+                      <div
+                        className="grid gap-4 md:gap-5"
+                        style={{
+                          gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))",
+                        }}
+                      >
+                        {queue.map((p) => (
+                          <PositionCard key={p.slug} p={p} variant="themed" />
+                        ))}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-              <div className="text-[13px] md:text-[14px] text-pg-ink-600 leading-relaxed mt-0.5">
-                Paspor Perantau Global menyiapkan psikotes & fundamental per
-                negara. Bukan syarat — tapi bikin kamu lebih siap.
-              </div>
-            </div>
-            <span className="inline-flex items-center gap-1 text-[13px] font-bold shrink-0 text-pg-gold-700">
-              <span className="hidden sm:inline">Lihat sertifikasi</span>
-              <Icon name="arrow_right" size={16} />
-            </span>
-          </Link>
-        </Section>
+            </section>
+          );
+        })}
+
+        {/* Empty state — if positions list is empty */}
+        {positions.length === 0 && (
+          <section className="px-5 md:px-8 py-16 text-center text-pg-ink-500">
+            <Icon name="info" size={28} stroke={2} className="mx-auto mb-3" />
+            Belum ada posisi aktif saat ini. Hubungi kami untuk daftar antrian.
+          </section>
+        )}
+
+        {/* Cross-link to sertifikasi */}
+        <section className="px-5 md:px-8 py-8 md:py-10">
+          <div className="max-w-6xl mx-auto">
+            <CrossLinkSertifikasi />
+          </div>
+        </section>
 
         {/* Final CTA bookend */}
         <FinalCTA
