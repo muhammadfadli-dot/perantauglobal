@@ -2,6 +2,21 @@ import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import { Icon } from "@/components/pg/Icon";
+import { Sparkline } from "@/components/admin/Sparkline";
+
+/**
+ * Compute days-ago index in local time (most recent = 0, 6 days ago = 6).
+ * Inlined here because the catalog only needs 7-day weekly buckets — a
+ * dedicated lib would be overkill until another caller needs it.
+ */
+function daysAgoLocal(ts: Date, now: Date): number {
+  const tsKey = `${ts.getFullYear()}-${ts.getMonth()}-${ts.getDate()}`;
+  const nowKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  if (tsKey === nowKey) return 0;
+  const tsMid = new Date(ts.getFullYear(), ts.getMonth(), ts.getDate()).getTime();
+  const nowMid = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  return Math.round((nowMid - tsMid) / (24 * 60 * 60 * 1000));
+}
 
 export const dynamic = "force-dynamic";
 
@@ -41,10 +56,17 @@ export default async function AdminPositionsPage({
 
   const supabase = await createServerClient();
 
+  // eslint-disable-next-line react-hooks/purity -- per-request time anchor for "this week" buckets; intentionally non-idempotent in RSC
+  const now = new Date();
+  const sevenDaysAgoIso = new Date(
+    now.getTime() - 7 * 24 * 60 * 60 * 1000,
+  ).toISOString();
+
   const [
     { data: positionsData },
     { data: jobOrdersData },
     { data: appsData },
+    { data: weekAppsData },
     { data: readinessData },
     { count: candidateCount },
     { count: weekApps },
@@ -57,14 +79,31 @@ export default async function AdminPositionsPage({
       .order("name"),
     supabase.from("job_orders").select("position_slug, status, slot_count, slot_filled").eq("status", "open"),
     supabase.from("applications").select("position_slug"),
+    supabase
+      .from("applications")
+      .select("position_slug, created_at")
+      .gte("created_at", sevenDaysAgoIso),
     supabase.from("application_readiness_view").select("position_slug, hard_pass"),
     supabase.from("candidates").select("*", { count: "exact", head: true }),
     supabase
       .from("applications")
       .select("*", { count: "exact", head: true })
-      // eslint-disable-next-line react-hooks/purity -- per-request time window for "applications this week" stat; intentionally non-idempotent in RSC
-      .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
+      .gte("created_at", sevenDaysAgoIso),
   ]);
+
+  // Bucket weekly inflow per position — index 0 = 6 days ago, index 6 = today
+  const weeklyByPosition = new Map<string, number[]>();
+  for (const a of (weekAppsData ?? []) as {
+    position_slug: string;
+    created_at: string;
+  }[]) {
+    const idx = 6 - daysAgoLocal(new Date(a.created_at), now);
+    if (idx < 0 || idx > 6) continue;
+    const arr = weeklyByPosition.get(a.position_slug) ?? [0, 0, 0, 0, 0, 0, 0];
+    arr[idx] += 1;
+    weeklyByPosition.set(a.position_slug, arr);
+  }
+  const ZERO_WEEK: number[] = [0, 0, 0, 0, 0, 0, 0];
 
   const positions = (positionsData ?? []) as PositionRow[];
 
@@ -209,7 +248,8 @@ export default async function AdminPositionsPage({
           <div
             className="grid items-center px-5 py-3 text-[10px] font-semibold tracking-[0.1em] uppercase"
             style={{
-              gridTemplateColumns: "minmax(0,2.4fr) 1fr 0.9fr 0.9fr 1.4fr 0.9fr 1.4fr",
+              gridTemplateColumns:
+                "minmax(0,2.4fr) 1fr 0.9fr 0.9fr 1fr 1.4fr 0.9fr 1.4fr",
               color: "var(--pg-ink-tertiary)",
               fontFamily: "var(--font-mono)",
               borderBottom: "1px solid var(--pg-border)",
@@ -219,6 +259,7 @@ export default async function AdminPositionsPage({
             <span>Negara</span>
             <span>JO Open</span>
             <span>Lamaran</span>
+            <span>Apply / minggu</span>
             <span>Talent ready</span>
             <span>Status</span>
             <span></span>
@@ -227,12 +268,15 @@ export default async function AdminPositionsPage({
             const openCount = openJOByPosition.get(p.slug) ?? 0;
             const appCount = appsByPosition.get(p.slug) ?? 0;
             const ready = readyByPosition.get(p.slug);
+            const weekly = weeklyByPosition.get(p.slug) ?? ZERO_WEEK;
+            const weeklyTotal = weekly.reduce((s, n) => s + n, 0);
             return (
               <div
                 key={p.slug}
                 className="grid items-center px-5 py-3.5 hover:bg-pg-paper transition-colors"
                 style={{
-                  gridTemplateColumns: "minmax(0,2.4fr) 1fr 0.9fr 0.9fr 1.4fr 0.9fr 1.4fr",
+                  gridTemplateColumns:
+                    "minmax(0,2.4fr) 1fr 0.9fr 0.9fr 1fr 1.4fr 0.9fr 1.4fr",
                   borderBottom: "1px solid var(--pg-border-soft)",
                 }}
               >
@@ -279,6 +323,24 @@ export default async function AdminPositionsPage({
                   )}
                 </span>
                 <span className="text-[13px] font-semibold text-pg-ink-secondary">{appCount}</span>
+                <span
+                  className="flex items-center gap-2 pr-3"
+                  title={`${weeklyTotal} lamaran 7 hari terakhir`}
+                >
+                  <Sparkline data={weekly} width={64} height={20} />
+                  <span
+                    className="text-[11px] tabular-nums"
+                    style={{
+                      color:
+                        weeklyTotal > 0
+                          ? "var(--pg-ink-secondary)"
+                          : "var(--pg-ink-quaternary)",
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
+                    {weeklyTotal > 0 ? `+${weeklyTotal}` : "—"}
+                  </span>
+                </span>
                 <ReadinessBar ready={ready?.ready ?? 0} total={ready?.total ?? 0} />
                 <span>
                   {p.active ? (
