@@ -11,6 +11,7 @@ import PositionEditorShell from "@/components/admin/PositionEditorShell";
 import ApplicationFieldsEditor, {
   type Field as ApplicationField,
 } from "@/components/admin/ApplicationFieldsEditor";
+import { EditorTabsHeader } from "@/components/admin/EditorTabsHeader";
 import { parseContent } from "@/lib/position-content";
 
 export const dynamic = "force-dynamic";
@@ -143,27 +144,14 @@ export default async function PositionDetailPage({
           </div>
         </div>
 
-        {/* Publish toggle — own card on top so the switch is unmistakable */}
-        <div className="mb-4 max-w-3xl">
-          <PositionActiveToggle slug={position.slug} initialActive={position.active} />
-        </div>
+        {/* Phase 6b — tabbed editor. Sections below switch via [data-tab]
+            attribute selector; underlying editors keep their state. */}
+        <EditorTabsHeader
+          counts={{ form: fields.length, jobs: jobOrdersCount }}
+        />
 
-        {/* Meta editor (name / desc) — narrow card */}
-        <div className="mb-6 max-w-3xl">
-          <PositionMetaEditor
-            slug={position.slug}
-            initial={{
-              name: position.name,
-              description: position.description,
-            }}
-          />
-        </div>
-
-        {/* Content editor + live preview side-by-side */}
-        <section className="mb-8">
-          <div className="text-[10px] font-bold tracking-[0.12em] uppercase font-mono text-pg-ink-tertiary mb-3">
-            Konten landing page
-          </div>
+        {/* === Tab: Konten landing === */}
+        <section data-tab="konten" className="mb-8">
           <PositionEditorShell
             slug={position.slug}
             name={position.name}
@@ -181,16 +169,34 @@ export default async function PositionDetailPage({
           />
         </section>
 
-        {/* Application form fields editor */}
-        <section className="mb-8">
+        {/* === Tab: Form lamaran === */}
+        <section data-tab="form" className="mb-8 max-w-4xl">
           <div className="text-[10px] font-bold tracking-[0.12em] uppercase font-mono text-pg-ink-tertiary mb-3">
-            Form pertanyaan candidate
+            Pertanyaan untuk kandidat
           </div>
           <ApplicationFieldsEditor positionSlug={position.slug} initial={fields} />
         </section>
 
-        {/* Job orders for this position */}
-        <section className="mb-8">
+        {/* === Tab: Settings === */}
+        <section data-tab="settings" className="mb-8 max-w-3xl flex flex-col gap-4">
+          <PositionActiveToggle slug={position.slug} initialActive={position.active} />
+          <PositionMetaEditor
+            slug={position.slug}
+            initial={{
+              name: position.name,
+              description: position.description,
+            }}
+          />
+          <DeletePositionCard
+            slug={position.slug}
+            name={position.name}
+            appCount={applicationsCount}
+            joCount={jobOrdersCount}
+          />
+        </section>
+
+        {/* === Tab: Job orders === */}
+        <section data-tab="jobs" className="mb-8">
           <div className="flex items-center justify-between mb-3">
             <div className="text-[10px] font-bold tracking-[0.12em] uppercase font-mono text-pg-ink-tertiary">
               Job orders ({jobOrders.length})
@@ -254,14 +260,6 @@ export default async function PositionDetailPage({
             </div>
           )}
         </section>
-
-        {/* Danger zone — hard delete (refuses if linked apps/JOs exist) */}
-        <DeletePositionCard
-          slug={position.slug}
-          name={position.name}
-          appCount={applicationsCount}
-          joCount={jobOrdersCount}
-        />
       </main>
     </>
   );
