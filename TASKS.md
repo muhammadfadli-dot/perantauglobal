@@ -2,7 +2,75 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-05-25 (Position model rework Fase 0–4 DONE & MERGED. Fase 5 deferred.)
+**Last updated:** 2026-05-27 (Full design system redesign Phases 0–7 SHIPPED, 20 PRs, live in prod)
+
+## 2026-05-27 — Full redesign sprint Phases 0–7 ✅ SHIPPED
+
+20 PRs squash-merged to main, both apps deployed to production. Plan locked
+in `~/.claude/plans/federated-wondering-boole.md`; source design folder
+`~/Downloads/web redesign perantau global/`.
+
+**apps/web (perantauglobal.com):**
+- PR #71 — **Phase 0** Design tokens (IBM Plex Mono swap, country tints, shadow scale)
+- PR #72 — **Phase 1** Homepage (portrait collage hero, dual portals, deep sections, polaroid testimoni, postcard CTA)
+- PR #73 — **Phase 2** Lowongan listing (sticky country tabs, chapter bands, mixed featured/queue)
+- PR #74 — **Phase 3** Lowongan detail (editorial hero, QuickFacts floating card, 6 numbered sections, related, share)
+- PR #76 — **Phase 4** Sertifikasi + Phase 0-4 polish (passport mockup, 8 sections, dark TrustStrip, no CountryStrip)
+
+**apps/platform candidate portal v2 (app.perantauglobal.com):**
+- PR #77 — **5a** chrome (4-tab BottomNav, amber alias tokens)
+- PR #78 — **5b** Beranda S1-S3 hero state machine
+- PR #79 — **5c** Lowongan tab (country tiles + featured/queue)
+- PR #80 — **5d** Applications list (photo thumbs + StagePill)
+- PR #81 — **5e** Pipeline detail timeline (5-step + doc rows + Pendamping)
+- PR #82 — **5f** Paspor tab (amber hero + 4 modules + Other Paspor, mock data)
+- PR #83 — **5g** Saya tab (progress ring + 4 stat tiles + settings) + Paspor TS hotfix
+- PR #84 — **5h** Desktop adaptive layout (md+ sidebar)
+
+**apps/platform admin (admin.perantauglobal.com):**
+- PR #85 — **6a** Admin PublishBar scaffold
+- PR #86 — **6b** Tabbed Position Editor (Konten/Form/Settings/JO)
+- PR #87 — **6c+6d** Admin Sparkline + KpiStat primitives scaffold
+
+**packages/db schema (DRAFT, not applied):**
+- PR #88 — **Phase 7** draft migrations: `0040_paspor_courses_draft.sql`, `0041_interview_scheduled_draft.sql`, `0042_pre_departure_checklist_draft.sql`
+
+**Visual review polish PRs (post-deploy sweep):**
+- PR #89 — Position card photo fallback (country image as middle layer when slug-specific photo missing)
+- PR #90 — Auth pages "Talent Hub" → "Perantau Global" rename
+- PR #91 — Mobile lowongan overflow fix (ChapterBand aspect 4/3 mobile / 21/7 desktop + tighter hero stat gap)
+
+## Next session pickup
+
+**Phase 5 deferred sub-states (need Phase 7 schema applied first):**
+- BerandaS4 wawancara hero (needs `interview_scheduled` table + admin scheduling UI)
+- BerandaS5 boarding-pass + pre-departure checklist (needs `pre_departure_checklist` table + admin checklist UI)
+- Paspor real lesson player (needs `paspor_courses`/`modules`/`lessons` tables + admin CMS UI)
+
+**Phase 6 admin redesign — full UI integration (scaffolds shipped, integration deferred):**
+- Wire `KpiStat` + `Sparkline` (PR #87) into `/admin` dashboard hero KPIs
+- Use `Sparkline` in catalog table "Apply / minggu" column
+- Wire `PublishBar` (PR #85) into `/admin/positions/[slug]` as sticky footer
+- Build `/admin/analytics` deep-dive page (5 KPI hero + 12-week trend + funnel + leaderboard)
+
+**Phase 7 application — only after 1-2 weeks prod observation + admin CMS:**
+1. Apply migration 0040 + build admin Paspor course CMS
+2. Wire `/paspor` candidate page to real tables (replace mock data)
+3. Apply migration 0041 + build admin interview scheduler
+4. Implement BerandaS4 (interview hero)
+5. Apply migration 0042 + build admin departure checklist manager
+6. Implement BerandaS5 (boarding pass hero)
+
+**Architecture decisions locked:**
+- IBM Plex Mono (not JetBrains)
+- Dark TrustStrip ink-900 (not gold band)
+- Country tints (`--c-saudi-tint`, etc.) = image filter ONLY, never UI accent
+- Red is sole UI accent
+- 4 bottom tabs: Beranda · Lowongan · Paspor · Saya (no dedicated Lamaran tab — lives in Beranda hero)
+- `position_application_fields` is canonical (no more `profile_data.credentials`)
+- Paspor schema deferred until admin CMS UI built
+
+---
 
 ## Position model rework — Fase 0–4 ✅ DONE (2026-05-24/25)
 
