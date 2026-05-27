@@ -14,6 +14,13 @@ export type ReadinessResultV3 = {
     string,
     {
       passed: boolean
+      /**
+       * Candidate gave some answer (or uploaded a doc) — distinct from
+       * `passed`. A candidate who answered "Belum punya SSW" is
+       * answered:true, passed:false. Used for the "answered but not
+       * qualifying" warn state.
+       */
+      answered: boolean
       self_passed: boolean
       doc_passed: boolean
       importance: "hard" | "soft"
@@ -41,7 +48,7 @@ type FormField = {
   field_key: string;
   field_label: string;
   field_type: string;
-  options: { value: string; label: string }[] | null;
+  options: { value: string; label: string; qualifying?: boolean }[] | null;
   collect_at_stage: string;
 };
 
@@ -201,15 +208,25 @@ function QuestionRow({
   answer: unknown;
   readinessField?: {
     passed: boolean;
+    answered: boolean;
     importance: string;
   };
 }) {
   const passed = readinessField?.passed;
+  const answered = readinessField?.answered;
   const isHard = readinessField?.importance === "hard";
+
+  // Three states drive the row:
+  //   passed=true                  → ✅ memenuhi
+  //   passed=false && answered     → ⚠️ tidak memenuhi (answered with a non-qualifying option)
+  //   passed=false && !answered    → ❌ belum dijawab
+  let state: "pass" | "answered_fail" | "missing" = "missing";
+  if (passed) state = "pass";
+  else if (answered) state = "answered_fail";
 
   return (
     <div className="flex items-start gap-3 px-3 py-2.5 hover:bg-pg-ink-50 transition-colors">
-      <StatusIcon passed={passed} hasReadiness={!!readinessField} />
+      <StatusIcon state={state} hasReadiness={!!readinessField} />
       <div className="flex-1 min-w-0">
         <div className="text-[11px] font-semibold text-pg-ink-500">
           {field.field_label}
@@ -218,15 +235,20 @@ function QuestionRow({
           {formatAnswer(answer, field)}
         </div>
       </div>
-      {readinessField && passed === false && isHard && (
+      {readinessField && isHard && state === "missing" && (
         <span
           className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
-          style={{
-            background: "var(--pg-err-bg)",
-            color: "var(--pg-err)",
-          }}
+          style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
         >
-          Hard fail
+          Belum dijawab
+        </span>
+      )}
+      {readinessField && isHard && state === "answered_fail" && (
+        <span
+          className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide"
+          style={{ background: "var(--pg-warn-bg)", color: "var(--pg-warn)" }}
+        >
+          Tidak memenuhi
         </span>
       )}
     </div>
@@ -234,10 +256,10 @@ function QuestionRow({
 }
 
 function StatusIcon({
-  passed,
+  state,
   hasReadiness,
 }: {
-  passed?: boolean;
+  state: "pass" | "answered_fail" | "missing";
   hasReadiness: boolean;
 }) {
   if (!hasReadiness) {
@@ -251,17 +273,25 @@ function StatusIcon({
       </span>
     );
   }
-  if (passed) {
+  if (state === "pass") {
     return (
       <span
         className="w-5 h-5 rounded-full grid place-items-center mt-0.5 shrink-0"
-        style={{
-          background: "var(--pg-ok-soft-bg)",
-          color: "var(--pg-ok-soft-fg)",
-        }}
+        style={{ background: "var(--pg-ok-soft-bg)", color: "var(--pg-ok-soft-fg)" }}
         title="Syarat terpenuhi"
       >
         <Icon name="check" size={12} stroke={2.4} />
+      </span>
+    );
+  }
+  if (state === "answered_fail") {
+    return (
+      <span
+        className="w-5 h-5 rounded-full grid place-items-center mt-0.5 shrink-0"
+        style={{ background: "var(--pg-warn-bg)", color: "var(--pg-warn)" }}
+        title="Sudah dijawab tapi tidak memenuhi syarat"
+      >
+        <Icon name="warn" size={12} stroke={2.4} />
       </span>
     );
   }
@@ -269,7 +299,7 @@ function StatusIcon({
     <span
       className="w-5 h-5 rounded-full grid place-items-center mt-0.5 shrink-0"
       style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
-      title="Syarat tidak terpenuhi"
+      title="Belum dijawab"
     >
       <Icon name="x" size={12} stroke={2.4} />
     </span>

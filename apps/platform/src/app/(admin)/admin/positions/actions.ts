@@ -255,7 +255,7 @@ export type ApplicationFieldInput = {
   field_label: string;
   field_help?: string;
   field_type: "select" | "radio" | "number" | "text" | "textarea" | "file" | "multiselect";
-  options?: { value: string; label: string }[] | null;
+  options?: { value: string; label: string; qualifying?: boolean }[] | null;
   importance?: "required" | "optional";
   section?: "syarat_utama" | "kualifikasi" | "screening";
   tier_weight?: number;

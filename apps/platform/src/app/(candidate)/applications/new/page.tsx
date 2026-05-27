@@ -19,7 +19,7 @@ type FormField = {
   field_label: string;
   field_help: string | null;
   field_type: string;
-  options: { value: string; label: string }[] | null;
+  options: { value: string; label: string; qualifying?: boolean }[] | null;
   required: boolean;
   sort_order: number;
 };
@@ -91,7 +91,7 @@ export default async function ApplyNewPage({
     field_label: string;
     field_help: string | null;
     field_type: string;
-    options: { value: string; label: string }[] | null;
+    options: { value: string; label: string; qualifying?: boolean }[] | null;
     importance: "required" | "optional";
     sort_order: number;
   }>;

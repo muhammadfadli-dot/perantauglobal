@@ -21,12 +21,24 @@ import type { Database } from "@perantauglobal/db";
 export type FieldImportance = "required" | "optional";
 export type FieldSection = "syarat_utama" | "kualifikasi" | "screening";
 
+/**
+ * Option for radio/select/multiselect fields.
+ * `qualifying` (added 2026-05-28): when true, picking this option counts the
+ * field as "passing" for hard_pass. When omitted/null on every option, the
+ * field falls back to legacy presence-check (answer just needs to exist).
+ */
+export type FieldOption = {
+  value: string;
+  label: string;
+  qualifying?: boolean;
+};
+
 export type ApplicationField = {
   field_key: string;
   field_label: string;
   field_help: string | null;
   field_type: string;
-  options: { value: string; label: string }[] | null;
+  options: FieldOption[] | null;
   importance: FieldImportance;
   section: FieldSection;
   tier_weight: number;
@@ -38,8 +50,19 @@ export type ApplicationField = {
   value: string | null;
   /** A doc has been uploaded for this field (file fields only). */
   doc_uploaded: boolean;
-  /** Field is satisfied — either answer present or doc uploaded. */
+  /**
+   * Field is satisfied for hard_pass:
+   * - file: doc uploaded
+   * - radio/select/text with options carrying `qualifying`: answer matches a qualifying option
+   * - multiselect with options carrying `qualifying`: at least one selected value is qualifying
+   * - everything else: presence check (legacy fallback)
+   */
   passed: boolean;
+  /**
+   * Did the candidate provide some answer? Distinct from `passed` — useful
+   * for showing a "answered but not qualifying" state in admin UI.
+   */
+  answered: boolean;
 };
 
 export type ApplicationCompleteness = {
@@ -100,7 +123,7 @@ export async function getApplicationCompleteness(
     field_label: string;
     field_help: string | null;
     field_type: string;
-    options: { value: string; label: string }[] | null;
+    options: FieldOption[] | null;
     importance: FieldImportance;
     section: FieldSection;
     tier_weight: number;
@@ -124,10 +147,27 @@ export async function getApplicationCompleteness(
       ? docsByType.has(f.document_type)
       : false;
 
-    const answerPassed =
+    const answered =
       value !== null && value !== "" && value !== "[]" && value !== "null";
 
-    const passed = f.field_type === "file" ? docUploaded : answerPassed;
+    const hasQualifyingFlag = f.options?.some((o) => typeof o.qualifying === "boolean") ?? false;
+
+    let passed: boolean;
+    if (f.field_type === "file") {
+      passed = docUploaded;
+    } else if (!answered) {
+      passed = false;
+    } else if (!hasQualifyingFlag) {
+      passed = true;
+    } else if (f.field_type === "multiselect" && Array.isArray(rawAnswer)) {
+      passed = rawAnswer.some((sel) => {
+        const opt = f.options?.find((o) => o.value === sel);
+        return opt?.qualifying === true;
+      });
+    } else {
+      const opt = f.options?.find((o) => o.value === value);
+      passed = opt?.qualifying === true;
+    }
 
     return {
       field_key: f.field_key,
@@ -144,15 +184,20 @@ export async function getApplicationCompleteness(
       value,
       doc_uploaded: docUploaded,
       passed,
+      answered,
     };
   });
 
   const required = fields.filter((f) => f.importance === "required");
   const hardPass = required.every((f) => f.passed);
 
+  // score_pct = completeness (how much of the form is filled). This is the
+  // candidate-facing progress signal — fills as they answer questions,
+  // regardless of whether their answer is qualifying. Admin uses
+  // `hard_pass` (qualifying-aware) for the actual eligibility check.
   const total = fields.length;
-  const passedCount = fields.filter((f) => f.passed).length;
-  const scorePct = total === 0 ? 100 : Math.round((passedCount / total) * 100);
+  const answeredCount = fields.filter((f) => f.answered || (f.field_type === "file" && f.doc_uploaded)).length;
+  const scorePct = total === 0 ? 100 : Math.round((answeredCount / total) * 100);
 
   return {
     fields,

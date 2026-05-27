@@ -27,7 +27,13 @@ export type Field = {
   field_label: string;
   field_help: string | null;
   field_type: string;
-  options: { value: string; label: string }[] | null;
+  /**
+   * `qualifying` (added 2026-05-28) marks options that count as "passing"
+   * for the qualification gate (used by application_readiness_view).
+   * The admin editor preserves this flag when round-tripping; UI for
+   * setting it is not yet exposed (set via migration for now).
+   */
+  options: { value: string; label: string; qualifying?: boolean }[] | null;
   importance: "required" | "optional";
   section: "syarat_utama" | "kualifikasi" | "screening";
   tier_weight: number;
@@ -433,7 +439,7 @@ type FieldFormProps =
       sortOrder?: undefined;
     };
 
-type OptionRow = { value: string; label: string };
+type OptionRow = { value: string; label: string; qualifying?: boolean };
 
 function FieldForm(props: FieldFormProps) {
   const { mode, positionSlug, onClose } = props;
@@ -450,7 +456,13 @@ function FieldForm(props: FieldFormProps) {
   );
   const [options, setOptions] = useState<OptionRow[]>(
     initial?.options && initial.options.length > 0
-      ? initial.options.map((o) => ({ value: o.value, label: o.label }))
+      ? initial.options.map((o) => ({
+          value: o.value,
+          label: o.label,
+          // Preserve the qualifying flag through edit round-trip. Admin UI
+          // for setting it isn't exposed yet; values are seeded via migration.
+          qualifying: o.qualifying,
+        }))
       : [
           { value: "", label: "" },
           { value: "", label: "" },
@@ -484,13 +496,15 @@ function FieldForm(props: FieldFormProps) {
     if (!canSubmit) return;
     setError(null);
 
-    const finalOptions: { value: string; label: string }[] | null = typeMeta.hasOptions
+    const finalOptions: { value: string; label: string; qualifying?: boolean }[] | null = typeMeta.hasOptions
       ? options
           .filter((o) => o.label.trim().length > 0)
           .map((o) => {
             const cleanLabel = o.label.trim();
             const cleanValue = o.value.trim() || slugify(cleanLabel);
-            return { value: cleanValue, label: cleanLabel };
+            return typeof o.qualifying === "boolean"
+              ? { value: cleanValue, label: cleanLabel, qualifying: o.qualifying }
+              : { value: cleanValue, label: cleanLabel };
           })
       : null;
 

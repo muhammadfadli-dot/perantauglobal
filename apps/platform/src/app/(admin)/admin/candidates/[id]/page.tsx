@@ -197,6 +197,7 @@ export default async function CandidateDetailPage({
           f.field_key,
           {
             passed: f.passed,
+            answered: f.answered,
             self_passed: f.passed && f.field_type !== "file",
             doc_passed: f.doc_uploaded,
             importance: (f.importance === "required" ? "hard" : "soft") as
