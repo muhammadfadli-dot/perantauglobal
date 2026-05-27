@@ -156,6 +156,14 @@ export async function saveDraft(slug: string, content: PositionContent) {
 }
 
 /**
+ * Result type for user-facing publish actions. Friendly errors are RETURNED
+ * (not thrown) because Next.js production strips server-action exception
+ * messages to the generic "Server Components render" overlay. Throwing is
+ * reserved for actual programming errors (auth, unexpected DB outage).
+ */
+export type PublishActionResult = { ok: true } | { ok: false; error: string };
+
+/**
  * Promote the working draft to live: copy positions.draft_content into
  * positions.content, stamp published_at = now(), clear draft_content.
  *
@@ -164,9 +172,10 @@ export async function saveDraft(slug: string, content: PositionContent) {
  *   - draft and live are back in sync (draft_content = NULL)
  *   - apps/web ISR is busted via notifyWebRevalidate
  *
- * Refuses if there is no draft to publish.
+ * Refuses (returns ok: false) if there is no draft to publish — returning
+ * the friendly message preserves it through Next.js production filtering.
  */
-export async function publishPosition(slug: string) {
+export async function publishPosition(slug: string): Promise<PublishActionResult> {
   await assertAdmin();
   const supabase = await createServerClient();
 
@@ -176,11 +185,19 @@ export async function publishPosition(slug: string) {
     .select("draft_content")
     .eq("slug", slug)
     .maybeSingle();
-  if (readErr) throw new Error(readErr.message);
-  if (!data) throw new Error("Posisi tidak ditemukan.");
+  if (readErr) {
+    // Unexpected DB read failure — alertable. Throw to log as 500.
+    throw new Error(`DB read error: ${readErr.message}`);
+  }
+  if (!data) {
+    return { ok: false, error: "Posisi tidak ditemukan." };
+  }
   const draft = (data as { draft_content: unknown }).draft_content;
   if (draft == null) {
-    throw new Error("Tidak ada draft untuk dipublish. Edit dulu sebelum publish.");
+    return {
+      ok: false,
+      error: "Tidak ada draft untuk dipublish. Edit dulu sebelum publish.",
+    };
   }
 
   const { error: writeErr } = await supabase
@@ -191,26 +208,37 @@ export async function publishPosition(slug: string) {
       published_at: new Date().toISOString(),
     } as never)
     .eq("slug", slug);
-  if (writeErr) throw new Error(writeErr.message);
+  if (writeErr) {
+    // Unexpected DB write failure — alertable. Throw to log as 500.
+    throw new Error(`DB write error: ${writeErr.message}`);
+  }
 
   revalidatePath(`/admin/positions/${slug}`);
   revalidatePath("/admin/positions");
   await notifyWebRevalidate(slug);
+  return { ok: true };
 }
 
 /**
  * Discard pending draft changes — drops draft_content back to NULL.
  * Live content stays untouched. Useful for "saya batalin perubahan ini".
+ *
+ * Returns discriminated union for the same reason as publishPosition:
+ * keeps user-facing copy intact through Next.js production filtering.
  */
-export async function discardDraft(slug: string) {
+export async function discardDraft(slug: string): Promise<PublishActionResult> {
   await assertAdmin();
   const supabase = await createServerClient();
   const { error } = await supabase
     .from("positions")
     .update({ draft_content: null } as never)
     .eq("slug", slug);
-  if (error) throw new Error(error.message);
+  if (error) {
+    // Unexpected DB write failure — alertable. Throw to log as 500.
+    throw new Error(`DB write error: ${error.message}`);
+  }
   revalidatePath(`/admin/positions/${slug}`);
+  return { ok: true };
 }
 
 /**

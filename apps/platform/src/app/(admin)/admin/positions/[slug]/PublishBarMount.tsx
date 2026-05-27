@@ -69,14 +69,25 @@ export default function PublishBarMount({
     if (busyAction) return;
     setBusyAction("publish");
     try {
-      await publishPosition(slug);
+      const result = await publishPosition(slug);
+      if (!result.ok) {
+        // Expected user-facing failure (e.g. no draft to publish). Server
+        // returns the friendly Indonesian copy as data; we'd have lost it
+        // through Next.js production sanitization if it had been thrown.
+        alert(result.error);
+        return;
+      }
       setHasPendingDraft(false);
       setDraftSavedAt(null);
       startTransition(() => router.refresh());
     } catch (e) {
-      // Surface error inline in the bar? For now, alert. Phase 8d+ can add
-      // proper toast/banner.
-      alert(e instanceof Error ? e.message : "Gagal publish");
+      // Unexpected throw (auth failure, DB outage). Production strips the
+      // real message — show a generic note + suggest reload.
+      alert(
+        e instanceof Error
+          ? e.message
+          : "Gagal publish. Coba reload halaman & ulangi.",
+      );
     } finally {
       setBusyAction(null);
     }
@@ -90,12 +101,20 @@ export default function PublishBarMount({
     if (!ok) return;
     setBusyAction("discard");
     try {
-      await discardDraft(slug);
+      const result = await discardDraft(slug);
+      if (!result.ok) {
+        alert(result.error);
+        return;
+      }
       setHasPendingDraft(false);
       setDraftSavedAt(null);
       startTransition(() => router.refresh());
     } catch (e) {
-      alert(e instanceof Error ? e.message : "Gagal discard");
+      alert(
+        e instanceof Error
+          ? e.message
+          : "Gagal discard. Coba reload halaman & ulangi.",
+      );
     } finally {
       setBusyAction(null);
     }
