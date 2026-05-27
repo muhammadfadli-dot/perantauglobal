@@ -662,8 +662,10 @@ export type Database = {
           country: string
           created_at: string
           description: string | null
+          draft_content: Json | null
           name: string
           pipeline: Json
+          published_at: string | null
           role: string
           scoring: Json
           slug: string
@@ -675,8 +677,10 @@ export type Database = {
           country: string
           created_at?: string
           description?: string | null
+          draft_content?: Json | null
           name: string
           pipeline?: Json
+          published_at?: string | null
           role: string
           scoring?: Json
           slug: string
@@ -688,8 +692,10 @@ export type Database = {
           country?: string
           created_at?: string
           description?: string | null
+          draft_content?: Json | null
           name?: string
           pipeline?: Json
+          published_at?: string | null
           role?: string
           scoring?: Json
           slug?: string
