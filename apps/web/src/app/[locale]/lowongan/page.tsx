@@ -99,7 +99,7 @@ export default async function LowonganIndexPage({
                   Bebas biaya sebelum offering letter.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-8 md:gap-10">
+              <div className="flex flex-wrap gap-4 md:gap-10">
                 <div className="flex flex-col gap-1 pl-5 border-l-[2px] border-pg-ink-900 py-2">
                   <span
                     className="font-mono font-extrabold leading-none tracking-[-0.025em]"

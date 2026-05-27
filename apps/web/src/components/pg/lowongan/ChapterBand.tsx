@@ -17,12 +17,10 @@ export function ChapterBand({
 }) {
   return (
     <div
-      className="relative overflow-hidden mb-9 isolate"
+      className="relative overflow-hidden mb-6 md:mb-9 isolate aspect-[4/3] md:aspect-[21/7] rounded-[18px] md:rounded-[24px]"
       style={{
-        borderRadius: 24,
         minHeight: 220,
         background: "var(--pg-ink-900)",
-        aspectRatio: "21/7",
       }}
       data-country={country.key}
     >
