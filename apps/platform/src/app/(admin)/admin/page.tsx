@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import { Icon } from "@/components/pg/Icon";
+import { KpiStat } from "@/components/admin/Sparkline";
 
 export const dynamic = "force-dynamic";
 
@@ -87,6 +88,8 @@ export default async function AdminHomePage({
   }>;
 
   const dailyCounts = new Map<string, number>();
+  const screeningDaily = new Map<string, number>();
+  const acceptedDaily = new Map<string, number>();
   const velocityMap = new Map<string, number>();
   let applicationsThisRange = 0;
   let applicationsPriorRange = 0;
@@ -97,11 +100,17 @@ export default async function AdminHomePage({
     const ts = new Date(row.created_at);
     if (ts >= rangeAgo) {
       applicationsThisRange++;
-      if (row.pipeline_stage === "screening") screeningStage++;
-      if (row.pipeline_stage === "selected") acceptedStage++;
-      velocityMap.set(row.position_slug, (velocityMap.get(row.position_slug) ?? 0) + 1);
       const key = dayKey(ts);
       dailyCounts.set(key, (dailyCounts.get(key) ?? 0) + 1);
+      if (row.pipeline_stage === "screening") {
+        screeningStage++;
+        screeningDaily.set(key, (screeningDaily.get(key) ?? 0) + 1);
+      }
+      if (row.pipeline_stage === "selected") {
+        acceptedStage++;
+        acceptedDaily.set(key, (acceptedDaily.get(key) ?? 0) + 1);
+      }
+      velocityMap.set(row.position_slug, (velocityMap.get(row.position_slug) ?? 0) + 1);
     } else {
       applicationsPriorRange++;
     }
@@ -109,10 +118,16 @@ export default async function AdminHomePage({
 
   // Build day-by-day series, filling zero days, oldest first
   const dailySeries: { date: Date; count: number }[] = [];
+  const screeningSeries: number[] = [];
+  const acceptedSeries: number[] = [];
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    dailySeries.push({ date: d, count: dailyCounts.get(dayKey(d)) ?? 0 });
+    const k = dayKey(d);
+    dailySeries.push({ date: d, count: dailyCounts.get(k) ?? 0 });
+    screeningSeries.push(screeningDaily.get(k) ?? 0);
+    acceptedSeries.push(acceptedDaily.get(k) ?? 0);
   }
+  const inflowSeries = dailySeries.map((d) => d.count);
   const dailyMax = Math.max(...dailySeries.map((d) => d.count), 1);
   const dailyAvg =
     dailySeries.length > 0
@@ -247,6 +262,53 @@ export default async function AdminHomePage({
               ? "Pipeline lancar — tidak ada urgent task"
               : `${attentions.slice(0, 3).filter((a) => a.count > 0).length} hal yang butuh perhatian kamu`}
           </h1>
+        </div>
+
+        {/* KPI hero row — 5 stats with inline sparklines for the selected range */}
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
+          <KpiStat
+            label="Lamaran masuk"
+            value={thisRange}
+            delta={
+              wowPct != null
+                ? `${wowPct >= 0 ? "+" : ""}${wowPct}%`
+                : undefined
+            }
+            deltaTone={
+              wowPct == null ? "mute" : wowPct >= 0 ? "ok" : "warn"
+            }
+            sparkline={inflowSeries}
+            caption={`vs ${RANGE_LABEL[range]} sebelumnya`}
+          />
+          <KpiStat
+            label="Maju ke screening"
+            value={screeningStage}
+            sparkline={screeningSeries}
+            caption={
+              thisRange > 0
+                ? `${Math.round((screeningStage / thisRange) * 100)}% dari lamaran`
+                : "Belum ada lamaran"
+            }
+          />
+          <KpiStat
+            label="Diterima"
+            value={acceptedStage}
+            sparkline={acceptedSeries}
+            deltaTone="ok"
+            caption={`Sepanjang ${RANGE_LABEL[range]}`}
+          />
+          <KpiStat
+            label="Job orders open"
+            value={openJobOrders ?? 0}
+            caption="Pull dari talent pool"
+          />
+          <KpiStat
+            label="Doc pending"
+            value={pendingDocs ?? 0}
+            delta={(pendingDocs ?? 0) > 5 ? "Perlu review" : undefined}
+            deltaTone={(pendingDocs ?? 0) > 5 ? "warn" : "mute"}
+            caption="Sertifikat & dokumen baru"
+          />
         </div>
 
         {/* Attention cards */}
