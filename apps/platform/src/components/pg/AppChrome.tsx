@@ -123,38 +123,115 @@ export function BottomNav() {
     pathname?.startsWith("/explore") ? "search" :
     // /applications/* still maps to Beranda since lamaran lives there post-v2
     "home";
+
   return (
-    <nav
-      className="sticky bottom-0 z-30 grid grid-cols-4 px-2 pt-0 pb-4 border-t border-pg-ink-100"
-      style={{ background: "var(--pg-white)" }}
-      aria-label="Navigasi utama"
-    >
-      {NAV_ITEMS.map((it) => {
-        const on = it.key === activeKey;
-        return (
-          <Link
-            key={it.key}
-            href={it.href}
-            aria-current={on ? "page" : undefined}
-            className={`relative flex flex-col items-center gap-1 pt-3 pb-1 px-1 no-underline text-[10.5px] font-bold tracking-[0.02em] transition-colors ${
-              on ? "text-pg-red-600" : "text-pg-ink-400"
-            }`}
+    <>
+      {/* Mobile: sticky bottom bar */}
+      <nav
+        className="md:hidden sticky bottom-0 z-30 grid grid-cols-4 px-2 pt-0 pb-4 border-t border-pg-ink-100"
+        style={{ background: "var(--pg-white)" }}
+        aria-label="Navigasi utama"
+      >
+        {NAV_ITEMS.map((it) => {
+          const on = it.key === activeKey;
+          return (
+            <Link
+              key={it.key}
+              href={it.href}
+              aria-current={on ? "page" : undefined}
+              className={`relative flex flex-col items-center gap-1 pt-3 pb-1 px-1 no-underline text-[10.5px] font-bold tracking-[0.02em] transition-colors ${
+                on ? "text-pg-red-600" : "text-pg-ink-400"
+              }`}
+            >
+              <span
+                aria-hidden
+                className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-b-[4px] transition-opacity"
+                style={{
+                  background: "var(--pg-red-600)",
+                  opacity: on ? 1 : 0,
+                }}
+              />
+              <Icon name={it.icon} size={22} stroke={on ? 2.2 : 1.8} />
+              <span>{it.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Desktop: fixed-left vertical sidebar (Phase 5h) */}
+      <nav
+        className="hidden md:flex fixed left-0 top-0 bottom-0 z-30 w-[240px] flex-col gap-1 px-4 py-6 border-r border-pg-ink-100"
+        style={{ background: "var(--pg-white)" }}
+        aria-label="Navigasi utama"
+      >
+        <Link
+          href="/dashboard"
+          className="flex items-center gap-2.5 mb-6 px-2 no-underline"
+        >
+          <span
+            className="w-10 h-10 rounded-[12px] grid place-items-center text-white font-extrabold text-[13px] shrink-0"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--pg-red-600) 0%, var(--pg-red-700) 100%)",
+              boxShadow:
+                "0 2px 6px rgba(215,38,47,0.30), inset 0 1px 0 rgba(255,255,255,0.25)",
+            }}
           >
-            {/* Top-anchored active indicator */}
-            <span
-              aria-hidden
-              className="absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-6 rounded-b-[4px] transition-opacity"
-              style={{
-                background: "var(--pg-red-600)",
-                opacity: on ? 1 : 0,
-              }}
-            />
-            <Icon name={it.icon} size={22} stroke={on ? 2.2 : 1.8} />
-            <span>{it.label}</span>
+            PG
+          </span>
+          <span className="flex flex-col leading-tight">
+            <span className="text-[14px] font-extrabold tracking-[-0.015em] text-pg-ink-900">
+              Perantau Global
+            </span>
+            <span className="font-mono text-[10px] text-pg-ink-500 tracking-[0.04em]">
+              v2 · Portal
+            </span>
+          </span>
+        </Link>
+
+        {NAV_ITEMS.map((it) => {
+          const on = it.key === activeKey;
+          return (
+            <Link
+              key={it.key}
+              href={it.href}
+              aria-current={on ? "page" : undefined}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] no-underline text-[14px] font-bold transition-colors"
+              style={
+                on
+                  ? {
+                      background: "var(--pg-red-50)",
+                      color: "var(--pg-red-700)",
+                    }
+                  : {
+                      color: "var(--pg-ink-700)",
+                    }
+              }
+            >
+              <Icon name={it.icon} size={18} stroke={on ? 2.4 : 2} />
+              {it.label}
+              {on && (
+                <span
+                  aria-hidden
+                  className="ml-auto w-1.5 h-1.5 rounded-full"
+                  style={{ background: "var(--pg-red-600)" }}
+                />
+              )}
+            </Link>
+          );
+        })}
+
+        <div className="mt-auto pt-4 border-t border-pg-ink-100">
+          <Link
+            href="/profile"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-[10px] no-underline text-[12.5px] text-pg-ink-500"
+          >
+            <Icon name="info" size={16} />
+            Bantuan
           </Link>
-        );
-      })}
-    </nav>
+        </div>
+      </nav>
+    </>
   );
 }
 
