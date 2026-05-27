@@ -24,7 +24,9 @@ type Position = {
   description: string | null;
   active: boolean;
   content: unknown;
+  draft_content: unknown;
   updated_at: string | null;
+  published_at: string | null;
 };
 
 type JobOrder = {
@@ -61,7 +63,9 @@ export default async function PositionDetailPage({
   ] = await Promise.all([
     supabase
       .from("positions")
-      .select("slug, name, country, description, active, content, updated_at")
+      .select(
+        "slug, name, country, description, active, content, draft_content, updated_at, published_at",
+      )
       .eq("slug", slug)
       .maybeSingle(),
     supabase
@@ -89,7 +93,12 @@ export default async function PositionDetailPage({
 
   const jobOrders = (jobOrdersData ?? []) as JobOrder[];
   const fields = (fieldsData ?? []) as ApplicationField[];
-  const content = parseContent(position.content as never);
+  // Editor works on the draft. Falls back to live content when no draft
+  // exists yet (draft_content is NULL = draft + live are in sync).
+  const editorContent = parseContent(
+    (position.draft_content ?? position.content) as never,
+  );
+  const hasPendingDraft = position.draft_content != null;
   const applicationsCount = appCount ?? 0;
   const jobOrdersCount = jobOrders.length;
 
@@ -154,12 +163,29 @@ export default async function PositionDetailPage({
 
         {/* === Tab: Konten landing === */}
         <section data-tab="konten" className="mb-8">
+          {hasPendingDraft && (
+            <div
+              className="mb-3 px-3.5 py-2.5 rounded-xl flex items-center gap-2.5 text-[12.5px]"
+              style={{
+                background: "var(--pg-warn-soft-bg)",
+                color: "var(--pg-warn-soft-fg)",
+                border: "1px solid var(--pg-warn-soft-border)",
+              }}
+            >
+              <Icon name="warn" size={14} stroke={2.4} />
+              <span className="font-bold">Draft belum dipublish.</span>
+              <span style={{ color: "var(--pg-ink-secondary)" }}>
+                Konten di editor bawah ini lebih baru dari yang live di /lowongan.
+                Klik &quot;Publish ke live&quot; di bar bawah untuk promote draft.
+              </span>
+            </div>
+          )}
           <PositionEditorShell
             slug={position.slug}
             name={position.name}
             country={COUNTRY_LABEL[position.country] ?? position.country}
             description={position.description}
-            initialContent={content}
+            initialContent={editorContent}
             initialFields={fields.map((f) => ({
               field_key: f.field_key,
               field_label: f.field_label,

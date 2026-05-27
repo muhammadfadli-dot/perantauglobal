@@ -134,20 +134,92 @@ export async function deletePosition(slug: string): Promise<void> {
 // =========================================================================
 
 /**
- * Persist the entire positions.content JSONB blob. Whole-blob replacement
- * is safer than jsonb merge for this editor since admin sees + edits the
- * full shape together. Size guard at DB layer (< 100KB).
+ * Save editor changes to positions.draft_content (NOT live).
+ *
+ * Phase 8b: the editor now writes to a working draft instead of the live
+ * content. The public /lowongan page keeps reading positions.content until
+ * admin explicitly clicks "Publish ke live" (publishPosition action below).
+ *
+ * - Whole-blob replacement (safer than jsonb merge for this editor).
+ * - Size guard enforced at DB layer (positions content_size_check, 100KB).
+ * - Does NOT revalidate apps/web — draft is invisible to the public.
  */
-export async function updatePositionContent(slug: string, content: PositionContent) {
+export async function saveDraft(slug: string, content: PositionContent) {
   await assertAdmin();
   const supabase = await createServerClient();
   const { error } = await supabase
     .from("positions")
-    .update({ content: content as never } as never)
+    .update({ draft_content: content as never } as never)
     .eq("slug", slug);
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/positions/${slug}`);
+}
+
+/**
+ * Promote the working draft to live: copy positions.draft_content into
+ * positions.content, stamp published_at = now(), clear draft_content.
+ *
+ * After this:
+ *   - /lowongan reads the new content
+ *   - draft and live are back in sync (draft_content = NULL)
+ *   - apps/web ISR is busted via notifyWebRevalidate
+ *
+ * Refuses if there is no draft to publish.
+ */
+export async function publishPosition(slug: string) {
+  await assertAdmin();
+  const supabase = await createServerClient();
+
+  // Fetch current draft (cannot publish without one).
+  const { data, error: readErr } = await supabase
+    .from("positions")
+    .select("draft_content")
+    .eq("slug", slug)
+    .maybeSingle();
+  if (readErr) throw new Error(readErr.message);
+  if (!data) throw new Error("Posisi tidak ditemukan.");
+  const draft = (data as { draft_content: unknown }).draft_content;
+  if (draft == null) {
+    throw new Error("Tidak ada draft untuk dipublish. Edit dulu sebelum publish.");
+  }
+
+  const { error: writeErr } = await supabase
+    .from("positions")
+    .update({
+      content: draft as never,
+      draft_content: null,
+      published_at: new Date().toISOString(),
+    } as never)
+    .eq("slug", slug);
+  if (writeErr) throw new Error(writeErr.message);
+
+  revalidatePath(`/admin/positions/${slug}`);
+  revalidatePath("/admin/positions");
   await notifyWebRevalidate(slug);
+}
+
+/**
+ * Discard pending draft changes — drops draft_content back to NULL.
+ * Live content stays untouched. Useful for "saya batalin perubahan ini".
+ */
+export async function discardDraft(slug: string) {
+  await assertAdmin();
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("positions")
+    .update({ draft_content: null } as never)
+    .eq("slug", slug);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/admin/positions/${slug}`);
+}
+
+/**
+ * @deprecated since Phase 8b — use `saveDraft` directly. Kept as a thin
+ * alias so existing callers (PositionEditorShell pre-PR-C) keep working
+ * while we migrate them to the explicit draft/publish API.
+ */
+export async function updatePositionContent(slug: string, content: PositionContent) {
+  await saveDraft(slug, content);
 }
 
 export type ApplicationFieldInput = {
