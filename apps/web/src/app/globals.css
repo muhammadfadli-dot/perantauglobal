@@ -209,6 +209,14 @@ article p {
   50%      { transform: rotate(var(--pc-rot, 0deg)) translateY(-4px); }
 }
 
+/* TrustStrip marquee — continuous horizontal loop. The track contains the
+ * sequence rendered twice; animating -50% means the second copy slides into
+ * the position of the first, creating a seamless loop. */
+@keyframes pg-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

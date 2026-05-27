@@ -26,7 +26,7 @@ const PORTRAIT_CARDS = [
   // - rini (caregiver): worker is center-left, elderly patient is right
   { src: "/images/people/sari.jpg", name: "Sari, 28", meta: "Perawat · 🇸🇦 Riyadh · 2025", objectPosition: "55% center" },
   { src: "/images/people/budi.jpg", name: "Budi, 32", meta: "Truck Driver · 🇯🇵 Osaka · 2025", objectPosition: "30% center" },
-  { src: "/images/people/rini.jpg", name: "Rini, 26", meta: "Caregiver · 🇹🇼 Taipei · 2025", objectPosition: "40% center" },
+  { src: "/images/people/rini.jpg", name: "Rini, 26", meta: "Caregiver · 🇹🇼 Taipei · 2025", objectPosition: "58% center" },
 ];
 
 export function HomeHero({
@@ -97,9 +97,10 @@ export function HomeHero({
               </a>
             </div>
 
-            {/* Alumni strip */}
-            <div className="flex items-center gap-3.5 mt-3">
-              <div className="flex items-center">
+            {/* Alumni strip — compact on mobile (smaller avatars + tighter copy)
+                to avoid overflow / overlap on narrow viewports. */}
+            <div className="flex items-center gap-2.5 md:gap-3.5 mt-3 min-w-0">
+              <div className="flex items-center shrink-0">
                 {PORTRAIT_CARDS.map((p, i) => (
                   <Image
                     key={p.src}
@@ -107,20 +108,19 @@ export function HomeHero({
                     alt={p.name}
                     width={36}
                     height={36}
-                    className="rounded-full object-cover border-2 border-pg-paper"
-                    style={{ marginLeft: i === 0 ? 0 : -8, objectPosition: p.objectPosition }}
+                    className="w-7 h-7 md:w-9 md:h-9 rounded-full object-cover border-2 border-pg-paper"
+                    style={{ marginLeft: i === 0 ? 0 : -6, objectPosition: p.objectPosition }}
                   />
                 ))}
                 <span
-                  className="w-9 h-9 rounded-full bg-pg-ink-900 text-white font-mono text-[11.5px] font-bold grid place-items-center border-2 border-pg-paper"
-                  style={{ marginLeft: -8 }}
+                  className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-pg-ink-900 text-white font-mono text-[10px] md:text-[11.5px] font-bold grid place-items-center border-2 border-pg-paper"
+                  style={{ marginLeft: -6 }}
                 >
                   +200
                 </span>
               </div>
-              <div className="text-[13px] text-pg-ink-700 leading-snug">
-                <b className="text-pg-ink-900 font-bold">Sari, Budi, Rini</b> + 200 alumni sejak
-                2024 — semua diberangkatkan resmi.
+              <div className="text-[12px] md:text-[13px] text-pg-ink-700 leading-snug min-w-0">
+                <b className="text-pg-ink-900 font-bold">Sari, Budi, Rini</b> + 200 alumni sejak 2024 — semua diberangkatkan resmi.
               </div>
             </div>
           </div>
