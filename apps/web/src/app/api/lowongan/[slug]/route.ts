@@ -4,29 +4,31 @@ import { sendMetaEvent } from "@/lib/meta-capi";
 import { writePendingSubmission } from "@/lib/pending-write";
 import { supabaseV2 } from "@/lib/supabase-v2";
 
-// Map slug → role + country. Kept as a whitelist so we reject unknown slugs
-// before touching the DB. Kept in sync with src/lib/positions.ts.
-const SLUG_MAP: Record<string, { role: string; country: string }> = {
-  // Saudi Arabia
-  "perawat-saudi-arabia": { role: "nurse", country: "saudi_arabia" },
-  "barista-saudi-arabia": { role: "barista", country: "saudi_arabia" },
-  "waiter-saudi-arabia": { role: "waiter", country: "saudi_arabia" },
-  "waitress-saudi-arabia": { role: "waitress", country: "saudi_arabia" },
-  "chef-bakery-saudi-arabia": { role: "chef_bakery", country: "saudi_arabia" },
-  "head-barista-saudi-arabia": { role: "head_barista", country: "saudi_arabia" },
-  "roaster-saudi-arabia": { role: "roaster", country: "saudi_arabia" },
-  "chef-pastry-saudi-arabia": { role: "chef_pastry", country: "saudi_arabia" },
-  "spa-therapist-saudi-arabia": { role: "spa_therapist", country: "saudi_arabia" },
-  "laundry-worker-saudi-arabia": { role: "laundry_worker", country: "saudi_arabia" },
-  // Jepang
-  "truck-driver-jepang": { role: "truck_driver", country: "japan" },
-  "food-service-jepang": { role: "food_service", country: "japan" },
-  "kaigo-jepang": { role: "kaigo", country: "japan" },
-  "pengolahan-makanan-jepang": { role: "pengolahan_makanan", country: "japan" },
-  // Lainnya
-  "caregiver-taiwan": { role: "caregiver", country: "taiwan" },
-  "spg-indonesia": { role: "spg", country: "indonesia" },
-};
+/**
+ * Resolve a slug to its role + country via the positions table. Replaces the
+ * old hardcoded SLUG_MAP (which drifted out of sync every time we shipped a
+ * new position — half of the 2026-05 ad rollout had broken submit URLs because
+ * 4 new slugs were never added to the whitelist).
+ *
+ * Anon read of `positions` where active=true is allowed by RLS policy
+ * `positions_anon_read_active`. Inactive or unknown slugs return null so the
+ * caller can 404.
+ */
+async function lookupPositionMapping(
+  slug: string,
+): Promise<{ role: string; country: string } | null> {
+  const { data, error } = await supabaseV2()
+    .from("positions")
+    .select("role, country")
+    .eq("slug", slug)
+    .eq("active", true)
+    .maybeSingle();
+  if (error) {
+    console.error("[lowongan] position lookup failed:", error.message);
+    return null;
+  }
+  return data ? { role: data.role, country: data.country } : null;
+}
 
 interface CandidatePayload {
   full_name: string;
@@ -94,7 +96,7 @@ export async function POST(
 ) {
   try {
     const { slug } = await params;
-    const mapping = SLUG_MAP[slug];
+    const mapping = await lookupPositionMapping(slug);
 
     if (!mapping) {
       return NextResponse.json(
