@@ -27,13 +27,20 @@ const COLS = [
       { label: "Kontak", href: "/kontak" },
     ],
   },
+  {
+    title: "Legal",
+    items: [
+      { label: "Kebijakan Privasi", href: "/privacy" },
+      { label: "Syarat & Ketentuan", href: "/terms" },
+    ],
+  },
 ];
 
 export function Footer() {
   return (
     <footer className="bg-pg-ink-900 text-white px-5 md:px-8 py-8 md:py-12">
       <div className="max-w-6xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr] gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr_1fr_1fr_1fr] gap-8">
           <div>
             <div className="flex items-center gap-2.5">
               <Image
