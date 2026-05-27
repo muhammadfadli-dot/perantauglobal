@@ -99,37 +99,37 @@ export default async function LowonganIndexPage({
                   Bebas biaya sebelum offering letter.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-4 md:gap-10">
-                <div className="flex flex-col gap-1 pl-5 border-l-[2px] border-pg-ink-900 py-2">
+              <div className="flex gap-2 md:gap-10">
+                <div className="flex-1 md:flex-initial flex flex-col gap-1 pl-2.5 md:pl-5 border-l-[2px] border-pg-ink-900 py-1 md:py-2">
                   <span
                     className="font-mono font-extrabold leading-none tracking-[-0.025em]"
-                    style={{ fontSize: "clamp(34px, 4vw, 48px)" }}
+                    style={{ fontSize: "clamp(26px, 4vw, 48px)" }}
                   >
                     {positions.length}
                   </span>
-                  <span className="font-mono text-[13px] text-pg-ink-500 tracking-[0.02em]">
+                  <span className="font-mono text-[10.5px] md:text-[13px] text-pg-ink-500 tracking-[0.02em]">
                     posisi aktif
                   </span>
                 </div>
-                <div className="flex flex-col gap-1 pl-5 border-l border-pg-ink-200 py-2">
+                <div className="flex-1 md:flex-initial flex flex-col gap-1 pl-2.5 md:pl-5 border-l border-pg-ink-200 py-1 md:py-2">
                   <span
                     className="font-mono font-extrabold leading-none tracking-[-0.025em] text-pg-ok"
-                    style={{ fontSize: "clamp(34px, 4vw, 48px)" }}
+                    style={{ fontSize: "clamp(26px, 4vw, 48px)" }}
                   >
                     {openCountTotal}
                   </span>
-                  <span className="font-mono text-[13px] text-pg-ink-500 tracking-[0.02em]">
-                    batch lagi buka
+                  <span className="font-mono text-[10.5px] md:text-[13px] text-pg-ink-500 tracking-[0.02em]">
+                    batch buka
                   </span>
                 </div>
-                <div className="flex flex-col gap-1 pl-5 border-l border-pg-ink-200 py-2">
+                <div className="flex-1 md:flex-initial flex flex-col gap-1 pl-2.5 md:pl-5 border-l border-pg-ink-200 py-1 md:py-2">
                   <span
                     className="font-mono font-extrabold leading-none tracking-[-0.025em]"
-                    style={{ fontSize: "clamp(34px, 4vw, 48px)" }}
+                    style={{ fontSize: "clamp(26px, 4vw, 48px)" }}
                   >
                     4
                   </span>
-                  <span className="font-mono text-[13px] text-pg-ink-500 tracking-[0.02em]">
+                  <span className="font-mono text-[10.5px] md:text-[13px] text-pg-ink-500 tracking-[0.02em]">
                     negara tujuan
                   </span>
                 </div>
