@@ -8,6 +8,7 @@ import PositionActiveToggle from "./PositionActiveToggle";
 import PositionMetaEditor from "./PositionMetaEditor";
 import DeletePositionCard from "./DeletePositionCard";
 import PublishBarMount from "./PublishBarMount";
+import PreviewMount from "./PreviewMount";
 import { PublishHistoryCard } from "./PublishHistoryCard";
 import PositionEditorShell from "@/components/admin/PositionEditorShell";
 import MediaSeoTab from "@/components/admin/MediaSeoTab";
@@ -15,6 +16,7 @@ import ApplicationFieldsEditor, {
   type Field as ApplicationField,
 } from "@/components/admin/ApplicationFieldsEditor";
 import { EditorTabsHeader } from "@/components/admin/EditorTabsHeader";
+import { BannerMetric } from "@/components/admin/BannerMetric";
 import { parseContent } from "@/lib/position-content";
 
 export const dynamic = "force-dynamic";
@@ -57,11 +59,18 @@ export default async function PositionDetailPage({
   const { slug } = await params;
   const supabase = await createServerClient();
 
+  // eslint-disable-next-line react-hooks/purity -- per-request time anchor for "7 hari" banner metric
+  const sevenDaysAgoIso = new Date(
+    Date.now() - 7 * 24 * 60 * 60 * 1000,
+  ).toISOString();
+
   const [
     { data: positionData },
     { data: jobOrdersData },
     { data: fieldsData },
     { count: appCount },
+    { data: weekAppsData },
+    { count: screeningAllTime },
   ] = await Promise.all([
     supabase
       .from("positions")
@@ -88,6 +97,23 @@ export default async function PositionDetailPage({
       .from("applications")
       .select("*", { count: "exact", head: true })
       .eq("position_slug", slug),
+    supabase
+      .from("applications")
+      .select("created_at")
+      .eq("position_slug", slug)
+      .gte("created_at", sevenDaysAgoIso),
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .eq("position_slug", slug)
+      .in("pipeline_stage", [
+        "screening",
+        "interview",
+        "selected",
+        "training",
+        "deployed",
+        "active",
+      ]),
   ]);
 
   const position = positionData as Position | null;
@@ -103,6 +129,25 @@ export default async function PositionDetailPage({
   const hasPendingDraft = position.draft_content != null;
   const applicationsCount = appCount ?? 0;
   const jobOrdersCount = jobOrders.length;
+
+  // Banner-metric computation: 7-day inflow + conv → screening (lifetime)
+  const weekApps = (weekAppsData ?? []) as Array<{ created_at: string }>;
+  const weekTotal = weekApps.length;
+  // eslint-disable-next-line react-hooks/purity -- per-request time anchor matches the sevenDaysAgoIso above
+  const now = new Date();
+  const weeklyBuckets = new Array(7).fill(0) as number[];
+  for (const a of weekApps) {
+    const t = new Date(a.created_at).getTime();
+    const daysAgo = Math.floor((now.getTime() - t) / (24 * 60 * 60 * 1000));
+    const idx = 6 - daysAgo;
+    if (idx >= 0 && idx <= 6) weeklyBuckets[idx] += 1;
+  }
+  // Naive WoW comparison would need 14d window — defer; just show count for now.
+  const screenedLifetime = screeningAllTime ?? 0;
+  const convPct =
+    applicationsCount > 0
+      ? Math.round((screenedLifetime / applicationsCount) * 100)
+      : null;
 
   return (
     <>
@@ -139,21 +184,43 @@ export default async function PositionDetailPage({
         }
       />
       <main className="px-6 lg:px-8 py-6 max-w-[1600px]">
-        <div className="flex flex-col gap-1.5 mb-5">
-          <div
-            className="text-[11px] font-semibold tracking-[0.12em] uppercase"
-            style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
-          >
-            {COUNTRY_LABEL[position.country] ?? position.country}
+        <div className="flex items-start justify-between gap-5 mb-5 flex-wrap">
+          <div className="flex flex-col gap-1.5 min-w-0">
+            <div
+              className="text-[11px] font-semibold tracking-[0.12em] uppercase"
+              style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
+            >
+              {COUNTRY_LABEL[position.country] ?? position.country}
+            </div>
+            <h1 className="text-[28px] font-extrabold leading-[32px] tracking-[-0.025em]">
+              {position.name}
+            </h1>
+            <div
+              className="text-[12px] text-pg-ink-tertiary"
+              style={{ fontFamily: "var(--font-mono)" }}
+            >
+              {position.slug}
+            </div>
           </div>
-          <h1 className="text-[28px] font-extrabold leading-[32px] tracking-[-0.025em]">
-            {position.name}
-          </h1>
-          <div
-            className="text-[12px] text-pg-ink-tertiary"
-            style={{ fontFamily: "var(--font-mono)" }}
-          >
-            {position.slug}
+
+          {/* BannerMetric strip — 3 position-level KPIs at a glance */}
+          <div className="flex items-stretch gap-2 flex-wrap">
+            <BannerMetric
+              label="Lamaran 7 hari"
+              value={weekTotal}
+              sparkline={weeklyBuckets}
+              deltaTone={weekTotal > 0 ? "ok" : "mute"}
+            />
+            <BannerMetric
+              label="Apply → screen"
+              value={convPct != null ? `${convPct}%` : "—"}
+              deltaTone={convPct != null && convPct >= 30 ? "ok" : "mute"}
+            />
+            <BannerMetric
+              label="Total lamaran"
+              value={applicationsCount}
+              deltaTone="mute"
+            />
           </div>
         </div>
 
@@ -182,21 +249,7 @@ export default async function PositionDetailPage({
               </span>
             </div>
           )}
-          <PositionEditorShell
-            slug={position.slug}
-            name={position.name}
-            country={COUNTRY_LABEL[position.country] ?? position.country}
-            description={position.description}
-            initialContent={editorContent}
-            initialFields={fields.map((f) => ({
-              field_key: f.field_key,
-              field_label: f.field_label,
-              field_help: f.field_help,
-              field_type: f.field_type,
-              importance: f.importance,
-              section: f.section,
-            }))}
-          />
+          <PositionEditorShell slug={position.slug} initialContent={editorContent} />
         </section>
 
         {/* === Tab: Form lamaran === */}
@@ -309,6 +362,21 @@ export default async function PositionDetailPage({
         </section>
       </main>
 
+      <PreviewMount
+        slug={position.slug}
+        name={position.name}
+        country={COUNTRY_LABEL[position.country] ?? position.country}
+        description={position.description}
+        initialContent={editorContent}
+        fields={fields.map((f) => ({
+          field_key: f.field_key,
+          field_label: f.field_label,
+          field_help: f.field_help,
+          field_type: f.field_type,
+          importance: f.importance,
+          section: f.section,
+        }))}
+      />
       <PublishBarMount
         slug={position.slug}
         positionName={position.name}
