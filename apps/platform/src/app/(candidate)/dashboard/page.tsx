@@ -1,13 +1,27 @@
 import Link from "next/link";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
-import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
+import { BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import {
   getDashboardData,
   getTimeOfDayGreeting,
   sortLamaranByUrgency,
+  deriveBerandaState,
+  type LamaranJourney,
 } from "@/lib/journey";
-import LamaranSwitcher from "./LamaranSwitcher";
+import { formatMemberId } from "@/lib/candidate";
+import {
+  BerandaTopBar,
+  BerandaHeader,
+  SectionHead,
+} from "@/components/pg/candidate/BerandaShared";
+import { JourneyHero } from "@/components/pg/candidate/JourneyHero";
+import { PasporInviteCard } from "@/components/pg/candidate/PasporInviteCard";
+import { TaskCard } from "@/components/pg/candidate/TaskCard";
+import { CountryBigTile } from "@/components/pg/candidate/CountryBigTile";
+import { ProgressNudge } from "@/components/pg/candidate/ProgressNudge";
+import { PendampingCard } from "@/components/pg/candidate/PendampingCard";
+import { TerminalCard } from "@/components/pg/candidate/TerminalCard";
 
 export const dynamic = "force-dynamic";
 
@@ -19,307 +33,434 @@ const COUNTRY_LABEL: Record<string, string> = {
   any: "Global",
 };
 
+const COUNTRY_TILES: Array<{
+  slug: "saudi" | "jepang" | "taiwan" | "indonesia";
+  flag: string;
+  name: string;
+  dbKey: string;
+}> = [
+  { slug: "jepang", flag: "🇯🇵", name: "Jepang", dbKey: "japan" },
+  { slug: "saudi", flag: "🇸🇦", name: "Arab Saudi", dbKey: "saudi_arabia" },
+  { slug: "taiwan", flag: "🇹🇼", name: "Taiwan", dbKey: "taiwan" },
+  { slug: "indonesia", flag: "🇮🇩", name: "Indonesia", dbKey: "indonesia" },
+];
+
 export default async function DashboardPage() {
   const { session, candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  const dashboard = await getDashboardData(candidateId, supabase);
+  // Parallel: dashboard data + open-position counts per country (for S1 tiles).
+  const [dashboard, positionCountsResult, candidateMeta] = await Promise.all([
+    getDashboardData(candidateId, supabase),
+    supabase
+      .from("positions")
+      .select("country, active")
+      .eq("active", true),
+    supabase
+      .from("candidates")
+      .select("created_at")
+      .eq("id", candidateId)
+      .single(),
+  ]);
+
   const lamaranSorted = sortLamaranByUrgency(dashboard.lamaran);
+  const primary = lamaranSorted[0];
+  const state = deriveBerandaState(primary);
 
   const firstName =
     (dashboard.candidateFullName || session.email || "kandidat").split(" ")[0];
-  const initials =
-    (dashboard.candidateFullName || "??")
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((s) => s[0]?.toUpperCase())
-      .join("") || "??";
 
-  // Show Paspor card when active lamaran is in "diproses" — that's the "sambil
-  // nunggu" moment that makes the offer contextual. Card disappears at
-  // terkirim (too early), hasil_diterima (different flow), and hasil_ditolak.
-  const primaryLamaran = lamaranSorted[0];
-  const showPasporCard = primaryLamaran?.stage === "diproses";
-  const pasporCountry = primaryLamaran?.country
-    ? COUNTRY_LABEL[primaryLamaran.country] ?? primaryLamaran.country
-    : null;
+  const positionCounts: Record<string, number> = {};
+  for (const row of (positionCountsResult.data ?? []) as Array<{ country: string }>) {
+    positionCounts[row.country] = (positionCounts[row.country] || 0) + 1;
+  }
 
-  const greeting = getTimeOfDayGreeting();
+  const memberId = candidateMeta.data
+    ? formatMemberId(candidateId, (candidateMeta.data as { created_at: string }).created_at)
+    : undefined;
+
+  const greeting = `${getTimeOfDayGreeting()}, ${firstName} 👋`;
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <TopBarApp title="Beranda" />
-
-      <main className="flex-1 pb-6">
-        {/* Welcome zone — brand-led with hospitality */}
-        <section
-          className="px-5 pt-4 pb-4"
-          style={{
-            background: "linear-gradient(180deg, var(--pg-surface-subtle) 0%, transparent 100%)",
-            borderBottom: "1px solid var(--pg-border)",
-          }}
-        >
-          <div className="flex items-center mb-3">
-            <span
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full"
-              style={{
-                background: "var(--pg-white)",
-                border: "1px solid var(--pg-border)",
-                boxShadow: "0 1px 2px rgba(20,20,20,0.04), 0 4px 12px rgba(20,20,20,0.04)",
-              }}
-            >
-              <span
-                className="w-1.5 h-1.5 rounded-full"
-                style={{
-                  background: "var(--pg-red-600)",
-                  animation: "pg-pulse-soft 2s infinite",
-                }}
-              />
-              <span
-                className="text-[10px] font-bold uppercase tracking-[0.1em] font-mono"
-                style={{ color: "var(--pg-ink-secondary)" }}
-              >
-                Welcome to Global Talent Hub
-              </span>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3.5">
-            <div
-              className="w-12 h-12 rounded-full grid place-items-center text-white text-[16px] font-extrabold shrink-0"
-              style={{
-                background: "linear-gradient(135deg, var(--pg-red-600) 0%, var(--pg-red-700) 100%)",
-                boxShadow:
-                  "0 3px 10px rgba(215,38,47,0.25), inset 0 1px 0 rgba(255,255,255,0.25)",
-              }}
-            >
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[13px]" style={{ color: "var(--pg-ink-tertiary)" }}>
-                {greeting},
-              </div>
-              <div className="text-[22px] font-extrabold tracking-[-0.02em] leading-tight">
-                {firstName} 👋
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Per-lamaran tab strip + hero (or empty state) */}
-        {lamaranSorted.length > 0 ? (
-          <LamaranSwitcher lamaran={lamaranSorted} countryLabel={COUNTRY_LABEL} />
-        ) : (
-          <EmptyState
+    <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
+      <BerandaTopBar />
+      <main className="flex-1 pb-8 pt-1">
+        {state === "S1" && (
+          <BerandaS1
+            greeting={greeting}
+            memberId={memberId}
             identityFilled={dashboard.identityFilledCount}
             identityTotal={dashboard.identityTotalCount}
+            positionCounts={positionCounts}
           />
         )}
-
-        {/* Paspor Perantau Global — only when active lamaran is in "diproses" */}
-        {showPasporCard && pasporCountry && (
-          <section className="px-5 pt-7">
-            <PasporCard
-              countryLabel={pasporCountry}
-              positionName={primaryLamaran?.positionName ?? null}
-            />
-          </section>
+        {state === "S2" && primary && (
+          <BerandaS2
+            greeting={greeting}
+            memberId={memberId}
+            primary={primary}
+          />
         )}
-
-        {/* "Cocok buat kamu" section removed in Fase 6B — pre-apply readiness
-            depended on shared profile_data.credentials which is sunset
-            (Fase 5). /explore is still the path for browsing positions. */}
+        {state === "S3" && primary && (
+          <BerandaS3
+            greeting={greeting}
+            memberId={memberId}
+            primary={primary}
+          />
+        )}
+        {state === "hasil-diterima" && primary && (
+          <BerandaTerminal
+            greeting={greeting}
+            memberId={memberId}
+            primary={primary}
+            outcome="diterima"
+          />
+        )}
+        {state === "hasil-ditolak" && primary && (
+          <BerandaTerminal
+            greeting={greeting}
+            memberId={memberId}
+            primary={primary}
+            outcome="ditolak"
+          />
+        )}
       </main>
-
       <BottomNav />
     </div>
   );
 }
 
-// ─── Empty state (no lamaran yet) ──────────────────────────────────────────
-
-function EmptyState({
+// ─── S1: No application yet ────────────────────────────────────────────────
+function BerandaS1({
+  greeting,
+  memberId,
   identityFilled,
   identityTotal,
+  positionCounts,
 }: {
+  greeting: string;
+  memberId?: string;
   identityFilled: number;
   identityTotal: number;
+  positionCounts: Record<string, number>;
 }) {
+  const totalOpen = Object.values(positionCounts).reduce((a, b) => a + b, 0);
   const profileIncomplete = identityFilled < identityTotal;
-
   return (
-    <section className="px-5 pt-5">
-      <div
-        className="rounded-3xl p-5 text-center relative overflow-hidden"
-        style={{
-          background: "linear-gradient(160deg, var(--pg-red-600) 0%, var(--pg-red-700) 100%)",
-          color: "white",
-          boxShadow:
-            "0 8px 24px rgba(215,38,47,0.22), 0 16px 48px rgba(215,38,47,0.12), inset 0 1px 0 rgba(255,255,255,0.18)",
-        }}
-      >
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "radial-gradient(ellipse at top right, rgba(255,255,255,0.12) 0%, transparent 60%)",
-          }}
-        />
-        <div className="relative">
-          <h2 className="text-[22px] font-extrabold tracking-[-0.02em] leading-tight">
-            {profileIncomplete ? "Lengkapi profil dulu" : "Yuk mulai cari lowongan"}
-          </h2>
-          <p className="text-[13px] mt-2 leading-relaxed" style={{ opacity: 0.9 }}>
-            {profileIncomplete
-              ? "Profil lengkap = lamaran lebih cepet diproses. Tinggal beberapa hal lagi."
-              : "Banyak lowongan ke Saudi Arabia, Jepang, Taiwan & Indonesia siap kamu lamar."}
-          </p>
-          <Link
-            href={profileIncomplete ? "/profile" : "/explore"}
-            className="inline-flex items-center justify-center gap-1.5 px-5 py-3 mt-4 rounded-2xl text-[14px] font-extrabold no-underline"
-            style={{
-              background: "rgba(255,255,255,0.95)",
-              color: "var(--pg-red-600)",
-              boxShadow: "0 4px 14px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.8)",
-            }}
-          >
-            {profileIncomplete ? "Lengkapi profil" : "Cari lowongan"}
-            <Icon name="arrow_right" size={14} stroke={2.5} />
-          </Link>
+    <>
+      <BerandaHeader
+        greeting={greeting}
+        memberId={memberId}
+        headline={
+          <>
+            Mau kerja <span style={{ color: "var(--pg-red-600)" }}>di mana</span>?
+          </>
+        }
+        sub={`${totalOpen} lowongan di 4 negara. Pilih satu dulu, lengkapi profil sambil jalan.`}
+      />
+
+      {/* Country picker — horizontal scroll */}
+      <div className="pl-5">
+        <div className="flex gap-3 overflow-x-auto pb-1 pr-5 scrollbar-none" style={{ scrollbarWidth: "none" as const }}>
+          {COUNTRY_TILES.map((c) => {
+            const count = positionCounts[c.dbKey] ?? 0;
+            return (
+              <CountryBigTile
+                key={c.slug}
+                slug={c.slug}
+                flag={c.flag}
+                name={c.name}
+                count={`${count} posisi`}
+                href={`/explore?country=${encodeURIComponent(c.dbKey)}`}
+              />
+            );
+          })}
         </div>
       </div>
-    </section>
+
+      {/* Profile progress — soft nudge */}
+      {profileIncomplete && (
+        <div className="px-5 pt-4">
+          <ProgressNudge filled={identityFilled} total={identityTotal} />
+        </div>
+      )}
+
+      {/* Paspor invite — compact secondary */}
+      <div className="px-5 pt-4">
+        <div className="mb-2.5">
+          <span
+            className="font-mono text-[10.5px] font-bold uppercase tracking-[0.14em]"
+            style={{ color: "var(--pa-amber-700)" }}
+          >
+            Belajar duluan, sambil milih
+          </span>
+        </div>
+        <PasporInviteCard variant="compact" countryLabel="Jepang" />
+      </div>
+    </>
   );
 }
 
-// ─── Paspor Perantau Global card ───────────────────────────────────────────
-
-function PasporCard({
-  countryLabel,
-  positionName,
+// ─── S2: Active application, needs lengkapi/upload (most common) ─────────
+function BerandaS2({
+  greeting,
+  memberId,
+  primary,
 }: {
+  greeting: string;
+  memberId?: string;
+  primary: LamaranJourney;
+}) {
+  const countryLabel = COUNTRY_LABEL[primary.country] ?? primary.country;
+  return (
+    <>
+      <BerandaHeader
+        greeting={greeting}
+        memberId={memberId}
+        headline={
+          <>
+            Perjalananmu ke{" "}
+            <span style={{ color: "var(--pg-red-600)" }}>{countryLabel}</span>{" "}
+            lagi jalan.
+          </>
+        }
+      />
+
+      <div className="px-5">
+        <JourneyHero
+          mode="applying"
+          countrySlug={primary.country}
+          positionName={primary.positionName}
+          applicationId={primary.applicationId}
+          positionSlug={primary.positionSlug}
+        />
+      </div>
+
+      {/* Tasks hari ini */}
+      <div className="px-5 pt-5">
+        <SectionHead
+          title="Tugas hari ini"
+          sub={
+            primary.needsDocs ? "Lengkapi syarat agar lamaran bisa lanjut" : "Pantau status"
+          }
+        />
+        <div className="flex flex-col gap-2.5">
+          {primary.needsDocs ? (
+            <TaskCard
+              icon="passport"
+              title="Lengkapi syarat lamaran"
+              meta="Upload dokumen + isi pertanyaan sisanya"
+              deadline="Sekarang"
+              urgent
+              href={`/applications/${primary.applicationId}/lengkapi`}
+            />
+          ) : (
+            <TaskCard
+              icon="clock"
+              title="Pantau status lamaran"
+              meta="Cek update terakhir dari tim Perantau Global"
+              href={`/applications/${primary.applicationId}`}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Sambil nunggu — Paspor secondary */}
+      <div className="px-5 pt-5">
+        <SectionHead
+          title="Sambil nunggu"
+          sub={`Lanjut persiapan ${countryLabel}`}
+        />
+        <PasporInviteCard variant="default" countryLabel={countryLabel} />
+      </div>
+
+      {/* Eksplor lain */}
+      <div className="pt-5">
+        <div className="px-5">
+          <SectionHead title="Eksplor lowongan lain" sub="Mungkin ada yang lebih cocok" allHref="/explore" />
+        </div>
+        <div className="pl-5">
+          <div className="flex gap-3 overflow-x-auto pb-1 pr-5 scrollbar-none" style={{ scrollbarWidth: "none" as const }}>
+            <ExploreCard slug="perawat-saudi-arabia" country="saudi" flag="🇸🇦" countryLabel="Saudi Arabia" role="Perawat" salary="SAR 3.200" status="open" />
+            <ExploreCard slug="truck-driver-jepang" country="jepang" flag="🇯🇵" countryLabel="Jepang" role="Truck Driver" salary="¥250.000" status="queue" />
+            <ExploreCard slug="kaigo-jepang" country="jepang" flag="🇯🇵" countryLabel="Jepang" role="Caregiver Kaigo" salary="¥190.000" status="queue" />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ─── S3: Application processing (docs complete, waiting for review) ──────
+function BerandaS3({
+  greeting,
+  memberId,
+  primary,
+}: {
+  greeting: string;
+  memberId?: string;
+  primary: LamaranJourney;
+}) {
+  const countryLabel = COUNTRY_LABEL[primary.country] ?? primary.country;
+  return (
+    <>
+      <BerandaHeader
+        greeting={greeting}
+        memberId={memberId}
+        headline={
+          <>
+            Lamaran kamu lagi{" "}
+            <span style={{ color: "var(--pg-red-600)" }}>diproses</span>.
+          </>
+        }
+        sub="Biasanya 5-7 hari kerja. Tim Perantau kabari segera."
+      />
+
+      <div className="px-5">
+        <JourneyHero
+          mode="processing"
+          countrySlug={primary.country}
+          positionName={primary.positionName}
+          applicationId={primary.applicationId}
+          positionSlug={primary.positionSlug}
+        />
+      </div>
+
+      {/* Paspor jadi primer */}
+      <div className="px-5 pt-5">
+        <SectionHead
+          title="Manfaatkan waktu nunggu"
+          sub={`Mulai belajar untuk ${countryLabel} — sertifikat di akhir`}
+        />
+        <PasporInviteCard variant="primary" countryLabel={countryLabel} />
+      </div>
+
+      {/* Pendamping */}
+      <div className="px-5 pt-5">
+        <SectionHead title="Pesan dari Perantau Global" />
+        <PendampingCard
+          msg={`Halo! Dokumen kamu sudah kami terima. Tim sedang review lamaran kamu untuk ${primary.positionName} di ${countryLabel}. Kami kabari segera.`}
+          time="Baru saja"
+        />
+      </div>
+    </>
+  );
+}
+
+// ─── Terminal: hasil diterima / ditolak ──────────────────────────────────
+function BerandaTerminal({
+  greeting,
+  memberId,
+  primary,
+  outcome,
+}: {
+  greeting: string;
+  memberId?: string;
+  primary: LamaranJourney;
+  outcome: "diterima" | "ditolak";
+}) {
+  const countryLabel = COUNTRY_LABEL[primary.country] ?? primary.country;
+  return (
+    <>
+      <BerandaHeader
+        greeting={greeting}
+        memberId={memberId}
+        headline={
+          outcome === "diterima" ? (
+            <>Selamat berangkat ke <span style={{ color: "var(--pg-red-600)" }}>{countryLabel}</span> 🎉</>
+          ) : (
+            <>Hasil lamaranmu sudah keluar.</>
+          )
+        }
+      />
+      <div className="px-5">
+        <TerminalCard
+          outcome={outcome}
+          positionName={primary.positionName}
+          country={countryLabel}
+          applicationId={primary.applicationId}
+        />
+      </div>
+      {outcome === "diterima" && (
+        <div className="px-5 pt-5">
+          <SectionHead
+            title="Persiapan keberangkatan"
+            sub="Modul Paspor + tips dari alumni"
+          />
+          <PasporInviteCard variant="primary" countryLabel={countryLabel} />
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── Mini explore card (S2 horizontal scroll) ─────────────────────────────
+function ExploreCard({
+  slug,
+  country,
+  flag,
+  countryLabel,
+  role,
+  salary,
+  status,
+}: {
+  slug: string;
+  country: string;
+  flag: string;
   countryLabel: string;
-  positionName: string | null;
+  role: string;
+  salary: string;
+  status: "open" | "queue";
 }) {
   return (
-    <div
-      className="rounded-3xl p-5 relative overflow-hidden"
+    <Link
+      href={`/explore?position=${encodeURIComponent(slug)}`}
+      className="flex flex-col shrink-0 rounded-[14px] overflow-hidden bg-pg-white no-underline transition-transform hover:-translate-y-0.5"
       style={{
-        background:
-          "linear-gradient(135deg, #fffaef 0%, var(--pg-amber-100) 60%, #fce8b6 100%)",
-        border: "1px solid var(--pg-amber-200)",
+        width: 220,
+        border: "1px solid var(--pg-ink-100)",
         boxShadow:
-          "0 6px 18px rgba(201,138,20,0.20), 0 12px 36px rgba(201,138,20,0.10), inset 0 1px 0 rgba(255,255,255,0.6)",
+          "0 1px 2px rgba(20,16,12,0.04), 0 8px 24px rgba(20,16,12,0.06)",
       }}
     >
       <div
-        className="absolute pointer-events-none"
-        style={{
-          top: 0, left: 0, right: 0, height: "50%",
-          background: "linear-gradient(180deg, rgba(255,255,255,0.55) 0%, transparent 100%)",
-        }}
-      />
-      <div
-        className="absolute pointer-events-none"
-        style={{
-          top: "-28px", right: "-28px",
-          width: "100px", height: "100px",
-          background: "radial-gradient(circle, var(--pg-amber-500) 0%, transparent 70%)",
-          opacity: 0.16,
-        }}
-      />
-
-      <div className="relative">
-        <div className="flex items-center gap-2.5 mb-1">
-          <div
-            className="w-9 h-9 rounded-xl grid place-items-center text-white shrink-0"
-            style={{
-              background: "linear-gradient(135deg, var(--pg-amber-500) 0%, var(--pg-amber-600) 100%)",
-              boxShadow:
-                "0 2px 6px rgba(201,138,20,0.40), inset 0 1px 0 rgba(255,255,255,0.3)",
-            }}
-          >
-            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-              <path d="M12 2L9 7l-5.5.8L7.5 12l-1 5.5L12 15l5.5 2.5-1-5.5 4-4.2L15 7z" />
-            </svg>
-          </div>
-          <span
-            className="text-[10px] font-bold uppercase tracking-[0.14em] font-mono"
-            style={{ color: "var(--pg-amber-700)" }}
-          >
-            Paspor Perantau Global
-          </span>
-          <span
-            className="text-[9px] font-extrabold uppercase tracking-[0.08em] px-2 py-0.5 rounded font-mono text-white"
-            style={{ background: "var(--pg-amber-700)" }}
-          >
-            Gratis
-          </span>
-        </div>
-
-        <h3
-          className="text-[20px] font-extrabold tracking-[-0.018em] mt-2 leading-tight"
-          style={{ color: "var(--pg-amber-700)" }}
+        className="relative h-[110px] bg-cover bg-center bg-pg-ink-50"
+        style={{ backgroundImage: `url(/images/lowongan/${slug}.jpg)` }}
+      >
+        <div
+          aria-hidden
+          className="absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(20,16,12,0.10) 0%, rgba(20,16,12,0.45) 100%)",
+          }}
+        />
+        <span
+          className="absolute top-2 left-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[10px] font-bold tracking-[0.04em]"
+          style={{ background: "rgba(255,255,255,0.94)", color: "var(--pg-ink-900)" }}
         >
-          Sertifikasi Siap Kerja {countryLabel}
-        </h3>
-        <p className="text-[13px] mt-2 leading-snug" style={{ color: "var(--pg-ink-secondary)" }}>
-          Sambil nunggu hasil lamaran
-          {positionName ? <strong> {positionName}</strong> : null}, siapin diri kamu lewat
-          kursus singkat dari Perantau Global. Buat <strong>tahan & sukses</strong> kerja di {countryLabel}.
-        </p>
-
-        <div className="flex flex-col gap-1.5 mt-4 mb-4">
-          {[
-            "Etika kerja & budaya kerja",
-            "Bahasa praktis di tempat kerja",
-            "Adaptasi hidup & cara kelola gaji",
-          ].map((feature) => (
-            <div
-              key={feature}
-              className="flex items-center gap-2 text-[12px] font-medium"
-              style={{ color: "var(--pg-ink-secondary)" }}
-            >
-              <span
-                className="w-4 h-4 rounded-full grid place-items-center text-white shrink-0"
-                style={{
-                  background: "var(--pg-amber-500)",
-                  boxShadow: "0 1px 3px rgba(201,138,20,0.4)",
-                }}
-              >
-                <Icon name="check" size={9} stroke={3} />
-              </span>
-              {feature}
-            </div>
-          ))}
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
-          <div
-            className="text-[11px] font-bold flex items-center gap-2"
-            style={{ color: "var(--pg-amber-600)" }}
-          >
-            ~5 jam
-            <span className="w-[3px] h-[3px] rounded-full" style={{ background: "var(--pg-amber-500)" }} />
-            Online
-            <span className="w-[3px] h-[3px] rounded-full" style={{ background: "var(--pg-amber-500)" }} />
-            Sertifikat
-          </div>
-          <Link
-            href="/paspor"
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-[12px] font-extrabold text-white no-underline"
-            style={{
-              background: "linear-gradient(180deg, var(--pg-amber-600) 0%, #8a5e08 100%)",
-              boxShadow:
-                "0 3px 8px rgba(110,73,6,0.35), inset 0 1px 0 rgba(255,255,255,0.25)",
-            }}
-          >
-            Mulai
-            <Icon name="arrow_right" size={12} stroke={2.5} />
-          </Link>
-        </div>
+          <span aria-hidden className="text-[11px] leading-none">{flag}</span>
+          {countryLabel}
+        </span>
+        <span
+          className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[9.5px] font-bold uppercase tracking-[0.06em]"
+          style={
+            status === "open"
+              ? { background: "var(--pg-red-600)", color: "#fff" }
+              : { background: "rgba(255,255,255,0.92)", color: "var(--pg-ink-700)" }
+          }
+        >
+          {status === "open" ? "Lagi buka" : "Antrian"}
+        </span>
       </div>
-    </div>
+      <div className="p-3 flex flex-col gap-0.5">
+        <span className="text-[14px] font-extrabold tracking-[-0.01em] text-pg-ink-900">
+          {role}
+        </span>
+        <span className="font-mono text-[11px] text-pg-ink-500 tracking-[0.02em]">
+          {salary} <span style={{ opacity: 0.6 }}>/bulan</span>
+        </span>
+      </div>
+    </Link>
   );
 }

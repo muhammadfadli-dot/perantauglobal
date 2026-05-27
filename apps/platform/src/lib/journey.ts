@@ -147,6 +147,40 @@ export function sortLamaranByUrgency(lamaran: LamaranJourney[]): LamaranJourney[
   });
 }
 
+/**
+ * Beranda hero state machine — drives which BerandaSn component renders.
+ *
+ * Per portal-v2 design (Airbnb Journey):
+ *  - S1: candidate signed up, no application yet → country picker hero
+ *  - S2: has application, needs docs / lengkapi (most common) → journey hero + tasks
+ *  - S3: has application, docs complete, waiting for review → journey hero + Paspor primary + Pendamping
+ *  - S4: interview scheduled (deferred — needs interview_scheduled schema)
+ *  - S5: pre-departure (deferred — needs pre_departure_checklist schema)
+ *  - hasil-diterima: terminal accepted (interim, until S5 schema lands)
+ *  - hasil-ditolak: terminal rejected
+ */
+export type BerandaState =
+  | "S1"
+  | "S2"
+  | "S3"
+  | "hasil-diterima"
+  | "hasil-ditolak";
+
+export function deriveBerandaState(
+  primary: LamaranJourney | undefined,
+): BerandaState {
+  if (!primary) return "S1";
+  if (primary.stage === "hasil_diterima") return "hasil-diterima";
+  if (primary.stage === "hasil_ditolak") return "hasil-ditolak";
+  // terkirim / diproses with needsDocs → S2 (action required)
+  if (primary.needsDocs) return "S2";
+  // diproses w/o needs docs → S3 (waiting for review)
+  if (primary.stage === "diproses") return "S3";
+  // terkirim (talent pool) — show S2 style since user still has work to do
+  // (lengkapi profile / wait for review)
+  return "S2";
+}
+
 // Server-side time-of-day greeting (Asia/Jakarta).
 export function getTimeOfDayGreeting(): string {
   const formatter = new Intl.DateTimeFormat("en-US", {
