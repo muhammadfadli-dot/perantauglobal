@@ -2,7 +2,38 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-05-27 (Phases 0–8 ALL SHIPPED, 31 PRs total, design-C admin publish flow live in prod)
+**Last updated:** 2026-05-28 (event registration LP built — ⚠️ migration 0055 NOT yet applied)
+
+## 2026-05-28 — Event registration LP (sharing session) 🔨 BUILT, NOT SHIPPED
+
+First-party event registration to replace Google Forms, so paid traffic to the
+sharing session is measurable (Meta CAPI `CompleteRegistration`). Architecture
+decision: **standalone unlinked LP** at `/event/[slug]` (NOT an events nav
+section); **separate `events` + `event_registrations` tables** (NOT
+candidates/applications); **no magic-link/auth** — frictionless anon insert.
+
+**⚠️ BLOCKED — manual step for Panji:** migration `0055_events_registrations.sql`
+was NOT applied (auto-mode classifier blocks direct prod DB migration). Apply it
+(Supabase SQL editor / CLI / approve MCP), then the LP works end-to-end. Until
+then: tables don't exist, LP 404s, admin page shows "relation does not exist".
+`packages/db/src/types.ts` already hand-edited with the new table types.
+
+**What's built (both apps build green, EXIT=0):**
+- `packages/db/migrations/0055_events_registrations.sql` — 2 tables + RLS
+  (anon insert, `is_admin()` admin read/manage) + seed row `sharing-session-perawat`
+  (status=published, 29 Mei 2026 18:30 WIB, content JSONB w/ tagline+intro+benefits+speakers).
+- web: `/[locale]/event/[slug]/page.tsx` (red hero + intro + benefits + speakers + form),
+  minimal `event/layout.tsx` (logo only, no nav), `components/pg/event/EventForm.tsx`
+  (frictionless, fbp/fbc + dataLayer dedup), `lib/events-db.ts`,
+  `api/event/[slug]/route.ts` (anon insert + CAPI CompleteRegistration).
+- platform: `/admin/events` (index w/ reg counts) + `/admin/events/[slug]`
+  (table + CSV export + KPI strip), Sidebar "Event" link.
+- assets: `apps/web/public/images/events/sharing-session-perawat/` — poster.png +
+  alfi.jpg/tessa.jpg (⚠️ speaker photos are 72×72 placeholders; hi-res pending from Panji).
+
+**Follow-ups after apply:** point ad/QR destination to `/event/sharing-session-perawat`
+(currently bit.ly→GForm); set `events.join_url` (Zoom link) via SQL; drop in hi-res
+speaker photos (same filenames); optionally wire a reminder email (event_reg → Resend).
 
 ## 2026-05-27 (evening) — Phase 8 design-C publish flow ✅ SHIPPED
 

@@ -70,6 +70,7 @@ export default function AdminSidebar({
           ? { label: `${counts.inboxNew} BARU`, tone: "warn" }
           : undefined,
       },
+      { href: "/admin/events", label: "Event", icon: "bell" },
       { href: "/admin/analytics", label: "Analytics", icon: "sparkle_dot" },
     ],
   };

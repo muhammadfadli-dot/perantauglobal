@@ -478,6 +478,146 @@ export type Database = {
         }
         Relationships: []
       }
+      event_registrations: {
+        Row: {
+          answers: Json
+          city: string | null
+          consent_marketing: boolean
+          created_at: string
+          email: string
+          event_slug: string
+          fbc: string | null
+          fbp: string | null
+          full_name: string
+          id: string
+          interest: string | null
+          ip_address: unknown | null
+          meta_event_id: string | null
+          profession: string | null
+          referrer_url: string | null
+          source: string | null
+          status: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          whatsapp: string
+        }
+        Insert: {
+          answers?: Json
+          city?: string | null
+          consent_marketing?: boolean
+          created_at?: string
+          email: string
+          event_slug: string
+          fbc?: string | null
+          fbp?: string | null
+          full_name: string
+          id?: string
+          interest?: string | null
+          ip_address?: unknown | null
+          meta_event_id?: string | null
+          profession?: string | null
+          referrer_url?: string | null
+          source?: string | null
+          status?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          whatsapp: string
+        }
+        Update: {
+          answers?: Json
+          city?: string | null
+          consent_marketing?: boolean
+          created_at?: string
+          email?: string
+          event_slug?: string
+          fbc?: string | null
+          fbp?: string | null
+          full_name?: string
+          id?: string
+          interest?: string | null
+          ip_address?: unknown | null
+          meta_event_id?: string | null
+          profession?: string | null
+          referrer_url?: string | null
+          source?: string | null
+          status?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          whatsapp?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_slug_fkey"
+            columns: ["event_slug"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          capacity: number | null
+          content: Json
+          cover_image: string | null
+          created_at: string
+          ends_at: string | null
+          join_url: string | null
+          kind: string
+          platform: string
+          slug: string
+          starts_at: string
+          status: string
+          timezone: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          content?: Json
+          cover_image?: string | null
+          created_at?: string
+          ends_at?: string | null
+          join_url?: string | null
+          kind?: string
+          platform?: string
+          slug: string
+          starts_at: string
+          status?: string
+          timezone?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          content?: Json
+          cover_image?: string | null
+          created_at?: string
+          ends_at?: string | null
+          join_url?: string | null
+          kind?: string
+          platform?: string
+          slug?: string
+          starts_at?: string
+          status?: string
+          timezone?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       job_orders: {
         Row: {
           created_at: string
