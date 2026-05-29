@@ -1,20 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Icon } from "@/components/pg/Icon";
-import { saveDraft } from "../../app/(admin)/admin/positions/actions";
+import { saveDraftMediaSeo } from "../../app/(admin)/admin/positions/actions";
 import type { PositionContent, ContentMedia, ContentSeo } from "@/lib/position-content";
 
 /**
- * Media & SEO tab — Phase 8d, 5th tab in the position editor.
+ * Media & SEO tab — 5th tab in the position editor.
  *
- * Writes to positions.content.media (image URLs) and positions.content.seo
- * (meta title + description) via the same `saveDraft` server action used by
- * the Konten tab. Bridges to PositionEditorShell via the `pg-editor-state`
- * window event so cross-tab edits don't clobber each other:
- *   - PositionEditorShell broadcasts the latest full content on every change
- *   - MediaSeoTab keeps a ref to that latest snapshot
- *   - When MediaSeoTab saves, it merges its own fields into that snapshot
+ * Writes ONLY positions.draft_content.media (image URLs) + .seo (meta tags) via
+ * the dedicated `saveDraftMediaSeo` action, which merges them into the current
+ * draft server-side. The Konten tab's `saveDraft` symmetrically preserves media/seo,
+ * so the two tabs own disjoint keys and their independent auto-saves can't clobber
+ * each other regardless of save order (fixes the prior one-directional event-bus bug).
  *
  * Trade-off: text URLs only for MVP. File upload to Supabase Storage is
  * deferred until storage RLS + bucket setup lands (separate phase).
@@ -31,18 +29,6 @@ export default function MediaSeoTab({
   const [saving, setSaving] = useState(false);
   const [savedAt, setSavedAt] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
-
-  // Track the latest full content from the Konten tab so our save doesn't
-  // clobber pending edits there.
-  const latestContent = useRef<PositionContent>(initialContent);
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail as { content?: PositionContent };
-      if (detail.content) latestContent.current = detail.content;
-    };
-    window.addEventListener("pg-editor-state", handler);
-    return () => window.removeEventListener("pg-editor-state", handler);
-  }, []);
 
   async function persist(nextMedia: ContentMedia, nextSeo: ContentSeo) {
     setSaving(true);
@@ -61,12 +47,13 @@ export default function MediaSeoTab({
       if (nextSeo.metaDescription?.trim())
         cleanSeo.metaDescription = nextSeo.metaDescription.trim();
 
-      const merged: PositionContent = {
-        ...latestContent.current,
-        media: Object.keys(cleanMedia).length > 0 ? cleanMedia : undefined,
-        seo: Object.keys(cleanSeo).length > 0 ? cleanSeo : undefined,
-      };
-      await saveDraft(slug, merged);
+      // Send only media/seo; the action merges them into the current draft server-side,
+      // preserving the Konten tab's fields. No client-side content mirroring needed.
+      await saveDraftMediaSeo(
+        slug,
+        Object.keys(cleanMedia).length > 0 ? cleanMedia : undefined,
+        Object.keys(cleanSeo).length > 0 ? cleanSeo : undefined,
+      );
       setSavedAt(new Date());
       window.dispatchEvent(
         new CustomEvent("pg-editor-state", {

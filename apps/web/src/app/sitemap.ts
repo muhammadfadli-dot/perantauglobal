@@ -1,8 +1,7 @@
 import type { MetadataRoute } from "next";
 import { POSITIONS } from "@/lib/positions";
 import { CERTIFICATIONS } from "@/lib/certifications";
-
-const SITE_URL = "https://perantauglobal.com";
+import { SITE_URL } from "@/lib/site";
 
 const STATIC_PAGES: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "", priority: 1.0, changeFrequency: "weekly" },

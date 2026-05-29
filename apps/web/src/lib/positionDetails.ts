@@ -540,6 +540,38 @@ export const POSITION_DETAILS: Record<string, PositionDetail> = {
     process: COMMON_PROCESS,
   },
 
+  "manufaktur-pengelasan": {
+    jobDescription: [
+      "Pengelasan komponen logam pada lini manufaktur sesuai standar mutu pabrik",
+      "Pembacaan gambar kerja, persiapan material, dan finishing hasil las",
+      "Pengoperasian mesin pada lini produksi, pembersihan tempat kerja, dan pencucian peralatan",
+    ],
+    details: [
+      { label: "Lokasi", value: "Jepang" },
+      { label: "Jenis pekerjaan", value: "Manufaktur (Pengelasan)" },
+      { label: "Jam kerja", value: "8 jam shift · rata-rata 40 jam/minggu" },
+      { label: "Informasi tambahan", value: "Terbiasa hou-ren-sou (laporan, komunikasi, konsultasi)" },
+    ],
+    benefits: [
+      { icon: "wallet", label: "Gaji pokok", value: "¥244.200 / bulan" },
+      { icon: "shield", label: "Asuransi sosial", value: "Disediakan" },
+    ],
+    qualifications: [
+      "Laki-laki, maksimal 35 tahun",
+      "Kewarganegaraan Indonesia",
+      "Minimal SMA / SMK / sederajat",
+      "Sertifikasi bahasa: JLPT N4 / JFT A2",
+      "Sertifikat keahlian: SSW Manufaktur (Pengelasan)",
+      "Pengalaman pengelasan lebih diutamakan",
+    ],
+    fee: {
+      amount: "Rp ??.000.000",
+      breakdown: ["BPJS", "MCU", "COE", "Visa", "Tiket pesawat"],
+      note: COMMON_FEE_NOTE,
+    },
+    process: COMMON_PROCESS,
+  },
+
   // === Taiwan ===
   "caregiver-taiwan": {
     jobDescription: [

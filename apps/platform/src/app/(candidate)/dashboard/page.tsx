@@ -45,23 +45,57 @@ const COUNTRY_TILES: Array<{
   { slug: "indonesia", flag: "🇮🇩", name: "Indonesia", dbKey: "indonesia" },
 ];
 
+// DB country key → card display (slug/flag/name), derived from COUNTRY_TILES.
+const COUNTRY_CARD: Record<
+  string,
+  { slug: string; flag: string; name: string }
+> = Object.fromEntries(
+  COUNTRY_TILES.map((t) => [t.dbKey, { slug: t.slug, flag: t.flag, name: t.name }]),
+);
+
+type ExploreCardData = {
+  slug: string;
+  country: string;
+  flag: string;
+  countryLabel: string;
+  role: string;
+  salary: string;
+  status: "open" | "queue";
+};
+
+// Pull salary off positions.content.cardMeta.salary (mirrors explore/page.tsx).
+function pickSalary(content: unknown): string {
+  if (!content || typeof content !== "object" || Array.isArray(content)) return "—";
+  const meta = (content as Record<string, unknown>).cardMeta;
+  if (!meta || typeof meta !== "object" || Array.isArray(meta)) return "—";
+  const salary = (meta as Record<string, unknown>).salary;
+  return typeof salary === "string" && salary.trim() ? salary : "—";
+}
+
 export default async function DashboardPage() {
   const { session, candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  // Parallel: dashboard data + open-position counts per country (for S1 tiles).
-  const [dashboard, positionCountsResult, candidateMeta] = await Promise.all([
-    getDashboardData(candidateId, supabase),
-    supabase
-      .from("positions")
-      .select("country, active")
-      .eq("active", true),
-    supabase
-      .from("candidates")
-      .select("created_at")
-      .eq("id", candidateId)
-      .single(),
-  ]);
+  // Parallel: dashboard data + active positions (for S1 counts + S2 explore
+  // cards) + open job_orders (for status) + candidate meta.
+  const [dashboard, positionsResult, jobOrdersResult, candidateMeta] =
+    await Promise.all([
+      getDashboardData(candidateId, supabase),
+      supabase
+        .from("positions")
+        .select("slug, name, country, content, active, created_at")
+        .eq("active", true)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("job_orders")
+        .select("position_slug")
+        .eq("status", "open"),
+      supabase
+        .from("candidates")
+        .select("created_at")
+        .eq("id", candidateId)
+        .single(),
+    ]);
 
   const lamaranSorted = sortLamaranByUrgency(dashboard.lamaran);
   const primary = lamaranSorted[0];
@@ -70,10 +104,43 @@ export default async function DashboardPage() {
   const firstName =
     (dashboard.candidateFullName || session.email || "kandidat").split(" ")[0];
 
+  const activePositions = (positionsResult.data ?? []) as Array<{
+    slug: string;
+    name: string;
+    country: string;
+    content: unknown;
+  }>;
+
   const positionCounts: Record<string, number> = {};
-  for (const row of (positionCountsResult.data ?? []) as Array<{ country: string }>) {
+  for (const row of activePositions) {
     positionCounts[row.country] = (positionCounts[row.country] || 0) + 1;
   }
+
+  // Slugs with an open job_order → "open", otherwise "queue" (talent-pool).
+  const openSlugs = new Set(
+    ((jobOrdersResult.data ?? []) as Array<{ position_slug: string }>).map(
+      (j) => j.position_slug,
+    ),
+  );
+
+  // Build explore cards from real positions for S2's "Eksplor lowongan lain".
+  // Exclude positions the candidate already applied to.
+  const appliedSlugs = new Set(dashboard.lamaran.map((l) => l.positionSlug));
+  const exploreCards: ExploreCardData[] = activePositions
+    .filter((p) => !appliedSlugs.has(p.slug))
+    .map((p) => {
+      const tile = COUNTRY_CARD[p.country];
+      return {
+        slug: p.slug,
+        country: tile?.slug ?? p.country,
+        flag: tile?.flag ?? "🌐",
+        countryLabel: tile?.name ?? COUNTRY_LABEL[p.country] ?? p.country,
+        role: p.name,
+        salary: pickSalary(p.content),
+        status: openSlugs.has(p.slug) ? ("open" as const) : ("queue" as const),
+      };
+    })
+    .slice(0, 6);
 
   const memberId = candidateMeta.data
     ? formatMemberId(candidateId, (candidateMeta.data as { created_at: string }).created_at)
@@ -99,6 +166,7 @@ export default async function DashboardPage() {
             greeting={greeting}
             memberId={memberId}
             primary={primary}
+            exploreCards={exploreCards}
           />
         )}
         {state === "S3" && primary && (
@@ -206,10 +274,12 @@ function BerandaS2({
   greeting,
   memberId,
   primary,
+  exploreCards,
 }: {
   greeting: string;
   memberId?: string;
   primary: LamaranJourney;
+  exploreCards: ExploreCardData[];
 }) {
   const countryLabel = COUNTRY_LABEL[primary.country] ?? primary.country;
   return (
@@ -275,18 +345,29 @@ function BerandaS2({
       </div>
 
       {/* Eksplor lain */}
-      <div className="pt-5">
-        <div className="px-5">
-          <SectionHead title="Eksplor lowongan lain" sub="Mungkin ada yang lebih cocok" allHref="/explore" />
-        </div>
-        <div className="pl-5">
-          <div className="flex gap-3 overflow-x-auto pb-1 pr-5 scrollbar-none" style={{ scrollbarWidth: "none" as const }}>
-            <ExploreCard slug="perawat-saudi-arabia" country="saudi" flag="🇸🇦" countryLabel="Saudi Arabia" role="Perawat" salary="SAR 3.200" status="open" />
-            <ExploreCard slug="truck-driver-jepang" country="jepang" flag="🇯🇵" countryLabel="Jepang" role="Truck Driver" salary="¥250.000" status="queue" />
-            <ExploreCard slug="kaigo-jepang" country="jepang" flag="🇯🇵" countryLabel="Jepang" role="Caregiver Kaigo" salary="¥190.000" status="queue" />
+      {exploreCards.length > 0 && (
+        <div className="pt-5">
+          <div className="px-5">
+            <SectionHead title="Eksplor lowongan lain" sub="Mungkin ada yang lebih cocok" allHref="/explore" />
+          </div>
+          <div className="pl-5">
+            <div className="flex gap-3 overflow-x-auto pb-1 pr-5 scrollbar-none" style={{ scrollbarWidth: "none" as const }}>
+              {exploreCards.map((c) => (
+                <ExploreCard
+                  key={c.slug}
+                  slug={c.slug}
+                  country={c.country}
+                  flag={c.flag}
+                  countryLabel={c.countryLabel}
+                  role={c.role}
+                  salary={c.salary}
+                  status={c.status}
+                />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
@@ -458,7 +539,13 @@ function ExploreCard({
           {role}
         </span>
         <span className="font-mono text-[11px] text-pg-ink-500 tracking-[0.02em]">
-          {salary} <span style={{ opacity: 0.6 }}>/bulan</span>
+          {salary === "—" ? (
+            "Gaji menyusul"
+          ) : (
+            <>
+              {salary} <span style={{ opacity: 0.6 }}>/bulan</span>
+            </>
+          )}
         </span>
       </div>
     </Link>

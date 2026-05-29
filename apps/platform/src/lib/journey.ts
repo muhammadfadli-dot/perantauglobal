@@ -16,6 +16,7 @@
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@perantauglobal/db";
+import { isAcceptedStage, isRejectedStage } from "./applicationStatus";
 
 export type LamaranStage = "terkirim" | "diproses" | "hasil_diterima" | "hasil_ditolak";
 
@@ -36,19 +37,11 @@ export type DashboardData = {
   candidateFullName: string;
 };
 
-const ACCEPTED_STAGES = new Set([
-  "selected",
-  "training",
-  "deployed",
-  "active",
-]);
-const REJECTED_STAGES = new Set(["rejected", "exit"]);
-
 const IDENTITY_TOTAL = 5; // phone, city, birth_date, gender, education
 
 function deriveStage(pipelineStage: string, jobOrderId: string | null): LamaranStage {
-  if (ACCEPTED_STAGES.has(pipelineStage)) return "hasil_diterima";
-  if (REJECTED_STAGES.has(pipelineStage)) return "hasil_ditolak";
+  if (isAcceptedStage(pipelineStage)) return "hasil_diterima";
+  if (isRejectedStage(pipelineStage)) return "hasil_ditolak";
   if (jobOrderId !== null) return "diproses";
   return "terkirim";
 }

@@ -9,8 +9,12 @@ export function ContactForm() {
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // Capture the form node now — after `await` below, e.currentTarget is null
+    // (React pools the event), so calling .reset() on it would throw and flip a
+    // successful submit into the error state.
+    const form = e.currentTarget;
     setStatus("loading");
-    const fd = new FormData(e.currentTarget);
+    const fd = new FormData(form);
     const payload = {
       name: String(fd.get("name") ?? ""),
       email: String(fd.get("email") ?? ""),
@@ -25,7 +29,7 @@ export function ContactForm() {
         body: JSON.stringify(payload),
       });
       setStatus(res.ok ? "success" : "error");
-      if (res.ok) e.currentTarget.reset();
+      if (res.ok) form.reset();
     } catch {
       setStatus("error");
     }
@@ -59,27 +63,28 @@ export function ContactForm() {
       <h3 className="text-xl md:text-2xl font-extrabold tracking-tight mt-1">Form kontak</h3>
 
       <div className="grid gap-3 mt-5">
-        <Field label="Nama" required>
-          <Input name="name" type="text" required />
+        <Field label="Nama" required htmlFor="contact-name">
+          <Input id="contact-name" name="name" type="text" required />
         </Field>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Email" required>
-            <Input name="email" type="email" required />
+          <Field label="Email" required htmlFor="contact-email">
+            <Input id="contact-email" name="email" type="email" required />
           </Field>
-          <Field label="Nomor HP">
-            <Input name="phone" type="tel" placeholder="+62 …" />
+          <Field label="Nomor HP" htmlFor="contact-phone">
+            <Input id="contact-phone" name="phone" type="tel" placeholder="+62 …" />
           </Field>
         </div>
-        <Field label="Subjek">
-          <Select name="subject" defaultValue="Pertanyaan umum">
+        <Field label="Subjek" htmlFor="contact-subject">
+          <Select id="contact-subject" name="subject" defaultValue="Pertanyaan umum">
             <option>Pertanyaan umum</option>
             <option>Tanya lowongan</option>
             <option>Tanya biaya & proses</option>
             <option>Lainnya</option>
           </Select>
         </Field>
-        <Field label="Pesan" required>
+        <Field label="Pesan" required htmlFor="contact-message">
           <Textarea
+            id="contact-message"
             name="message"
             required
             rows={5}

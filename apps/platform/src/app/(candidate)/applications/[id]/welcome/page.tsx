@@ -155,7 +155,7 @@ export default async function ApplyWelcomePage({ params }: PageProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="text-[13px] font-bold text-pg-ok-soft-fg">
-                  Profil kamu cocok {score_pct}%
+                  Profil kamu terisi {score_pct}%
                 </div>
                 {missing > 0 && (
                   <div className="text-[11px] mt-0.5" style={{ color: "var(--pg-ink-tertiary)" }}>

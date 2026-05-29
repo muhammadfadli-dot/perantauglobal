@@ -3,18 +3,16 @@ import { createServerClient } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import { Icon } from "@/components/pg/Icon";
 import { Sparkline } from "@/components/admin/Sparkline";
+import { jakartaDayKey } from "@/lib/datetime";
 
 /**
- * Compute days-ago index in local time (most recent = 0, 6 days ago = 6).
- * Inlined here because the catalog only needs 7-day weekly buckets — a
- * dedicated lib would be overkill until another caller needs it.
+ * Compute days-ago index in Asia/Jakarta time (most recent = 0, 6 days ago = 6).
+ * Server runs UTC on sin1, so bucketing must use the WIB calendar day to avoid
+ * mis-attributing evening/midnight WIB applies to the wrong day.
  */
 function daysAgoLocal(ts: Date, now: Date): number {
-  const tsKey = `${ts.getFullYear()}-${ts.getMonth()}-${ts.getDate()}`;
-  const nowKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
-  if (tsKey === nowKey) return 0;
-  const tsMid = new Date(ts.getFullYear(), ts.getMonth(), ts.getDate()).getTime();
-  const nowMid = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const tsMid = Date.parse(`${jakartaDayKey(ts)}T00:00:00Z`);
+  const nowMid = Date.parse(`${jakartaDayKey(now)}T00:00:00Z`);
   return Math.round((nowMid - tsMid) / (24 * 60 * 60 * 1000));
 }
 

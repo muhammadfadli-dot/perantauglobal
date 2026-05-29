@@ -2,9 +2,23 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-05-28 (event registration LP built — ⚠️ migration 0055 NOT yet applied)
+**Last updated:** 2026-05-29 (deep audit + fix sweep — see below)
 
-## 2026-05-28 — Event registration LP (sharing session) 🔨 BUILT, NOT SHIPPED
+## 2026-05-29 — Deep audit + fix sweep 🔨 IN PROGRESS
+
+Full-codebase audit (DB / reporting / UI-UX / bugs) + holistic fixes. Findings + plan recorded in [AUDIT-2026-05-29.md](./AUDIT-2026-05-29.md). 0 critical, 8 HIGH (all fixed this session). Both apps typecheck clean.
+
+**Shipped + verified on prod DB (all via `apply_migration`, in the ledger):**
+- **0056** — `application_readiness_view` IDOR fix: `security_invoker=true` + REVOKE anon. Role-sim proven (anon→0, candidate→own-only, admin→all). Closes the `security_definer_view` ERROR.
+- **0057** — drop dup `idx_candidates_phone_nn`, drop 3 dead JWT-dup admin RLS policies, add 6 FK indexes. Verified (0 dup, 0 dead, 6 new).
+- **0058** — `consents_candidate_insert_own` RLS so authenticated candidates log their own PDP consent (was anon-only). Role-sim proven (own→OK, other→blocked).
+- **Migration ledger reconciled** — recorded 0044–0052 + 0054 (data migrations previously applied via SQL editor) into `supabase_migrations.schema_migrations` with ordered versions, NOT re-executed. `list_migrations` is now complete + in order.
+
+**Code fixes (branch, typecheck-clean):** reporting (shared `ACCEPTED_STAGES` kills the dashboard-vs-analytics "Diterima" drift, WIB date bucketing, funnel/90d-sparkline, JO filter counts) · web (unified `SITE_URL`, `og-default.jpg` 1200×630, hero claim removed + disclaimer, manufaktur slug, ContactForm success-as-error bug, a11y labels) · candidate (paspor fake %, `submitApplication` discriminated-union + active-position guard + 23505, dashboard real data, **PDP consent now affirmative/unchecked + logged**) · admin (JO status/notes wiring, **editor Media&SEO clobber fixed via disjoint-key actions** + apps/web renders admin hero/OG/SEO) · platform CSP allows GTM · `META_TEST_EVENT_CODE` prod guard. Detail: AUDIT-2026-05-29.md.
+
+**Deferred mediums (noted, not done):** `/admin/candidates` filter-tab count vs page-local rows; qualifying-option admin toggle; JO over-fill friendly error; `slot_filled` semantics (product decision); admin preview ⊆ production. **Pending from Panji:** real consented alumni photos for the homepage hero (claims removed for now).
+
+## 2026-05-28 — Event registration LP (sharing session) ✅ SHIPPED
 
 First-party event registration to replace Google Forms, so paid traffic to the
 sharing session is measurable (Meta CAPI `CompleteRegistration`). Architecture
@@ -12,11 +26,9 @@ decision: **standalone unlinked LP** at `/event/[slug]` (NOT an events nav
 section); **separate `events` + `event_registrations` tables** (NOT
 candidates/applications); **no magic-link/auth** — frictionless anon insert.
 
-**⚠️ BLOCKED — manual step for Panji:** migration `0055_events_registrations.sql`
-was NOT applied (auto-mode classifier blocks direct prod DB migration). Apply it
-(Supabase SQL editor / CLI / approve MCP), then the LP works end-to-end. Until
-then: tables don't exist, LP 404s, admin page shows "relation does not exist".
-`packages/db/src/types.ts` already hand-edited with the new table types.
+**✅ migration `0055_events_registrations.sql` APPLIED to prod** (verified 2026-05-29:
+events=1 row, event_registrations=15 live registrations). LP is live end-to-end.
+`packages/db/src/types.ts` carries the table types.
 
 **What's built (both apps build green, EXIT=0):**
 - `packages/db/migrations/0055_events_registrations.sql` — 2 tables + RLS

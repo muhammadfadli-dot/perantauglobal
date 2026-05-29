@@ -13,7 +13,11 @@ import crypto from "crypto";
 
 const PIXEL_ID = process.env.META_PIXEL_ID;
 const ACCESS_TOKEN = process.env.META_CAPI_ACCESS_TOKEN;
-const TEST_EVENT_CODE = process.env.META_TEST_EVENT_CODE; // optional, dev only
+// Hard production guard: even if META_TEST_EVENT_CODE is mis-scoped to "All
+// Environments" in Vercel, it must NEVER tag production CAPI events (that routes real
+// conversions to Meta's Test Events tab and excludes them from ad optimization).
+const TEST_EVENT_CODE =
+  process.env.VERCEL_ENV === "production" ? undefined : process.env.META_TEST_EVENT_CODE;
 const API_VERSION = "v21.0";
 
 /**

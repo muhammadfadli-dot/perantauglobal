@@ -112,20 +112,15 @@ export function HomeHero({
                     style={{ marginLeft: i === 0 ? 0 : -6, objectPosition: p.objectPosition }}
                   />
                 ))}
-                <span
-                  className="w-7 h-7 md:w-9 md:h-9 rounded-full bg-pg-ink-900 text-white font-mono text-[10px] md:text-[11.5px] font-bold grid place-items-center border-2 border-pg-paper"
-                  style={{ marginLeft: -6 }}
-                >
-                  +200
-                </span>
               </div>
               <div className="text-[12px] md:text-[13px] text-pg-ink-700 leading-snug min-w-0">
-                <b className="text-pg-ink-900 font-bold">Sari, Budi, Rini</b> + 200 alumni sejak 2024 — semua diberangkatkan resmi.
+                Penempatan resmi ke Saudi, Jepang &amp; Taiwan — tiap tahap dikabarin PIC, bukan calo.
               </div>
             </div>
           </div>
 
           {/* Portrait collage column */}
+          <div className="w-full">
           <div
             className="relative w-full mx-auto"
             style={{ maxWidth: 520, aspectRatio: "5/5" }}
@@ -178,15 +173,6 @@ export function HomeHero({
                   <div className="mt-2.5 flex flex-col gap-0.5">
                     <div className="flex items-center gap-1.5 text-[14px] font-extrabold text-pg-ink-900">
                       {p.name}
-                      <span
-                        aria-hidden
-                        className="inline-flex items-center justify-center w-[15px] h-[15px] rounded-full"
-                        style={{ background: "var(--pg-ok)" }}
-                      >
-                        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={4} strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M5 13l4 4L19 7" />
-                        </svg>
-                      </span>
                     </div>
                     <div className="font-mono text-[11.5px] text-pg-ink-500 tracking-[0.02em]">
                       {p.meta}
@@ -214,6 +200,15 @@ export function HomeHero({
               />
               Bebas calo
             </div>
+          </div>
+            {/* Authenticity disclaimer — these are sample faces/names until we
+                publish consented real-candidate stories (matches Testimoni.tsx). */}
+            <p
+              className="mx-auto mt-4 text-center font-mono text-[10.5px] text-pg-ink-400 leading-snug"
+              style={{ maxWidth: 520 }}
+            >
+              Ilustrasi — foto &amp; nama contoh, akan diganti kandidat asli.
+            </p>
           </div>
         </div>
 

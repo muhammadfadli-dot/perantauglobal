@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { createServerClient } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import { Icon } from "@/components/pg/Icon";
+import StatusControls from "./StatusControls";
+import NotesField from "./NotesField";
 
 export const dynamic = "force-dynamic";
 
@@ -154,24 +156,14 @@ export default async function JobOrderDetailPage({
           { label: `${jo.public_employer_name ?? jo.internal_employer_name} · ${jo.intake_label}`, emphasis: true },
         ]}
         rightSlot={
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/admin/job-orders/${jo.id}/edit`}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-bold text-pg-ink-secondary no-underline"
-              style={{ border: "1px solid var(--pg-border)", background: "var(--pg-white)" }}
-            >
-              <Icon name="edit" size={13} />
-              Edit JO
-            </Link>
-            <Link
-              href={`/admin/candidates?position=${jo.position_slug}`}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-bold text-white no-underline"
-              style={{ background: "var(--pg-red-600)" }}
-            >
-              <Icon name="plus" size={13} stroke={2.4} />
-              Pull dari talent pool
-            </Link>
-          </div>
+          <Link
+            href={`/admin/candidates?position=${jo.position_slug}`}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-bold text-white no-underline"
+            style={{ background: "var(--pg-red-600)" }}
+          >
+            <Icon name="plus" size={13} stroke={2.4} />
+            Pull dari talent pool
+          </Link>
         }
       />
 
@@ -334,22 +326,12 @@ export default async function JobOrderDetailPage({
               <DRow label="Kota" value={jo.employer_city ?? "—"} />
               <DRow label="Dibuat" value={new Date(jo.created_at).toLocaleDateString("id-ID")} />
             </dl>
-            {jo.notes && (
-              <div
-                className="px-5 py-4"
-                style={{ borderTop: "1px solid var(--pg-border)" }}
-              >
-                <div
-                  className="text-[10px] font-semibold tracking-[0.12em] uppercase mb-1.5"
-                  style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
-                >
-                  Catatan internal
-                </div>
-                <p className="text-[14px] text-pg-ink-secondary leading-tight whitespace-pre-wrap">
-                  {jo.notes}
-                </p>
-              </div>
-            )}
+            <div
+              className="px-5 py-4"
+              style={{ borderTop: "1px solid var(--pg-border)" }}
+            >
+              <NotesField id={jo.id} initial={jo.notes ?? ""} />
+            </div>
           </div>
           <div
             className="bg-pg-white rounded-2xl p-5 flex flex-col gap-3"
@@ -358,6 +340,13 @@ export default async function JobOrderDetailPage({
             <div
               className="text-[10px] font-semibold tracking-[0.12em] uppercase"
               style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
+            >
+              Status job order
+            </div>
+            <StatusControls id={jo.id} current={jo.status} />
+            <div
+              className="text-[10px] font-semibold tracking-[0.12em] uppercase pt-2"
+              style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)", borderTop: "1px solid var(--pg-border)" }}
             >
               Aksi cepat
             </div>

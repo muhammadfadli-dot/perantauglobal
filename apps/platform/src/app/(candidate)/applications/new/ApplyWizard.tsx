@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Icon } from "@/components/pg/Icon";
 import { Button, Badge } from "@/components/pg/primitives";
@@ -75,11 +76,13 @@ export default function ApplyWizard({
   docMissingCount: number;
   fields: FormField[];
 }) {
+  const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [agree, setAgree] = useState(true);
+  // PDP UU 27/2022: consent must be affirmative — default UNCHECKED, candidate ticks it.
+  const [agree, setAgree] = useState(false);
 
   const totalSteps = fields.length > 0 ? 3 : 2;
 
@@ -118,13 +121,20 @@ export default function ApplyWizard({
     }
     start(async () => {
       try {
-        await submitApplication({
+        const result = await submitApplication({
           position_slug: position.slug,
           job_order_id: jobOrder?.id ?? null,
           answers,
+          agreed: agree,
         });
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Gagal kirim lamaran");
+        if (result.ok) {
+          router.push(`/applications/${result.applicationId}/welcome`);
+        } else {
+          setError(result.error);
+        }
+      } catch {
+        // Last-resort guard for unexpected throws (network, server crash).
+        setError("Gagal kirim lamaran. Coba lagi sebentar.");
       }
     });
   }

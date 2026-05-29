@@ -232,8 +232,9 @@ export function ApplyForm({
           </div>
 
           <div className="grid gap-3 mt-5">
-            <Field label="Nama lengkap" required>
+            <Field label="Nama lengkap" required htmlFor="apply-fullName">
               <Input
+                id="apply-fullName"
                 type="text"
                 required
                 autoComplete="name"
@@ -242,8 +243,9 @@ export function ApplyForm({
                 onChange={(e) => setIdentityField("fullName", e.target.value)}
               />
             </Field>
-            <Field label="Email" required>
+            <Field label="Email" required htmlFor="apply-email">
               <Input
+                id="apply-email"
                 type="email"
                 required
                 autoComplete="email"
@@ -252,8 +254,9 @@ export function ApplyForm({
                 onChange={(e) => setIdentityField("email", e.target.value)}
               />
             </Field>
-            <Field label="No. HP / WhatsApp" required>
+            <Field label="No. HP / WhatsApp" required htmlFor="apply-whatsapp">
               <Input
+                id="apply-whatsapp"
                 type="tel"
                 required
                 autoComplete="tel"
@@ -262,8 +265,9 @@ export function ApplyForm({
                 onChange={(e) => setIdentityField("whatsapp", e.target.value)}
               />
             </Field>
-            <Field label="Kota tinggal">
+            <Field label="Kota tinggal" htmlFor="apply-city">
               <Input
+                id="apply-city"
                 type="text"
                 placeholder="Jakarta"
                 value={identity.city}
@@ -331,9 +335,10 @@ export function ApplyForm({
             </div>
             <div className="text-sm font-bold text-pg-ink-900 mb-3">Pilih password Perantau Global</div>
             <div className="grid gap-3">
-              <Field label="Password" required>
+              <Field label="Password" required htmlFor="apply-password">
                 <div className="relative">
                   <Input
+                    id="apply-password"
                     type={showPw ? "text" : "password"}
                     required
                     autoComplete="new-password"
@@ -352,8 +357,9 @@ export function ApplyForm({
                   </button>
                 </div>
               </Field>
-              <Field label="Konfirmasi password" required>
+              <Field label="Konfirmasi password" required htmlFor="apply-confirmPassword">
                 <Input
+                  id="apply-confirmPassword"
                   type={showPw ? "text" : "password"}
                   required
                   autoComplete="new-password"
@@ -679,8 +685,9 @@ function SingleStepForm({
       </p>
 
       <div className="grid gap-3 mt-5">
-        <Field label="Nama lengkap" required>
+        <Field label="Nama lengkap" required htmlFor="apply-ss-fullName">
           <Input
+            id="apply-ss-fullName"
             type="text"
             required
             autoComplete="name"
@@ -690,8 +697,9 @@ function SingleStepForm({
           />
         </Field>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Email" required>
+          <Field label="Email" required htmlFor="apply-ss-email">
             <Input
+              id="apply-ss-email"
               type="email"
               required
               autoComplete="email"
@@ -700,8 +708,9 @@ function SingleStepForm({
               onChange={(e) => setIdentityField("email", e.target.value)}
             />
           </Field>
-          <Field label="Nomor HP" required>
+          <Field label="Nomor HP" required htmlFor="apply-ss-whatsapp">
             <Input
+              id="apply-ss-whatsapp"
               type="tel"
               required
               autoComplete="tel"
@@ -711,8 +720,9 @@ function SingleStepForm({
             />
           </Field>
         </div>
-        <Field label="Kota tinggal">
+        <Field label="Kota tinggal" htmlFor="apply-ss-city">
           <Input
+            id="apply-ss-city"
             type="text"
             placeholder="Jakarta (opsional, bisa diisi nanti di portal)"
             value={identity.city}
@@ -726,9 +736,10 @@ function SingleStepForm({
           Akun Perantau Global
         </div>
         <div className="grid gap-3">
-          <Field label="Password" required>
+          <Field label="Password" required htmlFor="apply-ss-password">
             <div className="relative">
               <Input
+                id="apply-ss-password"
                 type={showPw ? "text" : "password"}
                 required
                 autoComplete="new-password"
@@ -747,8 +758,9 @@ function SingleStepForm({
               </button>
             </div>
           </Field>
-          <Field label="Konfirmasi password" required>
+          <Field label="Konfirmasi password" required htmlFor="apply-ss-confirmPassword">
             <Input
+              id="apply-ss-confirmPassword"
               type={showPw ? "text" : "password"}
               required
               autoComplete="new-password"

@@ -99,7 +99,7 @@ const CITY_BY_SLUG: Record<string, string> = {
   "food-service-jepang": "Tokyo",
   "kaigo-jepang": "Nagoya",
   "pengolahan-makanan-jepang": "Hokkaido",
-  "manufaktur-pengelasan-jepang": "Aichi",
+  "manufaktur-pengelasan": "Aichi",
   "caregiver-taiwan": "Taipei",
   "spg-indonesia": "Jakarta",
 };

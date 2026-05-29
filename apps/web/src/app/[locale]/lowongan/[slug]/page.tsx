@@ -24,6 +24,16 @@ import { waLink } from "@/lib/contact";
 
 type RouteParams = { locale: string; slug: string };
 
+// Admin-authored media/SEO live in positions.content JSONB (set via the Media & SEO
+// editor tab). The content blob is typed `unknown`; read these keys defensively.
+type ContentMediaSeo = {
+  media?: { heroUrl?: string | null; ogImageUrl?: string | null } | null;
+  seo?: { metaTitle?: string | null; metaDescription?: string | null } | null;
+};
+function asMediaSeo(content: unknown): ContentMediaSeo | null {
+  return content && typeof content === "object" ? (content as ContentMediaSeo) : null;
+}
+
 export const revalidate = 60;
 
 export async function generateStaticParams() {
@@ -37,11 +47,22 @@ export async function generateMetadata({
   params: Promise<RouteParams>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const p = await fetchPositionForDetail(slug);
+  const [p, content] = await Promise.all([
+    fetchPositionForDetail(slug),
+    fetchPositionContent(slug),
+  ]);
   if (!p) return { title: "Lowongan tidak ditemukan" };
+  const cms = asMediaSeo(content);
+  const title =
+    cms?.seo?.metaTitle?.trim() || `Lowongan ${p.role} ${p.country} — ${p.salary}/bulan`;
+  const description =
+    cms?.seo?.metaDescription?.trim() ||
+    `Lowongan ${p.role} di ${p.country}. Gaji ${p.salary}, ${p.contractLabel ?? "kontrak resmi"}. Bebas biaya sebelum offering letter. Daftar di Perantau Global.`;
+  const ogImage = cms?.media?.ogImageUrl?.trim() || cms?.media?.heroUrl?.trim();
   return {
-    title: `Lowongan ${p.role} ${p.country} — ${p.salary}/bulan`,
-    description: `Lowongan ${p.role} di ${p.country}. Gaji ${p.salary}, ${p.contractLabel ?? "kontrak resmi"}. Bebas biaya sebelum offering letter. Daftar di Perantau Global.`,
+    title,
+    description,
+    ...(ogImage ? { openGraph: { images: [ogImage] } } : {}),
   };
 }
 
@@ -84,7 +105,9 @@ export default async function LowonganDetailPage({
   const countryKey = countryKeyFromName(position.country);
   const country = COUNTRY_META[countryKey];
   const city = cityForSlug(slug, countryKey);
-  const heroImg = `/images/lowongan/${slug}.jpg`;
+  // Prefer the admin-authored hero (Media & SEO tab); fall back to the per-slug static asset.
+  const heroImg =
+    asMediaSeo(dbContent)?.media?.heroUrl?.trim() || `/images/lowongan/${slug}.jpg`;
   const waMessage = `Halo, saya mau tanya soal lowongan ${position.role} ${position.country}.`;
 
   return (

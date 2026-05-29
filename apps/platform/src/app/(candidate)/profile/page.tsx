@@ -195,8 +195,8 @@ export default async function ProfilePage() {
               icon="passport"
               tone="amber"
               label="Paspor"
-              value="40%"
-              caption="3 modul lagi"
+              value="—"
+              caption="Belum mulai"
             />
             <StatTile
               icon="check"

@@ -10,8 +10,11 @@ import type { NextConfig } from "next";
  */
 
 // CSP enforce mode for the platform app.
-// Scope is tight: only Supabase auth/storage/REST + first-party Next.js.
-// No GTM, no marketing tags here — admins/candidates only.
+// Scope: Supabase auth/storage/REST + first-party Next.js + the SAME GTM container
+// as apps/web. The portal loads GoogleTagManager (see layout.tsx) so the browser
+// Meta Pixel fires here too, completing the cross-domain _fbc/_fbp attribution — so
+// the GTM / Meta origins MUST be whitelisted (mirrors apps/web's directives) or the
+// enforced CSP silently blocks gtm.js and the pixel never loads.
 //
 // To soften temporarily for debugging (e.g. adding a new third-party):
 //   set CSP_ENFORCE=false → switches to Content-Security-Policy-Report-Only
@@ -21,16 +24,18 @@ const cspDirectives = [
   "default-src 'self'",
   // 'unsafe-inline' is required by Next.js for hydration markers/runtime.
   // Migrate to nonce-based CSP when Next.js App Router fully supports it.
-  "script-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
   // Tailwind 4 + inline style attributes from React components.
   "style-src 'self' 'unsafe-inline'",
   // Self-hosted fonts via next/font (no external font CDN).
   "font-src 'self' data:",
   // Supabase Storage signed URLs serve images from *.supabase.co.
   // data:/blob: needed for client-side file preview before upload.
-  "img-src 'self' data: blob: https://*.supabase.co",
+  // GTM/GA/FB pixel beacons load tracking images from their origins.
+  "img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://www.facebook.com",
   // Supabase Auth (token refresh), REST, Realtime, Storage all on *.supabase.co.
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
+  // GTM/GA/Meta CAPI browser beacons.
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://graph.facebook.com",
   // Block all framing — admin tool, no legitimate embed use case.
   "frame-ancestors 'none'",
   "base-uri 'self'",

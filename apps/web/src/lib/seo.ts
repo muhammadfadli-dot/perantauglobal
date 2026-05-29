@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
+import { SITE_URL } from './site'
 
 const SITE_NAME = 'Perantau Global'
-const SITE_URL = 'https://dayatalentaglobal.id'
 
 // Paths that exist in both locales (shared pages)
 const SHARED_PATHS = new Set(['', 'layanan', 'services', 'tentang', 'about', 'kontak', 'contact'])
@@ -23,7 +23,7 @@ export function generateMeta({
   description,
   locale,
   path: pagePath = '',
-  image = '/og-default.png',
+  image = '/og-default.jpg',
   type = 'website',
   publishedTime,
   modifiedTime,

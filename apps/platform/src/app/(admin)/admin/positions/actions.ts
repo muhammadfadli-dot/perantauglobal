@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
-import type { PositionContent } from "@/lib/position-content";
+import type { PositionContent, ContentMedia, ContentSeo } from "@/lib/position-content";
 
 async function assertAdmin() {
   const { session, role } = await getSessionAndRole();
@@ -124,8 +124,9 @@ export async function deletePosition(slug: string): Promise<void> {
 //   - createFormField / updateFormField / deleteFormField / reorderFormField
 //     (CRUD on position_form_fields)
 // All replaced by the position_application_fields editor + positions.content
-// JSONB editor. The positions.requirements column + position_form_fields
-// table still exist (deferred drop until Fase 5 — see TASKS.md).
+// JSONB editor. The legacy positions.requirements column + position_form_fields
+// table have since been DROPPED (migrations 0035 + 0037) — no live code references
+// them; the candidate lengkapi flow reads position_application_fields.
 // =========================================================================
 
 
@@ -147,9 +148,62 @@ export async function deletePosition(slug: string): Promise<void> {
 export async function saveDraft(slug: string, content: PositionContent) {
   await assertAdmin();
   const supabase = await createServerClient();
+
+  // media/seo are owned exclusively by the Media & SEO tab (saveDraftMediaSeo).
+  // The Konten editor's in-memory content carries only the load-time media/seo, so
+  // writing it verbatim would clobber any newer media/seo the Media tab saved to the
+  // draft. Preserve the draft's existing media/seo (the authoritative copy) on every
+  // Konten save. First save (no draft yet) seeds from the incoming load-time values.
+  const { data: existing } = await supabase
+    .from("positions")
+    .select("draft_content")
+    .eq("slug", slug)
+    .maybeSingle();
+  const prevDraft =
+    (existing as { draft_content: PositionContent | null } | null)?.draft_content ?? null;
+  const next: PositionContent = prevDraft
+    ? { ...content, media: prevDraft.media, seo: prevDraft.seo }
+    : content;
+
   const { error } = await supabase
     .from("positions")
-    .update({ draft_content: content as never } as never)
+    .update({ draft_content: next as never } as never)
+    .eq("slug", slug);
+  if (error) throw new Error(error.message);
+  revalidatePath(`/admin/positions/${slug}`);
+}
+
+/**
+ * Save ONLY the media + seo keys into positions.draft_content, merging into the
+ * current draft (or live content if no draft exists). Used by the Media & SEO tab.
+ *
+ * Disjoint-key ownership with saveDraft: the Konten editor owns every other key and
+ * preserves media/seo; this owns media/seo and preserves everything else. That makes
+ * the two tabs' independent auto-saves order-independent — neither can clobber the
+ * other regardless of which saved last.
+ */
+export async function saveDraftMediaSeo(
+  slug: string,
+  media: ContentMedia | undefined,
+  seo: ContentSeo | undefined,
+) {
+  await assertAdmin();
+  const supabase = await createServerClient();
+
+  const { data: existing } = await supabase
+    .from("positions")
+    .select("draft_content, content")
+    .eq("slug", slug)
+    .maybeSingle();
+  const row = existing as
+    | { draft_content: PositionContent | null; content: PositionContent | null }
+    | null;
+  const base = (row?.draft_content ?? row?.content ?? {}) as PositionContent;
+  const next: PositionContent = { ...base, media, seo };
+
+  const { error } = await supabase
+    .from("positions")
+    .update({ draft_content: next as never } as never)
     .eq("slug", slug);
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/positions/${slug}`);

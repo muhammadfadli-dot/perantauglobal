@@ -1,4 +1,4 @@
-const SITE_URL = "https://perantauglobal.com";
+import { SITE_URL } from "./site";
 
 export function organizationJsonLd() {
   return {

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://perantauglobal.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     template: "%s | Perantau Global",
     default: "Perantau Global — Your Best Gateway to Global Career Opportunities",
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
     icon: "/icon.svg",
   },
   openGraph: {
-    images: [{ url: "/images/og-default.svg", width: 1200, height: 630 }],
+    images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
   },
 };
 

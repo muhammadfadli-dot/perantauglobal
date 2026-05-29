@@ -18,14 +18,24 @@ export type ApplicationStatus = {
   description: string;
 };
 
-const ACCEPTED_STAGES = new Set([
-  "selected",
-  "training",
-  "deployed",
-  "active",
-]);
+// Canonical stage groupings — single source of truth shared by candidate-facing
+// status, the admin dashboard/analytics KPIs, kanban, and job-order accepted counts.
+// pipeline_stage is a single current-state column, so "accepted" must include every
+// stage at or past selection (a candidate advanced to training/deployed/active is
+// still accepted). Importing these instead of re-listing prevents the dashboard-vs-
+// analytics "Diterima" drift.
+export const ACCEPTED_STAGES = ["selected", "training", "deployed", "active"] as const;
+export const REJECTED_STAGES = ["rejected", "exit"] as const;
 
-const REJECTED_STAGES = new Set(["rejected", "exit"]);
+const ACCEPTED_SET = new Set<string>(ACCEPTED_STAGES);
+const REJECTED_SET = new Set<string>(REJECTED_STAGES);
+
+export function isAcceptedStage(stage: string): boolean {
+  return ACCEPTED_SET.has(stage);
+}
+export function isRejectedStage(stage: string): boolean {
+  return REJECTED_SET.has(stage);
+}
 
 export function getApplicationStatus(input: {
   pipelineStage: string;
@@ -33,7 +43,7 @@ export function getApplicationStatus(input: {
 }): ApplicationStatus {
   const { pipelineStage, hardPass } = input;
 
-  if (REJECTED_STAGES.has(pipelineStage)) {
+  if (REJECTED_SET.has(pipelineStage)) {
     return {
       key: "rejected",
       label: "Tidak terpilih",
@@ -44,7 +54,7 @@ export function getApplicationStatus(input: {
     };
   }
 
-  if (ACCEPTED_STAGES.has(pipelineStage)) {
+  if (ACCEPTED_SET.has(pipelineStage)) {
     return {
       key: "accepted",
       label: "Diterima",

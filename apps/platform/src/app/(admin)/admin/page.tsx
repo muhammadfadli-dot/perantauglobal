@@ -4,11 +4,11 @@ import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import { Icon } from "@/components/pg/Icon";
 import { KpiStat } from "@/components/admin/Sparkline";
+import { isAcceptedStage } from "@/lib/applicationStatus";
+import { getTimeOfDayGreeting } from "@/lib/journey";
+import { jakartaDayKey, jakartaDayOfMonth } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
-
-const HOUR_NAMES = (h: number) =>
-  h < 11 ? "pagi" : h < 15 ? "siang" : h < 18 ? "sore" : "malam";
 
 type Range = "7d" | "14d" | "30d";
 
@@ -19,13 +19,9 @@ const RANGE_LABEL: Record<Range, string> = {
   "30d": "30 hari",
 };
 
-function dayKey(d: Date): string {
-  // Local-date key (YYYY-MM-DD) so day buckets reflect Asia/Jakarta-style local time
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
+// Day-bucket key in Asia/Jakarta (WIB), so evening/midnight WIB activity lands on the
+// correct calendar day regardless of the server's UTC clock.
+const dayKey = jakartaDayKey;
 
 export default async function AdminHomePage({
   searchParams,
@@ -106,7 +102,7 @@ export default async function AdminHomePage({
         screeningStage++;
         screeningDaily.set(key, (screeningDaily.get(key) ?? 0) + 1);
       }
-      if (row.pipeline_stage === "selected") {
+      if (isAcceptedStage(row.pipeline_stage)) {
         acceptedStage++;
         acceptedDaily.set(key, (acceptedDaily.get(key) ?? 0) + 1);
       }
@@ -171,7 +167,7 @@ export default async function AdminHomePage({
   const wowPct = priorRange > 0 ? Math.round((wowDelta / priorRange) * 100) : null;
 
   const greetingName = session.email?.split("@")[0]?.split(".")[0] ?? "admin";
-  const greeting = `Selamat ${HOUR_NAMES(now.getHours())}, ${
+  const greeting = `${getTimeOfDayGreeting()}, ${
     greetingName.charAt(0).toUpperCase() + greetingName.slice(1)
   }`;
 
@@ -625,9 +621,9 @@ function DailyInflowChart({
   peak: { date: Date; count: number };
 }) {
   const dayLabel = (d: Date) =>
-    d.toLocaleDateString("id-ID", { weekday: "short", day: "numeric", month: "short" });
+    d.toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", weekday: "short", day: "numeric", month: "short" });
   const shortDay = (d: Date) =>
-    d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
+    d.toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", day: "numeric", month: "short" });
 
   // Label every Nth bar so labels don't crowd
   const n = series.length;
@@ -693,7 +689,7 @@ function DailyInflowChart({
                 visibility: show ? "visible" : "hidden",
               }}
             >
-              {d.date.getDate()}
+              {jakartaDayOfMonth(d.date)}
             </div>
           );
         })}

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import { KpiStat, Sparkline } from "@/components/admin/Sparkline";
+import { isAcceptedStage } from "@/lib/applicationStatus";
+import { jakartaDayKey } from "@/lib/datetime";
 
 export const dynamic = "force-dynamic";
 
@@ -29,12 +31,9 @@ function rangeToDate(range: Range): string | null {
   return d.toISOString();
 }
 
-function dayKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
+// Day-bucket key in Asia/Jakarta (WIB) — server runs UTC on sin1, so naive local
+// keys would mis-bucket evening/midnight WIB activity by up to 7 hours.
+const dayKey = jakartaDayKey;
 
 /** Drop-in helper to bucket a series of timestamps into N daily slots,
  *  most-recent on the right (Sparkline's expected order). */
@@ -100,7 +99,6 @@ export default async function AnalyticsPage({
     { data: countryData },
     { data: stageData },
     { data: openJobOrders },
-    { count: candidateRange },
   ] = await Promise.all([
     // Apps in selected range — for KPIs, leaderboard, sparklines
     since
@@ -140,12 +138,6 @@ export default async function AnalyticsPage({
       )
       .eq("status", "open")
       .order("created_at", { ascending: false }),
-    since
-      ? supabase
-          .from("candidates")
-          .select("*", { count: "exact", head: true })
-          .gte("created_at", since)
-      : supabase.from("candidates").select("*", { count: "exact", head: true }),
   ]);
 
   // === Range-bound aggregates ===
@@ -162,12 +154,7 @@ export default async function AnalyticsPage({
 
   for (const a of rangeApps) {
     if (a.pipeline_stage === "screening") screeningCount++;
-    if (
-      a.pipeline_stage === "selected" ||
-      a.pipeline_stage === "training" ||
-      a.pipeline_stage === "deployed" ||
-      a.pipeline_stage === "active"
-    ) {
+    if (isAcceptedStage(a.pipeline_stage)) {
       acceptedCount++;
     }
     positionApplyCount.set(
@@ -178,9 +165,11 @@ export default async function AnalyticsPage({
 
   const conversionPct = totalApps > 0 ? Math.round((screeningCount / totalApps) * 100) : null;
 
-  // Daily sparkline series (capped at 30 daily slots for visual sanity; longer ranges get weekly resolution elsewhere)
+  // Daily sparkline span matches the KPI's counting window so the trend visual can't
+  // silently omit days (90d previously rendered only the last 30). "all" uses a 90-day
+  // recent-trend window since an unbounded daily series isn't meaningful in a sparkline.
   const sparklineDays =
-    range === "7d" ? 7 : range === "30d" ? 30 : range === "90d" ? 30 : 30;
+    range === "7d" ? 7 : range === "30d" ? 30 : range === "90d" ? 90 : 90;
   const sparklineTimestamps = rangeApps.map((a) => a.created_at);
   const inflowSpark = bucketDaily(sparklineTimestamps, sparklineDays, now);
   const screeningSpark = bucketDaily(
@@ -190,13 +179,7 @@ export default async function AnalyticsPage({
   );
   const acceptedSpark = bucketDaily(
     rangeApps
-      .filter(
-        (a) =>
-          a.pipeline_stage === "selected" ||
-          a.pipeline_stage === "training" ||
-          a.pipeline_stage === "deployed" ||
-          a.pipeline_stage === "active",
-      )
+      .filter((a) => isAcceptedStage(a.pipeline_stage))
       .map((a) => a.created_at),
     sparklineDays,
     now,
@@ -208,10 +191,11 @@ export default async function AnalyticsPage({
   );
   const weeklyTrend = bucketWeekly(trendTimestamps, now);
 
-  // === Funnel (entire database, not range-bound — matches existing semantics) ===
-  // For range-bound funnel use the rangeApps + pendingTotal vs candidateRange
+  // === Funnel (range-bound) ===
+  // Starts at "Lamaran dibuat" so every step is a true subset of the prior — a
+  // "Candidate created" first step let conv% exceed 100% (one candidate can file
+  // multiple lamaran, so lamaran/candidate is not a funnel conversion).
   const funnel = [
-    { label: "Candidate created", value: candidateRange ?? 0 },
     { label: "Lamaran dibuat", value: totalApps },
     { label: "Maju ke screening", value: screeningCount },
     { label: "Diterima", value: acceptedCount },

@@ -86,7 +86,7 @@ Magic link flow: form → `pending_submissions` (nonce) → magic link sent → 
 - [x] Data backfill from gt-tools
 - [x] Production cutover (2026-04-22)
 - [x] Position model rework — Fase 0–4 (2026-05-24/25)
-- [ ] Position model rework — Fase 5 (lengkapi flip + schema drop)
+- [x] Position model rework — Fase 5 schema drop + lengkapi flip (2026-05-24, migrations 0034–0037). Only WA/SMS OTP wiring remains (tracked under Phase 2 / Deferred).
 
 ### Position model rework progress (Fase 0–4 done)
 
@@ -96,12 +96,12 @@ Magic link flow: form → `pending_submissions` (nonce) → magic link sent → 
 - **Fase 3** — candidate-side flip (PR #49): `/lowongan` reads `positions.content` from DB (fallback to static), apply form reads from `position_application_fields`, LP form trimmed to 3 required fields, WA OTP sketch route
 - **Fase 4** — code sunset (this PR): delete dead editors, dead actions; PositionWizard dual-write retained until Fase 5
 
-**Fase 5 (deferred):**
-1. Rewrite `/applications/[id]/lengkapi` to read from `position_application_fields` + `applications.answers` (no longer `profile_data.credentials`)
-2. Stop `handle_new_auth_user` trigger from writing `profile_data.credentials`
-3. Sunset `/profile/kualifikasi` page
-4. Migration 0034: drop `position_form_fields` table, drop `positions.requirements` column
-5. Wire up WhatsApp / SMS OTP (Twilio bridge) per [project-wa-otp-promoted](.claude/memory/project_wa_otp_promoted.md)
+**Fase 5 — DONE (2026-05-24), except WA OTP:**
+1. ✅ `/applications/[id]/lengkapi` reads `position_application_fields` + `applications.answers` (no longer `profile_data.credentials`)
+2. ✅ `handle_new_auth_user` trigger stopped writing `profile_data.credentials` (migration 0034)
+3. ✅ `/profile/kualifikasi` page removed
+4. ✅ Dropped `position_form_fields` table + `positions.requirements` column (migrations 0035 + 0037); `application_tiers` dropped (0036)
+5. ⏳ Wire up WhatsApp / SMS OTP (Twilio bridge) per [project-wa-otp-promoted](.claude/memory/project_wa_otp_promoted.md) — STILL PENDING (sketch route at `/auth/whatsapp`)
 
 ## Related
 

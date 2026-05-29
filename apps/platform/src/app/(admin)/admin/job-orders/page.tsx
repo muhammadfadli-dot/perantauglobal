@@ -42,27 +42,31 @@ export default async function JobOrdersListPage({
   const { status } = await searchParams;
   const supabase = await createServerClient();
 
-  let query = supabase
+  // Fetch the full list once: tab counts must reflect the whole catalog regardless of
+  // the active filter (a pre-filtered query made the other tab badges read 0). The table
+  // is small, so we filter in-memory for display rather than re-querying.
+  const { data } = await supabase
     .from("job_orders")
     .select(
       "id, position_slug, internal_employer_name, public_employer_name, employer_city, intake_label, slot_count, slot_filled, status, deadline, created_at, positions (name, country)"
     )
     .order("created_at", { ascending: false });
 
-  if (status && ["open", "closed", "filled", "cancelled"].includes(status)) {
-    query = query.eq("status", status as "open" | "closed" | "filled" | "cancelled");
-  }
-
-  const { data } = await query;
-  const rows = (data ?? []) as unknown as JobOrderRow[];
+  const allRows = (data ?? []) as unknown as JobOrderRow[];
 
   const counts = {
-    all: rows.length,
-    open: rows.filter((r) => r.status === "open").length,
-    filled: rows.filter((r) => r.status === "filled").length,
-    closed: rows.filter((r) => r.status === "closed").length,
-    cancelled: rows.filter((r) => r.status === "cancelled").length,
+    all: allRows.length,
+    open: allRows.filter((r) => r.status === "open").length,
+    filled: allRows.filter((r) => r.status === "filled").length,
+    closed: allRows.filter((r) => r.status === "closed").length,
+    cancelled: allRows.filter((r) => r.status === "cancelled").length,
   };
+
+  const activeFilter =
+    status && ["open", "closed", "filled", "cancelled"].includes(status) ? status : null;
+  const rows = activeFilter
+    ? allRows.filter((r) => r.status === activeFilter)
+    : allRows;
 
   return (
     <>
