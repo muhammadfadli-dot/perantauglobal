@@ -4,9 +4,9 @@ Session handoff. Next Claude Code session yang baca file ini harus tau exactly w
 
 **Last updated:** 2026-06-02 (Akademi Perantau foundation — see below)
 
-## 2026-06-02 — Akademi Perantau (learning platform) foundation 🔨 BUILT, NOT APPLIED/DEPLOYED
+## 2026-06-02 — Akademi Perantau (learning platform) foundation ✅ SHIPPED + DEPLOYED
 
-Branch `feat/akademi-perantau-foundation` (3 commits, on top of main). Built the
+**PR [#136](https://github.com/panji-firmansyah/perantauglobal/pull/136) squash-merged to main; migrations 0060+0061 applied to prod + verified; both apps deployed (web prod deploy READY).** Product is intentionally EMPTY — only the `[CONTOH]` sample program exists; the real Masterclass Financial content is the NEXT phase. Built the
 **fundamental codebase** to receive course registrations + deliver in-app guided
 learning. **Nothing applied to prod DB or deployed** — that's the hand-off to Panji.
 Design + decisions: [docs/akademi-perantau/SPEC.md](./docs/akademi-perantau/SPEC.md)
