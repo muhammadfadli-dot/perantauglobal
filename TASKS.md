@@ -2,7 +2,19 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-06-02 (Akademi Perantau foundation — see below)
+**Last updated:** 2026-06-03 (Akademi Perantau — first product LIVE — see below)
+
+## 2026-06-03 — Akademi Perantau: first product LIVE ✅
+
+Built on top of the foundation (below). All shipped + live on prod:
+- **Web rebrand** `/sertifikasi → /akademi` (PR #136) + **web course-register page** `/akademi/kelas/[slug]` (DB-driven, account-creation form) (PR #137).
+- **RLS fix 0062** — academy anon-read policies must NOT call `is_admin()` (revoked from anon in 0018 → SQLSTATE 42501 → web pages 404'd for anon). Gate anon read on `status='published'` only (events/positions pattern). Caught via real local test against prod DB.
+- **Lesson UX** (PR #138) — richer reading renderer (max-width column, accented headings, `steps`/`stat`/`quote` blocks + callout `tip|info|warn` variants), scroll-to-top + "Mantap, selesai!" advance transition, "Baca lagi materi" button on quiz fail.
+- **First product LIVE** — course `finansial-cerdas-pmi-saudi` "Finansial Cerdas untuk Perantau ke Arab Saudi" (free lead-magnet, Saudi/Gulf, worker-focused: cost-of-living, WPS, remittance, scams, budgeting, pre-departure + financing CTA). 6 modules, 15 reading + 6 quiz (28 Q). Built via multi-agent workflows (research → curriculum → author → review POV pelajar+akademisi → revise → enrich). Seeded **migration 0063** (content) + **0064** (visual-block enrichment + M2 kurs fix). `[CONTOH]` sample set to `draft` (hidden). Content + curriculum: `docs/akademi-perantau/masterclass-finansial-saudi*.{md,json}`.
+
+Live URLs: web register `https://www.perantauglobal.com/akademi/kelas/finansial-cerdas-pmi-saudi`; portal `app.perantauglobal.com/akademi`. Content is read from DB dynamically — data seeds go live without an app deploy.
+
+**Remaining polish (need Panji/PO input):** completion-screen financing CTA banner (`content.final_cta` in DB, UI not rendered yet); course cover image; exact financing numbers + WA contact. **Deferred:** admin CMS `/admin/academy` authoring UI (content via AI + seed migration meanwhile); webinar/offline/external delivery wiring; Paspor PG content+pricing; product #2 "cara kerja di negara X"; cert PDF; interactive cost-of-living calculator. **Known gap:** existing-account web-register doesn't auto-enroll (must enroll in-app) — see SPEC.
 
 ## 2026-06-02 — Akademi Perantau (learning platform) foundation ✅ SHIPPED + DEPLOYED
 
