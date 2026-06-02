@@ -14,6 +14,7 @@ export const routing = defineRouting({
     "/lowongan/[slug]": "/lowongan/[slug]",
     "/akademi": "/akademi",
     "/akademi/[slug]": "/akademi/[slug]",
+    "/akademi/kelas/[slug]": "/akademi/kelas/[slug]",
     "/tentang": {
       id: "/tentang",
       en: "/about",
