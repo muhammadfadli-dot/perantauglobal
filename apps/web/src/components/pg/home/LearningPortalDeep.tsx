@@ -8,7 +8,7 @@ import { Icon } from "@/components/pg/Icon";
  * Paspor Perantau Global is paid + per-country, but the schema for lessons
  * isn't shipped yet (per project_learning_platform_dev memory). This section
  * advertises the program with a hero photo + features, CTA goes to
- * /sertifikasi marketing page where users get the WhatsApp waitlist link.
+ * /akademi marketing page where users get the WhatsApp waitlist link.
  */
 
 const FEATURES = [
@@ -87,7 +87,7 @@ export function LearningPortalDeep() {
             <div className="inline-flex items-center gap-2 self-start">
               <span className="font-mono text-[15px] font-extrabold text-pg-gold-700">02</span>
               <span className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-pg-gold-700">
-                Learning Portal
+                Akademi Perantau
               </span>
             </div>
             <h2 className="text-[28px] md:text-[44px] font-extrabold tracking-[-0.025em] leading-[1.05] text-pg-ink-900 text-balance">
@@ -121,14 +121,14 @@ export function LearningPortalDeep() {
             </div>
 
             <Link
-              href="/sertifikasi"
+              href="/akademi"
               className="inline-flex self-start items-center gap-2 px-[22px] py-4 text-pg-ink-900 font-bold text-[15px] rounded-[14px] no-underline transition-all hover:-translate-y-0.5"
               style={{
                 background: "linear-gradient(135deg, var(--pg-gold-200), #d4a04a)",
                 boxShadow: "0 4px 12px rgba(138,94,10,0.20)",
               }}
             >
-              Lihat semua sertifikasi
+              Lihat Akademi Perantau
               <Icon name="arrow_right" size={15} stroke={2.4} />
             </Link>
           </div>

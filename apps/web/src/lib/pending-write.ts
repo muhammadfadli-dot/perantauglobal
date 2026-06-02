@@ -7,8 +7,16 @@ import { supabaseV2, isV2Configured } from "./supabase-v2";
  * + `consents` tables in the perantauglobal schema.
  */
 export interface WritePendingArgs {
-  /** Position slug — must match `positions.slug`. */
-  position_slug: string;
+  /**
+   * Intent of the submission. 'job' → materializes an application; 'academy' →
+   * materializes an academy_enrollment (migration 0060). Defaults to 'job' for
+   * backward compatibility with the existing apply flow.
+   */
+  intent?: "job" | "academy";
+  /** Position slug — required when intent='job'. Must match `positions.slug`. */
+  position_slug?: string;
+  /** Program slug — required when intent='academy'. Must match `academy_programs.slug`. */
+  program_slug?: string;
   /** Candidate email used for magic-link auth + dedupe. */
   email: string;
   /** Candidate phone (WhatsApp). */
@@ -66,9 +74,12 @@ export async function writePendingSubmission(
   try {
     const db = supabaseV2();
 
+    const intent = args.intent ?? "job";
     const { error: pendingErr } = await db.from("pending_submissions").insert({
       id: pendingId,
-      position_slug: args.position_slug,
+      intent,
+      position_slug: intent === "job" ? (args.position_slug ?? null) : null,
+      program_slug: intent === "academy" ? (args.program_slug ?? null) : null,
       email: args.email.toLowerCase().trim(),
       phone: args.phone || null,
       form_data: args.form_data as unknown as Json,

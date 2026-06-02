@@ -78,7 +78,7 @@ export default async function CertificationDetailPage({
               diumumkan di aplikasi Perantau Global.
             </p>
             <Link
-              href="/sertifikasi"
+              href="/akademi"
               className="inline-flex items-center gap-2 mt-7 text-pg-red-600 font-bold no-underline"
             >
               <Icon name="arrow_left" size={16} /> Lihat sertifikasi lain
@@ -97,7 +97,7 @@ export default async function CertificationDetailPage({
         <div className="px-5 md:px-8 pt-8 md:pt-10">
           <div className="max-w-4xl mx-auto">
             <Link
-              href="/sertifikasi"
+              href="/akademi"
               className="inline-flex items-center gap-1.5 text-[13px] font-bold text-pg-ink-500 no-underline"
             >
               <Icon name="arrow_left" size={15} /> Semua sertifikasi

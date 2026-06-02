@@ -16,6 +16,380 @@ export type Database = {
   }
   public: {
     Tables: {
+      academy_enrollments: {
+        Row: {
+          answers: Json
+          candidate_id: string
+          certificate_id: string | null
+          certificate_url: string | null
+          completed_at: string | null
+          created_at: string
+          enrolled_at: string
+          external_ref: string | null
+          external_status: string | null
+          external_url: string | null
+          id: string
+          program_slug: string
+          progress_pct: number
+          score: number | null
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          answers?: Json
+          candidate_id: string
+          certificate_id?: string | null
+          certificate_url?: string | null
+          completed_at?: string | null
+          created_at?: string
+          enrolled_at?: string
+          external_ref?: string | null
+          external_status?: string | null
+          external_url?: string | null
+          id?: string
+          program_slug: string
+          progress_pct?: number
+          score?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          answers?: Json
+          candidate_id?: string
+          certificate_id?: string | null
+          certificate_url?: string | null
+          completed_at?: string | null
+          created_at?: string
+          enrolled_at?: string
+          external_ref?: string | null
+          external_status?: string | null
+          external_url?: string | null
+          id?: string
+          program_slug?: string
+          progress_pct?: number
+          score?: number | null
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_enrollments_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academy_enrollments_program_slug_fkey"
+            columns: ["program_slug"]
+            isOneToOne: false
+            referencedRelation: "academy_programs"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      academy_lesson_keys: {
+        Row: {
+          created_at: string
+          keys: Json
+          lesson_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          keys?: Json
+          lesson_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          keys?: Json
+          lesson_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_lesson_keys_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: true
+            referencedRelation: "academy_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_lesson_progress: {
+        Row: {
+          answers: Json | null
+          completed_at: string
+          enrollment_id: string
+          id: string
+          lesson_id: string
+          score: number | null
+          status: string
+        }
+        Insert: {
+          answers?: Json | null
+          completed_at?: string
+          enrollment_id: string
+          id?: string
+          lesson_id: string
+          score?: number | null
+          status?: string
+        }
+        Update: {
+          answers?: Json | null
+          completed_at?: string
+          enrollment_id?: string
+          id?: string
+          lesson_id?: string
+          score?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_lesson_progress_enrollment_id_fkey"
+            columns: ["enrollment_id"]
+            isOneToOne: false
+            referencedRelation: "academy_enrollments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "academy_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "academy_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_lessons: {
+        Row: {
+          content: Json
+          created_at: string
+          estimated_minutes: number | null
+          id: string
+          lesson_num: number
+          lesson_type: string
+          module_id: string
+          pass_threshold: number | null
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          estimated_minutes?: number | null
+          id?: string
+          lesson_num: number
+          lesson_type?: string
+          module_id: string
+          pass_threshold?: number | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          estimated_minutes?: number | null
+          id?: string
+          lesson_num?: number
+          lesson_type?: string
+          module_id?: string
+          pass_threshold?: number | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "academy_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      academy_modules: {
+        Row: {
+          created_at: string
+          id: string
+          module_num: number
+          program_slug: string
+          sort_order: number
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          module_num: number
+          program_slug: string
+          sort_order?: number
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          module_num?: number
+          program_slug?: string
+          sort_order?: number
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "academy_modules_program_slug_fkey"
+            columns: ["program_slug"]
+            isOneToOne: false
+            referencedRelation: "academy_programs"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      academy_programs: {
+        Row: {
+          capacity: number | null
+          content: Json
+          country: string | null
+          cover_image: string | null
+          created_at: string
+          credential_delivery: string
+          credential_issuer: string | null
+          category: string
+          delivery_mode: string
+          duration_label: string | null
+          external_url: string | null
+          facilitated_by: string
+          is_free: boolean
+          location: string | null
+          output_type: string
+          pass_threshold: number
+          price: number | null
+          published_at: string | null
+          slug: string
+          sort_order: number
+          starts_at: string | null
+          status: string
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number | null
+          content?: Json
+          country?: string | null
+          cover_image?: string | null
+          created_at?: string
+          credential_delivery?: string
+          credential_issuer?: string | null
+          category?: string
+          delivery_mode?: string
+          duration_label?: string | null
+          external_url?: string | null
+          facilitated_by?: string
+          is_free?: boolean
+          location?: string | null
+          output_type?: string
+          pass_threshold?: number
+          price?: number | null
+          published_at?: string | null
+          slug: string
+          sort_order?: number
+          starts_at?: string | null
+          status?: string
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number | null
+          content?: Json
+          country?: string | null
+          cover_image?: string | null
+          created_at?: string
+          credential_delivery?: string
+          credential_issuer?: string | null
+          category?: string
+          delivery_mode?: string
+          duration_label?: string | null
+          external_url?: string | null
+          facilitated_by?: string
+          is_free?: boolean
+          location?: string | null
+          output_type?: string
+          pass_threshold?: number
+          price?: number | null
+          published_at?: string | null
+          slug?: string
+          sort_order?: number
+          starts_at?: string | null
+          status?: string
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      program_registration_fields: {
+        Row: {
+          created_at: string
+          field_help: string | null
+          field_key: string
+          field_label: string
+          field_type: Database["public"]["Enums"]["form_field_type"]
+          id: string
+          options: Json | null
+          program_slug: string
+          required: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          field_help?: string | null
+          field_key: string
+          field_label: string
+          field_type: Database["public"]["Enums"]["form_field_type"]
+          id?: string
+          options?: Json | null
+          program_slug: string
+          required?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          field_help?: string | null
+          field_key?: string
+          field_label?: string
+          field_type?: Database["public"]["Enums"]["form_field_type"]
+          id?: string
+          options?: Json | null
+          program_slug?: string
+          required?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_registration_fields_program_slug_fkey"
+            columns: ["program_slug"]
+            isOneToOne: false
+            referencedRelation: "academy_programs"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       admin_audit_log: {
         Row: {
           action: string
@@ -689,10 +1063,12 @@ export type Database = {
           expires_at: string
           form_data: Json
           id: string
+          intent: string
           ip_address: unknown
           nonce: string
           phone: string | null
-          position_slug: string
+          position_slug: string | null
+          program_slug: string | null
           user_agent: string | null
         }
         Insert: {
@@ -703,10 +1079,12 @@ export type Database = {
           expires_at?: string
           form_data: Json
           id?: string
+          intent?: string
           ip_address?: unknown
           nonce?: string
           phone?: string | null
-          position_slug: string
+          position_slug?: string | null
+          program_slug?: string | null
           user_agent?: string | null
         }
         Update: {
@@ -717,10 +1095,12 @@ export type Database = {
           expires_at?: string
           form_data?: Json
           id?: string
+          intent?: string
           ip_address?: unknown
           nonce?: string
           phone?: string | null
-          position_slug?: string
+          position_slug?: string | null
+          program_slug?: string | null
           user_agent?: string | null
         }
         Relationships: [
@@ -729,6 +1109,13 @@ export type Database = {
             columns: ["position_slug"]
             isOneToOne: false
             referencedRelation: "positions"
+            referencedColumns: ["slug"]
+          },
+          {
+            foreignKeyName: "pending_submissions_program_slug_fkey"
+            columns: ["program_slug"]
+            isOneToOne: false
+            referencedRelation: "academy_programs"
             referencedColumns: ["slug"]
           },
         ]
@@ -871,6 +1258,23 @@ export type Database = {
       }
     }
     Functions: {
+      complete_academy_reading: {
+        Args: { p_enrollment_id: string; p_lesson_id: string }
+        Returns: undefined
+      }
+      enroll_in_academy_program: {
+        Args: {
+          p_answers?: Json
+          p_consent_text?: string
+          p_consent_version?: string
+          p_program_slug: string
+        }
+        Returns: string
+      }
+      grade_academy_quiz: {
+        Args: { p_answers: Json; p_enrollment_id: string; p_lesson_id: string }
+        Returns: Json
+      }
       applications_stage_counts: {
         Args: { p_position?: string; p_search?: string }
         Returns: {
@@ -1097,6 +1501,25 @@ export type JobOrderStatus = Database["public"]["Enums"]["job_order_status"]
 export type UserRole = Database["public"]["Enums"]["user_role"]
 export type ApplicationFieldImportance = Database["public"]["Enums"]["application_field_importance"]
 export type ApplicationFieldSection = Database["public"]["Enums"]["application_field_section"]
+
+// Akademi Perantau (migration 0060). Regenerate via generate_typescript_types
+// after the migration is applied to prod to confirm parity.
+export type AcademyProgram = Database["public"]["Tables"]["academy_programs"]["Row"]
+export type AcademyModule = Database["public"]["Tables"]["academy_modules"]["Row"]
+export type AcademyLesson = Database["public"]["Tables"]["academy_lessons"]["Row"]
+export type AcademyEnrollment = Database["public"]["Tables"]["academy_enrollments"]["Row"]
+export type AcademyLessonProgress = Database["public"]["Tables"]["academy_lesson_progress"]["Row"]
+export type ProgramRegistrationField = Database["public"]["Tables"]["program_registration_fields"]["Row"]
+export type AcademyDeliveryMode = "in_app" | "webinar" | "offline" | "external"
+export type AcademyCategory = "paspor" | "masterclass" | "sertifikasi" | "vokasi"
+export type AcademyOutputType = "certificate" | "psikotes_result" | "completion" | "none"
+export type AcademyEnrollmentStatus =
+  | "registered"
+  | "in_progress"
+  | "completed"
+  | "passed"
+  | "failed"
+  | "cancelled"
 
 export const Constants = {
   public: {

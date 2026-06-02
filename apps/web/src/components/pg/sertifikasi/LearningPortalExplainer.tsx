@@ -7,7 +7,7 @@ export function LearningPortalExplainer() {
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col gap-2 max-w-2xl mb-10">
           <div className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-pg-gold-700">
-            Apa itu Learning Portal
+            Apa itu Akademi Perantau
           </div>
           <h2 className="text-[24px] md:text-[40px] font-extrabold tracking-[-0.02em] leading-[1.1] text-pg-ink-900 text-balance m-0">
             Tempat semua kredensial siap berangkat{" "}
@@ -38,7 +38,7 @@ export function LearningPortalExplainer() {
             {
               num: "03 · Ke depan",
               title: "Kredensial sesuai kebutuhan",
-              desc: "Setiap negara dan industri punya syarat berbeda. Learning Portal akan terus berkembang sesuai apa yang dibutuhkan kandidat untuk lulus seleksi employer.",
+              desc: "Setiap negara dan industri punya syarat berbeda. Akademi Perantau akan terus berkembang sesuai apa yang dibutuhkan kandidat untuk lulus seleksi employer.",
               tone: "active" as const,
             },
           ].map((tile) => (

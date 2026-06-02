@@ -12,9 +12,9 @@ import { InlineXlink } from "@/components/pg/sertifikasi/InlineXlink";
 import { SertFinalCTA } from "@/components/pg/sertifikasi/SertFinalCTA";
 
 export const metadata: Metadata = {
-  title: "Sertifikasi Siap Kerja — Paspor Perantau Global",
+  title: "Akademi Perantau — Paspor Perantau Global",
   description:
-    "Paspor Perantau Global: psikotes yang diakui formal + pelatihan fundamental per negara tujuan (Saudi Arabia, Jepang). Bukan syarat dari kami — kredensial yang memang kamu butuhkan untuk berangkat.",
+    "Akademi Perantau: psikotes yang diakui formal + pelatihan fundamental per negara tujuan (Saudi Arabia, Jepang). Bukan syarat dari kami — kredensial yang memang kamu butuhkan untuk berangkat.",
 };
 
 export const dynamic = "force-static";
@@ -23,7 +23,7 @@ export function generateStaticParams() {
   return [{ locale: "id" }];
 }
 
-export default async function SertifikasiPage({
+export default async function AkademiPage({
   params,
 }: {
   params: Promise<{ locale: string }>;

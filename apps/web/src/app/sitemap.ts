@@ -6,7 +6,7 @@ import { SITE_URL } from "@/lib/site";
 const STATIC_PAGES: { path: string; priority: number; changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"] }[] = [
   { path: "", priority: 1.0, changeFrequency: "weekly" },
   { path: "lowongan", priority: 0.95, changeFrequency: "weekly" },
-  { path: "sertifikasi", priority: 0.9, changeFrequency: "weekly" },
+  { path: "akademi", priority: 0.9, changeFrequency: "weekly" },
   { path: "tentang", priority: 0.7, changeFrequency: "monthly" },
   { path: "tim", priority: 0.5, changeFrequency: "monthly" },
   { path: "layanan", priority: 0.7, changeFrequency: "monthly" },
@@ -39,7 +39,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   for (const c of CERTIFICATIONS) {
     entries.push({
-      url: `${SITE_URL}/sertifikasi/${c.slug}`,
+      url: `${SITE_URL}/akademi/${c.slug}`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: c.status === "live" ? 0.85 : 0.5,

@@ -3,7 +3,7 @@ import { waLink } from "@/lib/contact";
 
 const TILES = [
   { ic: "search" as const, label: "Job Portal", title: "17 lowongan terbuka", tone: "red" as const },
-  { ic: "passport" as const, label: "Learning Portal", title: "2 Paspor tersedia", tone: "gold" as const },
+  { ic: "passport" as const, label: "Akademi", title: "2 Paspor tersedia", tone: "gold" as const },
   { ic: "user" as const, label: "Profil & Lamaran", title: "2 lamaran aktif", tone: "red" as const },
   { ic: "check" as const, label: "Status", title: "Diproses · Riyadh", tone: "gold" as const },
 ];
@@ -32,7 +32,7 @@ export function SertFinalCTA() {
                 textShadow: "0 1px 2px rgba(0,0,0,0.18), 0 2px 18px rgba(0,0,0,0.22)",
               }}
             >
-              Job &amp; Learning Portal,{" "}
+              Job Portal &amp; Akademi,{" "}
               <span style={{ color: "var(--pg-gold-200)" }}>dalam satu aplikasi.</span>
             </h2>
             <p

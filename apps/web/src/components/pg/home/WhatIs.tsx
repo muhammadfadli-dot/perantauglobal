@@ -4,9 +4,9 @@ import { Icon } from "@/components/pg/Icon";
 /**
  * WhatIs — dual-portal preview cards.
  *
- * Two big cards: Job Portal (red accent) + Learning Portal (gold accent).
- * Learning Portal is a "rich coming-soon" stub — schema for Paspor lessons
- * isn't shipped yet, CTA points at /sertifikasi marketing page.
+ * Two big cards: Job Portal (red accent) + Akademi Perantau (gold accent).
+ * Akademi Perantau is a "rich coming-soon" stub — schema for Paspor lessons
+ * isn't shipped yet, CTA points at /akademi marketing page.
  */
 export function WhatIs() {
   return (
@@ -103,9 +103,9 @@ export function WhatIs() {
             </span>
           </Link>
 
-          {/* Learning Portal card — gold accent, coming-soon stub */}
+          {/* Akademi Perantau card — gold accent, coming-soon stub */}
           <Link
-            href="/sertifikasi"
+            href="/akademi"
             className="group flex flex-col gap-5 p-6 md:p-7 rounded-[22px] no-underline transition-all hover:-translate-y-1"
             style={{
               background: "linear-gradient(135deg, #fcf6e8 0%, #f8eecf 100%)",
@@ -122,7 +122,7 @@ export function WhatIs() {
               </div>
               <div className="flex flex-col gap-1">
                 <div className="font-mono text-[10.5px] font-bold uppercase tracking-[0.12em] text-pg-gold-700">
-                  Learning Portal
+                  Akademi Perantau
                 </div>
                 <h3 className="text-[20px] md:text-[22px] font-extrabold text-pg-ink-900 tracking-[-0.015em]">
                   Persiapan siap kerja
@@ -167,7 +167,7 @@ export function WhatIs() {
             </div>
 
             <span className="inline-flex items-center gap-2 mt-1 font-bold text-[13.5px] text-pg-gold-700 transition-transform group-hover:gap-2.5">
-              Lihat sertifikasi
+              Lihat Akademi Perantau
               <Icon name="arrow_right" size={14} stroke={2.6} />
             </span>
           </Link>

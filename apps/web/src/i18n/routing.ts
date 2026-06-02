@@ -12,8 +12,8 @@ export const routing = defineRouting({
     "/": "/",
     "/lowongan": "/lowongan",
     "/lowongan/[slug]": "/lowongan/[slug]",
-    "/sertifikasi": "/sertifikasi",
-    "/sertifikasi/[slug]": "/sertifikasi/[slug]",
+    "/akademi": "/akademi",
+    "/akademi/[slug]": "/akademi/[slug]",
     "/tentang": {
       id: "/tentang",
       en: "/about",

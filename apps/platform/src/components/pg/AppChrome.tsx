@@ -111,7 +111,7 @@ function BrandMark() {
 const NAV_ITEMS: { key: string; label: string; icon: IconName; href: string }[] = [
   { key: "home",   label: "Beranda",  icon: "home",     href: "/dashboard" },
   { key: "search", label: "Lowongan", icon: "search",   href: "/explore" },
-  { key: "learn",  label: "Paspor",   icon: "passport", href: "/paspor" },
+  { key: "learn",  label: "Akademi",  icon: "passport", href: "/akademi" },
   { key: "me",     label: "Saya",     icon: "user",     href: "/profile" },
 ];
 
@@ -119,7 +119,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const activeKey =
     pathname?.startsWith("/profile") ? "me" :
-    pathname?.startsWith("/paspor") ? "learn" :
+    pathname?.startsWith("/akademi") || pathname?.startsWith("/paspor") ? "learn" :
     pathname?.startsWith("/explore") ? "search" :
     // /applications/* still maps to Beranda since lamaran lives there post-v2
     "home";

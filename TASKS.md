@@ -2,7 +2,50 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-05-29 (deep audit + fix sweep — see below)
+**Last updated:** 2026-06-02 (Akademi Perantau foundation — see below)
+
+## 2026-06-02 — Akademi Perantau (learning platform) foundation 🔨 BUILT, NOT APPLIED/DEPLOYED
+
+Branch `feat/akademi-perantau-foundation` (3 commits, on top of main). Built the
+**fundamental codebase** to receive course registrations + deliver in-app guided
+learning. **Nothing applied to prod DB or deployed** — that's the hand-off to Panji.
+Design + decisions: [docs/akademi-perantau/SPEC.md](./docs/akademi-perantau/SPEC.md)
++ memory `project_akademi_perantau`. Both apps typecheck clean; academy code lint-clean.
+
+**What's built:**
+- **Schema** `0060_academy_foundation.sql` — 7 tables (`academy_programs`,
+  `program_registration_fields`, `academy_modules`, `academy_lessons`,
+  `academy_lesson_keys` [admin-only quiz keys], `academy_enrollments`,
+  `academy_lesson_progress`) + intent-aware `pending_submissions`/`handle_new_auth_user`
+  routing (`intent` job|academy) + SECURITY DEFINER RPCs (`enroll_in_academy_program`,
+  `complete_academy_reading`, `grade_academy_quiz`, `_recompute_academy_enrollment`).
+  **Two adversarial-review passes folded in** (IDOR NULL-deny, cert cleared when not
+  earned, enroll-via-RPC w/ atomic consent, anon EXECUTE revoked, per-lesson
+  pass_threshold, program_slug RESTRICT, idempotent guards).
+- `0061_academy_seed_sample.sql` — optional `[CONTOH]` program (2 modules, reading +
+  quiz lessons + answer keys) to demo E2E. Deletable.
+- `packages/db/src/types.ts` — hand-added academy tables + RPC sigs + aliases
+  (regenerate after apply to confirm parity).
+- **apps/web** — intent-aware `writePendingSubmission` + `/api/akademi/[slug]` register
+  route (mirrors job apply, bio contract enforced). Removed superseded draft 0040.
+- **apps/platform candidate** — `/akademi` catalog → program detail (enroll panel /
+  progress + outline) → lesson player (reading completion + interactive quiz graded via
+  RPC). `lib/academy-db.ts`, `actions.ts`, `components/pg/academy/{EnrollPanel,LessonPlayer}`,
+  `lib/academy-consent.ts`. Nav tab "Paspor"→"Akademi"; legacy `/paspor` redirects.
+
+**HAND-OFF — Panji's manual steps (gated, not done autonomously):**
+1. Apply `0060` via `apply_migration` (MCP) — **review the SQL first**. Then optionally `0061` to demo.
+2. Regenerate TS types (`generate_typescript_types`) to confirm parity with hand-added types.
+3. Deploy both apps (push branch → PR → merge), then smoke-test the journey + a sample enroll/quiz.
+
+**Deferred (clearly scoped, NOT done):**
+- **Admin CMS** `/admin/academy` (author programs/modules/lessons/quizzes + view enrollments).
+  Content seedable via SQL meanwhile (like positions were at first).
+- **Full apps/web `/sertifikasi → /akademi` rebrand** (~20 files incl. i18n routing, sitemap,
+  redirects, `components/pg/sertifikasi/*`). Portal already on /akademi; web marketing still /sertifikasi.
+- Build the **web register form** (route exists; on 409 existing-account → login → in-app enroll).
+- webinar/offline/external delivery wiring; certificate PDF generation; Masterclass Financial content.
+- Copy debt: `PasporInviteCard` ("~5 jam · gratis"), profile "Paspor" StatTile, dashboard "Modul Paspor".
 
 ## 2026-05-29 — Deep audit + fix sweep 🔨 IN PROGRESS
 

@@ -8,7 +8,7 @@ const COLS = [
     title: "Produk",
     items: [
       { label: "Lowongan", href: "/lowongan" },
-      { label: "Sertifikasi", href: "/sertifikasi" },
+      { label: "Akademi", href: "/akademi" },
     ],
   },
   {

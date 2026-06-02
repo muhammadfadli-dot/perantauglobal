@@ -114,6 +114,13 @@ const nextConfig: NextConfig = {
       // already in circulation and can't be reprinted.
       { source: "/lowongan/diesel-mechanic-saudi-arabia", destination: "/lowongan/heavy-diesel-mechanic-saudi-arabia", permanent: true },
       { source: "/id/lowongan/diesel-mechanic-saudi-arabia", destination: "/lowongan/heavy-diesel-mechanic-saudi-arabia", permanent: true },
+      // Learning portal rebrand: /sertifikasi → /akademi (now "Akademi Perantau",
+      // coherent with the portal app). Keep old URLs alive for inbound links
+      // and the portal's deep links.
+      { source: "/sertifikasi", destination: "/akademi", permanent: true },
+      { source: "/sertifikasi/:slug*", destination: "/akademi/:slug*", permanent: true },
+      { source: "/id/sertifikasi", destination: "/akademi", permanent: true },
+      { source: "/id/sertifikasi/:slug*", destination: "/akademi/:slug*", permanent: true },
     ];
   },
   webpack(config) {

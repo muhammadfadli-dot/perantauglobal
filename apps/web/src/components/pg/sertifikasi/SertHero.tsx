@@ -27,7 +27,7 @@ export function SertHero() {
                   border: "1px solid rgba(201,138,20,0.25)",
                 }}
               >
-                Learning Portal
+                Akademi Perantau
               </span>
               <span className="font-mono text-[11px] font-semibold text-pg-ink-500 tracking-[0.04em]">
                 Paspor Perantau Global · sister of Job Portal
@@ -61,7 +61,7 @@ export function SertHero() {
                 href="#apa-itu"
                 className="inline-flex items-center justify-center px-[22px] py-4 bg-pg-white text-pg-ink-900 font-bold text-[15px] rounded-[14px] border-[1.5px] border-pg-ink-200 no-underline transition-all hover:border-pg-ink-300 hover:-translate-y-0.5"
               >
-                Apa itu Learning Portal?
+                Apa itu Akademi Perantau?
               </a>
             </div>
           </div>

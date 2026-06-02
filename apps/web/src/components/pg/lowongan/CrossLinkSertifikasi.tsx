@@ -4,7 +4,7 @@ import { Icon } from "@/components/pg/Icon";
 export function CrossLinkSertifikasi() {
   return (
     <Link
-      href="/sertifikasi"
+      href="/akademi"
       className="flex items-center gap-5 p-6 rounded-[20px] no-underline text-pg-ink-900 transition-all hover:-translate-y-0.5"
       style={{
         background: "linear-gradient(135deg, #fcf6e8 0%, #f8eecf 100%)",
@@ -31,7 +31,7 @@ export function CrossLinkSertifikasi() {
         className="inline-flex items-center gap-1.5 font-bold text-[13px] shrink-0"
         style={{ color: "var(--pg-gold-700)" }}
       >
-        <span className="hidden sm:inline">Lihat sertifikasi</span>
+        <span className="hidden sm:inline">Lihat Akademi Perantau</span>
         <Icon name="arrow_right" size={16} stroke={2.4} />
       </span>
     </Link>
