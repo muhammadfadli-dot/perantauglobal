@@ -1,7 +1,7 @@
 import type { PositionCountry } from "./positions";
 
 export type CountryMeta = {
-  key: "saudi" | "jepang" | "taiwan" | "indonesia";
+  key: "saudi" | "jepang" | "taiwan" | "indonesia" | "europe";
   name: PositionCountry;
   short: string;
   flag: string;
@@ -68,9 +68,22 @@ export const COUNTRY_META: Record<CountryMeta["key"], CountryMeta> = {
     imgFilter: "saturate(1.05) brightness(0.95)",
     tint: "#c4452f",
   },
+  europe: {
+    key: "europe",
+    name: "Eropa Timur",
+    short: "Eropa Timur",
+    flag: "🇪🇺",
+    currency: "Euro / Poundsterling",
+    contract: "Kontrak 1 tahun",
+    img: "/images/countries/europe.jpg",
+    tagline:
+      "Posisi spesialis pengeboran (drilling) di project site Eropa Timur. Untuk tenaga berpengalaman — gaji euro, kontrak resmi lewat jalur yang benar.",
+    imgFilter: "saturate(0.95) brightness(0.93)",
+    tint: "#4f6d7a",
+  },
 };
 
-export const COUNTRY_KEYS: CountryMeta["key"][] = ["saudi", "jepang", "taiwan", "indonesia"];
+export const COUNTRY_KEYS: CountryMeta["key"][] = ["saudi", "jepang", "taiwan", "europe", "indonesia"];
 
 export function countryKeyFromName(name: PositionCountry): CountryMeta["key"] {
   switch (name) {
@@ -78,6 +91,7 @@ export function countryKeyFromName(name: PositionCountry): CountryMeta["key"] {
     case "Jepang": return "jepang";
     case "Taiwan": return "taiwan";
     case "Indonesia": return "indonesia";
+    case "Eropa Timur": return "europe";
   }
 }
 
@@ -102,6 +116,8 @@ const CITY_BY_SLUG: Record<string, string> = {
   "manufaktur-pengelasan": "Aichi",
   "caregiver-taiwan": "Taipei",
   "spg-indonesia": "Jakarta",
+  "head-driller": "Balkan",
+  "assistant-driller": "Balkan",
 };
 
 const FALLBACK_CITY: Record<CountryMeta["key"], string> = {
@@ -109,6 +125,7 @@ const FALLBACK_CITY: Record<CountryMeta["key"], string> = {
   jepang: "Tokyo",
   taiwan: "Taipei",
   indonesia: "Jakarta",
+  europe: "Balkan",
 };
 
 export function cityForSlug(slug: string, countryKey: CountryMeta["key"]): string {

@@ -15,6 +15,7 @@ const FALLBACK_TINT: Record<ReturnType<typeof countryKeyFromName>, string> = {
   jepang: "#36598c",
   taiwan: "#3a8567",
   indonesia: "#c4452f",
+  europe: "#4f6d7a",
 };
 
 function heroImgSrc(slug: string): string {

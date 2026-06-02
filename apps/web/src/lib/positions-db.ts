@@ -180,6 +180,7 @@ const COUNTRY_LABEL: Record<string, PositionCountry> = {
   saudi_arabia: "Saudi Arabia",
   taiwan: "Taiwan",
   indonesia: "Indonesia",
+  europe: "Eropa Timur",
 };
 
 const VALID_ICONS = new Set<IconName>([
@@ -367,7 +368,7 @@ export async function fetchPositionsForCatalog(): Promise<Position[]> {
 
     // Stable ordering: country group then slug, so the page isn't reshuffled
     // every time admin saves a position.
-    const COUNTRY_ORDER: PositionCountry[] = ["Saudi Arabia", "Jepang", "Taiwan", "Indonesia"];
+    const COUNTRY_ORDER: PositionCountry[] = ["Saudi Arabia", "Jepang", "Taiwan", "Eropa Timur", "Indonesia"];
     out.sort((a, b) => {
       const ai = COUNTRY_ORDER.indexOf(a.country);
       const bi = COUNTRY_ORDER.indexOf(b.country);
