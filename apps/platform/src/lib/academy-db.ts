@@ -30,9 +30,17 @@ export interface ProgramContent {
 }
 
 export interface ReadingBlock {
-  type: "heading" | "paragraph" | "list" | "callout";
+  type: "heading" | "paragraph" | "list" | "callout" | "steps" | "stat" | "quote";
   text?: string;
   items?: string[];
+  /** callout: tone */
+  variant?: "tip" | "info" | "warn";
+  /** callout / stat: optional bold title or label */
+  title?: string;
+  /** stat: the big figure + caption */
+  value?: string;
+  label?: string;
+  sub?: string;
 }
 export interface ReadingContent {
   blocks: ReadingBlock[];

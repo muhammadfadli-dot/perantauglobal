@@ -43,6 +43,12 @@ export default async function LessonPage({
   const alreadyDone = progress.some((p) => p.lesson_id === lessonId);
   const moduleInfo = flat[idx]!;
 
+  // First reading lesson of THIS module — target of the quiz "Baca lagi materi" CTA.
+  const curModule = outline.find((m) => m.lessons.some((l) => l.id === lessonId));
+  const moduleFirstReadingId =
+    (curModule?.lessons.find((l) => l.lesson_type === "reading") ?? curModule?.lessons[0])?.id ??
+    null;
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
       <TopBarApp title="Akademi" back backHref={`/akademi/${slug}`} />
@@ -65,6 +71,7 @@ export default async function LessonPage({
           quizContent={lesson.lesson_type === "quiz" ? (lesson.content as unknown as QuizContent) : null}
           alreadyDone={alreadyDone}
           nextLessonId={nextLessonId}
+          moduleFirstReadingId={moduleFirstReadingId}
         />
       </main>
     </div>
