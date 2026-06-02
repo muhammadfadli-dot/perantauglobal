@@ -73,7 +73,7 @@ export const COUNTRY_META: Record<CountryMeta["key"], CountryMeta> = {
     name: "Eropa Timur",
     short: "Eropa Timur",
     flag: "🇪🇺",
-    currency: "Euro / Poundsterling",
+    currency: "Euro (€)",
     contract: "Kontrak 1 tahun",
     img: "/images/countries/europe.jpg",
     tagline:
