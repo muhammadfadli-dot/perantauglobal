@@ -1,0 +1,2463 @@
+{
+  "course": {
+    "slug": "finansial-cerdas-pmi-saudi",
+    "title": "Finansial Cerdas untuk Perantau ke Arab Saudi",
+    "subtitle": "Cara jaga, kirim, dan tumbuhkan gajimu — biar 2 tahun di Saudi nggak balik nol",
+    "duration_label": "Sekitar 2–3 jam, bisa dicicil per pelajaran",
+    "pass_threshold": 70,
+    "learning_outcomes": [
+      "Paham bahwa untuk kerja domestik jalur resmi, rumah-makan-medis-transport ditanggung majikan, jadi hampir seluruh gaji bisa kamu kirim/tabung — dan tahu kenapa 'gaji nominal' bisa menipu",
+      "Bisa baca slip & kontrak: tahu beda 'akomodasi & makan ditanggung / tidak', dan kenapa take-home dua kontrak gaji sama bisa beda jutaan",
+      "Paham sistem perlindungan upah Saudi (WPS, Musaned + Mada card wajib 2026, mukafaah/pesangon) dan tahu langkah konkret kalau gaji telat atau tidak dibayar — termasuk siapa yang dihubungi",
+      "Bisa mengenali dan menghindari jebakan finansial PMI: debt bondage calo, scam kirim uang, bukti transfer palsu, pinjol ilegal, investasi bodong, dan TPPO — plus cara verifikasi gratis di SISKOP2MI & bp2mi.go.id",
+      "Bisa memilih kanal kirim uang termurah dengan membandingkan rupiah yang BENAR-BENAR sampai (bukan ongkir), dan tahu trik batching untuk hemat jutaan per tahun",
+      "Bisa mengirim uang langkah demi langkah dengan benar — terutama memasukkan nama & nomor rekening keluarga dengan tepat supaya uang tidak nyangkut",
+      "Bisa menyusun pembagian gaji ala pay-yourself-first dengan tabungan ATAS NAMA SENDIRI, dan menetapkan batas kiriman rutin ke keluarga",
+      "Tahu tangga uang setelah kontrak: lunasi utang, dana darurat, lalu tumbuhkan lewat produk halal (Tabungan Emas, Sukuk Ritel, deposito syariah) dan aset produktif — bukan barang konsumtif",
+      "Siap secara finansial sebelum berangkat (rekening, m-banking, dokumen, Iqama, buffer) dan paham kapan pembiayaan resmi seperti KUR Penempatan PMI relevan — dan kapan justru kamu TIDAK perlu utang sama sekali"
+    ],
+    "final_cta": {
+      "heading": "Kamu Juga Bisa Berangkat — Lewat Jalur Resmi, Bukan Calo",
+      "body": "Sekarang kamu tahu cara jaga, kirim, dan tumbuhkan gaji supaya 2 tahun di Saudi nggak balik nol. Tapi semua itu dimulai dari satu hal: berangkat lewat jalur yang BENAR. Kalau kamu kerja domestik jalur resmi, biaya penempatan ditanggung majikan — kamu nggak perlu utang sama sekali, dan jangan mau ditawari 'dana talangan' untuk biaya yang harusnya gratis. Kalau kamu jalur skilled/formal yang memang ada biaya sah atau butuh modal, ada pintu legal: KUR Penempatan PMI — plafon sampai Rp100 juta, bunga 6%/tahun, tanpa agunan, cicilan baru mulai setelah 6 bulan gaji. Bandingkan dengan rentenir/calo yang menjerat 20-40%. Sebelum percaya siapa pun, cek izin P3MI di bp2mi.go.id dan pastikan nama serta job order kamu terdaftar di SISKOP2MI. Perantau Global bantu kamu berangkat lewat jalur resmi yang transparan — dan kalau memang perlu, pembiayaan penempatan yang legal, bukan calo.",
+      "offer": "Konsultasi gratis jalur resmi & pembiayaan penempatan legal bersama Perantau Global — cek dulu apakah kamu termasuk kategori yang biayanya ditanggung majikan (gratis), atau butuh KUR Penempatan PMI."
+    }
+  },
+  "modules": [
+    {
+      "module_num": 1,
+      "title": "Gajimu Hampir Semua Bisa Ditabung (Tapi Gaji Nominal Bisa Menipu)",
+      "summary": "Modul pembuka yang menampar dengan fakta paling penting buat pekerja domestik jalur resmi (PRT, pengasuh, sopir keluarga, juru masak, dll): rumah dan makan ditanggung majikan SECARA HUKUM (HRSD), dan medis seharusnya ditanggung sesuai kontrak/aturan. Jadi gaji sekitar SAR 1.500/bln hampir 100% bisa kamu kirim atau tabung — pengeluaran nyata cuma sekitar SAR 100/bln (pulsa + sabun). Masalah sebenarnya bukan \"gimana bertahan hidup\", tapi \"gimana nggak ngabisin uang yang sebenarnya sudah jadi milikmu\". Modul ini juga mengajarkan kenapa gaji nominal menipu: dua orang gaji sama bisa beda take-home jutaan cuma karena satu baris kontrak \"makan ditanggung / tidak\". Dua catatan jujur yang dipakai sepanjang modul: (1) kalau kamu berangkat lewat dana talangan/pembiayaan penempatan, beberapa bulan pertama gajimu bisa dipotong dulu untuk cicilan — padahal untuk jalur resmi Saudi banyak biaya penempatan SEHARUSNYA ditanggung pemberi kerja, jadi kamu berhak minta rincian biaya yang boleh/tidak boleh dipotong; (2) kirim uang ke kampung ada biayanya (dibahas modul berikutnya). Patokan kurs dipakai realistis ~1 SAR ≈ Rp4.300-an (selalu cek hari ini). Ini hook pembuka seluruh kursus.",
+      "lessons": [
+        {
+          "lesson_num": 1,
+          "type": "reading",
+          "title": "Rahasia yang Bikin Melongo: Hampir Seluruh Gajimu Bisa Kamu Kirim Pulang",
+          "estimated_minutes": 7,
+          "blocks": [
+            {
+              "type": "heading",
+              "text": "Coba pikir dulu sebentar"
+            },
+            {
+              "type": "paragraph",
+              "text": "Kalau kamu kerja sebagai pekerja rumah tangga (PRT), pengasuh anak, perawat lansia, juru masak, atau sopir keluarga di Arab Saudi lewat jalur RESMI — dan kamu tinggal di rumah majikan (live-in) — berapa kira-kira biaya hidupmu di sana setiap bulan?"
+            },
+            {
+              "type": "paragraph",
+              "text": "Jawabannya akan bikin kamu melongo: hampir NOL."
+            },
+            {
+              "type": "heading",
+              "text": "Kenapa biaya hidupmu hampir nol?"
+            },
+            {
+              "type": "paragraph",
+              "text": "Karena untuk pekerja sektor rumah tangga jalur resmi, majikan WAJIB menanggung kebutuhan pokokmu. Ini bukan kebaikan hati majikan — ini aturan hukum di Saudi (hak pekerja domestik yang diatur HRSD, kementerian tenaga kerja Saudi)."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Tempat tinggal — ditanggung majikan (kamu tinggal di rumahnya)",
+                "Makan sehari-hari — ditanggung majikan",
+                "Biaya berobat / medis — SEHARUSNYA ditanggung (lewat asuransi/jaminan kesehatan sesuai kontrak & aturan)",
+                "Tiket pulang di akhir kontrak — ditanggung majikan"
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Karena tinggal dan makan sudah ditanggung — gaji yang masuk ke tanganmu hampir seluruhnya bisa kamu kirim pulang atau tabung. Inilah keuntungan besar jalur resmi yang sering nggak disadari. Soal medis: aturannya majikan menanggung lewat asuransi, tapi di lapangan ini area yang kadang bermasalah — jadi pastikan ada di kontrakmu dan tanyakan ke P3MI sebelum berangkat."
+            },
+            {
+              "type": "heading",
+              "text": "Berapa sebenarnya yang kamu keluarkan tiap bulan?"
+            },
+            {
+              "type": "paragraph",
+              "text": "Mari kita hitung. Gaji minimum PRT Indonesia di Saudi sekarang sekitar SAR 1.500/bulan (hasil kesepakatan antar-pemerintah / MoU). Ini contoh ilustrasi untuk pekerja rumah tangga yang tinggal di rumah majikan (live-in):"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Tempat tinggal: SAR 0 (ditanggung)",
+                "Makan: SAR 0 (ditanggung)",
+                "Berobat: SAR 0 (seharusnya ditanggung lewat asuransi — cek kontrak)",
+                "Pulsa / paket data buat telepon keluarga: kira-kira SAR 50-75",
+                "Sabun, perlengkapan mandi, jajan kecil: kira-kira SAR 25-50",
+                "TOTAL keluar: kira-kira SAR 100 saja"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Artinya, dari gaji sekitar SAR 1.500, yang benar-benar keluar untuk hidup di Saudi cuma sekitar SAR 100. Sisanya — kira-kira SAR 1.400 — BISA kamu kirim pulang atau tabung. Setiap bulan."
+            },
+            {
+              "type": "callout",
+              "text": "Angka di atas contoh ilustrasi, bisa beda tergantung kontrak dan kebiasaanmu. Yang penting konsepnya: pengeluaran pokokmu di Saudi kecil sekali, jadi sebagian besar gaji adalah MILIKMU untuk dikirim atau ditabung."
+            },
+            {
+              "type": "heading",
+              "text": "Tapi tunggu — ada 2 hal yang belum dihitung (jujur, biar nggak kaget)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Supaya kamu nggak salah harap pas gaji pertama cair, dua biaya ini WAJIB kamu tahu sejak sekarang. SAR 1.400 itu sisa kotor — belum dikurangi dua hal di bawah:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "POTONGAN CICILAN (kalau pakai dana talangan): kalau kamu berangkat lewat pembiayaan penempatan / dana talangan, beberapa bulan pertama gajimu bisa DIPOTONG dulu untuk bayar cicilan. Jadi 'sisa penuh SAR 1.400' itu baru kamu rasakan setelah cicilan lunas. Tapi hati-hati: untuk jalur resmi Saudi, banyak biaya penempatan SEHARUSNYA ditanggung pemberi kerja (bukan kamu) — jadi kamu berhak minta P3MI menjelaskan rincian biaya mana yang boleh dan tidak boleh dipotong dari gajimu. Kita bahas tuntas di modul terakhir.",
+                "BIAYA KIRIM UANG: kirim uang ke Indonesia ada ongkosnya (ongkir + selisih kurs). Jadi yang sampai ke keluarga sedikit lebih kecil dari yang kamu kirim. Cara milih kanal paling murah kita bahas khusus di modul tentang kirim uang."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Jangan panik — kedua biaya ini ada solusinya, dan kamu berhak bertanya. Khusus soal potongan dana talangan: jangan anggap semua potongan itu 'sudah seharusnya'. Minta rinciannya secara tertulis. Yang penting: kamu tahu sejak awal, jadi pas lihat slip gaji pertama kamu nggak kaget. Janji ke keluarga sebaiknya pakai angka yang sudah dikurangi cicilan & ongkir kirim, bukan SAR 1.400 utuh."
+            },
+            {
+              "type": "heading",
+              "text": "Patokan kurs: SAR ke Rupiah"
+            },
+            {
+              "type": "paragraph",
+              "text": "Biar kebayang nilainya dalam Rupiah, kita pakai patokan kira-kira: 1 SAR sekitar Rp4.300-an (cek kurs hari ini). Jadi gaji SAR 1.500 itu kira-kira Rp6,5 juta sebulan (1.500 x 4.350 = sekitar Rp6.525.000)."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Untuk hitungan serius (mau janji nominal ke keluarga): pakai 1 SAR sekitar Rp4.300-4.400, dan WAJIB cek kurs hari ini dulu",
+                "Untuk hitung cepat di kepala saja: boleh bulatkan jadi 1 SAR kira-kira Rp4.300 (contoh: SAR 100 kira-kira Rp430 ribu) — ini cuma kira-kira kasar, jangan dipakai buat janji nominal"
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "PENTING: kurs SAR-Rupiah berubah TIAP HARI. Angka di atas hanya patokan kasar (sekitar Rp4.300-an). Sebelum kamu janji nominal ke keluarga, cek kurs hari ini dulu. Jangan pakai angka lama atau angka yang ditinggi-tinggikan."
+            },
+            {
+              "type": "heading",
+              "text": "Hitungan yang bikin melongo"
+            },
+            {
+              "type": "paragraph",
+              "text": "Sekarang bayangkan kontrak 2 tahun (24 bulan). Kalau biaya hidupmu di Saudi hampir nol dan kamu disiplin, ini potensimu. Kita hitung pelan-pelan biar jelas:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Gaji kotor 24 bulan: SAR 1.500 x 24 = SAR 36.000. Dalam Rupiah: SAR 36.000 x kira-kira Rp4.350 = sekitar Rp156 juta (ini sebelum dikurangi apa-apa)",
+                "Tapi kamu tetap keluar uang kecil (pulsa + sabun) kira-kira SAR 100/bulan = SAR 2.400 selama 2 tahun",
+                "Jadi sisa bersih: kira-kira SAR 33.600, atau dalam Rupiah sekitar Rp146 juta",
+                "Kesimpulan: kira-kira Rp145-150 juta dalam 2 tahun — tergantung disiplin, kurs hari itu, dan apakah kamu masih punya cicilan dana talangan"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Rp145-150 juta. Cukup buat renovasi rumah, modal warung, atau DP tanah. Tapi ini angka BEST CASE — artinya, itu cuma terjadi kalau hampir semua hal berjalan mulus."
+            },
+            {
+              "type": "callout",
+              "text": "Angka segini cuma tercapai kalau: (1) gajimu dibayar PENUH dan tepat waktu 24 bulan tanpa putus, (2) nggak ada potongan dana talangan tersisa, (3) nggak ada kejadian darurat yang nguras tabungan, dan (4) kamu disiplin nggak boros. Di dunia nyata jarang semua mulus — jadi anggap Rp145-150 juta sebagai TARGET, bukan janji pasti. Kurs juga berubah, cek hari ini."
+            },
+            {
+              "type": "heading",
+              "text": "Jadi, masalah sebenarnya apa?"
+            },
+            {
+              "type": "paragraph",
+              "text": "Kebanyakan orang mengira tantangan kerja di luar negeri adalah 'gimana cara bertahan hidup'. Untuk pekerja rumah tangga jalur resmi, itu BUKAN tantangannya — hidupmu di Saudi sudah ditanggung."
+            },
+            {
+              "type": "callout",
+              "text": "Tantangan sebenarnya: gimana caranya kamu TIDAK menghabiskan uang yang sebenarnya sudah jadi milikmu — dan gimana mengirimnya pulang dengan biaya semurah mungkin. Itu yang akan kita pelajari di kelas ini. Dan kabar baiknya — semua ini GRATIS buat kamu."
+            }
+          ]
+        },
+        {
+          "lesson_num": 2,
+          "type": "reading",
+          "title": "Gaji Nominal Itu Menipu: Baca Dulu Satu Baris 'Makan Ditanggung atau Tidak'",
+          "estimated_minutes": 7,
+          "blocks": [
+            {
+              "type": "heading",
+              "text": "Gaji besar belum tentu bawa pulang lebih banyak"
+            },
+            {
+              "type": "paragraph",
+              "text": "Di pelajaran sebelumnya kita lihat pekerja rumah tangga bisa kirim hampir seluruh gaji karena tinggal + makan ditanggung. Tapi nggak semua pekerjaan begitu. Di sinilah banyak orang tertipu oleh ANGKA GAJI."
+            },
+            {
+              "type": "paragraph",
+              "text": "Aturan paling penting yang harus kamu pegang: jangan bandingkan dua tawaran kerja hanya dari angka gajinya. Yang menentukan berapa uang yang BENAR-BENAR sampai ke keluargamu adalah satu baris kecil di kontrak: 'akomodasi & makan: ditanggung atau tidak'."
+            },
+            {
+              "type": "heading",
+              "text": "Dua orang, gaji sama, sisa beda jutaan"
+            },
+            {
+              "type": "paragraph",
+              "text": "Bandingkan dua pekerja, sama-sama gaji SAR 1.500. Contoh ilustrasi (harga & kurs bisa berubah):"
+            },
+            {
+              "type": "list",
+              "items": [
+                "ORANG A — Pekerja rumah tangga: tinggal & makan DITANGGUNG. Keluar cuma pulsa + sabun kira-kira SAR 100. Sisa: kira-kira SAR 1.400.",
+                "ORANG B — Pekerja pabrik / kamp: tinggal di mess gratis + bus gratis, TAPI makan beli sendiri kira-kira SAR 400-600. Plus pulsa + kebutuhan pribadi. Sisa: kira-kira SAR 840."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Gaji mereka SAMA PERSIS — SAR 1.500. Tapi sisa yang bisa dikirim beda kira-kira SAR 560 (sekitar Rp2,4 juta) tiap bulan. Bedanya cuma satu: makan ditanggung atau tidak. (Angka ilustrasi — kurs ~Rp4.300-an & harga berubah.)"
+            },
+            {
+              "type": "heading",
+              "text": "Cerita Sari dan Budi"
+            },
+            {
+              "type": "paragraph",
+              "text": "Sari kerja sebagai PRT, gaji SAR 1.500, tinggal & makan ditanggung majikan. Budi kerja sebagai pelayan hotel, gajinya lebih besar — tapi dia bayar sewa kamar dan beli makan sendiri."
+            },
+            {
+              "type": "paragraph",
+              "text": "Di akhir bulan, Sari bisa kirim lebih banyak ke kampung daripada Budi — walaupun di atas kertas gaji Budi lebih tinggi. Kenapa? Karena gaji Budi sebagian besar habis buat sewa dan makan. Gaji Sari hampir utuh."
+            },
+            {
+              "type": "callout",
+              "text": "Pelajaran: 'gaji lebih besar' tidak otomatis berarti 'bawa pulang lebih banyak'. Selalu tanya dulu: apa yang ditanggung?"
+            },
+            {
+              "type": "heading",
+              "text": "Aturan praktis saat membandingkan tawaran"
+            },
+            {
+              "type": "paragraph",
+              "text": "Kalau ada yang nawarin kerja, pakai cara berpikir ini (ini juga dipakai recruiter berpengalaman):"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Kalau SEMUA ditanggung (tinggal + makan gratis) — gaji SAR 1.000 saja sudah lumayan, karena hampir semua bisa ditabung.",
+                "Kalau kamu harus beli makan sendiri — minta gaji minimal SAR 1.300 ke atas, supaya setelah makan masih ada sisa yang berarti.",
+                "Jangan pernah jawab 'gaji berapa?' tanpa lebih dulu tanya 'apa yang ditanggung?'"
+              ]
+            },
+            {
+              "type": "heading",
+              "text": "Jebakan: jangan tergoda pindah dari tempat gratis"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ini kesalahan yang bikin uang habis: pekerja yang aslinya dapat tempat tinggal gratis, lalu tergoda 'pengen bebas, ngontrak apartemen sendiri'."
+            },
+            {
+              "type": "paragraph",
+              "text": "Sewa apartemen sendiri di kota seperti Riyadh kira-kira SAR 1.500-2.500/bulan (studio paling murah pun sekitar SAR 1.200). Itu sama besar atau LEBIH BESAR dari seluruh gajimu. Artinya: kamu kerja sebulan penuh cuma buat bayar sewa, dan nggak ada yang bisa dikirim pulang."
+            },
+            {
+              "type": "callout",
+              "text": "Akomodasi gratis itu HARTA. Jangan ditukar dengan 'kebebasan' yang menghabiskan seluruh gajimu. Contoh angka di atas ilustrasi — tapi prinsipnya jelas: tinggal gratis = lebih hemat, titik."
+            },
+            {
+              "type": "heading",
+              "text": "Kalau kamu memang harus beli makan sendiri"
+            },
+            {
+              "type": "paragraph",
+              "text": "Untuk pekerja kamp/formal yang makan tanggungan sendiri, satu keputusan kecil ini paling berpengaruh:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Masak sendiri di mess: kira-kira SAR 400-600/bulan",
+                "Beli makan di warung 2x sehari: kira-kira SAR 1.000+/bulan",
+                "Selisihnya kira-kira SAR 400-600 (sekitar Rp1,7-2,6 juta) tiap bulan — itu setara satu kiriman ekstra buat keluarga"
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Masak sendiri vs jajan terus = beda satu kiriman buat keluarga tiap bulan. Angka ilustrasi, harga & kurs (~Rp4.300-an) berubah — tapi arah pelajarannya tetap: kebiasaan makan adalah pengeluaran paling bisa kamu kontrol."
+            }
+          ]
+        },
+        {
+          "lesson_num": 3,
+          "type": "quiz",
+          "title": "Kuis: Udah Paham Gajimu Sebenarnya Berapa?",
+          "estimated_minutes": 4,
+          "pass_threshold": 70,
+          "questions": [
+            {
+              "id": "q1",
+              "prompt": "Untuk pekerja rumah tangga (PRT) jalur resmi di Saudi yang tinggal di rumah majikan, siapa yang menanggung tempat tinggal dan makan sehari-hari?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Ditanggung majikan, dan ini diatur secara hukum (aturan HRSD)"
+                },
+                {
+                  "key": "b",
+                  "label": "Ditanggung sendiri oleh pekerja dari gajinya"
+                },
+                {
+                  "key": "c",
+                  "label": "Dibagi dua: pekerja bayar makan, majikan bayar tinggal"
+                }
+              ]
+            },
+            {
+              "id": "q2",
+              "prompt": "Dua orang sama-sama bergaji SAR 1.500. Kenapa yang satu bisa kirim lebih banyak uang ke kampung daripada yang lain?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Karena salah satunya bekerja lebih keras"
+                },
+                {
+                  "key": "b",
+                  "label": "Karena yang satu makan & tempat tinggalnya ditanggung, yang lain harus bayar sendiri"
+                },
+                {
+                  "key": "c",
+                  "label": "Karena kurs Rupiah berbeda untuk tiap orang"
+                }
+              ]
+            },
+            {
+              "id": "q3",
+              "prompt": "Kamu seorang PRT dengan tempat tinggal GRATIS dari majikan. Ada yang nawarin pindah ke apartemen sendiri seharga SAR 1.800/bulan. Kenapa ini jebakan?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Karena apartemennya pasti jelek"
+                },
+                {
+                  "key": "b",
+                  "label": "Karena pindah apartemen tidak diizinkan secara hukum"
+                },
+                {
+                  "key": "c",
+                  "label": "Karena sewanya lebih besar dari seluruh gajimu, jadi nggak ada lagi yang bisa dikirim pulang"
+                }
+              ]
+            },
+            {
+              "id": "q4",
+              "prompt": "Apa pertanyaan PERTAMA yang harus kamu cek sebelum membandingkan dua tawaran kerja yang gajinya sama?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Apakah makan & tempat tinggal ditanggung atau tidak"
+                },
+                {
+                  "key": "b",
+                  "label": "Berapa kurs Rupiah hari ini"
+                },
+                {
+                  "key": "c",
+                  "label": "Siapa nama majikannya"
+                }
+              ]
+            },
+            {
+              "id": "q5",
+              "prompt": "Kalau kamu berangkat lewat dana talangan / pembiayaan penempatan dan gajimu dipotong untuk cicilan, apa yang sebaiknya kamu lakukan?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Diam saja dan terima semua potongan, karena semua potongan pasti sudah sesuai aturan"
+                },
+                {
+                  "key": "b",
+                  "label": "Minta P3MI menjelaskan rincian biaya mana yang boleh dan tidak boleh dipotong — karena untuk jalur resmi Saudi banyak biaya penempatan seharusnya ditanggung pemberi kerja"
+                },
+                {
+                  "key": "c",
+                  "label": "Berhenti kerja saja supaya tidak ada potongan"
+                }
+              ]
+            }
+          ],
+          "answer_keys": [
+            {
+              "id": "q1",
+              "correct": [
+                "a"
+              ],
+              "weight": 1,
+              "explanation": "Untuk pekerja rumah tangga jalur resmi yang tinggal di rumah majikan, majikan WAJIB menanggung tempat tinggal dan makan — ini diatur secara hukum (hak pekerja domestik HRSD), bukan sekadar kebaikan hati. Medis seharusnya juga ditanggung lewat asuransi sesuai kontrak. Itulah kenapa hampir seluruh gajimu bisa dikirim atau ditabung."
+            },
+            {
+              "id": "q2",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Gaji nominal bisa menipu. Yang menentukan berapa yang sampai ke keluarga adalah apakah makan & tempat tinggal ditanggung. Kalau ditanggung, sisa gaji jauh lebih besar. Selalu baca baris kontrak 'akomodasi & makan: ditanggung / tidak'."
+            },
+            {
+              "id": "q3",
+              "correct": [
+                "c"
+              ],
+              "weight": 1,
+              "explanation": "Sewa apartemen sendiri bisa sama besar atau lebih besar dari seluruh gajimu. Kalau kamu sudah punya tempat tinggal gratis, pindah ke sewa pribadi berarti gajimu habis buat sewa dan nggak ada yang bisa dikirim pulang. Akomodasi gratis itu harta — jangan ditukar."
+            },
+            {
+              "id": "q4",
+              "correct": [
+                "a"
+              ],
+              "weight": 1,
+              "explanation": "Sebelum bandingkan gaji, tanya dulu: 'apa yang ditanggung?'. Dua gaji yang sama bisa beda take-home jutaan cuma karena satu baris 'makan & akomodasi: ditanggung / tidak'. Itu pertanyaan pertama, baru lihat angka gaji."
+            },
+            {
+              "id": "q5",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Jangan anggap semua potongan gaji untuk cicilan penempatan itu 'sudah seharusnya'. Untuk jalur resmi Saudi, banyak biaya penempatan SEHARUSNYA ditanggung pemberi kerja, bukan dipotong dari gajimu. Kamu berhak minta P3MI menjelaskan secara tertulis rincian biaya mana yang boleh dan tidak boleh dipotong. Dengan begitu kamu tahu mana potongan yang wajar dan mana yang berlebihan — dan 'sisa penuh' (kira-kira SAR 1.400) baru kamu rasakan setelah cicilan yang sah benar-benar lunas."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "module_num": 2,
+      "title": "Pastikan Gajimu Benar-Benar Dibayar",
+      "summary": "Gaji besar percuma kalau nggak masuk rekening. Modul ini menjelaskan sistem perlindungan upah Saudi: gaji ekspat bebas pajak penghasilan (0%) dan ekspat tidak ikut iuran GOSI (jaminan sosial pemerintah Saudi), jadi gaji kotor hampir sama dengan gaji bersih. WPS (sistem pantau upah lewat bank) memastikan majikan beneran bayar, dan mulai 1 Januari 2026 semua gaji PRT wajib dibayar elektronik lewat Musaned ke rekening/kartu Mada atas nama PEKERJA SENDIRI. Tiga dokumen kunci yang wajib di tangan kamu — kartu/rekening Mada, Iqama (KTP-nya pekerja asing), dan paspor — dapat pelajaran sendiri karena ini blok paling melindungi hidupmu. Ada bonus pulang yang banyak PMI tak tahu: mukafaah (pesangon end-of-service). Modul ini juga jujur soal realita gaji tak dibayar, mengenali red flag penggelapan gaji, dan memberi tangga eskalasi konkret lengkap dengan hotline.",
+      "lessons": [
+        {
+          "lesson_num": 4,
+          "type": "reading",
+          "title": "Gaji Kotor ≈ Gaji Bersih: Kenapa Gaji Saudi Hampir Utuh Kamu Pegang",
+          "estimated_minutes": 6,
+          "blocks": [
+            {
+              "type": "callout",
+              "text": "Sebelum mulai — beberapa singkatan yang sering muncul di modul ini: PPh = pajak penghasilan. GOSI = iuran jaminan sosial pemerintah Saudi (semacam BPJS-nya Saudi). WPS = sistem pemerintah Saudi yang memantau pembayaran gaji lewat bank. Musaned = platform resmi Saudi khusus pekerja rumah tangga. SAR = Riyal, mata uang Saudi. Iqama = KTP-nya pekerja asing. Nggak usah dihafal — tiap istilah dijelaskan lagi waktu muncul."
+            },
+            {
+              "type": "heading",
+              "text": "Di Saudi, gaji kotor hampir sama dengan gaji bersih"
+            },
+            {
+              "type": "paragraph",
+              "text": "Coba ingat slip gaji di Indonesia: ada potongan PPh (pajak penghasilan) dan potongan BPJS. Yang tertulis 'gaji' nggak pernah utuh masuk rekening. Di Saudi beda jauh."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Pajak penghasilan pribadi untuk pekerja asing = 0%. Nol. Nggak ada potongan PPh.",
+                "Pekerja asing TIDAK ikut iuran GOSI (iuran jaminan sosial pemerintah Saudi, semacam BPJS-nya sana). Jadi nggak ada potongan itu juga.",
+                "Artinya: berapa pun nominal yang tertulis di kontrakmu, yang seharusnya masuk ya kira-kira sebesar itu juga, hampir utuh — bukan dikurangi pajak dan iuran seperti di Indonesia."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Contoh saja biar kebayang: kalau kontrak tulis gaji SAR 1.500, itu ≈ Rp7 juta (kurs sekitar Rp4.750 per SAR — kurs berubah tiap hari, cek hari ini). Ini cuma ILUSTRASI cara hitungnya, BUKAN patokan gaji — besarnya gaji tergantung kontrakmu sendiri. Intinya: beda dari Indonesia, nominal di kontrak itulah yang hampir utuh kamu pegang."
+            },
+            {
+              "type": "heading",
+              "text": "WPS: gaji wajib lewat bank, dalam Riyal"
+            },
+            {
+              "type": "paragraph",
+              "text": "Pemerintah Saudi punya sistem namanya WPS (Wage Protection System / Sistem Perlindungan Upah). Tujuannya satu: memastikan majikan beneran bayar gaji, dan dipantau lewat bank. Gaji wajib dibayar dalam Riyal (SAR), bukan dijanji-janji atau dibayar barang."
+            },
+            {
+              "type": "callout",
+              "text": "Penting — aturan kapan gaji masuk BEDA antara sektor formal dan PRT, jadi cek dulu kamu masuk yang mana. Pekerja FORMAL = kerja di pabrik, resto, konstruksi, perusahaan (bukan di rumah orang). Pekerja PRT = kerja di rumah majikan (asisten rumah tangga, pengasuh, sopir keluarga, juru masak keluarga). Untuk pekerja FORMAL: gaji wajib masuk maksimal 10 hari awal bulan berikutnya, ada inspeksi otomatis kalau telat. Untuk PRT: gaji dibayar tiap akhir bulan Hijriah sesuai kontrak (diatur lewat Musaned). Kalau bingung kamu sektor mana, tanya P3MI/syarikah dan cek kontrakmu."
+            },
+            {
+              "type": "heading",
+              "text": "Mulai 1 Januari 2026: gaji PRT WAJIB elektronik lewat Musaned"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ini perubahan besar yang melindungi kamu. Musaned adalah platform resmi pemerintah Saudi untuk pekerja rumah tangga. Mulai 1 Januari 2026, semua gaji PRT wajib dibayar secara elektronik lewat Musaned — masuk ke rekening atas nama kamu sendiri, bukan rekening majikan."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Gaji masuk ke rekening ATAS NAMA KAMU secara otomatis, jadi ada catatan resmi tiap bulan.",
+                "Kamu dapat akses ke rekening/kartu (Mada) atas namamu untuk tarik atau pakai gaji itu. Mada = sistem kartu debit/ATM Saudi. Tergantung cara bayar majikan, aksesnya bisa berupa kartu fisik atau lewat aplikasi/dompet digital — yang penting rekeningnya ATAS NAMA KAMU.",
+                "Kalau majikan melanggar (nggak bayar lewat sistem ini), majikan bisa kena sanksi/denda dari pemerintah Saudi — dan pelanggaran ini bisa kamu laporkan lewat jalur resmi."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Kita bahas tiga dokumen kunci — rekening/kartu Mada, Iqama, dan paspor — lengkap di pelajaran berikutnya, karena ini blok yang paling melindungi hidupmu di Saudi. Untuk sekarang ingat satu hal: gaji yang katanya 'sudah ditransfer' tapi rekening/kartunya nggak pernah kamu pegang = uang itu belum benar-benar jadi milikmu."
+            }
+          ]
+        },
+        {
+          "lesson_num": 5,
+          "type": "reading",
+          "title": "Tiga Dokumen yang HARUS di Tanganmu: Mada, Iqama, Paspor",
+          "estimated_minutes": 5,
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Ini pelajaran paling penting untuk disimpan sebelum berangkat. Tiga dokumen ini yang menentukan apakah gaji dan hidup finansialmu di Saudi benar-benar kamu yang pegang — atau dikunci orang lain. Aturannya simpel: ketiganya ATAS NAMA KAMU dan DI TANGAN KAMU."
+            },
+            {
+              "type": "heading",
+              "text": "1. Rekening/kartu Mada — akses ke gajimu, atas namamu"
+            },
+            {
+              "type": "paragraph",
+              "text": "Sejak 1 Januari 2026 gaji PRT masuk elektronik ke rekening atas nama kamu (lewat Musaned). Aksesnya namanya Mada — sistem kartu debit/ATM Saudi. Bisa berupa kartu fisik, atau akses lewat aplikasi/dompet digital, tergantung cara bayar majikan."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Rekening dan akses Mada itu ATAS NAMA KAMU SENDIRI — bukan nama majikan.",
+                "Kamu yang pegang kartunya / kamu yang punya akses ke aplikasinya. Bukan majikan.",
+                "Karena gaji masuk otomatis ke rekening atas namamu, ada catatan resmi tiap bulan — ini bukti kuat kalau ada masalah."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "RED FLAG BESAR: kalau majikan bilang 'gaji sudah ditransfer kok' TAPI kamu nggak pernah pegang kartu/akses Mada-nya — itu tanda penggelapan gaji. Akses ke rekening HARUS di tangan kamu, atas nama kamu. Gaji yang katanya masuk tapi kartunya/aksesnya dikuasai majikan = uang itu belum benar-benar jadi milikmu."
+            },
+            {
+              "type": "heading",
+              "text": "2. Iqama — KTP-nya pekerja asing, kunci semua urusan keuangan"
+            },
+            {
+              "type": "paragraph",
+              "text": "Iqama adalah izin tinggal resmi kamu di Saudi — semacam KTP-nya pekerja asing. Tanpa Iqama, semua urusan finansial macet: nggak bisa buka rekening penuh, nggak bisa pakai akses Mada dengan lancar, dan nggak bisa lolos verifikasi identitas (yang sering disebut KYC — singkatnya: pihak bank/jasa kirim uang harus yakin kamu beneran kamu) waktu mau kirim uang ke Indonesia."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Majikan WAJIB mengurus dan menanggung biaya Iqama kamu — itu kewajiban dia, bukan kamu.",
+                "Iqama harus ada di tangan kamu dan atas nama kamu sendiri.",
+                "Majikan menahan Iqama kamu = pelanggaran serius. Iqama nyambung ke akses Mada dan ke proses kirim uang — kalau ditahan, hidup finansial kamu dikunci."
+              ]
+            },
+            {
+              "type": "heading",
+              "text": "3. Paspor — wajib kamu yang pegang"
+            },
+            {
+              "type": "paragraph",
+              "text": "Sama seperti Iqama, paspor itu milik kamu dan wajib kamu yang simpan. Majikan menyita paspor kamu adalah ILEGAL di Saudi — peraturan jelas-jelas melarang majikan menahan paspor pekerja, dan ini pelanggaran yang bisa kamu laporkan. Kalau paspor atau Iqama kamu ditahan, itu bukan hal sepele; itu alasan kuat buat lapor ke KBRI/KJRI (cara lapornya kita bahas di pelajaran berikutnya)."
+            },
+            {
+              "type": "callout",
+              "text": "Ingat tiga kunci ini: (1) Rekening/kartu Mada atas nama kamu, aksesnya di tangan kamu. (2) Iqama atas nama kamu, di tangan kamu. (3) Paspor di tangan kamu. Kalau salah satu disimpan majikan 'biar aman', itu BUKAN demi keamananmu — itu tanda bahaya."
+            }
+          ]
+        },
+        {
+          "lesson_num": 6,
+          "type": "reading",
+          "title": "Bonus Pulang (Mukafaah) & Apa yang Harus Dilakukan Kalau Gaji Telat",
+          "estimated_minutes": 8,
+          "blocks": [
+            {
+              "type": "heading",
+              "text": "Bagian 1 — Mukafaah: 'bonus pulang' yang banyak orang nggak tahu"
+            },
+            {
+              "type": "paragraph",
+              "text": "Mukafaah (end-of-service benefit / pesangon) adalah uang tambahan yang jadi HAK kamu waktu kontrak selesai. Banyak PMI nggak tahu ini ada, jadi nggak menuntut. Padahal ini lumayan — anggap saja bonus pulang."
+            },
+            {
+              "type": "heading",
+              "text": "Untuk pekerja rumah tangga (PRT)"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Kerja 4 tahun berturut-turut = berhak 1 bulan gaji sebagai mukafaah.",
+                "Lebih dari 4 tahun = tambah 1 bulan gaji untuk tiap tahun tambahan.",
+                "Kurang dari 4 tahun = sesuai kesepakatan di kontrak — makanya CEK KONTRAK kamu untuk kasus ini."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Dasarnya jelas: Pasal 22 Regulasi Pekerja Domestik Saudi. Jadi aturan '1 bulan gaji per 4 tahun' itu hak resmi, bukan kebaikan majikan. Tapi untuk masa kerja di bawah 4 tahun, hitungannya ikut kontrak — minta dijelaskan ke P3MI/syarikah dan minta tertulis."
+            },
+            {
+              "type": "heading",
+              "text": "Untuk pekerja formal (pabrik, resto, perusahaan)"
+            },
+            {
+              "type": "list",
+              "items": [
+                "5 tahun pertama: setengah bulan gaji (0,5 bulan) untuk tiap tahun kerja.",
+                "Setelah 5 tahun: naik jadi 1 bulan gaji untuk tiap tahun tambahan.",
+                "TAPI hati-hati: kalau kamu resign (berhenti sendiri) sebelum 2 tahun, hak mukafaah kamu = NOL."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Penting kalau kamu RESIGN (berhenti sendiri): di atas 2 tahun pun, jumlah yang kamu terima bisa DIPOTONG tergantung lama kerja — bukan langsung penuh. Aturannya bertingkat (makin lama kerja, makin besar bagian yang kamu dapat; penuh baru kalau kerjanya sudah sangat lama). Jadi jangan asal ambil keputusan berhenti — minta dihitung dulu berapa hakmu. Beda 'di-PHK' dan 'resign sendiri' juga beda hasilnya. Simpan kontrak dan tanya sebelum memutuskan."
+            },
+            {
+              "type": "heading",
+              "text": "Bagian 2 — Realita yang harus kita jujur soal: gaji bisa telat atau tidak dibayar"
+            },
+            {
+              "type": "paragraph",
+              "text": "Kita nggak mau bohongi kamu. Masalah WNI di Saudi yang paling sering itu soal gaji — telat, dipotong, atau tidak dibayar sama sekali (bahkan ada kasus ekstrem orang tak digaji bertahun-tahun). Justru karena itu, jalur resmi + gaji elektronik atas nama sendiri itu penting banget. Dan kalau masalah terjadi, kamu HARUS tahu langkah-langkahnya. Jangan diam saja, jangan cari calo."
+            },
+            {
+              "type": "heading",
+              "text": "Tangga eskalasi: kalau gaji telat atau tidak dibayar"
+            },
+            {
+              "type": "list",
+              "items": [
+                "LANGKAH 1 — Dokumentasikan. Kumpulkan bukti: kontrak kerja, catatan jam kerja, dan screenshot dari Musaned/Mada/WPS yang nunjukin gaji belum masuk. Bukti ini senjata kamu.",
+                "LANGKAH 2 — Lapor jalur resmi Saudi. Lewat aplikasi Musaned, atau telepon hotline HRSD (Kementerian SDM Saudi) di nomor 19911. Ini gratis dan resmi.",
+                "LANGKAH 3 — Hubungi perwakilan Indonesia. KBRI Riyadh atau KJRI Jeddah punya hotline pelindungan WNI. Mereka ada untuk bantu kamu — ini tugas mereka.",
+                "LANGKAH 4 — Lapor dari sisi Indonesia juga. BP3MI / SISKOP2MI / Migrant CARE bisa bantu menekan dan mendampingi dari dalam negeri."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Simpan nomor ini sebelum berangkat: HRSD Saudi 19911. Dan catat nomor hotline KBRI Riyadh / KJRI Jeddah. Lebih baik punya dan nggak pakai, daripada butuh dan nggak punya."
+            },
+            {
+              "type": "heading",
+              "text": "Benteng utama: pilih jalur resmi sejak awal"
+            },
+            {
+              "type": "paragraph",
+              "text": "Cara paling ampuh menghindari masalah gaji adalah berangkat lewat jalur resmi SPSK/Syarikah dari awal. SPSK/Syarikah = skema penempatan resmi di mana kamu kerja di bawah PERUSAHAAN resmi (bukan langsung ke individu majikan). Kenapa lebih aman?"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Hubungan kerja kamu dengan PERUSAHAAN resmi, bukan individu majikan. Ada badan yang bertanggung jawab.",
+                "Gaji dimonitor pemerintah lewat sistem, jadi penggelapan lebih sulit dan ketahuan.",
+                "Penempatannya zero-cost untuk kamu — kategori pekerjaan domestik nggak boleh ditagih biaya berangkat (majikan/agency yang bayar)."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Kesimpulan modul ini: gaji Saudi itu hampir bebas pajak dan dilindungi sistem — tapi perlindungan itu cuma jalan kalau (1) kamu lewat jalur resmi, (2) rekening/kartu Mada + Iqama + paspor atas nama dan di tangan kamu, dan (3) kamu tahu harus lapor ke mana kalau gaji bermasalah. Tiga ini yang bikin gaji besar beneran sampai ke keluarga, bukan cuma janji di kontrak."
+            }
+          ]
+        },
+        {
+          "lesson_num": 7,
+          "type": "quiz",
+          "title": "Kuis: Lindungi Gajimu",
+          "estimated_minutes": 5,
+          "pass_threshold": 70,
+          "questions": [
+            {
+              "id": "q1",
+              "prompt": "Majikan bilang gajimu sudah ditransfer, tapi kamu nggak pernah dikasih akses kartu/rekening Mada-nya — selalu dia yang pegang. Itu tanda apa?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Hal biasa, majikan cuma bantu menyimpan biar aman"
+                },
+                {
+                  "key": "b",
+                  "label": "Red flag penggelapan gaji — rekening/kartu Mada harus atas nama kamu dan aksesnya di tangan kamu"
+                },
+                {
+                  "key": "c",
+                  "label": "Tanda gaji kamu lebih besar dari seharusnya"
+                },
+                {
+                  "key": "d",
+                  "label": "Wajar karena kartu memang atas nama majikan"
+                }
+              ]
+            },
+            {
+              "id": "q2",
+              "prompt": "Selain paspor, dokumen apa yang wajib kamu pegang sendiri, dan kenapa penting buat urusan keuangan?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Iqama — prasyarat untuk pakai akses Mada dan lolos verifikasi identitas (KYC) saat kirim uang ke Indonesia"
+                },
+                {
+                  "key": "b",
+                  "label": "Struk belanja, supaya bisa klaim pajak"
+                },
+                {
+                  "key": "c",
+                  "label": "Kartu nama majikan, supaya gampang dihubungi"
+                },
+                {
+                  "key": "d",
+                  "label": "Tidak ada dokumen lain yang penting selain paspor"
+                }
+              ]
+            },
+            {
+              "id": "q3",
+              "prompt": "Gajimu telat dan tidak dibayar. Apa langkah PERTAMA yang benar?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Diam saja dan tunggu sampai majikan ingat sendiri"
+                },
+                {
+                  "key": "b",
+                  "label": "Cari calo yang janji bisa 'mengurus' cepat"
+                },
+                {
+                  "key": "c",
+                  "label": "Dokumentasikan bukti (kontrak, jam kerja, screenshot Musaned/Mada), lalu lapor jalur resmi seperti Musaned/HRSD 19911/KBRI"
+                },
+                {
+                  "key": "d",
+                  "label": "Langsung pulang ke Indonesia tanpa lapor siapa-siapa"
+                }
+              ]
+            },
+            {
+              "id": "q4",
+              "prompt": "Kenapa berangkat lewat jalur resmi SPSK/Syarikah lebih aman soal gaji?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Karena gajinya selalu lebih besar dua kali lipat"
+                },
+                {
+                  "key": "b",
+                  "label": "Karena hubungan kerjanya dengan perusahaan resmi (bukan individu) dan gaji dimonitor pemerintah"
+                },
+                {
+                  "key": "c",
+                  "label": "Karena kamu nggak perlu Iqama atau paspor sama sekali"
+                },
+                {
+                  "key": "d",
+                  "label": "Karena majikan bebas menyimpan kartu Mada kamu"
+                }
+              ]
+            }
+          ],
+          "answer_keys": [
+            {
+              "id": "q1",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Rekening/kartu Mada wajib atas nama kamu dan aksesnya di tangan kamu. Kalau majikan bilang gaji 'sudah ditransfer' tapi kartunya/aksesnya dia yang kuasai, kamu nggak punya bukti dan nggak bisa akses uangmu — itu indikasi penggelapan gaji. Gaji yang nggak bisa kamu pegang belum benar-benar milikmu."
+            },
+            {
+              "id": "q2",
+              "correct": [
+                "a"
+              ],
+              "weight": 1,
+              "explanation": "Iqama (izin tinggal, semacam KTP-nya pekerja asing) adalah prasyarat legal semua urusan finansial di Saudi: pakai akses Mada dengan lancar dan lolos verifikasi identitas (KYC) saat kirim uang. Majikan wajib mengurus dan menanggung Iqama, tapi dokumennya harus atas nama dan di tangan kamu. Menahan Iqama = pelanggaran serius."
+            },
+            {
+              "id": "q3",
+              "correct": [
+                "c"
+              ],
+              "weight": 1,
+              "explanation": "Jangan diam dan jangan cari calo. Langkah pertama: kumpulkan bukti (kontrak, jam kerja, screenshot WPS/Musaned/Mada) supaya laporanmu kuat. Lalu lapor jalur resmi: aplikasi Musaned, hotline HRSD Saudi 19911, dan KBRI Riyadh/KJRI Jeddah. Bukti + jalur resmi = perlindungan nyata."
+            },
+            {
+              "id": "q4",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Lewat jalur resmi SPSK/Syarikah, hubungan kerjamu dengan PERUSAHAAN resmi (bukan individu majikan), dan gaji dimonitor pemerintah lewat sistem. Penggelapan jadi lebih sulit dan ketahuan, plus penempatannya zero-cost untuk kategori pekerjaan domestik. Inilah benteng utama melawan masalah gaji."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "module_num": 3,
+      "title": "Jangan Sampai Kena Tipu: Calo, Scam Kirim Uang, Pinjol & Investasi Bodong",
+      "summary": "Revised module 3, fixing only the two MUST FIX items while keeping all structure, content, and quiz intact.",
+      "lessons": [
+        {
+          "lesson_num": 7,
+          "type": "reading",
+          "title": "Aturan Emas Anti-Calo: Kerja Domestik Itu GRATIS Berangkat",
+          "estimated_minutes": 8,
+          "blocks": [
+            {
+              "type": "heading",
+              "text": "Satu aturan yang bisa nyelamatin kamu dari utang puluhan juta"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ini aturan paling penting di seluruh kursus, dan paling gampang diingat: kalau kamu mau kerja jadi pembantu rumah tangga, pengasuh, sopir keluarga, dan sejenisnya ke luar negeri lewat jalur resmi — kamu TIDAK BOLEH ditagih biaya berangkat. Bukan kamu yang bayar tiket, visa, pelatihan, atau sertifikat. Majikan dan agency yang bayar. Ini hukum, bukan kebaikan hati."
+            },
+            {
+              "type": "paragraph",
+              "text": "Aturan ini diatur jelas: prinsip pekerja migran tidak boleh dibebani biaya penempatan ada di UU No. 18 Tahun 2017 Pasal 30. Pasal 86 UU yang sama bahkan mengancam pidana sampai 5 tahun penjara atau denda sampai Rp15 miliar bagi yang melanggar — jadi ini bukan aturan main-main. Larangan memotong gaji untuk biaya yang harusnya ditanggung majikan ada di Permen P2MI No. 17 Tahun 2025. Jadi kalau ada yang bilang 'biayanya nanti dipotong dari gajimu di sana', itu sekarang ILEGAL untuk kerja domestik."
+            },
+            {
+              "type": "heading",
+              "text": "10 jenis kerja yang GRATIS berangkat"
+            },
+            {
+              "type": "paragraph",
+              "text": "Daftar 10 kategori ini ada di Peraturan BP2MI No. 9 Tahun 2020. Kalau kerjamu salah satu dari ini, kamu Rp0 untuk biaya penempatan lewat jalur resmi:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Pembantu rumah tangga (PRT/ART)",
+                "Pengasuh bayi",
+                "Pengasuh lansia (orang tua)",
+                "Juru masak keluarga",
+                "Sopir keluarga",
+                "Perawat taman / tukang kebun",
+                "Pengasuh anak",
+                "Petugas kebersihan",
+                "Pekerja ladang / perkebunan",
+                "Awak kapal perikanan"
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Kebanyakan PMI Indonesia ke Arab Saudi masuk salah satu dari 10 kategori ini. Artinya: biaya penempatan kamu seharusnya Rp0. Hafalin ini."
+            },
+            {
+              "type": "heading",
+              "text": "8 biaya yang BUKAN tanggunganmu"
+            },
+            {
+              "type": "paragraph",
+              "text": "Untuk 10 kategori di atas, semua ini wajib ditanggung majikan/agency — bukan kamu:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Tiket pesawat pulang-pergi",
+                "Visa kerja",
+                "Legalisasi / pengesahan kontrak kerja",
+                "Pelatihan",
+                "Sertifikat keterampilan",
+                "Pemeriksaan kesehatan & psikologi (medical GAMCA/WAFID)",
+                "Jasa perusahaan penyalur",
+                "Pengurusan dokumen keberangkatan lainnya"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Soal medical/psikotes (GAMCA atau WAFID): secara aturan, untuk 10 kategori domestik ini, biayanya termasuk komponen tanggungan majikan/agency. Tapi jujur soal praktik lapangan: di banyak kasus pekerja tetap diminta bayar dulu ke klinik. Kalau itu terjadi padamu, jangan langsung nuduh penipuan — tapi minta penjelasan TERTULIS dan pastikan biaya itu diganti atau diperhitungkan, bukan jadi 'utang diam-diam' yang dipotong dari gajimu nanti."
+            },
+            {
+              "type": "heading",
+              "text": "Yang genuinely jadi tanggunganmu sendiri (biar adil, jangan asal tuduh)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Supaya aturan 'Rp0' ini tepat dan kamu nggak salah menuduh P3MI yang resmi: ada sedikit biaya pribadi yang memang wajar kamu tanggung sendiri, dan ini BUKAN biaya penempatan. Contohnya: bikin paspor sendiri kalau belum punya, perlengkapan pribadi, atau sebagian iuran yang skema-nya memang dibebankan ke pekerja secara tertulis. Yang ILEGAL adalah biaya penempatan (tiket, visa kerja, pelatihan, sertifikat, jasa perusahaan) — itu yang Rp0. Jadi rumusnya: bukan 'semua rupiah yang diminta = calo', tapi 'biaya penempatan yang ditagih ke kamu = calo'."
+            },
+            {
+              "type": "heading",
+              "text": "Jebakan utama: 'gratis berangkat, bayar belakangan' (debt bondage)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ini modus calo paling licik. Mereka bilang: 'Tenang, semua aku yang urus dulu. Kamu nggak usah keluar uang sekarang.' Lalu diam-diam biaya itu (bisa Rp3 juta sampai Rp65 juta) ditulis jadi UTANG kamu. Begitu kamu kerja di Saudi, gajimu dipotong tiap bulan untuk 'bayar utang' — kadang sampai 6-7 bulan gaji habis. Ini namanya jebakan utang (debt bondage)."
+            },
+            {
+              "type": "callout",
+              "text": "'Gratis berangkat, bayar belakangan dipotong gaji' BUKAN kebaikan. Itu jebakan utang. Untuk kerja domestik, biaya penempatanmu memang Rp0 — bukan 'gratis dulu lalu dipotong'."
+            },
+            {
+              "type": "paragraph",
+              "text": "Tiap tahun masih ribuan WNI berangkat lewat jalur ilegal seperti ini — tanpa kontrak resmi, tanpa asuransi, tanpa perlindungan kalau ada masalah. (Angka pastinya susah dipastikan karena memang nggak terdata; yang jelas jumlahnya banyak dan terus terjadi.) Kalau gaji tak dibayar atau kamu disiksa, tidak ada yang bisa bantu karena namamu tidak terdaftar di mana pun."
+            },
+            {
+              "type": "heading",
+              "text": "Pengecualian yang jujur (ini penting, jangan asal nuduh)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Aturannya: untuk 10 kategori lewat jalur resmi, DEFAULT-nya majikan yang bayar biaya penempatan. Tapi ada pengecualian jujur — kalau ada perjanjian antar-negara (bilateral) atau aturan negara tujuan yang memang mengatur sebagian biaya jadi tanggungan pekerja, itu bisa sah. Bedanya dengan calo: yang sah selalu TERTULIS dan jelas dasarnya."
+            },
+            {
+              "type": "callout",
+              "text": "Kalau P3MI bilang ada biaya yang kamu tanggung, minta rinciannya TERTULIS beserta dasar aturannya. Yang resmi nggak akan keberatan. Yang calo bakal ngambek atau ngalihin pembicaraan."
+            },
+            {
+              "type": "heading",
+              "text": "Cek sendiri GRATIS apakah agenmu resmi (2 langkah)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Kamu tidak perlu percaya omongan siapa pun. Kamu bisa cek sendiri, gratis, dari HP:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Langkah 1 — Cek izin P3MI. Buka bp2mi.go.id, cari nama perusahaan penyalurnya. Izinnya harus AKTIF. P3MI resmi itu wajib punya modal Rp5 miliar, deposit Rp1,5 miliar, sertifikat ISO 9001, dan kantor fisik (aturan Permen P2MI No. 31 Tahun 2025). Calo nggak punya itu.",
+                "Langkah 2 — Cek nama kamu + lowongan di SISKOP2MI. Nama kamu, nama P3MI, dan job order (lowongannya) harus SEMUA terdaftar di sistem SISKOP2MI. Tanyakan ke P3MI nomor pendaftaranmu dan minta dibantu cek."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Aturan paling tegas: kalau nama kamu TIDAK ADA di SISKOP2MI, kamu TIDAK diberangkatkan secara resmi. Titik. Jangan berangkat."
+            },
+            {
+              "type": "heading",
+              "text": "Tanda bahaya (red flag) calo"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Tidak punya izin atau alamat kantor yang jelas",
+                "Janji 'tanpa visa kerja' atau 'visa ziarah/umrah bisa langsung kerja' (ini ilegal & berbahaya)",
+                "Bilang 'gampang, cepat, tanpa pengalaman, tanpa pelatihan'",
+                "Minta biaya penempatan tapi tidak kasih kuitansi resmi",
+                "Minta kamu bayar biaya penempatan di muka untuk kerja domestik (harusnya gratis!)",
+                "MENAHAN paspormu — paspor wajib selalu di tanganmu sendiri"
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Soal paspor: di Saudi, menyita paspor pekerja secara aturan ILEGAL — untuk pekerja sektor formal, majikan bisa kena denda (ribuan riyal, besarnya bertingkat tergantung kasus). Tapi jujur untuk kategori PEKERJA DOMESTIK: aturan domestic-worker terbaru juga melarang penyitaan paspor, namun penegakannya di lapangan masih lemah dan besaran dendanya tidak selalu sejelas pada pekerja formal — jadi jangan berasumsi 'pasti ada denda otomatis' lalu kecewa kalau ternyata ribet. Yang pasti: paspor dan dokumen identitasmu (Iqama/izin tinggal) harus selalu kamu yang pegang. Dan jalur perlindungan yang riil bukan menunggu denda turun sendiri, tapi MELAPOR — kalau paspormu ditahan, segera lapor ke KBRI Riyadh atau KJRI Jeddah."
+            },
+            {
+              "type": "callout",
+              "text": "Ingat satu kalimat ini: untuk kerja domestik, biaya penempatan itu Rp0. Siapa pun yang nodong kamu bayar biaya penempatan = calo atau penipu. Cek di bp2mi.go.id + SISKOP2MI sebelum percaya."
+            }
+          ]
+        },
+        {
+          "lesson_num": 8,
+          "type": "reading",
+          "title": "Scam Kirim Uang, Bukti Transfer Palsu, Pinjol & Investasi Bodong",
+          "estimated_minutes": 10,
+          "blocks": [
+            {
+              "type": "heading",
+              "text": "4 jebakan yang bisa bikin tabunganmu lenyap"
+            },
+            {
+              "type": "paragraph",
+              "text": "Kamu sudah kerja keras dan uangmu sudah aman. Tapi penipu tahu PMI punya uang — jadi mereka mengincarmu dan keluargamu. Ada empat keluarga jebakan finansial yang harus kamu kenali. Sekali kamu tahu polanya, kamu kebal."
+            },
+            {
+              "type": "heading",
+              "text": "Jebakan 1: Scam kirim uang (calo remitansi)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ada orang nawarin 'jasa kirim uang' lewat WA dengan iming-iming: kurs lebih bagus, gratis ongkir, nggak ribet, nggak usah pakai KTP. Caranya: kamu transfer ke rekening PRIBADI dia, katanya nanti dia kirimkan ke keluargamu. Tapi begitu uang masuk, dia blokir kontakmu. Uang lenyap."
+            },
+            {
+              "type": "callout",
+              "text": "Hitung-hitungannya: kamu cuma 'hemat' Rp30-50 ribu ongkir, tapi taruhannya seluruh kiriman — bisa jutaan rupiah. Nggak sepadan."
+            },
+            {
+              "type": "paragraph",
+              "text": "Penting dan sering disalahpahami: kalau penyedia jasa kirim uang MINTA foto paspor atau Iqama kamu, itu TANDA BAGUS, bukan ribet. Itu aturan resmi (namanya AML/KYC — pencegahan pencucian uang). Justru yang TIDAK minta identitas sama sekali itu yang patut dicurigai."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Kirim uang hanya lewat bank atau lembaga transfer resmi (di Saudi: lewat penyedia seperti Enjaz, Western Union, atau Tahweel; uang masuk ke rekening bank atas namamu/keluargamu di Indonesia)",
+                "Jangan pernah transfer ke rekening pribadi orang yang ngaku 'jasa kirim'",
+                "Penyedia resmi pasti minta identitas dan kasih nomor referensi yang bisa dilacak"
+              ]
+            },
+            {
+              "type": "heading",
+              "text": "Jebakan 2: Scam yang nyamar jadi keluarga"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ini paling menyakitkan karena memanfaatkan rasa sayangmu ke keluarga. Tiga modus paling sering:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Bukti transfer PALSU: ada nomor baru kirim screenshot 'bukti transfer', bilang 'maaf salah transfer, tolong balikin ya'. Kalau kamu/keluarga balikin, kamu jadi penadah uang hasil kejahatan (money mule).",
+                "'Barang nyangkut Bea Cukai': ada yang telepon bilang paket/kiriman barangmu ditahan Bea Cukai, harus bayar 'biaya rilis' ke rekening tertentu. Ini PALSU.",
+                "Telepon tebusan: 'Keluargamu kena masalah/kecelakaan, kirim uang sekarang.' Bikin kamu panik biar nggak sempat mikir."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Aturan emas: percaya SALDO rekening, bukan screenshot. Screenshot gampang dipalsukan. Cek mutasi/saldo rekening asli sebelum percaya ada uang masuk."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Bea Cukai TIDAK PERNAH minta transfer ke rekening pribadi. Kalau ada, itu 100% penipuan.",
+                "Kalau ada telepon panik soal keluarga, jangan langsung kirim uang. Telepon balik keluargamu sendiri lewat nomor yang kamu kenal. Verifikasi dulu.",
+                "Kalau ragu dan kamu di luar negeri, hubungi KBRI dulu sebelum bertindak."
+              ]
+            },
+            {
+              "type": "heading",
+              "text": "Jebakan 3: Pinjol ilegal (di kampung halaman)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Kamu di luar negeri, tapi pinjol ilegal bisa meledak di rumah. Pinjaman Rp1 juta bisa membengkak jadi Rp50 juta dalam 6 bulan karena bunga gila. Orang sering nyetok pinjaman sampai 10 aplikasi sekaligus (gali lubang tutup lubang). Lalu debt collector-nya meneror keluarga dan tetangga."
+            },
+            {
+              "type": "callout",
+              "text": "Kamu di Saudi, tapi yang diteror DC adalah keluargamu di kampung. Ajari keluarga disiplin yang sama: JANGAN sentuh pinjol ilegal. Kalau perlu pinjam, hanya lewat yang terdaftar OJK."
+            },
+            {
+              "type": "heading",
+              "text": "Jebakan 4: Investasi bodong & ponzi"
+            },
+            {
+              "type": "paragraph",
+              "text": "Penipu suka mengincar PMI karena kalian punya uang tunai. Mereka tawarkan 'investasi', 'robot trading', 'crypto', atau 'forex' dengan janji untung pasti dan besar. Salah satu kasus besar, Net89 (robot trading), perputaran uangnya ditaksir sekitar Rp7 triliun dan kerugian korban diperkirakan sekitar Rp1 triliun dengan ribuan korban. Angkanya saja sudah bikin ngeri — dan semua itu uang hasil kerja keras orang biasa."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Tanda bahaya #1: 'untung PASTI dan BESAR'. Tidak ada investasi sungguhan yang menjamin untung pasti.",
+                "Sebelum ikut apa pun, cek izinnya di OJK dan Bappebti.",
+                "JANGAN PERNAH ikut crypto, forex, atau robot-trading yang ditawarkan lewat WA/grup. Itu hampir selalu jebakan untuk PMI."
+              ]
+            },
+            {
+              "type": "heading",
+              "text": "Bonus: modus TPPO 'kerja admin online di Kamboja'"
+            },
+            {
+              "type": "paragraph",
+              "text": "Lewat grup WA atau lowongan online, ada tawaran 'kerja admin online, gaji Rp6-10 juta, di Kamboja/Myanmar, nggak perlu skill'. INI BUKAN KERJA. Ini perdagangan orang (TPPO) — banyak korban malah disekap, dipaksa jadi penipu, dan disiksa. Hindari sama sekali."
+            },
+            {
+              "type": "heading",
+              "text": "Jangan termakan klaim viral palsu soal transfer"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ada kabar viral 'kalau transfer di atas SAR 80.000 langsung ditangkap'. Itu berlebihan dan tidak benar persis seperti itu. Yang benar: aturan anti pencucian uang menandai transfer yang BESAR dan TIDAK WAJAR (misalnya nominalnya nggak masuk akal dibanding gajimu). Selama kamu kirim uang lewat rekening atas namamu sendiri dan nominalnya wajar (sesuai gaji), kamu aman."
+            },
+            {
+              "type": "callout",
+              "text": "Aman itu sederhana: kirim lewat layanan resmi, pakai rekening atas nama sendiri, nominal wajar sesuai gaji. Nggak perlu takut transfer besar yang jujur."
+            }
+          ]
+        },
+        {
+          "lesson_num": 9,
+          "type": "quiz",
+          "title": "Kuis: Kebal Tipu",
+          "estimated_minutes": 4,
+          "pass_threshold": 70,
+          "questions": [
+            {
+              "id": "q1",
+              "prompt": "Ada yang nawarin kamu kerja PRT di Saudi, tapi minta kamu bayar biaya tiket & pelatihan dulu, katanya 'nanti dipotong dari gaji di sana'. Itu apa?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Kebaikan hati, karena kamu nggak perlu keluar uang sekarang"
+                },
+                {
+                  "key": "b",
+                  "label": "Jebakan utang (debt bondage) — untuk kerja domestik, biaya penempatan ditanggung majikan, harusnya Rp0"
+                },
+                {
+                  "key": "c",
+                  "label": "Normal dan wajib untuk semua PMI"
+                },
+                {
+                  "key": "d",
+                  "label": "Tanda agen itu profesional"
+                }
+              ]
+            },
+            {
+              "id": "q2",
+              "prompt": "Gimana cara GRATIS memastikan agen dan lowongan kamu benar-benar resmi?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Cukup percaya kalau kantornya kelihatan besar dan ramai"
+                },
+                {
+                  "key": "b",
+                  "label": "Tanya teman yang sudah pernah berangkat"
+                },
+                {
+                  "key": "c",
+                  "label": "Cek izin P3MI di bp2mi.go.id, lalu pastikan nama kamu + job order terdaftar di SISKOP2MI"
+                },
+                {
+                  "key": "d",
+                  "label": "Lihat dari banyaknya testimoni di media sosial agen"
+                }
+              ]
+            },
+            {
+              "id": "q3",
+              "prompt": "Keluargamu (dari nomor baru) kirim screenshot 'bukti transfer' dan minta uang dibalikin karena 'salah transfer'. Yang harus kamu percaya apa?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Screenshot bukti transfernya — kelihatan asli kok"
+                },
+                {
+                  "key": "b",
+                  "label": "SALDO/mutasi rekening yang sebenarnya, bukan screenshot — dan verifikasi dulu lewat nomor keluarga yang kamu kenal"
+                },
+                {
+                  "key": "c",
+                  "label": "Langsung balikin saja biar nggak ribut"
+                },
+                {
+                  "key": "d",
+                  "label": "Nomor teleponnya, kalau dia ngotot berarti benar"
+                }
+              ]
+            },
+            {
+              "id": "q4",
+              "prompt": "Penyedia jasa kirim uang minta foto paspor/Iqama kamu sebelum proses transfer. Itu tanda apa?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Tanda BAGUS — itu aturan resmi (AML/KYC); justru yang nggak minta identitas yang patut dicurigai"
+                },
+                {
+                  "key": "b",
+                  "label": "Tanda penipuan — penyedia jujur nggak akan minta identitas"
+                },
+                {
+                  "key": "c",
+                  "label": "Tanda mereka mau mencuri identitasmu"
+                },
+                {
+                  "key": "d",
+                  "label": "Tanda mereka ribet dan sebaiknya dihindari"
+                }
+              ]
+            }
+          ],
+          "answer_keys": [
+            {
+              "id": "q1",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Untuk 10 kategori kerja domestik, biaya penempatan (tiket, visa, pelatihan, sertifikat) WAJIB ditanggung majikan/agency (UU 18/2017 Pasal 30 menetapkan prinsipnya; daftar 10 kategori ada di Perban BP2MI 9/2020). 'Gratis berangkat lalu dipotong gaji' justru ilegal (Permen P2MI 17/2025) dan namanya jebakan utang (debt bondage). Biaya penempatan untuk kerja domestik seharusnya Rp0."
+            },
+            {
+              "id": "q2",
+              "correct": [
+                "c"
+              ],
+              "weight": 1,
+              "explanation": "Verifikasi gratis dan bisa kamu lakukan sendiri dari HP: cek izin P3MI aktif di bp2mi.go.id, lalu pastikan nama kamu, nama P3MI, dan job order terdaftar di SISKOP2MI. Kalau namamu tidak ada di SISKOP2MI, kamu tidak diberangkatkan secara resmi — jangan berangkat."
+            },
+            {
+              "id": "q3",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Screenshot gampang dipalsukan. Aturan emasnya: percaya SALDO/mutasi rekening yang sebenarnya, bukan screenshot. Kalau ada nomor baru minta uang 'salah transfer' dibalikin, itu modus bikin kamu jadi penadah (money mule). Selalu verifikasi dulu lewat nomor keluarga yang kamu kenal sebelum kirim apa pun."
+            },
+            {
+              "id": "q4",
+              "correct": [
+                "a"
+              ],
+              "weight": 1,
+              "explanation": "Penyedia jasa kirim uang resmi WAJIB minta identitas (paspor/Iqama) — itu aturan anti pencucian uang (AML/KYC) dan tanda mereka legal. Yang berbahaya justru calo yang menawarkan 'gratis ongkir, tanpa KTP, transfer ke rekening pribadi' — itu modus uang lenyap."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "module_num": 4,
+      "title": "Kirim Uang ke Kampung dengan Benar & Hemat",
+      "summary": "Kirim uang adalah aksi finansial paling sering buat PMI di Saudi — dan paling sering bikin rugi diam-diam. Modul ini ngajarin satu aturan emas yang ngubah segalanya: bandingkan RUPIAH YANG NYAMPE ke keluarga, bukan ongkirnya. Setiap transfer punya dua biaya — ongkir kecil yang kelihatan, dan selisih kurs besar yang disembunyiin. App yang teriak \"GRATIS BIAYA\" sering paling mahal. Peserta belajar trik batching (kirim lebih besar lebih jarang, hemat sampai jutaan setahun), checklist memilih kanal yang awet dipakai tahun kapan pun, tiga cara keluarga terima uang termasuk tanpa rekening, dan walkthrough langkah-demi-langkah ngirim uang — dengan penekanan ekstra pada nulis nama & nomor rekening penerima dengan benar, kegagalan nomor satu di dunia nyata.",
+      "lessons": [
+        {
+          "lesson_num": 10,
+          "type": "reading",
+          "title": "Aturan Emas: Bandingkan Rupiah yang NYAMPE, Bukan Ongkirnya",
+          "estimated_minutes": 5,
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Tiap bulan kamu ngirim uang hasil kerja keras ke rumah. Tapi tahu nggak — sebagian dari uang itu sering hilang diam-diam, dan kamu bahkan nggak sadar. Pelajaran ini ngajarin satu trik yang bisa nyelametin sampai jutaan Rupiah setahun."
+            },
+            {
+              "type": "heading",
+              "text": "Setiap kirim uang ada DUA biaya"
+            },
+            {
+              "type": "paragraph",
+              "text": "Banyak orang cuma ngeliat satu biaya: ongkir. Padahal ada dua, dan yang KEDUA jauh lebih besar."
+            },
+            {
+              "type": "list",
+              "items": [
+                "BIAYA 1 — Ongkir (yang kelihatan): biasanya SAR 5-20 tergantung app/jalur (kirim lewat counter/tunai biasanya lebih mahal dari lewat app). Ini yang ditulis gede-gede di layar. Kecil.",
+                "BIAYA 2 — Selisih kurs (yang TERSEMBUNYI): app ngasih kamu kurs yang sedikit lebih jelek dari kurs pasar. Selisihnya kelihatan kecil, tapi karena dipotong dari SELURUH uang yang kamu kirim, totalnya sering lebih besar dari ongkir."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "ATURAN EMAS: Jangan bandingin ONGKIR. Bandingin berapa RUPIAH yang BENAR-BENAR NYAMPE ke rekening ibu. Itu satu-satunya angka yang penting."
+            },
+            {
+              "type": "heading",
+              "text": "Kenapa app 'GRATIS BIAYA' sering paling mahal"
+            },
+            {
+              "type": "paragraph",
+              "text": "Hati-hati sama tulisan besar 'GRATIS ONGKIR' atau 'BIAYA Rp0'. App-nya nggak rugi — mereka cuma mindahin biayanya ke tempat yang kamu nggak lihat: kurs. Kamu nggak bayar ongkir, tapi tiap SAR kamu ditukar ke Rupiah dengan harga lebih murah. Hasilnya, kadang uang yang nyampe malah LEBIH SEDIKIT daripada app yang ngaku ada ongkir tapi kursnya jujur."
+            },
+            {
+              "type": "callout",
+              "text": "Cara ngecek gampang: ketik nominal yang SAMA (misal SAR 1.000) di dua app berbeda. Lihat angka 'Rupiah diterima' di masing-masing. Yang angkanya lebih BESAR, itu yang lebih murah — titik. Nggak peduli mana yang ngaku gratis."
+            },
+            {
+              "type": "heading",
+              "text": "Trik BATCHING: kirim lebih besar, lebih jarang"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ongkir itu hampir FLAT — bayar segitu-gitu aja (misal SAR 15-an) entah kamu kirim SAR 600 atau SAR 2.400. Jadi kalau kamu kirim sedikit-sedikit tapi sering, kamu bayar ongkir berkali-kali untuk uang yang sama."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Cara BOROS: kirim SAR 600 tiap minggu → sebulan kirim 4x → bayar ongkir 4x.",
+                "Cara HEMAT: kumpulin dulu, kirim SAR 2.400 sekali sebulan → bayar ongkir 1x.",
+                "Jumlah uang yang sampai ke keluarga SAMA, tapi yang cara hemat bisa hemat kira-kira Rp150-200 ribu per bulan — sekitar Rp2-2,5 juta setahun. Itu cukup buat SPP anak setahun. (Angka cuma ilustrasi — makin mahal ongkir app-mu, makin besar hematnya; makin murah, makin kecil.)"
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Kalau keluarga butuh uang tiap minggu buat belanja harian, akali begini: kirim sekaligus sebulan ke satu rekening, terus keluarga yang ngatur ngambilnya seminggu sekali. Tetap hemat, keluarga tetap kebagian rutin."
+            },
+            {
+              "type": "callout",
+              "text": "INGAT SATU INI AJA: Yang murah BUKAN yang ongkirnya nol — tapi yang Rupiahnya paling banyak sampai ke keluarga. Bandingin angka 'Rupiah diterima' di 2 app sebelum kirim. Selesai. (Di pelajaran berikutnya kita bahas cara MILIH app-nya.)"
+            }
+          ]
+        },
+        {
+          "lesson_num": 11,
+          "type": "reading",
+          "title": "Cara Milih App Kirim Uang yang Hemat (Tahun Kapan Pun)",
+          "estimated_minutes": 6,
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Di pelajaran sebelumnya kamu udah tahu aturan emasnya: bandingin Rupiah yang nyampe, dan kirim besar lebih jarang. Sekarang kita bahas cara MILIH app-nya — biar tetap hemat walau nama app dan harganya berubah-ubah."
+            },
+            {
+              "type": "heading",
+              "text": "Di app yang SAMA pun, harga bisa beda"
+            },
+            {
+              "type": "paragraph",
+              "text": "Banyak app ngasih beberapa pilihan cara uang diterima. Hampir selalu, kirim ke REKENING BANK lebih murah daripada kirim ke tunai (yang diambil di counter) atau ke dompet digital. Jadi kalau bisa, suruh keluarga buka rekening bank atau e-wallet sederhana — payout-nya lebih hemat."
+            },
+            {
+              "type": "heading",
+              "text": "Checklist memilih kanal (pakai untuk app APAPUN, tahun KAPANPUN)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Harga dan promo app berubah-ubah. Jangan hafalin nama app — hafalin cara MENILAINYA. Sebelum kirim, cek 4 hal ini:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "1. Berapa RUPIAH yang benar-benar sampai? (bukan ongkirnya — angka 'Rupiah diterima')",
+                "2. Apakah penyedianya terdaftar resmi? Cek logo/izin Bank Indonesia atau OJK. Yang resmi pasti minta data identitas (paspor/Iqama) — itu TANDA BAGUS, bukan ribet.",
+                "3. Ada nomor referensi & bisa dilacak? Pastikan kamu dikasih bukti dan nomor resi yang bisa dicek.",
+                "4. Sudah bandingin minimal 2 app untuk nominal yang sama? Kalau belum, jangan kirim dulu."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "BAHAYA: 'jasa kirim uang' lewat orang/grup WA yang kasih kurs ketinggian, gratis ongkir, dan nggak minta KTP — itu ciri penipuan. Hemat Rp30-50 ribu, tapi risiko UANGNYA HILANG SEMUA. Kanal resmi minta identitas justru karena dia diawasi pemerintah."
+            },
+            {
+              "type": "heading",
+              "text": "Contoh harga: ada yang MURAH, SEDANG, MAHAL"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ini cuma CONTOH biar kebayang, BUKAN rekomendasi — dan harganya pasti berubah, jadi tetap cek sendiri pas mau kirim. Yang penting bukan hafal app-nya, tapi paham bahwa untuk nominal yang sama, biaya antar-app bisa beda. Kira-kira ada tiga kelompok:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "KELOMPOK MURAH — beberapa penyedia transfer (contoh: Fawri, MoneyGram, TeleMoney) biasanya paling hemat. Inilah yang sering bikin Rupiah-mu nyampe paling banyak.",
+                "KELOMPOK SEDANG — penyedia besar yang familiar (contoh: Western Union, transfer lewat app bank) biasanya di tengah. Western Union plusnya: bisa diambil tunai tanpa rekening.",
+                "KELOMPOK MAHAL — beberapa app populer kalau lagi NGGAK ada promo biasanya termasuk yang termahal. Murah cuma kalau ada promo bagus."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Kenapa nggak kami kasih angka persis? Karena harga app berubah tiap waktu — kalau kamu hafal angka lama, kamu malah bisa salah pilih. Yang awet: BANDINGIN SENDIRI angka 'Rupiah diterima' di 2-3 app pas mau kirim. Itu nggak pernah basi."
+            },
+            {
+              "type": "callout",
+              "text": "Soal Enjaz: banyak PMI pakai Enjaz (Bank Albilad) karena familiar dan ada Bahasa Indonesia di app-nya — itu bagus buat yang baru pertama. TAPI kalau lagi nggak ada promo, harganya termasuk yang mahal. Jadi: boleh pakai kalau ada promo bagus, tapi tetap bandingin sama app lain dulu. Jangan langsung percaya 'default'-nya orang."
+            },
+            {
+              "type": "heading",
+              "text": "Sedikit tips kurs (kalau mau, ini bonus)"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Rupiah lagi lemah (kurs SAR ke Rupiah lagi tinggi)? Pas momen itu, kirim agak lebih banyak — uangmu jadi lebih banyak Rupiah-nya.",
+                "Hindari konversi dua kali (SAR ditukar ke USD dulu, baru ke Rupiah). Tiap kali uang ditukar, ada potongan kecil — jadi dua kali tukar = dua kali kepotong. Pilih yang LANGSUNG SAR ke Rupiah. Contoh gampang: kayak tukar uang di money changer dua kali, tiap meja ngambil untung — mending sekali tukar aja.",
+                "Kirim di HARI KERJA, bukan akhir pekan atau hari libur. Alasannya BUKAN kursnya beda — kurs Senin sampai Jumat hampir sama saja. Alasannya: pas akhir pekan beberapa app naikin biaya/kurs sedikit (karena bank tutup), dan uang lebih lambat masuk karena bank Indonesia libur. Jadi kirim di hari kerja biar lebih murah dan lebih cepat sampai."
+              ]
+            },
+            {
+              "type": "heading",
+              "text": "Tenang, kiriman ke keluarga BEBAS pajak"
+            },
+            {
+              "type": "paragraph",
+              "text": "Uang yang kamu kirim ke orang tua, istri/suami, atau anak di Indonesia TIDAK kena pajak penghasilan. Itu nafkah keluarga, bukan objek pajak. Pakai kanal resmi malah bagus — ada catatan bersih (paper trail) kalau suatu saat dibutuhkan. Jangan termakan rumor 'kirim banyak nanti kena pajak/ditangkap'. Yang penting: kirim lewat kanal resmi dan lewat rekening atas namamu sendiri."
+            },
+            {
+              "type": "callout",
+              "text": "RINGKASAN 2 PELAJARAN INI: (1) Bandingin Rupiah yang NYAMPE, bukan ongkir. (2) Kirim besar lebih jarang (batching). (3) Ke rekening bank lebih murah dari ke tunai. (4) Selalu pakai kanal resmi yang minta identitas."
+            }
+          ]
+        },
+        {
+          "lesson_num": 12,
+          "type": "reading",
+          "title": "Langkah Demi Langkah Kirim Uang (dan Cara Keluarga Terima Tanpa Rekening)",
+          "estimated_minutes": 7,
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Sekarang prakteknya. Kalau ini pertama kalinya kamu ngirim uang dari luar negeri, jangan panik — pelan-pelan ikutin 6 langkah ini. Sekali bisa, seterusnya gampang."
+            },
+            {
+              "type": "heading",
+              "text": "6 Langkah Kirim Uang"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Langkah 1 — Buka aplikasinya di HP, atau datang ke counter resmi tempat kamu biasa nerima/nukar gaji (bank atau money changer resmi). Ingat pelajaran tadi: tetap bandingin dulu, jangan asal pilih yang paling deket.",
+                "Langkah 2 — Pilih negara tujuan: INDONESIA. Lalu pilih BANK tujuan keluarga (misal BRI, BNI, Mandiri, BCA).",
+                "Langkah 3 — Masukkan NOMOR REKENING dan NAMA PENERIMA. Tulis PERSIS sama seperti yang tertulis di buku tabungan keluarga. (Ini langkah paling penting — baca callout di bawah.)",
+                "Langkah 4 — SEBELUM tekan 'Kirim/Confirm', cek dulu: berapa KURS-nya, berapa ONGKIR-nya, dan terutama berapa 'RUPIAH DITERIMA'. Kalau angkanya aneh atau kekecilan, batalin dan cek lagi.",
+                "Langkah 5 — Setelah terkirim, SIMPAN bukti transfer dan NOMOR REFERENSI (nomor resi). Screenshot atau foto.",
+                "Langkah 6 — Kabari keluarga: kasih tahu nomor referensinya, supaya kalau uang belum masuk, gampang dilacak."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "PALING SERING GAGAL DI SINI — BACA PELAN-PELAN: Salah SATU huruf di nama atau SATU angka di nomor rekening = uang bisa nyangkut, gagal, atau malah masuk ke orang lain. Ini kegagalan nomor satu di dunia nyata. Cek nomor rekening DUA KALI. Pastikan nama penerima sama persis dengan buku tabungan. Jangan buru-buru di langkah ini."
+            },
+            {
+              "type": "paragraph",
+              "text": "Tips aman langkah 3: minta keluarga FOTO halaman depan buku tabungan atau screenshot info rekening dari m-banking mereka, lalu kirim ke kamu lewat WhatsApp. Kamu tinggal nyalin dari foto itu — jauh lebih kecil risiko salah ketik daripada dikte lewat telepon."
+            },
+            {
+              "type": "heading",
+              "text": "Kalau keluarga belum punya rekening bank — TENANG, tetap bisa"
+            },
+            {
+              "type": "paragraph",
+              "text": "Banyak keluarga di kampung belum punya rekening. Itu bukan masalah. Ada tiga cara keluarga bisa nerima uang:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "CARA 1 — Rekening bank (PALING MURAH & paling aman buat jumlah besar): kalau keluarga punya rekening, kirim ke situ. Ongkos payout paling kecil, dan nggak ada batas saldo.",
+                "CARA 2 — E-wallet / dompet digital (cocok untuk jumlah KECIL, cukup punya HP): DANA, GoPay, OVO, ShopeePay, atau LinkAja. Keluarga cukup punya HP dan nomor aktif, nggak perlu ke bank.",
+                "CARA 3 — TUNAI TANPA REKENING: kamu kirim, keluarga dapat KODE, lalu ambil uang tunai pakai kode itu di puluhan ribu titik di seluruh Indonesia — tergantung penyedianya, bisa di kantor BRI, Kantor Pos, agen Western Union, sampai minimarket seperti Alfamart atau Indomaret. Keluarga cukup bawa KTP dan kode. (Titik mana saja yang bisa tergantung app/penyedia yang kamu pakai — cek di app pas mau kirim.)"
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "HATI-HATI BATAS SALDO E-WALLET: dompet digital yang belum diverifikasi (cuma daftar pakai nomor HP) cuma boleh nampung saldo maksimal Rp2 juta; yang sudah diverifikasi lengkap pun maksimal Rp10 juta. Jadi kalau kamu pakai trik batching dan kirim sekaligus besar (misal ~Rp10 juta sebulan sekali), JANGAN kirim ke e-wallet — bisa nyangkut atau ditolak. Untuk jumlah besar, pakai REKENING BANK. E-wallet cocoknya buat kiriman kecil rutin."
+            },
+            {
+              "type": "heading",
+              "text": "Kanal yang familiar & aman (lewat bank Indonesia)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Kalau kamu ingin jalur yang paling kecil risiko penipuannya, beberapa bank Indonesia punya layanan kirim uang dari Saudi:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "BNI — layanan transfer dan BNI Wesel PIN: keluarga bisa tarik tunai di Alfamart, Pegadaian, Kantor Pos, atau Agen46.",
+                "Mandiri — layanan transfer yang bekerja sama dengan bank-bank Saudi seperti Al Rajhi, Al Bilad, NCB, dan Riyad Bank."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "SARAN HEMAT: kalau memungkinkan, bantu keluarga buka rekening bank atau e-wallet sederhana SEBELUM kamu berangkat (atau lewat panduan dari jauh). Payout ke rekening/e-wallet lebih murah daripada tunai, dan tiap bulan selisihnya lumayan."
+            },
+            {
+              "type": "heading",
+              "text": "Sebelum tutup — ingat ini"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Cek nomor rekening dua kali. Selalu.",
+                "Selalu lihat 'Rupiah diterima' sebelum confirm.",
+                "Simpan bukti & nomor referensi tiap kali kirim.",
+                "Jumlah besar → rekening bank (bukan e-wallet, ada batas saldo).",
+                "Nama app, kurs, dan promo berubah-ubah — yang nggak berubah: bandingin Rupiah yang sampai, pakai kanal resmi yang minta identitas."
+              ]
+            }
+          ]
+        },
+        {
+          "lesson_num": 13,
+          "type": "quiz",
+          "title": "Kuis: Kirim Uang Cerdas",
+          "estimated_minutes": 4,
+          "pass_threshold": 70,
+          "questions": [
+            {
+              "id": "q1",
+              "prompt": "Ada app yang teriak 'GRATIS BIAYA / ONGKIR Rp0'. Kenapa app kayak gini malah bisa jadi paling MAHAL?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Karena app-nya lemot jadi rugi waktu"
+                },
+                {
+                  "key": "b",
+                  "label": "Karena biayanya disembunyiin di selisih kurs — kamu nggak bayar ongkir, tapi tiap SAR ditukar dengan kurs yang lebih jelek"
+                },
+                {
+                  "key": "c",
+                  "label": "Karena gratis ongkir berarti uangnya nggak akan sampai"
+                },
+                {
+                  "key": "d",
+                  "label": "Karena app gratis selalu penipuan"
+                }
+              ]
+            },
+            {
+              "id": "q2",
+              "prompt": "Mana cara kirim yang lebih HEMAT, dan kenapa?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Kirim sedikit (misal SAR 600) tiap minggu, karena terlihat lebih sering ngurus keluarga"
+                },
+                {
+                  "key": "b",
+                  "label": "Kirim sekaligus lebih besar (misal SAR 2.400) sebulan sekali, karena ongkir hampir flat jadi cuma bayar 1x bukan 4x (batching)"
+                },
+                {
+                  "key": "c",
+                  "label": "Sama saja, ongkir nggak ngaruh ke total"
+                },
+                {
+                  "key": "d",
+                  "label": "Kirim tiap hari biar kursnya rata-rata"
+                }
+              ]
+            },
+            {
+              "id": "q3",
+              "prompt": "Saat ngisi data penerima, hal apa yang PALING SERING bikin uang kiriman nyangkut atau gagal di dunia nyata?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Kirim di hari Senin"
+                },
+                {
+                  "key": "b",
+                  "label": "Pakai aplikasi, bukan datang ke counter"
+                },
+                {
+                  "key": "c",
+                  "label": "Salah satu huruf di nama atau satu angka di nomor rekening penerima"
+                },
+                {
+                  "key": "d",
+                  "label": "Nominalnya terlalu besar"
+                }
+              ]
+            },
+            {
+              "id": "q4",
+              "prompt": "Keluarga kamu di kampung BELUM punya rekening bank. Apakah mereka tetap bisa terima uang kiriman?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Tidak bisa, harus punya rekening bank dulu"
+                },
+                {
+                  "key": "b",
+                  "label": "Bisa — pakai kode, ambil tunai tanpa rekening di banyak titik (tergantung penyedia: BRI, Kantor Pos, Western Union, sampai minimarket); atau pakai e-wallet cukup dengan HP"
+                },
+                {
+                  "key": "c",
+                  "label": "Bisa, tapi harus lewat calo dulu"
+                },
+                {
+                  "key": "d",
+                  "label": "Bisa, tapi uangnya kena pajak"
+                }
+              ]
+            },
+            {
+              "id": "q5",
+              "prompt": "Kamu mau kirim sekaligus besar (sekitar Rp10 juta) sebulan sekali. Ke mana paling aman keluarga nerimanya?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Ke e-wallet (DANA/GoPay/OVO), karena cukup pakai HP"
+                },
+                {
+                  "key": "b",
+                  "label": "Ke rekening bank, karena e-wallet ada batas saldo (Rp2 juta kalau belum diverifikasi, Rp10 juta kalau sudah) jadi kiriman besar bisa nyangkut"
+                },
+                {
+                  "key": "c",
+                  "label": "Ke siapa saja, batas saldo nggak ada"
+                },
+                {
+                  "key": "d",
+                  "label": "Dipecah ke 5 calo biar aman"
+                }
+              ]
+            }
+          ],
+          "answer_keys": [
+            {
+              "id": "q1",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Setiap transfer punya dua biaya: ongkir (kecil, kelihatan) dan selisih kurs (besar, tersembunyi). App 'gratis biaya' nggak rugi — mereka mindahin biayanya ke kurs yang lebih jelek, dipotong dari seluruh uang yang kamu kirim. Makanya aturan emasnya: bandingin RUPIAH YANG NYAMPE, bukan ongkirnya."
+            },
+            {
+              "id": "q2",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Ini namanya batching. Ongkir hampir flat (sama saja mau kirim SAR 600 atau SAR 2.400), jadi kirim sekaligus sebulan sekali = bayar ongkir 1x, bukan 4x. Jumlah yang sampai ke keluarga sama, tapi bisa hemat kira-kira Rp2-2,5 juta setahun (makin mahal ongkir app-mu, makin besar hematnya). Kalau keluarga butuh rutin, kirim sekaligus ke satu rekening lalu mereka ambil bertahap."
+            },
+            {
+              "id": "q3",
+              "correct": [
+                "c"
+              ],
+              "weight": 1,
+              "explanation": "Salah satu huruf di nama atau satu angka di nomor rekening adalah penyebab gagal nomor satu di dunia nyata — uang bisa nyangkut, balik, atau masuk ke orang lain. Selalu cek nomor rekening dua kali, dan paling aman minta keluarga foto buku tabungan supaya kamu tinggal menyalin, bukan dikte lewat telepon."
+            },
+            {
+              "id": "q4",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Tanpa rekening pun keluarga tetap bisa terima uang: pakai kode untuk ambil tunai di banyak titik di seluruh Indonesia — tergantung penyedianya bisa di BRI, Kantor Pos, Western Union, sampai minimarket seperti Alfamart/Indomaret — atau pakai e-wallet seperti DANA/GoPay/OVO cukup bermodal HP. Tapi ingat: kalau bisa, payout ke rekening/e-wallet lebih murah daripada tunai."
+            },
+            {
+              "id": "q5",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "E-wallet punya batas saldo: yang belum diverifikasi cuma boleh nampung Rp2 juta, yang sudah diverifikasi lengkap pun maksimal Rp10 juta. Jadi kalau kamu kirim sekaligus besar (trik batching), kiriman ke e-wallet bisa nyangkut atau ditolak karena melebihi batas. Untuk jumlah besar, paling aman ke REKENING BANK — nggak ada batas saldo. E-wallet cocoknya buat kiriman kecil rutin."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "module_num": 5,
+      "title": "Atur, Tabung, Tumbuhkan: Biar Pulang Nggak Mulai dari Nol",
+      "summary": "Modul terberat dari sisi nilai jangka panjang. Karena rumah + makan ditanggung majikan (sektor domestik), pembagian gaji harus dimiringkan ke menabung — bukan 50-30-20 ala Barat. Kegagalan #1 yang terdokumentasi: \"menabung dari sisa\" (sisa selalu nol) + \"kirim semua ke rekening saudara biar aman\" → pulang uang habis. Solusinya: bayar diri sendiri dulu (pay-yourself-first) ke rekening ATAS NAMA SENDIRI, plus satu batas kiriman rutin yang disepakati di depan. Lalu tangga uang setelah kontrak dengan lensa halal (lunasi utang → dana darurat → tumbuhkan lewat Sukuk Ritel syariah / Tabungan Emas / deposito syariah + JHT → satu aset produktif), waspada gold-trap dan produk non-guaranteed, mekanika zakat praktis, dan intervensi sisi-keluarga lewat satu halaman yang bisa diforward ke kampung. Ditutup dengan ajakan jujur: kalau kamu belum berangkat dan butuh modal penempatan, ada jalur dana talangan resmi (KUR Penempatan PMI) — bukan calo. Semua angka adalah ilustrasi pertengahan 2026 — kurs dan tarif berubah, cek terbaru sebelum janji nominal.",
+      "lessons": [
+        {
+          "lesson_num": 13,
+          "type": "reading",
+          "title": "Bayar Diri Sendiri Dulu: Tabungan Kamu, ATAS NAMA KAMU",
+          "estimated_minutes": 8,
+          "blocks": [
+            {
+              "type": "heading",
+              "text": "Masalahnya bukan 'gimana hidup', tapi 'gimana nggak ngabisin uang yang udah jadi milikmu'"
+            },
+            {
+              "type": "paragraph",
+              "text": "Kalau kamu kerja domestik (PRT, pengasuh, sopir keluarga) lewat jalur resmi, rumah + makan + dokter + transport ditanggung majikan. Artinya dari gaji SAR 1.500 (sekitar Rp7 juta, kurs berubah), separuhnya bisa kamu kirim ke keluarga dan separuhnya lagi bisa kamu tabung — karena pengeluaran nyatamu cuma sekitar SAR 100/bulan buat pulsa + sabun + jajan."
+            },
+            {
+              "type": "paragraph",
+              "text": "Justru di sinilah banyak orang gagal. Bukan karena gajinya kecil — tapi karena uang yang sebenarnya sudah jadi milik mereka pelan-pelan habis tanpa sadar."
+            },
+            {
+              "type": "heading",
+              "text": "Dua kesalahan yang bikin pulang dengan tangan kosong"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Kesalahan 1 — 'Nanti aku nabung dari sisa.' Masalahnya: sisa itu selalu nol. Setiap bulan ada aja permintaan, dan tabungan jadi yang terakhir dipikirin — akhirnya nggak pernah kejadian.",
+                "Kesalahan 2 — 'Kirim semua ke rekening kakak/saudara biar aman.' Niatnya baik, tapi uang itu kepakai: sekolah adik, kebutuhan orang tua, kebutuhan rumah tangga si saudara. Pulang 2 tahun kemudian, tabungan nyaris habis dan kamu nggak bisa nuntut apa-apa."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Aturan paling penting di modul ini: tabungan kamu, ATAS NAMA KAMU. Kiriman buat keluarga itu satu hal; tabungan masa depanmu itu hal yang beda — jangan dicampur jadi satu kantong di tangan orang lain."
+            },
+            {
+              "type": "heading",
+              "text": "Caranya: bayar diri sendiri DULU, baru kirim"
+            },
+            {
+              "type": "paragraph",
+              "text": "Begitu gaji masuk, langkah pertama BUKAN kirim ke kampung. Langkah pertama: pindahkan jatah tabunganmu ke rekening atas namamu sendiri. Setelah itu baru kirim ke keluarga. Ini namanya bayar diri sendiri dulu (pay-yourself-first) — tabungan jadi prioritas, bukan sisa."
+            },
+            {
+              "type": "heading",
+              "text": "Contoh pembagian gaji SAR 1.500 (rumah + makan gratis)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ini ilustrasi, bukan rumus kaku — sesuaikan dengan keadaanmu. Inti yang penting: porsi MENABUNG harus besar, karena biaya hidupmu hampir nol."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Kirim keluarga — sekitar 50% (SAR 750 ≈ Rp3,5 juta): jumlah TETAP yang sudah disepakati, bukan dinego ulang tiap bulan.",
+                "Tabungan & aset masa depan — sekitar 30% (SAR 450 ≈ Rp2,1 juta): masuk rekening ATAS NAMA KAMU, disisihkan paling awal.",
+                "Dana darurat — sekitar 13% (SAR 200 ≈ Rp950rb): bantal pengaman kalau ada yang tak terduga.",
+                "Kebutuhan diri — sekitar 7% (SAR 100 ≈ Rp450rb): pulsa, sabun, jajan, secukupnya — ini pengeluaran nyatamu yang tadi."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Hasilnya: SAR 450/bulan x 24 bulan = sekitar SAR 10.800, kira-kira Rp50 juta. Itu cukup buat balikin biaya berangkat DAN modal usaha kecil. Itu beda antara pulang mulai dari nol vs pulang sudah punya pijakan."
+            },
+            {
+              "type": "heading",
+              "text": "Kalau kamu sektor formal (bayar sewa/makan sendiri)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Untuk pekerja pabrik/konstruksi/resto yang harus beli makan atau bayar sewa, jalankan tangga prioritas yang sama — cuma tambahkan sewa/makan sebagai pos pertama yang harus dibayar. Sisanya tetap: bayar tabungan diri dulu, baru kirim. Yang penting nabungnya tetap di awal, bukan dari sisa."
+            },
+            {
+              "type": "heading",
+              "text": "Dana darurat: dihitung dari kebutuhan keluarga, bukan biaya hidupmu di Saudi"
+            },
+            {
+              "type": "paragraph",
+              "text": "Karena biaya hidupmu di Saudi hampir nol, dana darurat BUKAN buat kamu — tapi buat keluarga yang bergantung pada kirimanmu, kalau-kalau kamu kehilangan kerja, sakit, atau gaji telat (risiko nyata)."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Hitung dulu: keluarga butuh berapa per bulan? Misal Rp3,5 juta.",
+                "Target dana darurat: 3–6 kali kebutuhan bulanan kalau kamu sendiri tanpa tanggungan; 6–12 kali kalau ada tanggungan (anak, orang tua sakit).",
+                "Contoh: keluarga butuh Rp3,5 juta/bulan, ada tanggungan → target sekitar Rp21–42 juta sebagai bantal. Bukan untuk dipakai, tapi untuk berjaga."
+              ]
+            },
+            {
+              "type": "heading",
+              "text": "Sepakati SATU jumlah kiriman rutin di depan"
+            },
+            {
+              "type": "paragraph",
+              "text": "Bencana kecil yang sering kejadian: setiap bulan ada permintaan baru, dan kamu nego dari nol terus. HP murah bikin keluarga gampang minta, dan tekanan rasa sungkan bikin kamu sulit menolak. Solusinya disepakati sekali di awal."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Tetapkan: 'Aku kirim Rp X setiap tanggal Y.' Itu jumlah rutin yang bisa diandalkan keluarga.",
+                "Pisahkan jelas: mana 'rutin' (tetap) dan mana 'darurat' (sakit, kecelakaan — beda kasus).",
+                "Waspada lifestyle inflation: renovasi, hajatan, gadget baru — kalau dituruti semua, tabunganmu yang jadi korban."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Cara melihatnya yang benar: 'Aku sayang keluarga, MAKANYA aku nabung — biar pas kontrak habis kita nggak mulai dari nol lagi.' Menabung itu bentuk sayang, bukan pelit. Yang pelit itu kalau pulang nggak bawa apa-apa dan semua harus mulai ulang."
+            }
+          ]
+        },
+        {
+          "lesson_num": 14,
+          "type": "reading",
+          "title": "Setelah Kontrak: Tangga Uang Halal Biar Nggak Balik Nol",
+          "estimated_minutes": 10,
+          "blocks": [
+            {
+              "type": "heading",
+              "text": "Menabung itu mudah. MENJAGA & MENUMBUHKAN-nya yang bikin orang gagal."
+            },
+            {
+              "type": "paragraph",
+              "text": "Ada data yang bikin kaget: dari belasan ribu purna-TKI yang sudah DILATIH pemerintah, hanya sekitar 30% yang benar-benar jalanin usaha. Sisanya balik ke titik nol. Survei Bank Indonesia juga nunjukin uang kiriman kebanyakan habis di konsumsi harian (sekitar separuhnya), cuma sebagian kecil yang masuk tabungan atau usaha."
+            },
+            {
+              "type": "paragraph",
+              "text": "Artinya: pulang bawa uang itu langkah awal, bukan garis finis. Yang nentuin kamu mulai dari nol atau nggak adalah apa yang kamu LAKUKAN sama uang itu setelah pulang."
+            },
+            {
+              "type": "heading",
+              "text": "Tangga Uang — naik satu per satu, jangan lompat"
+            },
+            {
+              "type": "paragraph",
+              "text": "Jangan langsung mikir 'investasi apa yang untung besar'. Ada urutan. Lompat tangga = jatuh."
+            },
+            {
+              "type": "list",
+              "items": [
+                "TANGGA 1 — Lunasi utang penempatan dulu. Kalau masih ada utang, bereskan ini sebelum yang lain. Utang yang dibiarkan makin mahal.",
+                "TANGGA 2 — Dana darurat 6–12 bulan, di rekening TERPISAH. Simpan di bank — uang di bank dijamin LPS sampai Rp2 miliar per orang per bank, jadi aman dari bank bangkrut.",
+                "TANGGA 3 — Amankan & tumbuhkan lewat produk HALAL yang dijamin/aman (lihat di bawah).",
+                "TANGGA 4 — Tambah tabungan hari tua: JHT BPJS, nominalnya tergantung tier penghasilan yang kamu pilih.",
+                "TANGGA 5 — Konversi ke SATU aset produktif yang kamu punya skill-nya."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Prinsip yang gampang diingat: beli aset yang MENGHASILKAN sebelum beli barang yang MENGHABISKAN. Sapi penggemukan menghasilkan; motor baru menghabiskan."
+            },
+            {
+              "type": "heading",
+              "text": "Tangga 3 — produk halal buat pemula (ini gem-nya)"
+            },
+            {
+              "type": "paragraph",
+              "text": "Sukuk Ritel (seri syariah SR) — hampir nggak ada PMI yang tahu produk ini, padahal cocok banget. Dijamin negara (risiko gagal bayar nyaris nol), HALAL (akadnya ijarah/sewa, bukan riba), imbal hasilnya TETAP (sekitar 5,5–6%/tahun di seri pertengahan 2026, cek seri terbaru), mulai dari Rp1 juta, dan dibayar TIAP BULAN ke rekeningmu — seperti gaji kecil dari uang yang tadinya cuma nganggur. Beli lewat aplikasi atau bank saat masa penawaran seri baru."
+            },
+            {
+              "type": "callout",
+              "text": "Awas, jangan ketukar serinya. Pemerintah terbit beberapa jenis: SR (Sukuk Ritel) dan ST (Sukuk Tabungan) itu SYARIAH — yang halal pilih ini. Bedanya: SR imbal hasilnya TETAP dan bisa dijual sebelum jatuh tempo; ST imbal hasilnya MENGAMBANG (ikut acuan, bisa naik-turun) dan TIDAK bisa dijual sebelum tempo. Sementara ORI itu konvensional (bukan syariah). Buat pemula yang mau halal + hasil pasti tiap bulan: ambil seri SR."
+            },
+            {
+              "type": "paragraph",
+              "text": "Tabungan Emas — mulai dari Rp10rb (Pegadaian) atau Rp50rb (BSI), halal (emas fisik, sesuai fatwa DSN-MUI), bisa digadai cepat saat darurat. Tapi awas GOLD TRAP berikut."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Jebakan utamanya SPREAD: ada selisih harga beli vs jual sekitar 3–8%. Beli pagi, jual sore = langsung rugi sebesar spread itu — ini alasan paling nyata kenapa emas BUKAN buat flip cepat.",
+                "Soal pajak, kabar baik buat kamu: kalau kamu jual balik Tabungan Emas milikmu sendiri, kamu dihitung KONSUMEN AKHIR — dan penjualan emas oleh konsumen akhir DIKECUALIKAN dari PPh Pasal 22 (aturan PMK 48/2023). Jadi umumnya kamu TIDAK kena pajak jual sama sekali. Jangan takut sama angka pajak lama yang kadang masih beredar.",
+                "Kalaupun di kanal/situasi tertentu ada pemungutan, tarif emas batangan sekarang cuma 0,25% (atau 0,5% kalau tanpa NPWP) — kecil, bukan 1,5%/3% seperti rezim lama. Punya NPWP tetap berguna (bikin urusan pajak lebih murah & rapi), tapi untuk konsumen akhir pajaknya sering memang nol.",
+                "Kesimpulan: emas disimpan 2–5 TAHUN, bukan buat flip cepat. Alasan utamanya bukan pajak — tapi SPREAD beli-jual tadi. Emas itu penyimpan nilai jangka panjang, bukan cara cepat kaya."
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Deposito syariah — akad bagi-hasil (mudharabah), halal, mulai sekitar Rp2 juta, dijamin LPS. Fungsinya 'kunci biar uang nggak kepegang' selama beberapa bulan, bukan alat cepat kaya."
+            },
+            {
+              "type": "callout",
+              "text": "JANGAN di tangga pemula: reksa dana / saham syariah — nilainya bisa TURUN dan TIDAK dijamin LPS. Boleh dipikirin, tapi SETELAH dana darurat + sukuk aman. Dan JANGAN PERNAH crypto, forex, atau robot-trading — itu justru jebakan yang memangsa PMI yang baru pegang uang banyak."
+            },
+            {
+              "type": "heading",
+              "text": "Tangga 4 — BPJS: kamu sudah bayar, pastikan keluarga tahu cara klaim"
+            },
+            {
+              "type": "paragraph",
+              "text": "Sebagai calon PMI kamu sudah bayar premi BPJS Ketenagakerjaan (sekitar Rp370rb untuk masa penempatan ~24 bulan, mengikuti skema PMI di Permenaker 4/2023 — bukan iuran bulanan). Itu BUKAN uang hangus — itu perlindungan, dan santunannya cuma berlaku selama polismu masih AKTIF."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Kamu cuma ter-cover selama masa penempatan (polis aktif). Begitu polis habis dan belum diperpanjang, perlindungan ini berhenti — jadi penting tahu kapan polismu mulai dan habis.",
+                "Kalau (amit-amit) meninggal karena KECELAKAAN KERJA saat polis aktif: santunannya paling besar (di skema PMI kerap dikutip kisaran puluhan juta sampai ~Rp85 juta tergantung kasusnya), plus bisa ada beasiswa anak. Cek rincian terbaru ke BPJS.",
+                "Kalau meninggal BUKAN karena kecelakaan kerja (sakit biasa) tapi polis masih aktif: masuk santunan JKM, total kira-kira Rp42 juta (gabungan santunan sekaligus + santunan berkala) di skema PMI Permenaker 4/2023. Angka bisa berubah — cek BPJS terbaru.",
+                "Kamu juga bisa tambah JHT (Jaminan Hari Tua) — iurannya tergantung tier penghasilan yang dipilih (kalau pilih tier terendah, kira-kira mulai dari puluhan ribu per bulan) — tabungan yang cair lump-sum nanti.",
+                "PENTING: pastikan keluargamu TAHU kamu punya BPJS, tahu masa berlakunya, dan tahu cara klaimnya. Perlindungan nggak ada artinya kalau keluarga nggak tahu cara pakainya."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Catatan jujur soal angka santunan: nominal santunan BPJS PMI diatur Permenaker dan bisa berubah, dan beda antara meninggal karena kecelakaan kerja vs sakit biasa. Jangan hafalkan satu angka mati — yang wajib kamu ingat: (1) kamu PUNYA perlindungan ini, (2) cuma aktif selama masa penempatan, (3) keluarga harus tahu cara klaim. Untuk nominal pasti, cek ke BPJS Ketenagakerjaan terbaru."
+            },
+            {
+              "type": "heading",
+              "text": "Tangga 5 — aset produktif: yang menghasilkan, bukan yang menghabiskan"
+            },
+            {
+              "type": "paragraph",
+              "text": "Pilih SATU aset yang kamu (atau keluargamu) punya skill ngurusnya. Jangan ikut-ikutan tren tetangga."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Yang menghasilkan: ternak penggemukan (siklus panen sekitar 3 bulan — ada kisah Pak Dimas di Lamongan dari 8 jadi 300+ sapi, Bu Sulis di Blitar reinvest tiap panen), warung, kos-kosan.",
+                "Yang menghabiskan (hindari sebagai 'investasi'): motor/HP/mobil baru, rumah mewah di luar kemampuan. Ini liabilitas — keluar terus, nggak masuk."
+              ]
+            },
+            {
+              "type": "heading",
+              "text": "Manfaatkan program pemerintah yang GRATIS"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Desmigratif / Desa Migran Produktif — pelatihan & pendampingan usaha.",
+                "Reintegrasi BP3MI — bantuan purna-penempatan.",
+                "DESBUMI / Migrant CARE — modal awal + alat usaha untuk komunitas tertentu."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Lakukan SEBELUM kontrak habis: tulis 'rencana pulang' satu halaman — berapa tabungan target, utang lunas belum, aset apa yang mau dibeli, langkah pertama setelah pulang. Yang punya rencana di kertas jauh lebih jarang balik nol daripada yang cuma 'lihat nanti'."
+            }
+          ]
+        },
+        {
+          "lesson_num": 15,
+          "type": "reading",
+          "title": "Zakat Praktis, Satu Halaman untuk Keluarga & Kalau Kamu Mau Berangkat",
+          "estimated_minutes": 9,
+          "blocks": [
+            {
+              "type": "heading",
+              "text": "Bagian 1 — Zakat: bersihkan harta, jangan dicampur sama kiriman keluarga"
+            },
+            {
+              "type": "paragraph",
+              "text": "Buat audiens Muslim yang kerja di Saudi sambil nyimpen uang, ini perlu jelas biar nggak salah hitung dan nggak merasa 'sudah bayar' padahal belum."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Nisab (batas wajib zakat): kira-kira setara harga 85 gram emas. Nilainya berubah ikut harga emas — cek nilai terbaru saat mau hitung.",
+                "Zakat maal: 2,5% dari tabungan/harta yang sudah mencapai nisab DAN disimpan selama 1 tahun (1 haul).",
+                "Bisa dibayar dari luar negeri lewat lembaga resmi seperti BAZNAS atau LAZ terdaftar — banyak yang sudah online.",
+                "Transfer/kirim uang (tahweel/hawala) lewat kanal resmi itu HALAL. Yang dihindari: pinjol/paylater yang berbunga (riba) — pilih produk syariah."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Beda penting yang sering keliru: ZAKAT itu wajib, 2,5% atas harta yang capai nisab — itu hak orang lain di hartamu. KIRIMAN KE KELUARGA itu NAFKAH, bukan zakat. Jangan dicampur: kirim ke orang tua bukan berarti zakatmu lunas. Dua hal yang berbeda."
+            },
+            {
+              "type": "heading",
+              "text": "Bagian 2 — Satu halaman buat keluarga: kegagalan terbesar ada di SISI KELUARGA"
+            },
+            {
+              "type": "paragraph",
+              "text": "Kamu bisa disiplin di luar negeri, tapi kalau di kampung uangnya bocor, hasilnya tetap nol. Karena itu, omongin hal-hal ini ke keluarga SEBELUM berangkat — dan kirim/print satu halaman ini ke kampung."
+            },
+            {
+              "type": "heading",
+              "text": "Yang HARUS diomongin ke keluarga sebelum berangkat"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Jumlah kiriman rutin yang disepakati + tanggalnya: 'Aku kirim Rp X setiap tanggal Y.' Permintaan di luar itu dibahas dulu, bukan otomatis.",
+                "Siapa yang pegang tabungan: KAMU, atas nama KAMU. Kiriman rutin boleh ke rekening orang tua, tapi tabungan masa depan tetap di kendalimu.",
+                "LARANGAN pinjol ilegal: pinjaman Rp1 juta bisa meledak jadi puluhan juta dalam beberapa bulan, dan penagih bakal teror tetangga. Kalau butuh dana, bilang ke kamu dulu — jangan diam-diam pinjam aplikasi.",
+                "Cara cek bukti transfer ASLI: percaya SALDO di rekening, BUKAN screenshot. Screenshot gampang dipalsukan.",
+                "Bea Cukai / petugas resmi TAK PERNAH minta transfer ke rekening pribadi. Kalau ada telepon 'paket nyangkut, bayar ke rekening ini' — itu penipuan, cek ke instansi resmi dulu."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Forward atau print satu halaman ini ke keluarga: (1) Kirimanku Rp ___ tiap tanggal ___. (2) Tabungan atas namaku, jangan dipakai. (3) DILARANG pinjol — telpon aku dulu kalau butuh. (4) Percaya SALDO bukan screenshot. (5) Tidak ada instansi resmi minta transfer ke rekening pribadi. Tempel di tembok rumah kalau perlu."
+            },
+            {
+              "type": "paragraph",
+              "text": "Tujuan halaman ini sederhana: ubah ini dari 'pelajaran buat kamu sendiri' jadi kesepakatan satu rumah tangga. Karena kegagalan finansial terbesar PMI bukan terjadi di Saudi — tapi di rumah."
+            },
+            {
+              "type": "heading",
+              "text": "Bagian 3 — Belum berangkat? Kamu juga bisa, dan caranya nggak harus lewat calo"
+            },
+            {
+              "type": "paragraph",
+              "text": "Semua yang kamu pelajari di modul ini — biaya hidup yang hampir nol untuk pekerja domestik, gaji yang hampir seluruhnya bisa ditabung, tangga uang halal — itu baru kerasa kalau kamu benar-benar berangkat lewat jalur yang BENAR. Banyak orang gagal di langkah paling awal: mau berangkat tapi nggak punya modal, lalu jatuh ke calo."
+            },
+            {
+              "type": "callout",
+              "text": "Dua hal yang harus kamu tahu soal biaya berangkat: (1) Untuk 10 kategori kerja domestik (PRT, pengasuh, sopir keluarga, dll) lewat jalur resmi, biaya penempatan = Rp0. Tiket, visa, pelatihan, sertifikat — itu kewajiban majikan/agency, BUKAN kamu. Kalau ada yang nodong biaya atau 'nanti dipotong gaji', itu calo, bukan kebaikan. (2) Kalau kamu jalur skilled/formal yang memang ada biaya sah, atau butuh modal awal — JANGAN pinjam ke rentenir/calo (bunga 20–40%, dan ujungnya jadi jeratan utang yang dipotong dari gajimu di luar negeri)."
+            },
+            {
+              "type": "paragraph",
+              "text": "Pintu legalnya namanya KUR Penempatan PMI — dana talangan resmi dari bank pemerintah: plafonnya sampai Rp100 juta, bunganya cuma sekitar 6%/tahun (jauh di bawah calo), TANPA agunan, dan cicilannya baru mulai setelah beberapa bulan kamu kerja dan gajian. Syarat utamanya: kamu punya perjanjian kerja resmi. Ini kebalikan dari jeratan calo — pintu yang sama (modal berangkat), tapi legal, tertulis, dan murah."
+            },
+            {
+              "type": "callout",
+              "text": "Kalau kamu serius mau berangkat: jalan dulu lewat jalur resmi. Cek izin P3MI-nya di bp2mi.go.id dan pastikan namamu + job order terdaftar di SISKOP2MI — 'nggak ada di SISKOP2MI = nggak diberangkatkan resmi'. Perantau Global siap bantu jalur resminya, termasuk arahan soal dana talangan penempatan yang legal kalau kamu memang butuh modal. Kamu juga bisa berangkat — lewat pintu yang benar, bukan calo."
+            }
+          ]
+        },
+        {
+          "lesson_num": 16,
+          "type": "quiz",
+          "title": "Kuis: Jaga & Tumbuhkan",
+          "estimated_minutes": 5,
+          "pass_threshold": 70,
+          "questions": [
+            {
+              "id": "q1",
+              "prompt": "Cara paling aman menyimpan tabunganmu selama kerja di luar negeri?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Kirim semua ke rekening saudara biar aman dipegang"
+                },
+                {
+                  "key": "b",
+                  "label": "Disimpan di rekening atas nama SENDIRI, terpisah dari kiriman keluarga"
+                },
+                {
+                  "key": "c",
+                  "label": "Dibelikan barang dulu biar nggak kepakai"
+                }
+              ]
+            },
+            {
+              "id": "q2",
+              "prompt": "Kenapa emas (Tabungan Emas) sebaiknya disimpan 2–5 tahun, bukan dijual cepat?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Karena emas dilarang dijual cepat oleh hukum"
+                },
+                {
+                  "key": "b",
+                  "label": "Karena ada selisih harga beli-jual (spread) 3–8%, jadi jual cepat malah rugi"
+                },
+                {
+                  "key": "c",
+                  "label": "Karena harga emas tidak pernah naik"
+                }
+              ]
+            },
+            {
+              "id": "q3",
+              "prompt": "Produk halal mana yang dijamin negara, imbal hasilnya TETAP, dan dibayar TIAP BULAN — cocok untuk pemula?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Crypto / robot-trading"
+                },
+                {
+                  "key": "b",
+                  "label": "Saham biasa"
+                },
+                {
+                  "key": "c",
+                  "label": "Sukuk Ritel seri syariah (SR)"
+                }
+              ]
+            },
+            {
+              "id": "q4",
+              "prompt": "Setelah kontrak selesai, mana urutan yang BENAR sebelum mulai investasi atau beli aset?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Beli motor baru dulu sebagai hadiah"
+                },
+                {
+                  "key": "b",
+                  "label": "Lunasi utang penempatan, lalu siapkan dana darurat"
+                },
+                {
+                  "key": "c",
+                  "label": "Langsung taruh semua uang di reksa dana saham"
+                }
+              ]
+            },
+            {
+              "id": "q5",
+              "prompt": "Mana yang termasuk ASET PRODUKTIF (menghasilkan), bukan liabilitas (menghabiskan)?",
+              "multiple": true,
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Ternak penggemukan"
+                },
+                {
+                  "key": "b",
+                  "label": "Warung / kos-kosan"
+                },
+                {
+                  "key": "c",
+                  "label": "Motor atau HP mewah baru"
+                },
+                {
+                  "key": "d",
+                  "label": "Mobil mewah di luar kemampuan"
+                }
+              ]
+            },
+            {
+              "id": "q6",
+              "prompt": "Kamu mau berangkat tapi belum punya modal/biaya. Mana langkah yang BENAR?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Pinjam ke calo/rentenir 'gratis berangkat, nanti dipotong gaji' biar cepat"
+                },
+                {
+                  "key": "b",
+                  "label": "Cek jalur resmi (P3MI di bp2mi.go.id + SISKOP2MI); untuk kerja domestik biaya ditanggung majikan, dan kalau butuh modal ada KUR Penempatan PMI yang legal"
+                },
+                {
+                  "key": "c",
+                  "label": "Batalkan niat berangkat karena pasti butuh utang besar"
+                }
+              ]
+            }
+          ],
+          "answer_keys": [
+            {
+              "id": "q1",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Tabungan kamu, atas nama KAMU. Kirim semua ke rekening saudara 'biar aman' adalah kegagalan #1 yang terdokumentasi — uangnya kepakai (sekolah adik, kebutuhan rumah tangga saudara) dan pulang nyaris habis. Pisahkan kiriman keluarga dari tabungan masa depan."
+            },
+            {
+              "id": "q2",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Alasan utamanya adalah SPREAD: selisih harga beli vs jual sekitar 3–8%. Beli pagi jual sore = langsung rugi sebesar spread itu. Soal pajak, jangan takut: kalau kamu jual balik Tabungan Emas milikmu, kamu dihitung konsumen akhir dan penjualan oleh konsumen akhir DIKECUALIKAN dari PPh Pasal 22 (PMK 48/2023) — umumnya kena pajak NOL, bukan 1,5%/3% seperti rezim lama. Kalaupun ada pemungutan di kanal tertentu, tarif emas batangan sekarang cuma 0,25% (0,5% tanpa NPWP). Intinya: emas itu penyimpan nilai jangka panjang (tahan 2–5 tahun), bukan alat cepat kaya — karena spread-nya, bukan karena pajaknya."
+            },
+            {
+              "id": "q3",
+              "correct": [
+                "c"
+              ],
+              "weight": 1,
+              "explanation": "Sukuk Ritel seri SR (syariah): dijamin negara, halal (akad ijarah/sewa, bukan riba), imbal hasil TETAP, mulai Rp1 juta, dibayar TIAP BULAN seperti gaji kecil. Pilih seri SR — ST juga syariah tapi hasilnya mengambang & nggak bisa dijual sebelum tempo, dan ORI itu konvensional (bukan syariah). Crypto/robot-trading justru jebakan yang memangsa PMI; saham biasa nilainya bisa turun dan tidak dijamin."
+            },
+            {
+              "id": "q4",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Naik tangga uang satu per satu: lunasi utang penempatan dulu, lalu bangun dana darurat 6–12 bulan di rekening terpisah. Baru setelah itu tumbuhkan lewat produk halal. Lompat langsung ke investasi atau beli barang konsumtif = gampang balik nol."
+            },
+            {
+              "id": "q5",
+              "correct": [
+                "a",
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Aset produktif itu yang MENGHASILKAN: ternak penggemukan (panen ~3 bulan), warung, kos. Motor/HP/mobil mewah itu liabilitas — uang keluar terus, nggak masuk. Prinsipnya: beli aset yang menghasilkan sebelum barang yang menghabiskan."
+            },
+            {
+              "id": "q6",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Jangan pernah lewat calo/rentenir — 'gratis berangkat, nanti dipotong gaji' itu jeratan utang (debt bondage). Untuk 10 kategori kerja domestik via jalur resmi, biaya penempatan = Rp0 (ditanggung majikan). Kalau jalur skilled/formal atau butuh modal, ada KUR Penempatan PMI: plafon sampai Rp100 juta, bunga ~6%/tahun, tanpa agunan, cicilan mulai setelah kamu gajian — legal dan tertulis. Selalu cek izin P3MI di bp2mi.go.id dan namamu di SISKOP2MI dulu."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "module_num": 6,
+      "title": "Siap Berangkat & Jalur Resmi: Kamu Juga Bisa",
+      "summary": "Modul penutup: checklist kesiapan finansial pra-keberangkatan (buka rekening + m-banking di Indonesia sebelum berangkat, akses keluarga yang aman lewat rekening terpisah BUKAN bagi PIN, pahami kontrak, buffer uang saku arrival, dokumen + Iqama yang diurus majikan, plus catatan bahwa Mada card dari majikan saat sampai = rekening tempat gajimu masuk), lalu CTA konversi yang JUJUR dengan scope-gate: untuk 10 kategori domestik via jalur resmi biaya penempatan = Rp0 jadi kamu TIDAK perlu utang; KUR Penempatan PMI (≤Rp100jt, bunga subsidi indikatif ~6% — cek tarif tahun berjalan, tanpa agunan, umumnya ada masa tenggang/grace period sebelum cicilan pokok mulai — konfirmasi ke bank penyalur) hanya relevan untuk jalur skilled/formal yang ada biaya sah atau modal — lawan legal dari calo/rentenir 20-40%. Ditutup langkah verifikasi: cek izin P3MI di bp2mi.go.id + nama & job order di SISKOP2MI.",
+      "lessons": [
+        {
+          "lesson_num": 17,
+          "type": "reading",
+          "title": "Checklist Finansial Sebelum Berangkat",
+          "estimated_minutes": 7,
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Banyak hal finansial jauh lebih gampang diurus SEKARANG, selagi kamu masih di Indonesia. Begitu sampai di Saudi, sebagian malah susah atau nggak bisa sama sekali. Modul ini checklist-nya — beresin sebelum berangkat, biar pas di sana kamu tinggal fokus kerja dan kirim uang."
+            },
+            {
+              "type": "heading",
+              "text": "1. Buka rekening + m-banking di Indonesia DULU"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ini yang paling sering kelewat. Buka rekening bank dari Indonesia itu mudah. Buka rekening PRIBADI baru dari Saudi? Jauh lebih ribet — sering perlu Iqama (izin tinggal) yang belum tentu langsung jadi. Jadi urus dari sekarang, mumpung gampang."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Buka 1 rekening atas nama KAMU sendiri — ini tempat gaji & tabungan kamu pulang.",
+                "Banyak bank punya produk tabungan khusus PMI/TKI (mis. Mandiri, BNI, BRI BritAma, BCA) — tanya yang biaya admin-nya kecil dan ada m-banking.",
+                "Aktifkan mobile banking + pastikan kamu bisa pakai sendiri sebelum berangkat. Latihan transfer kecil dulu biar nggak bingung di sana.",
+                "Satu PMI umumnya boleh punya 2 rekening: 1 atas nama kamu, 1 untuk keluarga terima kiriman."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Catatan penting soal rekening di Saudi: untuk 10 kategori domestik, majikan WAJIB mengurus kartu gaji prepaid (Mada card) atas nama KAMU saat kamu sampai — kartu itulah rekening tempat gajimu masuk. Jadi kamu TIDAK perlu repot buka sendiri rekening pribadi di Saudi. Rekening Indonesia yang kamu buka di poin atas tetap penting: itu tujuan akhir uang yang kamu kirim pulang."
+            },
+            {
+              "type": "callout",
+              "text": "Aturan emas dari modul sebelumnya: tabungan kamu, ATAS NAMA KAMU. Rekening keluarga itu untuk MENERIMA kiriman rutin — bukan tempat nyimpen seluruh tabunganmu."
+            },
+            {
+              "type": "heading",
+              "text": "2. Beri keluarga AKSES yang aman — bukan PIN kamu"
+            },
+            {
+              "type": "paragraph",
+              "text": "Keluarga perlu bisa terima kiriman dengan gampang, tapi kamu tetap harus pegang kendali. Caranya: kasih mereka rekening sendiri, JANGAN kasih PIN atau password m-banking kamu."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Buat rekening TERPISAH untuk keluarga terima kiriman bulanan.",
+                "Atau pakai fitur 'rekening bersama / kantong bersama' (beberapa bank digital punya ini) — keluarga bisa lihat & tarik dari kantong itu, tapi nggak bisa sentuh tabungan utamamu.",
+                "Sepakati 1 jumlah kiriman rutin tetap, terikat ke tanggal gajian. Misal: 'tanggal 5 tiap bulan, Rp X' — biar nggak dinego ulang tiap bulan."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Kasih PIN/password m-banking ke siapa pun = kamu kehilangan kendali penuh atas uangmu. Sekali kasih, susah ditarik. Akses lewat rekening terpisah jauh lebih aman."
+            },
+            {
+              "type": "heading",
+              "text": "3. Pahami kontrak SEBELUM tanda tangan"
+            },
+            {
+              "type": "paragraph",
+              "text": "Ingat dari modul awal: gaji nominal bisa menipu. Yang nentuin berapa yang benar-benar bisa kamu kirim pulang itu satu-dua baris di kontrak. Baca pelan-pelan, tanya kalau nggak ngerti — jangan tanda tangan kalau masih bingung."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Gaji pokok berapa? Untuk PRT Indonesia–Saudi, angka acuan yang sering dipakai sekitar SAR 1.500/bulan — tapi ini ANGKA INDIKATIF. Besaran resmi diatur lewat perjanjian/MoU (sistem Musaned) dan bisa berbeda per skema. Konfirmasi angka pastinya di KONTRAK kamu sendiri.",
+                "Baris paling penting: 'akomodasi & makan ditanggung atau tidak?' Untuk kategori domestik resmi, harusnya DITANGGUNG majikan.",
+                "Metode bayar: gaji wajib dibayar elektronik lewat sistem resmi (Musaned) ke Mada card ATAS NAMA KAMU — jangan mau dibayar tunai 'di luar sistem'.",
+                "Jam kerja, hari libur, dan masa kontrak — pastikan tertulis jelas."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Soal gaji elektronik: di Saudi, gaji pekerja domestik memang wajib dibayar lewat sistem resmi (Musaned) ke Mada card atas namamu — bukan tunai diam-diam. Aturan pembayaran upah elektronik ini sudah berjalan dan terus diperketat penegakannya. Intinya buat kamu: pastikan gajimu masuk ke Mada card ATAS NAMA KAMU, dan jangan mau diatur 'di luar sistem'."
+            },
+            {
+              "type": "heading",
+              "text": "4. Bawa buffer uang saku untuk arrival"
+            },
+            {
+              "type": "paragraph",
+              "text": "Gaji pertama kadang telat masuk — bisa beberapa minggu sampai sebulan. Jangan sampai kamu mendarat dengan dompet kosong total."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Bawa sedikit uang saku untuk kebutuhan awal: beli SIM card (sekitar SAR 30–50, kadang plus pajak) + pulsa/paket data biar bisa telpon keluarga.",
+                "Sisihkan juga buffer kecil di rekeningmu untuk 1–2 minggu pertama, jaga-jaga gaji telat.",
+                "Angka pasti berubah-ubah dan kurs naik-turun — intinya: jangan berangkat dengan nol rupiah."
+              ]
+            },
+            {
+              "type": "heading",
+              "text": "5. Lengkapi dokumen — termasuk Iqama"
+            },
+            {
+              "type": "paragraph",
+              "text": "Dokumen lengkap = kamu terlindungi secara hukum. Kurang satu, posisimu lemah."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Paspor masih berlaku minimal 6 bulan — dan WAJIB kamu pegang sendiri.",
+                "Medical check (GAMCA/WAFID), SKCK, dan perjanjian kerja resmi.",
+                "WAJIB terdaftar di SISKOP2MI — kalau nama kamu nggak ada di sana, kamu nggak berangkat secara resmi.",
+                "Untuk 10 kategori domestik via jalur resmi, biaya seperti medical & dokumen umumnya ditanggung majikan/agency — bukan dibebankan ke kamu."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "IQAMA (izin tinggal) — diurus & DITANGGUNG majikan, harus atas NAMA KAMU. Iqama ini kunci: tanpa Iqama atas namamu, kamu susah dapat Mada card, susah aktifkan rekening, dan susah kirim uang. Kalau majikan menahan Iqama atau paspor kamu, itu pelanggaran serius — paspor yang disita majikan ilegal di Saudi (ada denda untuk majikan, mulai dari ribuan riyal). Lapor KBRI Riyadh / KJRI Jeddah."
+            },
+            {
+              "type": "heading",
+              "text": "Sebelum lanjut: omongin ke keluarga"
+            },
+            {
+              "type": "paragraph",
+              "text": "Banyak masalah uang PMI sebenarnya masalah KELUARGA di rumah. Sebelum berangkat, duduk bareng dan sepakati hal-hal ini:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Jumlah kiriman rutin yang disepakati + tanggalnya — pisahkan 'rutin' dari 'darurat'.",
+                "Tabungan utama tetap atas nama kamu; keluarga hanya pegang rekening kiriman.",
+                "Ingatkan keluarga: JANGAN ambil pinjol ilegal. Utang Rp1 juta bisa meledak jadi puluhan juta dalam hitungan bulan.",
+                "Ajari cara cek kiriman ASLI: percaya SALDO di rekening, bukan screenshot/bukti transfer yang bisa dipalsukan."
+              ]
+            }
+          ]
+        },
+        {
+          "lesson_num": 18,
+          "type": "reading",
+          "title": "Kamu Juga Bisa Berangkat — Lewat Jalur Resmi, Bukan Calo",
+          "estimated_minutes": 7,
+          "blocks": [
+            {
+              "type": "paragraph",
+              "text": "Kamu sudah belajar banyak: gimana hidup di Saudi, cara budgeting gaji, cara kirim uang paling hemat, ngehindarin jebakan, dan nabung buat hidup setelah kontrak. Sekarang pertanyaannya satu: gimana cara BERANGKAT-nya — dengan aman, dan tanpa terjebak utang?"
+            },
+            {
+              "type": "heading",
+              "text": "Hal pertama yang harus kamu tahu: kamu mungkin TIDAK perlu utang sama sekali"
+            },
+            {
+              "type": "paragraph",
+              "text": "Untuk 10 kategori kerja domestik (PRT, pengasuh bayi, pengasuh lansia, pengasuh anak, juru masak, sopir keluarga, perawat taman/tukang kebun, petugas kebersihan, pekerja ladang/perkebunan, awak kapal perikanan) lewat jalur resmi — biaya penempatan ditanggung MAJIKAN, bukan kamu. Artinya: biaya kamu Rp0."
+            },
+            {
+              "type": "callout",
+              "text": "Kalau kerjamu termasuk 10 kategori domestik di atas dan lewat jalur resmi: kamu NGGAK perlu pinjam siapa pun untuk berangkat. Ada yang nawarin 'dana talangan' untuk biaya yang harusnya GRATIS? Tolak. Itu jebakan debt bondage (utang yang nyandera gajimu bertahun-tahun di luar negeri) — pola 'gratis berangkat, bayar belakangan dipotong gaji' adalah cara calo mengubah kebaikan palsu jadi utang yang mengikatmu di Saudi."
+            },
+            {
+              "type": "paragraph",
+              "text": "Catatan jujur: untuk kategori domestik, biayanya hampir SELALU Rp0. Kalau ada yang menagih biaya apa pun, JANGAN langsung bayar. Minta rinciannya TERTULIS + kuitansi resmi, lalu cek dulu ke P3MI yang terdaftar di bp2mi.go.id. Kalau dia nolak kasih rincian tertulis, itu tanda calo — tinggalkan."
+            },
+            {
+              "type": "heading",
+              "text": "Kapan pembiayaan resmi (KUR) baru masuk akal?"
+            },
+            {
+              "type": "paragraph",
+              "text": "KUR Penempatan PMI itu pinjaman LEGAL dari bank — bukan untuk semua orang. Ambil HANYA kalau:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "(a) Kamu jalur skilled/formal — yaitu kerja yang butuh keahlian/sertifikasi (mis. perawat, welder, operator pabrik), bukan kerja rumah tangga — yang memang ADA biaya sah (mis. pelatihan/sertifikasi tertentu yang bukan tanggungan majikan), ATAU",
+                "(b) Kamu butuh MODAL untuk hal yang jelas — dan kamu paham cicilannya."
+              ]
+            },
+            {
+              "type": "paragraph",
+              "text": "Dan kalau memang ambil, ambil dari BANK RESMI dengan kontrak tertulis — bukan cash dari sponsor/calo yang ditukar gajimu di masa depan."
+            },
+            {
+              "type": "heading",
+              "text": "Pintu legal vs pintu calo — kebutuhan sama, pintu beda"
+            },
+            {
+              "type": "paragraph",
+              "text": "Dulu, banyak orang yang nggak punya uang berangkat terpaksa pinjam ke rentenir atau calo dengan bunga 20–40%. Itu cara orang terjerat utang bertahun-tahun. Sekarang ada pintu yang legal."
+            },
+            {
+              "type": "list",
+              "items": [
+                "Calo / rentenir: bunga 20–40%, tanpa kontrak jelas, gaji disandera = debt bondage (utang yang nyandera gajimu).",
+                "KUR Penempatan PMI: plafon (batas maksimal pinjaman) sampai sekitar Rp100 juta, bunga subsidi yang RINGAN — angkanya indikatif (pernah di kisaran 6%/tahun, bahkan sempat lebih rendah di periode tertentu) karena tarif KUR ditetapkan ulang pemerintah tiap tahun anggaran, jadi cek tarif tahun berjalan ke bank. 'Disubsidi' artinya sebagian bunganya dibayar pemerintah, jadi kamu bayar lebih ringan. TANPA agunan (tanpa jaminan — kamu nggak perlu serahin sertifikat tanah atau BPKB), tenor (lama cicilan) sampai 3 tahun.",
+                "Syarat utama KUR: punya perjanjian kerja resmi. Bisa menutup pelatihan, sertifikasi, dokumen, tiket.",
+                "Umumnya ada masa tenggang (grace period) sebelum cicilan POKOK mulai — jadi kamu sempat napas dulu setelah mulai kerja. Tapi lamanya bervariasi per bank penyalur dan skema, jadi tanyakan rinciannya langsung ke bank — jangan dianggap pasti. Cair bertahap ikut proses, lewat bank penyalur resmi (bank yang ditunjuk menyalurkan KUR: Mandiri, BRI, BNI, BSI syariah, dan belasan bank lain)."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Angka di atas (plafon ~Rp100 juta, bunga ~6%, masa tenggang cicilan) bersifat INDIKATIF dan bisa berubah — sama seperti harga SIM card dan kurs yang berubah-ubah. Selalu konfirmasi tarif, plafon, dan masa tenggang yang berlaku langsung ke bank penyalur sebelum kamu jadikan rencana. Yang nggak berubah: pintu KUR itu legal, tercatat, dan jauh lebih murah dari calo."
+            },
+            {
+              "type": "callout",
+              "text": "Kebutuhan sama ('aku perlu dana untuk berangkat'), tapi pintunya beda. Pintu calo menjerat. Pintu KUR legal, murah, tercatat, dan cicilannya manusiawi. Kalau kamu memang perlu pinjam, pinjam lewat pintu yang benar."
+            },
+            {
+              "type": "heading",
+              "text": "Pinjaman terencana, bukan desperate"
+            },
+            {
+              "type": "paragraph",
+              "text": "Semua disiplin nabung yang kamu pelajari di modul-modul tadi gunanya di sini: supaya kalau kamu pinjam, kamu pinjam karena RENCANA — bukan karena panik dan terpaksa. Kamu tahu cicilannya, tahu kapan lunas, dan tahu sisa gaji tetap cukup buat kirim & nabung. Itu beda antara orang yang pulang bawa aset dan orang yang pulang bawa utang."
+            },
+            {
+              "type": "heading",
+              "text": "WAJIB: verifikasi dulu sebelum percaya siapa pun"
+            },
+            {
+              "type": "paragraph",
+              "text": "Sebelum kamu percaya agen, sponsor, atau siapa pun yang nawarin keberangkatan — cek dua hal ini. Gratis, dan ini yang membedakan jalur resmi dari calo:"
+            },
+            {
+              "type": "list",
+              "items": [
+                "Cek izin P3MI (agen penyalur) aktif di bp2mi.go.id — kalau agennya nggak ada izinnya, STOP.",
+                "Cek NAMA kamu + JOB ORDER kamu terdaftar di SISKOP2MI — kalau nggak ada, kamu nggak diberangkatkan secara resmi.",
+                "Tanda bahaya: minta uang besar di muka tanpa kuitansi resmi, janji 'cepat/gampang/tanpa pengalaman', menahan paspor, atau ngehindar kasih nama perusahaan resmi."
+              ]
+            },
+            {
+              "type": "callout",
+              "text": "Dua cek gratis ini — bp2mi.go.id + SISKOP2MI — adalah perlindungan paling kuat yang kamu punya. 'Nggak ada di SISKOP2MI = nggak resmi.' Ingat itu."
+            },
+            {
+              "type": "heading",
+              "text": "Kamu juga bisa — lewat Perantau Global"
+            },
+            {
+              "type": "paragraph",
+              "text": "Sampai sini, kamu sudah lebih siap dari kebanyakan orang yang berangkat. Kamu tahu cara hidup hemat, kirim uang, hindari jebakan, dan nabung. Tinggal satu langkah: berangkat lewat jalur yang benar."
+            },
+            {
+              "type": "paragraph",
+              "text": "Perantau Global adalah jalur resmi: transparan, terdaftar, dan kalau memang kamu perlu, kami bantu jelasin pembiayaan penempatan yang LEGAL — bukan calo, bukan dana talangan untuk biaya yang harusnya gratis. Kalau kerjamu domestik dan biayanya nol, kami nggak akan bikin kamu ngutang. Itu janjinya."
+            },
+            {
+              "type": "callout",
+              "text": "Kamu juga bisa berangkat — lewat jalur resmi, bukan calo. Cek peluang & posisi resmi di Perantau Global, dan selalu verifikasi sendiri di bp2mi.go.id + SISKOP2MI sebelum percaya siapa pun."
+            }
+          ]
+        },
+        {
+          "lesson_num": 19,
+          "type": "quiz",
+          "title": "Kuis: Siap Berangkat & Jalur Resmi",
+          "estimated_minutes": 4,
+          "pass_threshold": 70,
+          "questions": [
+            {
+              "id": "q1",
+              "prompt": "Kenapa sebaiknya kamu buka rekening + m-banking di Indonesia SEBELUM berangkat?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Karena di Saudi buka rekening pribadi baru jauh lebih susah (sering perlu Iqama dulu)"
+                },
+                {
+                  "key": "b",
+                  "label": "Karena bank di Indonesia lebih murah biaya transfernya"
+                },
+                {
+                  "key": "c",
+                  "label": "Karena wajib punya 5 rekening sebelum berangkat"
+                }
+              ]
+            },
+            {
+              "id": "q2",
+              "prompt": "Cara paling aman memberi keluarga akses ke uang kiriman adalah?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Kasih PIN dan password m-banking kamu ke mereka"
+                },
+                {
+                  "key": "b",
+                  "label": "Pakai rekening terpisah / kantong bersama untuk kiriman — TANPA membagi PIN m-banking utamamu"
+                },
+                {
+                  "key": "c",
+                  "label": "Pindahkan seluruh tabunganmu ke rekening saudara biar aman"
+                }
+              ]
+            },
+            {
+              "id": "q3",
+              "prompt": "Kamu mau kerja sebagai PRT lewat jalur resmi (salah satu dari 10 kategori domestik). Ada orang nawarin 'dana talangan' untuk biaya penempatan. Sikap yang benar?",
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Ambil saja, biar cepat berangkat"
+                },
+                {
+                  "key": "b",
+                  "label": "Tolak — biaya penempatan kategori domestik ditanggung majikan (Rp0); ditawari utang untuk itu = tanda debt bondage"
+                },
+                {
+                  "key": "c",
+                  "label": "Bayar setengahnya dulu sebagai tanda jadi"
+                }
+              ]
+            },
+            {
+              "id": "q4",
+              "prompt": "Sebelum percaya agen atau sponsor mana pun, dua hal apa yang WAJIB kamu cek? (boleh pilih lebih dari satu)",
+              "multiple": true,
+              "options": [
+                {
+                  "key": "a",
+                  "label": "Izin P3MI aktif di bp2mi.go.id"
+                },
+                {
+                  "key": "b",
+                  "label": "Nama & job order kamu terdaftar di SISKOP2MI"
+                },
+                {
+                  "key": "c",
+                  "label": "Jumlah follower agen di media sosial"
+                }
+              ]
+            }
+          ],
+          "answer_keys": [
+            {
+              "id": "q1",
+              "correct": [
+                "a"
+              ],
+              "weight": 1,
+              "explanation": "Buka rekening pribadi dari Saudi jauh lebih ribet — sering perlu Iqama yang belum tentu langsung jadi. Urus dari Indonesia selagi gampang, lengkap dengan m-banking yang bisa kamu pakai sendiri. (Catatan: untuk kategori domestik, Mada card dari majikan saat sampai = rekening tempat gajimu masuk, jadi kamu nggak perlu buka rekening pribadi sendiri di Saudi.)"
+            },
+            {
+              "id": "q2",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Beri keluarga AKSES lewat rekening terpisah atau kantong bersama, jangan pernah bagi PIN/password m-banking — sekali kasih, kamu kehilangan kendali. Dan tabungan utama tetap atas nama KAMU, bukan dipindah ke rekening saudara."
+            },
+            {
+              "id": "q3",
+              "correct": [
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Untuk 10 kategori domestik via jalur resmi, biaya penempatan = Rp0 (ditanggung majikan). Ditawari 'dana talangan' untuk biaya yang harusnya gratis adalah pintu masuk debt bondage — gajimu disandera untuk bayar utang yang sebenarnya nggak perlu ada. Kalau ada yang menagih, minta rincian tertulis + kuitansi resmi dan cek ke P3MI terdaftar dulu."
+            },
+            {
+              "id": "q4",
+              "correct": [
+                "a",
+                "b"
+              ],
+              "weight": 1,
+              "explanation": "Dua cek gratis ini perlindungan terkuatmu: izin P3MI di bp2mi.go.id + nama & job order kamu di SISKOP2MI. Kalau salah satu nggak ada, kamu tidak diberangkatkan secara resmi. Jumlah follower media sosial tidak membuktikan apa-apa."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
