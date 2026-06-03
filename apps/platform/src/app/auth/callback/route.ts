@@ -88,14 +88,17 @@ export async function GET(request: NextRequest) {
         const positionSlug = typeof meta.position_slug === "string" ? meta.position_slug : undefined;
         const fullName = typeof meta.full_name === "string" ? meta.full_name : undefined;
 
-        // Prefer the freshly-forwarded values if any; otherwise fall back
-        // to whatever was already on the portal cookie. Don't fire without
-        // any attribution — the event still goes to Pixel but match quality
-        // would be poor.
+        // Resolve attribution with the most reliable source first. The apply
+        // route stamps fbp/fbc into auth user_metadata at signup — that survives
+        // the email-client / cross-domain round trip where both the portal
+        // cookies and the forwarded redirect-URL params are commonly dropped.
+        // Fall back to the URL params, then any pre-existing portal cookie.
+        const metaFbp = typeof meta.fbp === "string" ? meta.fbp : undefined;
+        const metaFbc = typeof meta.fbc === "string" ? meta.fbc : undefined;
         const existingFbp = request.cookies.get("_fbp")?.value;
         const existingFbc = request.cookies.get("_fbc")?.value;
-        const fbp = metaParams.fbp ?? existingFbp ?? undefined;
-        const fbc = metaParams.fbc ?? existingFbc ?? undefined;
+        const fbp = metaFbp ?? metaParams.fbp ?? existingFbp ?? undefined;
+        const fbc = metaFbc ?? metaParams.fbc ?? existingFbc ?? undefined;
 
         await sendMetaEvent({
           eventName: "CompleteRegistration",

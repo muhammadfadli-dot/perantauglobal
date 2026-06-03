@@ -57,6 +57,22 @@ interface CandidatePayload {
   fbc?: string;
 }
 
+/**
+ * Extract the `fbclid` query param from the submitted source URL. Used to
+ * reconstruct an `_fbc` value when the Pixel cookie hasn't been written yet
+ * (race between page load and a fast form submit) so CAPI match quality — and
+ * the downstream CompleteRegistration attribution — don't silently depend on
+ * the cookie being present.
+ */
+function parseFbclid(sourceUrl?: string): string | undefined {
+  if (!sourceUrl) return undefined;
+  try {
+    return new URL(sourceUrl).searchParams.get("fbclid") ?? undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function validatePasswordServer(pw: string): boolean {
   return (
     pw.length >= 10 &&
@@ -139,6 +155,14 @@ export async function POST(
 
     const email = body.email.toLowerCase().trim();
 
+    // Reconstruct _fbc from fbclid when the Pixel cookie wasn't set in time
+    // (Meta accepts `fb.1.<ts>.<fbclid>`). Rescues attribution for the ~25% of
+    // ad clicks whose _fbc cookie hadn't been written at submit. Used for both
+    // the Lead CAPI fire below and the CompleteRegistration handoff to portal.
+    const fbclid = parseFbclid(body.source_url);
+    const effectiveFbc =
+      body.fbc || (fbclid ? `fb.1.${Date.now()}.${fbclid}` : undefined);
+
     // Step 1: stage the form payload. The DB trigger
     // (handle_new_auth_user in migration 0015) reads this on email_confirmed_at
     // flip to materialize candidate + application.
@@ -197,7 +221,7 @@ export async function POST(
       process.env.NEXT_PUBLIC_APP_URL || "https://app.perantauglobal.com";
     const redirectParams = new URLSearchParams();
     if (body.fbp) redirectParams.set("fbp", body.fbp);
-    if (body.fbc) redirectParams.set("fbc", body.fbc);
+    if (effectiveFbc) redirectParams.set("fbc", effectiveFbc);
     const redirectQuery = redirectParams.toString();
     const emailRedirectTo = redirectQuery
       ? `${platformBase}/auth/callback?${redirectQuery}`
@@ -213,6 +237,12 @@ export async function POST(
           full_name: body.full_name,
           source: "form_apply",
           position_slug: slug,
+          // Carry Meta attribution in auth user_metadata so the portal
+          // /auth/callback can fire CompleteRegistration with good match
+          // quality even when the magic link is opened in a different
+          // browser/email-client where _fbp/_fbc cookies + URL params are lost.
+          ...(body.fbp && { fbp: body.fbp }),
+          ...(effectiveFbc && { fbc: effectiveFbc }),
         },
       },
     });
@@ -267,7 +297,7 @@ export async function POST(
           ip: request.headers.get("x-forwarded-for")?.split(",")[0] || "",
           userAgent: request.headers.get("user-agent") || "",
           fbp: body.fbp,
-          fbc: body.fbc,
+          fbc: effectiveFbc,
           userData: {
             email,
             phone: body.whatsapp,
