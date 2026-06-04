@@ -52,9 +52,33 @@ interface CandidatePayload {
    * mirrored to `candidates.profile_data` (per-app fresh-start model post-Fase 5).
    */
   role_data?: Record<string, string | string[]>;
+  /**
+   * Optional affiliate referral code typed by the candidate ("kode agen").
+   * Persisted to pending_submissions.form_data.ref; the materialization trigger
+   * (handle_new_auth_user → _attribute_candidate_referral) resolves it to an
+   * agent and logs the registration commission event. A bad/empty code is a
+   * no-op and never blocks registration.
+   */
+  ref?: string;
   eventId?: string;
   fbp?: string;
   fbc?: string;
+}
+
+/**
+ * Normalize a candidate-typed referral code to the canonical stored shape:
+ * uppercase, whitespace-trimmed, charset [A-Z0-9-], 1–32 chars. Returns null
+ * for anything that can't be a code (empty, too long, illegal chars) so we only
+ * ever stage a clean token — the DB trigger does the authoritative resolution.
+ */
+function normalizeRef(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const v = raw.trim().toUpperCase();
+  // Mirror the DB CHECK / validate RPC (4–32 chars, [A-Z0-9-]) so only
+  // canonically-shaped codes are staged; anything shorter can never resolve to
+  // an agent anyway, so don't persist unresolvable noise to form_data.ref.
+  if (!/^[A-Z0-9-]{4,32}$/.test(v)) return null;
+  return v;
 }
 
 /**
@@ -183,6 +207,7 @@ export async function POST(
           country: mapping.country,
           source_url: body.source_url ?? null,
           role_data: sanitizeRoleData(body.role_data),
+          ref: normalizeRef(body.ref),
         },
         consents: [
           {

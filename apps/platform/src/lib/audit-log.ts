@@ -34,14 +34,26 @@ export type AuditAction =
   | "remove_admin"
   // Inbox triage
   | "update_inbox_status"
-  | "update_inbox_notes";
+  | "update_inbox_notes"
+  // Affiliate / referral operations
+  | "create_affiliate_agent"
+  | "update_affiliate_agent"
+  | "generate_referral_code"
+  | "update_referral_code"
+  | "set_commission_amount"
+  | "approve_commission"
+  | "mark_commission_paid"
+  | "void_commission";
 
 export type AuditResourceType =
   | "candidate_document"
   | "application"
   | "candidate"
   | "admin_user"
-  | "contact_submission";
+  | "contact_submission"
+  | "affiliate_agent"
+  | "referral_code"
+  | "commission_event";
 
 export type AuditMetadata = Record<string, string | number | boolean | null>;
 

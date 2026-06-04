@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Icon } from "./Icon";
 import { Button, Field, Input, Textarea } from "./primitives";
 import { trackEvent, generateEventId, getMetaCookies } from "@/lib/tracking";
@@ -20,6 +20,10 @@ type ApplyFormProps = {
 };
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.perantauglobal.com";
+
+// Codes are [A-Z0-9-], 4–32 (mirrors the DB CHECK). Only start the live check
+// once enough characters are typed so we don't ping the API on every keystroke.
+const REFERRAL_MIN_LEN = 4;
 
 type Identity = {
   fullName: string;
@@ -58,6 +62,15 @@ export function ApplyForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
 
+  // Optional affiliate referral code ("kode agen"). Normalized on change; a
+  // non-blocking debounced check just shows a subtle ✓/✗ hint. The code itself
+  // travels in the POST payload as `ref` regardless of the hint — attribution
+  // is resolved server-side by the DB trigger, never gated here.
+  const [referralCode, setReferralCode] = useState("");
+  const [referralCheck, setReferralCheck] = useState<
+    "idle" | "checking" | "valid" | "invalid"
+  >("idle");
+
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [submittedEmail, setSubmittedEmail] = useState("");
@@ -69,6 +82,43 @@ export function ApplyForm({
   function setAnswer(key: string, value: string | string[]) {
     setAnswers((prev) => ({ ...prev, [key]: value }));
   }
+
+  function handleReferralChange(raw: string) {
+    setReferralCode(normalizeReferral(raw));
+    // Reset the hint on input (event handler — allowed). The effect below only
+    // runs the async check and never sets state synchronously, satisfying the
+    // react-hooks/set-state-in-effect rule.
+    setReferralCheck("idle");
+  }
+
+  // Debounced, NON-blocking validity hint. Never gates submit — a bad/unknown
+  // code is fine; the server still stages it and the trigger no-ops on
+  // unresolved. Aborts in-flight checks on each keystroke; ignores network
+  // errors (hint just goes back to neutral).
+  useEffect(() => {
+    // Only the async result is set here (inside the timeout/promise) — never a
+    // synchronous setState in the effect body (react-hooks/set-state-in-effect).
+    // The "idle"/"checking" reset happens in handleReferralChange on input.
+    if (referralCode.length < REFERRAL_MIN_LEN) return;
+    const controller = new AbortController();
+    const t = setTimeout(() => {
+      fetch(`/api/referral/validate?code=${encodeURIComponent(referralCode)}`, {
+        signal: controller.signal,
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d: { valid?: boolean } | null) => {
+          setReferralCheck(d?.valid ? "valid" : "invalid");
+        })
+        .catch(() => {
+          // Abort or network error — drop the hint silently, don't block.
+          if (!controller.signal.aborted) setReferralCheck("idle");
+        });
+    }, 400);
+    return () => {
+      clearTimeout(t);
+      controller.abort();
+    };
+  }, [referralCode]);
 
   function validateIdentityAndAdvance() {
     setErrorMsg("");
@@ -126,6 +176,10 @@ export function ApplyForm({
       country: positionCountry,
       source_url: typeof window !== "undefined" ? window.location.href : "",
       role_data: answers,
+      // Optional referral/agent code. Only stage a canonically-shaped code
+      // (>= 4 chars, matching the server normalizeRef + DB CHECK); shorter input
+      // can never resolve. The live ✓/✗ hint never blocks this from being sent.
+      ...(referralCode.length >= REFERRAL_MIN_LEN ? { ref: referralCode } : {}),
       eventId,
       fbp,
       fbc,
@@ -206,6 +260,9 @@ export function ApplyForm({
         status={status}
         errorMsg={errorMsg}
         onSubmit={handleSubmit}
+        referralCode={referralCode}
+        onReferralChange={handleReferralChange}
+        referralCheck={referralCheck}
       />
     );
   }
@@ -274,6 +331,11 @@ export function ApplyForm({
                 onChange={(e) => setIdentityField("city", e.target.value)}
               />
             </Field>
+            <ReferralField
+              value={referralCode}
+              onChange={handleReferralChange}
+              check={referralCheck}
+            />
           </div>
 
           {errorMsg && (
@@ -524,6 +586,51 @@ function IdentitySummary({ identity, onEdit }: { identity: Identity; onEdit: () 
   );
 }
 
+function ReferralField({
+  value,
+  onChange,
+  check,
+}: {
+  value: string;
+  onChange: (raw: string) => void;
+  check: "idle" | "checking" | "valid" | "invalid";
+}) {
+  const showHint = check === "valid" || check === "invalid";
+  return (
+    <Field
+      label="Kode referral / kode agen (opsional)"
+      htmlFor="apply-referral"
+      helper={
+        showHint ? undefined : "Isi kalau kamu didaftarin sama agen Perantau Global."
+      }
+    >
+      <Input
+        id="apply-referral"
+        type="text"
+        inputMode="text"
+        autoCapitalize="characters"
+        autoComplete="off"
+        placeholder="Misal: BUDI-2024"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+      {check === "valid" && (
+        <div
+          className="text-[12px] font-semibold flex items-center gap-1.5"
+          style={{ color: "var(--pg-ok)" }}
+        >
+          <Icon name="check" size={13} stroke={2.6} /> Kode dikenali
+        </div>
+      )}
+      {check === "invalid" && (
+        <div className="text-[12px] font-medium flex items-center gap-1.5 text-pg-ink-500">
+          <Icon name="x" size={13} stroke={2.4} /> Kode nggak ketemu
+        </div>
+      )}
+    </Field>
+  );
+}
+
 function FieldQuestion({
   field,
   index,
@@ -654,6 +761,9 @@ function SingleStepForm({
   status,
   errorMsg,
   onSubmit,
+  referralCode,
+  onReferralChange,
+  referralCheck,
 }: {
   identity: Identity;
   setIdentityField: <K extends keyof Identity>(key: K, value: Identity[K]) => void;
@@ -667,6 +777,9 @@ function SingleStepForm({
   status: "idle" | "loading" | "success" | "error";
   errorMsg: string;
   onSubmit: () => void;
+  referralCode: string;
+  onReferralChange: (raw: string) => void;
+  referralCheck: "idle" | "checking" | "valid" | "invalid";
 }) {
   return (
     <form
@@ -729,6 +842,11 @@ function SingleStepForm({
             onChange={(e) => setIdentityField("city", e.target.value)}
           />
         </Field>
+        <ReferralField
+          value={referralCode}
+          onChange={onReferralChange}
+          check={referralCheck}
+        />
       </div>
 
       <div className="mt-5 border-t border-pg-ink-100 pt-5">
@@ -819,6 +937,17 @@ function isEmpty(v: string | string[] | undefined): boolean {
   if (v === undefined) return true;
   if (typeof v === "string") return v.trim() === "";
   return v.length === 0;
+}
+
+// Normalize a typed referral code: uppercase, strip ALL whitespace, keep only
+// [A-Z0-9-], cap at 32. Matches the server-side normalize + the DB charset so
+// what the candidate sees is exactly what gets staged.
+function normalizeReferral(raw: string): string {
+  return raw
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .replace(/[^A-Z0-9-]/g, "")
+    .slice(0, 32);
 }
 
 function validatePassword(pw: string): boolean {

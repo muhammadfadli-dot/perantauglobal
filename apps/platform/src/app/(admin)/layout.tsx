@@ -20,6 +20,7 @@ export default async function AdminLayout({
     { count: applications },
     { count: pendingDocs },
     { count: inboxNew },
+    { count: agents },
   ] = await Promise.all([
     supabase.from("positions").select("*", { count: "exact", head: true }),
     supabase.from("job_orders").select("*", { count: "exact", head: true }).eq("status", "open"),
@@ -31,6 +32,7 @@ export default async function AdminLayout({
       .eq("verified", false)
       .is("rejected_at", null),
     supabase.from("contact_submissions").select("*", { count: "exact", head: true }).eq("status", "new"),
+    supabase.from("affiliate_agents").select("*", { count: "exact", head: true }),
   ]);
 
   const fullName = session.email
@@ -48,6 +50,7 @@ export default async function AdminLayout({
     applications: applications ?? undefined,
     pendingDocs: pendingDocs ?? undefined,
     inboxNew: inboxNew ?? undefined,
+    agents: agents ?? undefined,
   };
 
   return (

@@ -25,6 +25,7 @@ type Candidate = {
   utm_campaign: string | null;
   created_at: string;
   auth_user_id: string | null;
+  referred_by_agent_id: string | null;
 };
 
 type AppRow = {
@@ -132,7 +133,7 @@ export default async function CandidateDetailPage({
     supabase
       .from("candidates")
       .select(
-        "id, full_name, email, phone, city, province, birth_date, gender, education, profile_data, source, utm_source, utm_campaign, created_at, auth_user_id"
+        "id, full_name, email, phone, city, province, birth_date, gender, education, profile_data, source, utm_source, utm_campaign, created_at, auth_user_id, referred_by_agent_id"
       )
       .eq("id", id)
       .maybeSingle(),
@@ -159,6 +160,19 @@ export default async function CandidateDetailPage({
 
   if (!candidate) return notFound();
   const cand = candidate as Candidate;
+
+  // Referral attribution — resolve the agent name when this candidate came in
+  // through an affiliate code (migration 0067). Single lightweight lookup.
+  let referredByAgent: { id: string; name: string } | null = null;
+  if (cand.referred_by_agent_id) {
+    const { data: agentRow } = await supabase
+      .from("affiliate_agents")
+      .select("id, name")
+      .eq("id", cand.referred_by_agent_id)
+      .maybeSingle();
+    referredByAgent = (agentRow as { id: string; name: string } | null) ?? null;
+  }
+
   const applications = (apps ?? []) as unknown as AppRow[];
   const docs = (documents ?? []) as Document[];
   const openJobOrders = (openJOs ?? []) as OpenJobOrder[];
@@ -404,6 +418,21 @@ export default async function CandidateDetailPage({
               <div className="flex items-center gap-2 text-[14px]">
                 <Icon name="phone" size={14} className="text-pg-ink-quaternary" />
                 <span className="text-pg-ink-primary">{cand.phone}</span>
+              </div>
+            )}
+            {referredByAgent && (
+              <div
+                className="flex items-center gap-2 text-[14px] pt-2.5 mt-0.5"
+                style={{ borderTop: "1px solid var(--pg-border-soft)" }}
+              >
+                <Icon name="share" size={14} className="text-pg-ink-quaternary" />
+                <span className="text-pg-ink-tertiary">Direferral oleh</span>
+                <Link
+                  href={`/admin/agents/${referredByAgent.id}`}
+                  className="font-bold text-pg-ink-primary no-underline hover:text-pg-red-600 truncate"
+                >
+                  {referredByAgent.name}
+                </Link>
               </div>
             )}
           </div>

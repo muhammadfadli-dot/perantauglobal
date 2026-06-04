@@ -22,6 +22,7 @@ export type SidebarCounts = {
   applications?: number;
   pendingDocs?: number;
   inboxNew?: number;
+  agents?: number;
 };
 
 export default function AdminSidebar({
@@ -53,6 +54,7 @@ export default function AdminSidebar({
           ? { label: `${counts.jobOrdersOpen} OPEN`, tone: "ok" }
           : undefined,
       },
+      { href: "/admin/agents", label: "Agen afiliasi", icon: "share", count: counts?.agents },
       { href: "/admin/candidates", label: "Kandidat", icon: "users", count: counts?.candidates },
       {
         href: "/admin/documents",
