@@ -6,7 +6,8 @@ import { Icon } from "@/components/pg/Icon";
 import GenerateCodeButton from "./GenerateCodeButton";
 import CodeStatusButton from "./CodeStatusButton";
 import AgentStatusControls from "./AgentStatusControls";
-import CommissionLedger, { formatIDR, type LedgerEvent } from "./CommissionLedger";
+import CommissionLedger, { type LedgerEvent } from "./CommissionLedger";
+import { formatIDR } from "./format";
 import type {
   AffiliateAgentStatus,
   CommissionEventStatus,

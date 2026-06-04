@@ -10,6 +10,7 @@ import {
   voidCommissionEvent,
 } from "../actions";
 import type { CommissionEventStatus, CommissionEventType } from "@perantauglobal/db";
+import { formatIDR } from "./format";
 
 export type LedgerEvent = {
   id: string;
@@ -44,14 +45,6 @@ const STATUS_TONE: Record<CommissionEventStatus, { bg: string; fg: string }> = {
   paid: { bg: "var(--pg-ok-soft-bg)", fg: "var(--pg-ok-soft-fg)" },
   void: { bg: "var(--pg-ink-50)", fg: "var(--pg-ink-tertiary)" },
 };
-
-/** "Rp 500.000" — no decimals for whole IDR; null → "—". */
-export function formatIDR(amount: number | null): string {
-  if (amount == null) return "—";
-  return `Rp ${new Intl.NumberFormat("id-ID", {
-    maximumFractionDigits: 0,
-  }).format(amount)}`;
-}
 
 export default function CommissionLedger({ events }: { events: LedgerEvent[] }) {
   if (events.length === 0) {
