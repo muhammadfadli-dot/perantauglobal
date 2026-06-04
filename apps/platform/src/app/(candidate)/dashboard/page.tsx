@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { BottomNav } from "@/components/pg/AppChrome";
-import { Icon } from "@/components/pg/Icon";
 import {
   getDashboardData,
   getTimeOfDayGreeting,
@@ -478,7 +477,6 @@ function BerandaTerminal({
 // ─── Mini explore card (S2 horizontal scroll) ─────────────────────────────
 function ExploreCard({
   slug,
-  country,
   flag,
   countryLabel,
   role,

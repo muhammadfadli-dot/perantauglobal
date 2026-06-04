@@ -83,7 +83,6 @@ export default async function AnalyticsPage({
   const since = rangeToDate(range);
   const supabase = await createServerClient();
 
-  // eslint-disable-next-line react-hooks/purity -- per-request time anchor for daily/weekly buckets
   const now = new Date();
   const twelveWeeksAgoIso = new Date(
     now.getTime() - 12 * 7 * 24 * 60 * 60 * 1000,

@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Icon } from "@/components/pg/Icon";
-import { Button, Badge } from "@/components/pg/primitives";
+import { Button } from "@/components/pg/primitives";
 import {
   createApplicationField,
   deleteApplicationField,

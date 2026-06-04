@@ -8,7 +8,6 @@ import { getApplicationStatus } from "@/lib/applicationStatus";
 import { waLink } from "@/lib/contact";
 import { BerandaTopBar, SectionHead } from "@/components/pg/candidate/BerandaShared";
 import {
-  PIPELINE_STEPS,
   PipelineTimeline,
   DocStateBadge,
 } from "@/components/pg/candidate/PipelineTimeline";

@@ -248,7 +248,6 @@ function BarButton({
 function formatRelative(iso: string | null): string {
   if (!iso) return "—";
   const then = new Date(iso).getTime();
-  // eslint-disable-next-line react-hooks/purity -- intentional: relative time display
   const now = Date.now();
   const diffMin = Math.round((now - then) / 60_000);
   if (diffMin < 1) return "baru saja";

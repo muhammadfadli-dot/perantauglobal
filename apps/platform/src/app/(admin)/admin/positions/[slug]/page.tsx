@@ -60,9 +60,7 @@ export default async function PositionDetailPage({
   const supabase = await createServerClient();
 
   // eslint-disable-next-line react-hooks/purity -- per-request time anchor for "7 hari" banner metric
-  const sevenDaysAgoIso = new Date(
-    Date.now() - 7 * 24 * 60 * 60 * 1000,
-  ).toISOString();
+  const sevenDaysAgoIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const [
     { data: positionData },
@@ -133,7 +131,6 @@ export default async function PositionDetailPage({
   // Banner-metric computation: 7-day inflow + conv → screening (lifetime)
   const weekApps = (weekAppsData ?? []) as Array<{ created_at: string }>;
   const weekTotal = weekApps.length;
-  // eslint-disable-next-line react-hooks/purity -- per-request time anchor matches the sevenDaysAgoIso above
   const now = new Date();
   const weeklyBuckets = new Array(7).fill(0) as number[];
   for (const a of weekApps) {

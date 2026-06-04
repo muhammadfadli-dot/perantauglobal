@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import { Icon, type IconName } from "@/components/pg/Icon";
 
 /**
@@ -40,20 +40,27 @@ function readHash(): TabKey {
   return TABS.some((t) => t.key === h) ? (h as TabKey) : DEFAULT_TAB;
 }
 
+// Subscribe to hash changes. `pg-editor-tab` is dispatched by handleClick after a
+// history.replaceState (which does NOT fire `hashchange`) so the store still updates.
+function subscribeHash(onChange: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("hashchange", onChange);
+  window.addEventListener("pg-editor-tab", onChange);
+  return () => {
+    window.removeEventListener("hashchange", onChange);
+    window.removeEventListener("pg-editor-tab", onChange);
+  };
+}
+
 export function EditorTabsHeader({
   counts,
 }: {
   counts?: Partial<Record<TabKey, number>>;
 }) {
-  const [active, setActive] = useState<TabKey>(DEFAULT_TAB);
-
-  // Initialize from URL hash on mount + listen for hash changes
-  useEffect(() => {
-    setActive(readHash());
-    const onHash = () => setActive(readHash());
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
+  // Tab state derives from the URL hash (an external store). useSyncExternalStore
+  // serves the server snapshot (DEFAULT_TAB) during SSR + hydration, then the live
+  // hash on the client — no hydration mismatch, and no setState-in-effect.
+  const active = useSyncExternalStore(subscribeHash, readHash, () => DEFAULT_TAB);
 
   // Apply data-active-tab to <html> so sibling [data-tab] sections can use
   // CSS attribute selectors to hide non-active tabs
@@ -65,9 +72,10 @@ export function EditorTabsHeader({
   }, [active]);
 
   const handleClick = (k: TabKey) => {
-    setActive(k);
     if (window.location.hash !== `#${k}`) {
       history.replaceState(null, "", `#${k}`);
+      // replaceState doesn't fire `hashchange` — nudge the external store ourselves.
+      window.dispatchEvent(new Event("pg-editor-tab"));
     }
     // Scroll to top of section
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });

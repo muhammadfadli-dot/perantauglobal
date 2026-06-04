@@ -131,6 +131,7 @@ export default async function ExplorePage({ searchParams }: PageProps) {
   const open = filtered.filter((j) => j.status === "open");
   const queue = filtered.filter((j) => j.status === "queue");
 
+  // eslint-disable-next-line react-hooks/purity -- per-request "baru" cutoff; non-idempotent by design in this RSC
   const cutoff = Date.now() - NEW_DAYS * 24 * 60 * 60 * 1000;
   const posByCreated = new Map(positions.map((p) => [p.slug, new Date(p.created_at).getTime()]));
 

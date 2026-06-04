@@ -54,7 +54,6 @@ export default async function AdminPositionsPage({
 
   const supabase = await createServerClient();
 
-  // eslint-disable-next-line react-hooks/purity -- per-request time anchor for "this week" buckets; intentionally non-idempotent in RSC
   const now = new Date();
   const sevenDaysAgoIso = new Date(
     now.getTime() - 7 * 24 * 60 * 60 * 1000,
