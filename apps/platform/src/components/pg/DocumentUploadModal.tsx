@@ -143,17 +143,29 @@ function SheetBody({
         if (typeof v === "string" && v.length > 0) cleanMeta[f.key] = v;
       }
 
-      const { error: insertErr } = await sb.from("candidate_documents").insert({
-        candidate_id: candidateId,
-        doc_type: docType,
-        file_path: path,
-        file_size: file.size,
-        mime_type: file.type,
-        metadata: cleanMeta,
-        expires_at: expiresAt,
-        display_name: schema.label,
-      } as never);
+      const { data: inserted, error: insertErr } = await sb
+        .from("candidate_documents")
+        .insert({
+          candidate_id: candidateId,
+          doc_type: docType,
+          file_path: path,
+          file_size: file.size,
+          mime_type: file.type,
+          metadata: cleanMeta,
+          expires_at: expiresAt,
+          display_name: schema.label,
+        } as never)
+        .select("id")
+        .single();
       if (insertErr) throw insertErr;
+
+      // Kick off AI grading for CVs — extraction + per-position fit. Fire and
+      // forget so the upload stays instant; results land asynchronously.
+      if (docType === "cv" && (inserted as { id?: string } | null)?.id) {
+        void sb.functions
+          .invoke("grade-cv", { body: { document_id: (inserted as { id: string }).id } })
+          .catch(() => {});
+      }
 
       onUploaded?.();
       router.refresh();

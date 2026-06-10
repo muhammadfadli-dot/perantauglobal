@@ -17,11 +17,22 @@ export default async function DokumenPage() {
   const candidate = candidateData as { id: string } | null;
   if (!candidate) throw new Error(`Candidate ${candidateId} disappeared`);
 
-  const { data: docsData } = await supabase
-    .from("candidate_documents")
-    .select("doc_type, file_path, verified, rejected_at, rejected_reason, uploaded_at")
-    .eq("candidate_id", candidateId)
-    .order("uploaded_at", { ascending: false });
+  const [{ data: docsData }, { data: cvAsmtData }] = await Promise.all([
+    supabase
+      .from("candidate_documents")
+      .select("doc_type, file_path, verified, rejected_at, rejected_reason, uploaded_at")
+      .eq("candidate_id", candidateId)
+      .order("uploaded_at", { ascending: false }),
+    // Latest successful CV reading (migration 0071) — drives the nudge below.
+    supabase
+      .from("cv_assessments")
+      .select("quality_score, quality, status")
+      .eq("candidate_id", candidateId)
+      .eq("status", "ok")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
   const docsRows = (docsData ?? []) as Array<{
     doc_type: string;
     file_path: string;
@@ -29,6 +40,10 @@ export default async function DokumenPage() {
     rejected_at: string | null;
     rejected_reason: string | null;
   }>;
+  const cvNudge = cvAsmtData as {
+    quality_score: number | null;
+    quality: { kekurangan?: string[] } | null;
+  } | null;
 
   const REQUIRED_DOC_TYPES: DocItem["type"][] = ["ktp", "passport", "formal_photo", "cv"];
   const docItems: DocItem[] = REQUIRED_DOC_TYPES.map((t) => {
@@ -57,6 +72,7 @@ export default async function DokumenPage() {
         <p className="text-[13px] text-pg-ink-tertiary mb-4 leading-snug">
           KTP wajib. Paspor, foto, & CV diminta saat tahap Cek Dokumen.
         </p>
+        <CvNudge score={cvNudge?.quality_score ?? null} kekurangan={cvNudge?.quality?.kekurangan ?? []} />
         <DocUploader candidateId={candidate.id} initial={docItems} />
         <div
           className="mt-4 flex gap-2 items-start text-[12px] leading-snug"
@@ -68,6 +84,50 @@ export default async function DokumenPage() {
       </main>
 
       <BottomNav />
+    </div>
+  );
+}
+
+/**
+ * CV completeness nudge (migration 0071). Shows the candidate how complete their
+ * uploaded CV looks (read automatically) + gentle suggestions. Only renders once
+ * a CV has been graded.
+ */
+function CvNudge({ score, kekurangan }: { score: number | null; kekurangan: string[] }) {
+  if (score === null) return null;
+  const strong = score >= 85;
+  const fg = strong ? "var(--pg-ok-soft-fg)" : "var(--pg-warn-soft-fg)";
+  const bg = strong ? "var(--pg-ok-soft-bg)" : "var(--pg-warn-soft-bg)";
+  return (
+    <div className="mb-4 rounded-2xl p-4" style={{ background: bg }}>
+      <div className="flex items-center gap-3">
+        <div
+          className="w-12 h-12 rounded-full grid place-items-center shrink-0 font-extrabold text-[15px] tabular-nums"
+          style={{ background: "var(--pg-white)", color: fg }}
+        >
+          {score}%
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[14px] font-extrabold" style={{ color: fg }}>
+            {strong ? "CV kamu sudah lengkap" : "CV kamu sudah kami baca"}
+          </div>
+          <div className="text-[12px] leading-snug" style={{ color: "var(--pg-ink-secondary)" }}>
+            {strong
+              ? "Bagus! CV kamu jelas dan siap dilihat perekrut."
+              : "Yuk lengkapi CV kamu biar makin siap dilihat perekrut:"}
+          </div>
+        </div>
+      </div>
+      {!strong && kekurangan.length > 0 && (
+        <ul className="mt-3 flex flex-col gap-1.5">
+          {kekurangan.slice(0, 3).map((k, i) => (
+            <li key={i} className="flex items-start gap-2 text-[12px]" style={{ color: "var(--pg-ink-secondary)" }}>
+              <span className="mt-[6px] w-1.5 h-1.5 rounded-full shrink-0" style={{ background: fg }} />
+              <span>{k}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

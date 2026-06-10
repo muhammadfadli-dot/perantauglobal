@@ -10,7 +10,7 @@ const SELECT_CLASS =
 const INPUT_CLASS =
   "bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3 py-2 text-sm text-pg-ink-900 outline-none focus:border-pg-red-600 transition-colors w-full sm:w-64";
 
-type SortKey = "newest" | "readiness";
+type SortKey = "newest" | "readiness" | "fit";
 type PoolKey = "pool" | "in_job_order" | "all";
 
 type PositionEntry = {
@@ -274,6 +274,7 @@ export default function ApplicationFilters({
         >
           <option value="newest">Terbaru</option>
           <option value="readiness">Paling qualified</option>
+          <option value="fit">CV paling cocok</option>
         </select>
       </div>
     </div>

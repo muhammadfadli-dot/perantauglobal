@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { headers } from "next/headers";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
 
@@ -110,6 +111,18 @@ export async function submitApplication(
   if (consentErr) {
     console.warn("[submitApplication] consent log failed:", consentErr.message);
   }
+
+  // Score CV-to-position fit for the new application (audit fix 2026-06-10).
+  // Non-blocking; self-skips to 'skipped' if the candidate has no CV yet, and
+  // auto-fits later when they upload one. grade-cv lets a candidate fit own app.
+  const newId = (row as { id: string }).id;
+  after(async () => {
+    try {
+      await supabase.functions.invoke("grade-cv", { body: { application_id: newId } });
+    } catch {
+      // best-effort
+    }
+  });
 
   revalidatePath("/dashboard");
   revalidatePath("/applications");

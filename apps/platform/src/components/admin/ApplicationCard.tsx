@@ -394,6 +394,14 @@ function CvFitPanel({ fit }: { fit?: CvFit | null }) {
       </div>
     );
   }
+  if (fit.status === "error") {
+    return (
+      <div className="mt-4 flex items-center gap-1.5 text-[12px]" style={{ color: "var(--pg-warn-soft-fg)" }}>
+        <Icon name="warn" size={13} />
+        Penilaian kecocokan CV gagal diproses. Coba grade ulang nanti.
+      </div>
+    );
+  }
   if (fit.status !== "ok") return null;
 
   const c = fitColor(fit.fit_score);

@@ -28,7 +28,7 @@ type OpenJobOrder = {
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 40;
-type SortKey = "newest" | "readiness";
+type SortKey = "newest" | "readiness" | "fit";
 type PoolKey = "pool" | "in_job_order" | "all";
 
 type AppRow = {
@@ -47,6 +47,9 @@ type AppRow = {
   job_order_id: string | null;
   job_order_intake_label: string | null;
   readiness: unknown;
+  cv_fit_score: number | null;
+  cv_fit_status: string | null;
+  cv_has_flags: boolean;
   total_count: number;
 };
 
@@ -76,7 +79,7 @@ export default async function ApplicationsPage({
 
   // Smart default: when filtering by position, sort by readiness; else newest.
   const sort: SortKey =
-    sortParam === "readiness" || sortParam === "newest"
+    sortParam === "readiness" || sortParam === "newest" || sortParam === "fit"
       ? sortParam
       : position
       ? "readiness"
@@ -185,6 +188,7 @@ export default async function ApplicationsPage({
               <th className="px-4 py-3">Kandidat</th>
               <th className="px-4 py-3">Posisi</th>
               <th className="px-4 py-3">Readiness</th>
+              <th className="px-4 py-3">Fit CV</th>
               <th className="px-4 py-3">Outreach</th>
               <th className="px-4 py-3">Masuk</th>
               <th className="px-4 py-3 text-right">Job order</th>
@@ -193,7 +197,7 @@ export default async function ApplicationsPage({
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-pg-ink-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-pg-ink-500">
                   Tidak ada lamaran yang cocok.
                 </td>
               </tr>
@@ -226,6 +230,9 @@ export default async function ApplicationsPage({
                   </td>
                   <td className="px-4 py-3">
                     <ReadinessBadge readiness={r.readiness} />
+                  </td>
+                  <td className="px-4 py-3">
+                    <FitCell score={r.cv_fit_score} status={r.cv_fit_status} hasFlags={r.cv_has_flags} />
                   </td>
                   <td className="px-4 py-3 text-[13px]">
                     <ReachOutToggle
@@ -350,5 +357,45 @@ function Pagination({
         </span>
       )}
     </nav>
+  );
+}
+
+function FitCell({
+  score,
+  status,
+  hasFlags,
+}: {
+  score: number | null;
+  status: string | null;
+  hasFlags: boolean;
+}) {
+  if (score === null) {
+    // Distinguish "no CV yet" (skipped) from "errored" from "not graded".
+    const label = status === "skipped" ? "Belum CV" : status === "error" ? "Gagal" : "—";
+    const title =
+      status === "skipped"
+        ? "Kandidat belum punya CV"
+        : status === "error"
+        ? "Penilaian CV gagal — buka kandidat"
+        : "CV belum dinilai";
+    return (
+      <span className="text-[11px] text-pg-ink-400" title={title}>
+        {label}
+      </span>
+    );
+  }
+  const fg =
+    score >= 75 ? "var(--pg-ok-soft-fg)" : score >= 50 ? "var(--pg-warn-soft-fg)" : "var(--pg-err)";
+  const bg =
+    score >= 75 ? "var(--pg-ok-soft-bg)" : score >= 50 ? "var(--pg-warn-soft-bg)" : "var(--pg-err-bg)";
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[12px] font-bold tabular-nums"
+      style={{ background: bg, color: fg }}
+      title={hasFlags ? "Ada klaim yang perlu dikonfirmasi vs CV" : "Kecocokan CV dengan posisi (AI)"}
+    >
+      {score}%
+      {hasFlags && <Icon name="warn" size={11} />}
+    </span>
   );
 }

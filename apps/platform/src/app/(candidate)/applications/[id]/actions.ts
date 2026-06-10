@@ -1,7 +1,27 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+
+/**
+ * Re-run CV-to-position fit for an application after its answers change, so
+ * contradiction flags + fit_score don't go stale (audit fix 2026-06-10). Runs
+ * after the response (non-blocking); grade-cv lets a candidate re-fit their OWN
+ * application. Best-effort — never surfaced to the candidate.
+ */
+function triggerRefit(
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  applicationId: string,
+) {
+  after(async () => {
+    try {
+      await supabase.functions.invoke("grade-cv", { body: { application_id: applicationId } });
+    } catch {
+      // best-effort
+    }
+  });
+}
 
 const ANSWER_FIELDS = [
   "motivation",
@@ -47,6 +67,7 @@ export async function updateAnswers(
 
   if (error) return { ok: false, error: error.message };
 
+  triggerRefit(supabase, applicationId);
   revalidatePath(`/applications/${applicationId}`);
   revalidatePath("/dashboard");
   return { ok: true };
@@ -119,6 +140,7 @@ export async function setApplicationAnswer(
     .eq("candidate_id", candidate.id);
   if (error) return { ok: false, error: error.message };
 
+  triggerRefit(supabase, applicationId);
   revalidatePath(`/applications/${applicationId}`);
   revalidatePath(`/applications/${applicationId}/lengkapi`);
   return { ok: true };
