@@ -14,7 +14,8 @@ import type { NextConfig } from "next";
 // as apps/web. The portal loads GoogleTagManager (see layout.tsx) so the browser
 // Meta Pixel fires here too, completing the cross-domain _fbc/_fbp attribution — so
 // the GTM / Meta origins MUST be whitelisted (mirrors apps/web's directives) or the
-// enforced CSP silently blocks gtm.js and the pixel never loads.
+// enforced CSP silently blocks gtm.js and the pixel never loads. Vercel Analytics
+// (va.vercel-scripts.com / vitals.vercel-insights.com) is whitelisted alongside.
 //
 // To soften temporarily for debugging (e.g. adding a new third-party):
 //   set CSP_ENFORCE=false → switches to Content-Security-Policy-Report-Only
@@ -24,7 +25,8 @@ const cspDirectives = [
   "default-src 'self'",
   // 'unsafe-inline' is required by Next.js for hydration markers/runtime.
   // Migrate to nonce-based CSP when Next.js App Router fully supports it.
-  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net",
+  // GTM/GA/FB pixel + va.vercel-scripts.com for the Vercel Analytics script.
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://va.vercel-scripts.com",
   // Tailwind 4 + inline style attributes from React components.
   "style-src 'self' 'unsafe-inline'",
   // Self-hosted fonts via next/font (no external font CDN).
@@ -34,8 +36,8 @@ const cspDirectives = [
   // GTM/GA/FB pixel beacons load tracking images from their origins.
   "img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://www.facebook.com",
   // Supabase Auth (token refresh), REST, Realtime, Storage all on *.supabase.co.
-  // GTM/GA/Meta CAPI browser beacons.
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://graph.facebook.com",
+  // GTM/GA/Meta CAPI browser beacons + vitals.vercel-insights.com for Vercel Analytics.
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://graph.facebook.com https://vitals.vercel-insights.com",
   // Block all framing — admin tool, no legitimate embed use case.
   "frame-ancestors 'none'",
   "base-uri 'self'",
