@@ -20,6 +20,7 @@ type Search = {
   q?: string;
   page?: string;
   tab?: "all" | "qualified" | "review" | "no_apply";
+  position?: string;
 };
 
 export default async function CandidatesListPage({
@@ -27,80 +28,125 @@ export default async function CandidatesListPage({
 }: {
   searchParams: Promise<Search>;
 }) {
-  const { q, page: pageParam, tab = "all" } = await searchParams;
+  const { q, page: pageParam, tab = "all", position } = await searchParams;
   const page = Math.max(1, Number(pageParam ?? "1") || 1);
   const from = (page - 1) * PAGE_SIZE;
-  const to = from + PAGE_SIZE - 1;
 
   const supabase = await createServerClient();
 
-  let query = supabase
-    .from("candidates")
-    .select("id, email, full_name, phone, city, created_at", { count: "exact" })
-    .order("created_at", { ascending: false })
-    .range(from, to);
+  // ── Membership id-sets, fetched in full (paginated past PostgREST's 1000-row cap) ──
+  // Computing these globally and then filtering in-memory keeps the tab COUNTS and the
+  // displayed TABLE in agreement. The old code counted globally but filtered only the
+  // current 25-row page, so "Sudah qualified (359)" rendered a near-empty table.
+  // A small paginator over a per-call thunk keeps each table's builder correctly typed.
+  async function paginateIds(
+    run: (from: number, to: number) => PromiseLike<{ data: { candidate_id: string | null }[] | null }>,
+  ): Promise<Set<string>> {
+    const set = new Set<string>();
+    for (let f = 0; ; f += 1000) {
+      const { data } = await run(f, f + 999);
+      const batch = data ?? [];
+      for (const r of batch) if (r.candidate_id) set.add(r.candidate_id);
+      if (batch.length < 1000) break;
+    }
+    return set;
+  }
 
-  if (q && q.trim().length > 0) {
-    const needle = `%${q.trim()}%`;
-    query = query.or(
-      `full_name.ilike.${needle},email.ilike.${needle},phone.ilike.${needle}`
+  const [qualifiedIds, pendingDocIds, appliedIds] = await Promise.all([
+    paginateIds((f, t) =>
+      supabase
+        .from("application_readiness_view")
+        .select("candidate_id")
+        .eq("hard_pass", true)
+        .range(f, t),
+    ),
+    paginateIds((f, t) =>
+      supabase
+        .from("candidate_documents")
+        .select("candidate_id")
+        .eq("verified", false)
+        .is("rejected_at", null)
+        .range(f, t),
+    ),
+    paginateIds((f, t) =>
+      supabase.from("applications").select("candidate_id").range(f, t),
+    ),
+  ]);
+
+  // Optional ?position= membership (powers "Pull dari talent pool" from a job order).
+  let positionName: string | null = null;
+  let positionIds: Set<string> | null = null;
+  if (position) {
+    const { data: posRow } = await supabase
+      .from("positions")
+      .select("name")
+      .eq("slug", position)
+      .maybeSingle();
+    positionName = (posRow as { name: string } | null)?.name ?? position;
+    positionIds = await paginateIds((f, t) =>
+      supabase
+        .from("applications")
+        .select("candidate_id")
+        .eq("position_slug", position)
+        .range(f, t),
     );
   }
 
-  const { data: candidatesData, count } = await query;
-  const candidates = (candidatesData ?? []) as Array<{
+  // Full candidate list (paginated), newest first — filtered + paginated in-memory.
+  type Cand = {
     id: string;
     email: string | null;
     full_name: string;
     phone: string | null;
     city: string | null;
     created_at: string;
-  }>;
-
-  const ids = candidates.map((c) => c.id);
-
-  // Stats — talent pool overview, not per-application triage (that lives in /admin/applications)
-  const [
-    { count: totalCandidates },
-    { data: readinessData },
-    { data: pendingDocsData },
-    { count: weekCandidates },
-  ] = await Promise.all([
-    supabase.from("candidates").select("*", { count: "exact", head: true }),
-    supabase
-      .from("application_readiness_view")
-      .select("candidate_id, hard_pass"),
-    supabase
-      .from("candidate_documents")
-      .select("candidate_id")
-      .eq("verified", false)
-      .is("rejected_at", null),
-    supabase
+  };
+  const allCandidates: Cand[] = [];
+  for (let f = 0; ; f += 1000) {
+    const { data } = await supabase
       .from("candidates")
-      .select("*", { count: "exact", head: true })
-      // eslint-disable-next-line react-hooks/purity -- per-request "this week" stat; intentionally non-idempotent in RSC
-      .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()),
-  ]);
-
-  // Qualified = candidates with ≥1 application where hard_pass=true.
-  // Sourced from application_readiness_view (Fase 6B: replaces legacy
-  // cross-join readiness_view that depended on profile_data.credentials).
-  const qualifiedMap = new Map<string, { count: number }>();
-  for (const r of (readinessData ?? []) as Array<{
-    candidate_id: string;
-    hard_pass: boolean;
-  }>) {
-    const cur = qualifiedMap.get(r.candidate_id) ?? { count: 0 };
-    if (r.hard_pass) cur.count += 1;
-    qualifiedMap.set(r.candidate_id, cur);
+      .select("id, email, full_name, phone, city, created_at")
+      .order("created_at", { ascending: false })
+      .range(f, f + 999);
+    const batch = (data ?? []) as Cand[];
+    allCandidates.push(...batch);
+    if (batch.length < 1000) break;
   }
-  const qualifiedCount = [...qualifiedMap.values()].filter((v) => v.count > 0).length;
 
-  const pendingDocCandidates = new Set(
-    ((pendingDocsData ?? []) as { candidate_id: string }[]).map((d) => d.candidate_id)
+  const totalCandidates = allCandidates.length;
+  // eslint-disable-next-line react-hooks/purity -- per-request "this week" stat; non-idempotent by design
+  const weekAgoIso = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const weekCandidates = allCandidates.filter((c) => c.created_at >= weekAgoIso).length;
+
+  const needle = q?.trim().toLowerCase() ?? "";
+  const matchesSearch = (c: Cand) =>
+    !needle ||
+    c.full_name.toLowerCase().includes(needle) ||
+    (c.email?.toLowerCase().includes(needle) ?? false) ||
+    (c.phone?.toLowerCase().includes(needle) ?? false);
+
+  // base = the position + search scope; tab badges AND rows both derive from it so the
+  // numbers always match what the table shows.
+  const base = allCandidates.filter(
+    (c) => (!positionIds || positionIds.has(c.id)) && matchesSearch(c),
   );
+  const allCount = base.length;
+  const qualifiedCount = base.filter((c) => qualifiedIds.has(c.id)).length;
+  const reviewCount = base.filter((c) => pendingDocIds.has(c.id)).length;
+  const noApplyCount = base.filter((c) => !appliedIds.has(c.id)).length;
 
-  // Apps per candidate — for the displayed page only.
+  const tabbed = base.filter((c) => {
+    if (tab === "qualified") return qualifiedIds.has(c.id);
+    if (tab === "review") return pendingDocIds.has(c.id);
+    if (tab === "no_apply") return !appliedIds.has(c.id);
+    return true;
+  });
+  const total = tabbed.length;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const rows = tabbed.slice(from, from + PAGE_SIZE);
+  const ids = rows.map((c) => c.id);
+
+  // Apps per displayed candidate — for the "Posisi terbaru" column.
   // Tracks count + latest position name/country for the "Posisi terbaru"
   // column (post-rework: shared "match terkuat" cross-position concept no
   // longer applies since each apply is fresh — see migration 0037).
@@ -139,18 +185,6 @@ export default async function CandidatesListPage({
     }
   }
 
-  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE));
-
-  // Filter rows by tab
-  const rows = candidates.filter((c) => {
-    const apps = appsByCandidate.get(c.id);
-    const qf = qualifiedMap.get(c.id);
-    if (tab === "qualified") return (qf?.count ?? 0) > 0;
-    if (tab === "review") return pendingDocCandidates.has(c.id);
-    if (tab === "no_apply") return !apps;
-    return true;
-  });
-
   function timeAgo(iso: string): string {
     // eslint-disable-next-line react-hooks/purity -- per-request "X jam lalu" label; non-idempotent by design
     const diffH = Math.round((Date.now() - new Date(iso).getTime()) / (1000 * 60 * 60));
@@ -159,14 +193,9 @@ export default async function CandidatesListPage({
     return `${Math.round(diffH / 24)} hari lalu`;
   }
 
-  const noApplyCount = candidates.filter((c) => !appsByCandidate.has(c.id)).length;
-
   return (
     <>
-      <AdminTopBar
-        crumbs={[{ label: "Kandidat", emphasis: true }]}
-        searchPlaceholder="Cari nama, email, atau slug posisi…"
-      />
+      <AdminTopBar crumbs={[{ label: "Kandidat", emphasis: true }]} />
       <main className="px-8 py-7 flex flex-col gap-6">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -209,41 +238,56 @@ export default async function CandidatesListPage({
           />
           <StatCard
             label="Belum lamar"
-            value={
-              candidates.length > 0
-                ? candidates.filter((c) => !appsByCandidate.has(c.id)).length
-                : 0
-            }
+            value={noApplyCount}
             sub="Masih kosong, perlu di-engage"
           />
           <StatCard
             label="Cek dokumen"
-            value={pendingDocCandidates.size}
+            value={reviewCount}
             valueColor="var(--pg-warn-soft-fg)"
             sub="Dokumen pending verify"
           />
         </div>
 
+        {/* Active position filter banner */}
+        {position && (
+          <div
+            className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl"
+            style={{ background: "var(--pg-red-50)", border: "1px solid var(--pg-red-200)" }}
+          >
+            <span className="text-[13px] font-semibold text-pg-ink-secondary">
+              Difilter ke pelamar posisi{" "}
+              <span className="font-bold text-pg-red-700">{positionName}</span>
+            </span>
+            <Link
+              href={buildUrl({ q })}
+              className="inline-flex items-center gap-1 text-[12px] font-bold text-pg-red-600 no-underline hover:underline"
+            >
+              <Icon name="x" size={12} stroke={2.4} /> Hapus filter
+            </Link>
+          </div>
+        )}
+
         {/* Filter tabs */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-1 flex-wrap">
-            <FilterTab href={buildUrl({ q })} label="Semua" count={candidates.length} active={tab === "all"} />
+            <FilterTab href={buildUrl({ q, position })} label="Semua" count={allCount} active={tab === "all"} />
             <FilterTab
-              href={buildUrl({ q, tab: "qualified" })}
+              href={buildUrl({ q, position, tab: "qualified" })}
               label="Sudah qualified"
               count={qualifiedCount}
               active={tab === "qualified"}
             />
             <FilterTab
-              href={buildUrl({ q, tab: "no_apply" })}
+              href={buildUrl({ q, position, tab: "no_apply" })}
               label="Belum lamar"
               count={noApplyCount}
               active={tab === "no_apply"}
             />
             <FilterTab
-              href={buildUrl({ q, tab: "review" })}
+              href={buildUrl({ q, position, tab: "review" })}
               label="Cek dokumen"
-              count={pendingDocCandidates.size}
+              count={reviewCount}
               active={tab === "review"}
             />
           </div>
@@ -277,14 +321,13 @@ export default async function CandidatesListPage({
           )}
           {rows.map((r) => {
             const apps = appsByCandidate.get(r.id);
-            const qf = qualifiedMap.get(r.id);
             const initials = (r.full_name || "?")
               .split(/\s+/)
               .filter(Boolean)
               .slice(0, 2)
               .map((s) => s[0]?.toUpperCase())
               .join("");
-            const isQualified = (qf?.count ?? 0) > 0;
+            const isQualified = qualifiedIds.has(r.id);
             return (
               <div
                 key={r.id}
@@ -349,7 +392,7 @@ export default async function CandidatesListPage({
                             color: "var(--pg-ok-soft-fg)",
                             fontFamily: "var(--font-mono)",
                           }}
-                          title={`Lolos syarat di ${qf!.count} posisi`}
+                          title="Lolos syarat min. 1 posisi"
                         >
                           <Icon name="check" size={10} stroke={2.4} /> Qual
                         </span>
@@ -384,17 +427,23 @@ export default async function CandidatesListPage({
         </div>
 
         {/* Pagination */}
-        <Pagination page={page} totalPages={totalPages} q={q} tab={tab} />
+        <Pagination page={page} totalPages={totalPages} q={q} tab={tab} position={position} />
       </main>
     </>
   );
 }
 
-function buildUrl(p: { q?: string; page?: number; tab?: string }): string {
+function buildUrl(p: {
+  q?: string;
+  page?: number;
+  tab?: string;
+  position?: string;
+}): string {
   const sp = new URLSearchParams();
   if (p.q) sp.set("q", p.q);
   if (p.page) sp.set("page", String(p.page));
   if (p.tab) sp.set("tab", p.tab);
+  if (p.position) sp.set("position", p.position);
   const qs = sp.toString();
   return qs ? `/admin/candidates?${qs}` : "/admin/candidates";
 }
@@ -404,15 +453,17 @@ function Pagination({
   totalPages,
   q,
   tab,
+  position,
 }: {
   page: number;
   totalPages: number;
   q?: string;
   tab?: string;
+  position?: string;
 }) {
   if (totalPages <= 1) return null;
-  const prev = page > 1 ? buildUrl({ q, tab, page: page - 1 }) : null;
-  const next = page < totalPages ? buildUrl({ q, tab, page: page + 1 }) : null;
+  const prev = page > 1 ? buildUrl({ q, tab, position, page: page - 1 }) : null;
+  const next = page < totalPages ? buildUrl({ q, tab, position, page: page + 1 }) : null;
   return (
     <nav className="flex items-center justify-between text-[13px] font-semibold">
       {prev ? (

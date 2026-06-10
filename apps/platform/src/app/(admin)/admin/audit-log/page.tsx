@@ -1,64 +1,27 @@
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
+import { AUDIT_ACTIONS, AUDIT_RESOURCES } from "@/lib/audit-log";
 import type { Json } from "@perantauglobal/db";
 
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 50;
 
+// All maps derived from the single source of truth in lib/audit-log.ts, so every
+// logged action is automatically filterable + labelled (no drift).
 const ACTION_FILTERS: { key: string; label: string }[] = [
   { key: "all", label: "Semua aksi" },
-  { key: "view_document", label: "Lihat dokumen" },
-  { key: "verify_document", label: "Verifikasi dokumen" },
-  { key: "reject_document", label: "Tolak dokumen" },
-  { key: "update_application_stage", label: "Ubah stage" },
-  { key: "update_application_notes", label: "Ubah notes" },
-  { key: "toggle_reached_out", label: "Reached out" },
-  { key: "assign_tier", label: "Assign tier" },
-  { key: "clear_tier", label: "Clear tier" },
-  { key: "invite_admin", label: "Invite admin" },
-  { key: "remove_admin", label: "Remove admin" },
-  { key: "update_inbox_status", label: "Inbox status" },
-  { key: "update_inbox_notes", label: "Inbox notes" },
+  ...Object.entries(AUDIT_ACTIONS).map(([key, m]) => ({ key, label: m.label })),
 ];
 
-const RESOURCE_LABELS: Record<string, string> = {
-  candidate_document: "Dokumen",
-  application: "Lamaran",
-  candidate: "Kandidat",
-  admin_user: "Admin user",
-  contact_submission: "Inbox",
-};
+const RESOURCE_LABELS: Record<string, string> = AUDIT_RESOURCES;
 
-const ACTION_LABELS: Record<string, string> = {
-  view_document: "Lihat dokumen",
-  verify_document: "Verifikasi dokumen",
-  reject_document: "Tolak dokumen",
-  update_application_stage: "Ubah stage",
-  update_application_notes: "Ubah notes",
-  toggle_reached_out: "Reached out",
-  assign_tier: "Assign tier",
-  clear_tier: "Clear tier",
-  invite_admin: "Invite admin",
-  remove_admin: "Remove admin",
-  update_inbox_status: "Update inbox status",
-  update_inbox_notes: "Update inbox notes",
-};
+const ACTION_LABELS: Record<string, string> = Object.fromEntries(
+  Object.entries(AUDIT_ACTIONS).map(([key, m]) => [key, m.label]),
+);
 
-const ACTION_TONE: Record<string, "info" | "ok" | "warn" | "err" | "mute"> = {
-  view_document: "info",
-  verify_document: "ok",
-  reject_document: "err",
-  update_application_stage: "info",
-  update_application_notes: "mute",
-  toggle_reached_out: "info",
-  assign_tier: "ok",
-  clear_tier: "mute",
-  invite_admin: "ok",
-  remove_admin: "err",
-  update_inbox_status: "mute",
-  update_inbox_notes: "mute",
-};
+const ACTION_TONE: Record<string, "info" | "ok" | "warn" | "err" | "mute"> =
+  Object.fromEntries(Object.entries(AUDIT_ACTIONS).map(([key, m]) => [key, m.tone]));
 
 const TONE_CLASS: Record<string, { bg: string; fg: string; label: string }> = {
   info: { bg: "var(--pg-info-bg)", fg: "var(--pg-info)", label: "" },

@@ -2,7 +2,61 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-06-03 (Akademi Perantau — first product LIVE — see below)
+**Last updated:** 2026-06-10 (Admin portal deep audit + overhaul — IN PROGRESS, see below)
+
+## 2026-06-10 — Admin portal deep audit + overhaul 🔨 IN PROGRESS
+
+Full multi-agent audit of the admin portal (41 agents, 93 findings; 2 critical / 26 high; 19 high/critical adversarially confirmed). Lowest surface = the pipeline (2/10). Locked decisions (Panji): **pipeline IS meant to run in-app through to deployment** (late stages were unused only because the kanban was broken/orphaned — fix the UI, don't simplify); **slot_filled should mean placements** (accepted-stage count); **build everything** (not just critical). Memory: `project_admin_portal_overhaul_2026_06_10`.
+
+**Branch:** `feat/admin-pipeline-overhaul` → **PR [#144](https://github.com/panji-firmansyah/perantauglobal/pull/144)** (open, not merged). Platform app typecheck + lint + build all clean.
+
+**SHIPPED on branch — 10 batches + adversarial review fixes, atomic commits:**
+1. **Pipeline driveable** (`5f80db7`) — canonical stage model in `lib/applicationStatus.ts` (PIPELINE_STAGES, STAGE_LABEL friendly, stageOrder, PIPELINE_COLUMNS anchored on ACCEPTED/REJECTED → kills 3-way drift). Interactive `JobOrderKanbanBoard` on the JO detail page (useOptimistic column move, confirm-on-backward). `updateApplicationStage` validates enum + revalidates JO/dashboard. Orphaned `/kanban` deleted. StageSelector friendly labels.
+2. **Dead affordances** (`be94cf9`) — real paginated Export CSV (was 404); shared `lib/doc-types.ts` fixes blank `formal_photo` + 7 extended types + expiry badge; dead `?job_order`/`?position`/`?stage` links repointed; candidates `?position` filter; inert catalog buttons removed; dead TopBar search → working global candidate search.
+3. **Dashboard rebuild** (`4781fe6`) — URGENT block (docs / JO overdue 11 / JO full real-placements / inbox new); honest KPI hero (dropped dead "Diterima" + mis-bucketed screening; added Pool-674 + Dalam-pipeline); pipeline-snapshot bar w/ accepted empty-state.
+4. **Edit job order** (`4eb172f`) — `updateJobOrder` + `/admin/job-orders/[id]/edit` (guards slot_count ≥ placements; position locked).
+5. **Governance** (`4eb172f`) — `audit-log.ts` single source of truth (AUDIT_ACTIONS/AUDIT_RESOURCES maps; unions + viewer maps derived); logging on all JO writes + position create/publish/discard/delete/meta + CSV export; team owner protection (`added_by IS NULL` undeletable + anti-lockout) no schema change.
+6. **Affiliate** (`50d237f`) — custom/vanity referral codes (create + generate) + edit-agent route wiring updateAffiliateAgent; canonical stageLabel on detail.
+7. **Triage at scale** (`aff634f`) — interactive ReachOutToggle inline on lamaran list + one-click QuickReject on pool rows.
+9. **Events CMS** (`c63a353`) — createEvent/updateEvent (audit-logged, WIB datetime, content merge) + EventForm (create+edit) + new/edit routes + "Buat event"/"Edit event". No more hand-SQL; join_url settable.
+10. **Analytics velocity** (`247a862`) — "Maju dari pool" = real advancement from `application_status_history` (by transition time) + honest "Diterima" empty-state + pool-aging buckets (≤7/8–14/>14d). NO migration (reads history).
+11. **Candidate filter fix** (`b86d0c2`) — tab badges + table now agree: fetch-all + membership id-sets, filter/count/paginate in-memory (no large `.in()`, paginated past 1000-cap). Also fixes the `?position` cap + count mismatch. NO migration.
+- **Review fixes** (`f3c4b69`) — adversarial review (1 high + 3 med/low, all confirmed): rejected pool rows now show "Tidak lolos" + leave the pool (migration 0070); kanban error state hoisted to survive card relocation; updateJobOrder returns union; dashboard open-JO KPI uses exact count.
+
+**⏭️ SKIPPED (Panji's call):** #8 inbox new-submission notify (decided "skip dulu" — no recipient/channel).
+
+**⚠️ GATED — needs Panji's explicit apply (prod DB writes, classifier-blocked autonomously). Apply BOTH before merging PR #144:**
+- **`0069_slot_filled_means_placements.sql`** — recompute trigger so slot_filled = accepted-stage count + backfill. Until applied, JO slot meters show old inflated numbers (dashboard "JO penuh" already correct, computed independently).
+- **`0070_pool_excludes_terminal_stages.sql`** — recreates `list_applications_for_admin` so the 'pool' filter excludes rejected/exit (so QuickReject actually empties the backlog). Only change vs the live def is one WHERE predicate. Until applied, rejected pool rows still appear (but now clearly badged "Tidak lolos").
+
+**Deletes done:** orphaned kanban ✅ · fake search ✅ · inert catalog buttons ✅. Still queued (minor): dead `applications.score` in list RPC + AppRow; leftover `test` position (prod, deletable); PublishBar 'Riwayat' dead path; `event_registrations.status` dead column.
+
+**Known follow-up (pre-existing, flagged by review):** `/admin/analytics` still fetches several full tables unbounded (stage distribution, top-cities, all-range inflow, 12-week trend) — they silently undercount once a table crosses PostgREST's 1000-row cap (applications=969, candidates=902 — imminent). The 2 queries THIS PR added are paginated; the pre-existing ones should be bounded (paginate or push to SQL count/group-by RPCs) in a follow-up. The dashboard already uses exact count queries, so its numbers are safe.
+
+**Panji's manual steps:** (a) live admin UI smoke test of PR #144 (auth-gated, not headless-testable); (b) review + apply migrations 0069 + 0070; (c) merge PR #144. (#8 inbox notify intentionally skipped.)
+
+## 2026-06-04 — Affiliate / Referral system LIVE ✅
+
+Admin-managed affiliate/referral channel shipped end-to-end + LIVE on prod. Agen scout talent → talent ketik kode referral pas daftar → sistem attribute ke agen (first-touch) + catat commission EVENT (`registration` + `departure`); admin isi nominal manual. Spec: [docs/affiliate-referral/SPEC.md](./docs/affiliate-referral/SPEC.md). Memory: `project_affiliate_referral_system`.
+
+**Keputusan terkunci (3 fork, di awal sesi):** admin-managed (NO agent portal) · record-events + nominal manual (ledger catat event, `amount` NULL sampai admin approve) · field kode manual (NO `?ref=` URL capture).
+
+**DB — migrations APPLIED to prod + verified (via `apply_migration` MCP, in ledger):**
+- **0067** — `affiliate_agents`, `referral_codes`, `affiliate_commission_events` (RLS admin-only) + kolom atribusi first-touch di `candidates` (`referred_by_agent_id` / `referred_by_code_id` / `referral_code_input` / `referral_attributed_at`) + RPC `validate_referral_code(text)→bool` (boolean-only, anon-safe) + extend `handle_new_auth_user` (resolve `form_data.ref` → agen + log registration event, **wrapped `EXCEPTION`** biar gagal-referral gak pernah abort signup) + trigger `log_affiliate_departure_event` (`deployed`/`active` → departure event, idempotent UNIQUE).
+- **0068** — `REVOKE EXECUTE` anon+authenticated dari `_attribute_candidate_referral` + `log_affiliate_departure_event`. Advisor (`get_advisors`) nangkep: `REVOKE FROM PUBLIC` **gak cukup** di Supabase (default privileges grant ke anon/authenticated) → SECURITY DEFINER internal bisa dipanggil anon. Lihat memory `reference_supabase_definer_grants_gotcha`.
+- Verified: schema + RLS + grants OK; smoke test write-path di transaction **rolled-back** (validate + atribusi + reg event + dep event semua jalan, zero residu); types regenerate → parity OK (30/18/45 kolom match).
+
+**Code — PR [#141](https://github.com/panji-firmansyah/perantauglobal/pull/141)** (built via multi-agent workflow: 2 build agent paralel + 3 reviewer adversarial):
+- apps/web: field "Kode referral" opsional di `ApplyForm` (wizard + single-step), debounced ✓/✗ hint non-blocking, `/api/referral/validate`, normalize → `form_data.ref`. Trigger baca `form_data.ref` langsung — NO magic-link/callback change.
+- apps/platform: `/admin/agents` (list + status tabs + KPI) · `/new` (create + auto-generate kode pertama) · `/[id]` (kode + kandidat ke-refer + ledger komisi). 8 server action `assertAdmin` + audit + `{ok,error}`; state machine `pending→approved→paid` / `void` **guarded server-side** (paid immutable). Sidebar + audit-log actions + "Direferral oleh" di candidate detail.
+
+**Post-ship fixes (landed + deployed):**
+- PR [#143](https://github.com/panji-firmansyah/perantauglobal/pull/143) — **bugfix prod 500**: create agen sukses, tapi redirect ke `/admin/agents/[id]` 500 (`Attempted to call formatIDR() from the server but it's on the client`). `formatIDR` di-extract dari `CommissionLedger.tsx` (`"use client"`) ke `[id]/format.ts` server-safe. **Lesson: build + DB smoke test gak nangkep RSC render error — verify halaman ke-render, bukan cuma typecheck/build.**
+- PR [#142](https://github.com/panji-firmansyah/perantauglobal/pull/142) — platform lint cleanup (pre-existing, dari `eslint-plugin-react-hooks` bump: `set-state-in-effect` + `purity` jadi error di posisi-editor + candidate pages). `EditorTabsHeader` → `useSyncExternalStore`. Sekarang 0 errors 0 warnings.
+
+**Sisa (pending Panji):** smoke test E2E di UI live (login admin → buat agen → reload detail page → daftar lowongan pakai kode → cek atribusi + event muncul). Logika udah dibuktiin DB-level; tinggal konfirmasi render. **Deferred follow-ups:** portal agen/login · auto-calc komisi · referral akademi · tampil referral ke kandidat · rate-limit `/api/referral/validate` · `?ref=` URL auto-capture + link agen.
+
+**Schema state prod:** migrations s/d **0068**. Agen test pertama (`639e1e00…`) udah ke-create dari attempt yang error sebelum fix — bisa dipake atau dihapus.
 
 ## 2026-06-03 — Akademi Perantau: first product LIVE ✅
 

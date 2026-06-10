@@ -75,7 +75,6 @@ export default async function JobOrdersListPage({
           { label: "Operasi" },
           { label: "Job orders", emphasis: true },
         ]}
-        searchPlaceholder="Cari employer, batch, atau posisi…"
       />
       <main className="px-8 py-7 flex flex-col gap-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">

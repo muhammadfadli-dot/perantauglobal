@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
 import { logAdminAction } from "@/lib/audit-log";
+import { isValidStage, stageLabel } from "@/lib/applicationStatus";
 
 async function assertAdmin() {
   const { session, role } = await getSessionAndRole();
@@ -18,8 +19,14 @@ export async function updateApplicationStage(
   stage: string,
 ) {
   const { reviewedBy } = await assertAdmin();
+  // Guard: only accept known pipeline stages — never write an arbitrary string
+  // (the kanban/select could otherwise persist a typo'd or removed stage).
+  if (!isValidStage(stage)) {
+    throw new Error(`Stage tidak dikenal: ${stage}`);
+  }
   await logAdminAction("update_application_stage", "application", applicationId, {
     new_stage: stage,
+    new_stage_label: stageLabel(stage),
   });
   const supabase = await createServerClient();
   const payload = {
@@ -34,6 +41,10 @@ export async function updateApplicationStage(
   if (error) throw new Error(error.message);
   revalidatePath("/admin/candidates", "layout");
   revalidatePath("/admin/applications", "layout");
+  // The "layout" scope covers /admin/job-orders/[id] too, so moving a card on the
+  // JO board re-groups it into the right column instead of going stale until reload.
+  revalidatePath("/admin/job-orders", "layout");
+  revalidatePath("/admin", "layout"); // dashboard pipeline snapshot
 }
 
 export async function updateApplicationNotes(
@@ -94,7 +105,7 @@ export async function toggleReachedOut(
  * - Advances pipeline_stage to 'screening' if currently 'applied' (so the
  *   trigger logs the transition into application_status_history). If the
  *   app is already past 'applied', stage is preserved — caller can manage
- *   transitions via the job order kanban from there.
+ *   transitions via the pipeline board on the job order detail page from there.
  * - Sets reviewed_at + reviewed_by on the row.
  */
 export async function moveApplicationToJobOrder(

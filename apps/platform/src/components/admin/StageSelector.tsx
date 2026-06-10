@@ -3,22 +3,7 @@
 import { useTransition, useState } from "react";
 import { Icon } from "@/components/pg/Icon";
 import { updateApplicationStage } from "@/app/(admin)/admin/actions";
-
-const STAGES = [
-  "applied",
-  "screening",
-  "voice_screen",
-  "interview",
-  "document_check",
-  "briefing",
-  "trial",
-  "selected",
-  "training",
-  "deployed",
-  "active",
-  "rejected",
-  "exit",
-] as const;
+import { PIPELINE_COLUMNS, stageLabel } from "@/lib/applicationStatus";
 
 export default function StageSelector({
   applicationId,
@@ -51,12 +36,17 @@ export default function StageSelector({
         value={value}
         onChange={onChange}
         disabled={pending}
-        className="w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3 py-2 text-sm outline-none focus:border-pg-red-600 disabled:opacity-60"
+        aria-label="Ubah stage pipeline"
+        className="w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3 py-2 text-sm font-semibold outline-none focus:border-pg-red-600 disabled:opacity-60"
       >
-        {STAGES.map((s) => (
-          <option key={s} value={s}>
-            {s}
-          </option>
+        {PIPELINE_COLUMNS.map((col) => (
+          <optgroup key={col.key} label={col.label}>
+            {col.stages.map((s) => (
+              <option key={s} value={s}>
+                {stageLabel(s)}
+              </option>
+            ))}
+          </optgroup>
         ))}
       </select>
       {pending && (

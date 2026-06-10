@@ -83,6 +83,20 @@ export default async function AnalyticsPage({
   const since = rangeToDate(range);
   const supabase = await createServerClient();
 
+  // Paginate past PostgREST's 1000-row cap for full-table fetches.
+  async function fetchAllRows<T>(
+    run: (from: number, to: number) => PromiseLike<{ data: T[] | null }>,
+  ): Promise<T[]> {
+    const out: T[] = [];
+    for (let f = 0; ; f += 1000) {
+      const { data } = await run(f, f + 999);
+      const batch = data ?? [];
+      out.push(...batch);
+      if (batch.length < 1000) break;
+    }
+    return out;
+  }
+
   const now = new Date();
   const twelveWeeksAgoIso = new Date(
     now.getTime() - 12 * 7 * 24 * 60 * 60 * 1000,
@@ -139,6 +153,25 @@ export default async function AnalyticsPage({
       .order("created_at", { ascending: false }),
   ]);
 
+  // Advancement + pool-aging are fetched paginated (these grow with the pool and
+  // would silently undercount past PostgREST's 1000-row cap).
+  const [advancedRows, poolAging] = await Promise.all([
+    fetchAllRows<{ application_id: string; changed_at: string }>((f, t) => {
+      const q = supabase
+        .from("application_status_history")
+        .select("application_id, from_stage, changed_at")
+        .eq("from_stage", "applied");
+      return (since ? q.gte("changed_at", since) : q).range(f, t);
+    }),
+    fetchAllRows<{ created_at: string }>((f, t) =>
+      supabase
+        .from("applications")
+        .select("created_at")
+        .eq("pipeline_stage", "applied")
+        .range(f, t),
+    ),
+  ]);
+
   // === Range-bound aggregates ===
   const rangeApps = (rangeAppsData ?? []) as Array<{
     created_at: string;
@@ -147,12 +180,10 @@ export default async function AnalyticsPage({
   }>;
 
   const totalApps = rangeApps.length;
-  let screeningCount = 0;
   let acceptedCount = 0;
   const positionApplyCount = new Map<string, number>();
 
   for (const a of rangeApps) {
-    if (a.pipeline_stage === "screening") screeningCount++;
     if (isAcceptedStage(a.pipeline_stage)) {
       acceptedCount++;
     }
@@ -162,8 +193,6 @@ export default async function AnalyticsPage({
     );
   }
 
-  const conversionPct = totalApps > 0 ? Math.round((screeningCount / totalApps) * 100) : null;
-
   // Daily sparkline span matches the KPI's counting window so the trend visual can't
   // silently omit days (90d previously rendered only the last 30). "all" uses a 90-day
   // recent-trend window since an unbounded daily series isn't meaningful in a sparkline.
@@ -171,11 +200,6 @@ export default async function AnalyticsPage({
     range === "7d" ? 7 : range === "30d" ? 30 : range === "90d" ? 90 : 90;
   const sparklineTimestamps = rangeApps.map((a) => a.created_at);
   const inflowSpark = bucketDaily(sparklineTimestamps, sparklineDays, now);
-  const screeningSpark = bucketDaily(
-    rangeApps.filter((a) => a.pipeline_stage === "screening").map((a) => a.created_at),
-    sparklineDays,
-    now,
-  );
   const acceptedSpark = bucketDaily(
     rangeApps
       .filter((a) => isAcceptedStage(a.pipeline_stage))
@@ -183,6 +207,32 @@ export default async function AnalyticsPage({
     sparklineDays,
     now,
   );
+
+  // === Real advancement (from history, by transition time) ===
+  // One application can leave 'applied' more than once (re-open) — count distinct.
+  const advancedIds = new Set(advancedRows.map((r) => r.application_id));
+  const advancedCount = advancedIds.size;
+  // Spark: first move-out per application, bucketed by when it happened.
+  const firstMoveByApp = new Map<string, string>();
+  for (const r of advancedRows) {
+    const prev = firstMoveByApp.get(r.application_id);
+    if (!prev || new Date(r.changed_at) < new Date(prev)) {
+      firstMoveByApp.set(r.application_id, r.changed_at);
+    }
+  }
+  const advancedSpark = bucketDaily([...firstMoveByApp.values()], sparklineDays, now);
+
+  // === Pool aging — how long current 'applied' candidates have waited ===
+  let agingFresh = 0; // ≤ 7 days
+  let agingWeek = 0; // 8–14 days
+  let agingStale = 0; // > 14 days
+  for (const a of poolAging) {
+    const ageDays = (now.getTime() - new Date(a.created_at).getTime()) / 86_400_000;
+    if (ageDays <= 7) agingFresh++;
+    else if (ageDays <= 14) agingWeek++;
+    else agingStale++;
+  }
+  const agingTotal = poolAging.length;
 
   // === 12-week historical trend ===
   const trendTimestamps = ((trendAppsData ?? []) as { created_at: string }[]).map(
@@ -196,7 +246,7 @@ export default async function AnalyticsPage({
   // multiple lamaran, so lamaran/candidate is not a funnel conversion).
   const funnel = [
     { label: "Lamaran dibuat", value: totalApps },
-    { label: "Maju ke screening", value: screeningCount },
+    { label: "Maju dari pool", value: advancedCount },
     { label: "Diterima", value: acceptedCount },
   ];
   const funnelMax = Math.max(...funnel.map((f) => f.value), 1);
@@ -301,19 +351,17 @@ export default async function AnalyticsPage({
             caption={RANGE_LABEL[range]}
           />
           <KpiStat
-            label="Maju ke screening"
-            value={screeningCount}
-            sparkline={screeningSpark}
-            caption={
-              conversionPct != null ? `${conversionPct}% conv` : "Belum ada data"
-            }
+            label="Maju dari pool"
+            value={advancedCount}
+            sparkline={advancedSpark}
+            caption="Diproses dari pool (by transition)"
           />
           <KpiStat
             label="Diterima"
             value={acceptedCount}
             sparkline={acceptedSpark}
-            deltaTone="ok"
-            caption="selected/training/deployed/active"
+            deltaTone={acceptedCount > 0 ? "ok" : "mute"}
+            caption={acceptedCount > 0 ? "selected→active" : "Belum ada penempatan"}
           />
           <KpiStat
             label="Job orders open"
@@ -392,6 +440,29 @@ export default async function AnalyticsPage({
               })}
             </div>
           </div>
+        </section>
+
+        {/* Pool aging — how long current applied candidates have waited */}
+        <section>
+          <Eyebrow>Antrian pool — usia lamaran belum ditindak</Eyebrow>
+          <div
+            className="mt-3 grid gap-3 sm:grid-cols-3"
+          >
+            <AgingCard label="≤ 7 hari" value={agingFresh} total={agingTotal} tone="ok" />
+            <AgingCard label="8–14 hari" value={agingWeek} total={agingTotal} tone="warn" />
+            <AgingCard
+              label="> 14 hari (basi)"
+              value={agingStale}
+              total={agingTotal}
+              tone="err"
+            />
+          </div>
+          <p className="mt-2 text-[12px] text-pg-ink-tertiary">
+            {agingTotal} lamaran masih di pool (stage <span className="font-mono">applied</span>, belum ditarik ke job order).
+            {agingStale > 0
+              ? ` ${agingStale} sudah > 14 hari — prioritaskan triage atau tolak.`
+              : ""}
+          </p>
         </section>
 
         <div className="grid gap-5 lg:grid-cols-2">
@@ -575,6 +646,45 @@ function RangeFilter({ range }: { range: Range }) {
           </Link>
         );
       })}
+    </div>
+  );
+}
+
+function AgingCard({
+  label,
+  value,
+  total,
+  tone,
+}: {
+  label: string;
+  value: number;
+  total: number;
+  tone: "ok" | "warn" | "err";
+}) {
+  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+  const fg =
+    tone === "ok"
+      ? "var(--pg-ok-soft-fg)"
+      : tone === "warn"
+      ? "var(--pg-warn-soft-fg)"
+      : "var(--pg-err)";
+  return (
+    <div
+      className="bg-pg-white rounded-2xl p-5"
+      style={{ border: "1px solid var(--pg-border)" }}
+    >
+      <div
+        className="text-[10px] font-semibold tracking-[0.1em] uppercase"
+        style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
+      >
+        {label}
+      </div>
+      <div className="text-[32px] font-extrabold leading-[40px] mt-1.5" style={{ color: fg }}>
+        {value}
+      </div>
+      <div className="text-[12px] font-semibold mt-0.5" style={{ color: "var(--pg-ink-tertiary)" }}>
+        {pct}% dari antrian
+      </div>
     </div>
   );
 }

@@ -4,9 +4,20 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/pg/Icon";
 import { Button } from "@/components/pg/primitives";
-import { createJobOrder } from "../actions";
+import { createJobOrder, updateJobOrder } from "../actions";
 
 type Position = { slug: string; name: string; country: string };
+
+export type JobOrderInitial = {
+  internal_employer_name: string;
+  public_employer_name: string | null;
+  employer_city: string | null;
+  intake_label: string;
+  slot_count: number;
+  deadline: string | null; // ISO date or null
+  public_description: string | null;
+  notes: string | null;
+};
 
 const INPUT_CLASS =
   "w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3.5 py-3 text-base text-pg-ink-900 font-medium placeholder:text-pg-ink-400 focus:border-pg-red-600 outline-none transition-colors";
@@ -14,13 +25,22 @@ const INPUT_CLASS =
 export default function JobOrderForm({
   positions,
   presetSlug,
+  mode = "create",
+  jobOrderId,
+  initial,
 }: {
   positions: Position[];
   presetSlug: string | null;
+  mode?: "create" | "edit";
+  jobOrderId?: string;
+  initial?: JobOrderInitial;
 }) {
+  const isEdit = mode === "edit";
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [positionSlug, setPositionSlug] = useState(presetSlug ?? "");
+  const [positionSlug, setPositionSlug] = useState(
+    presetSlug ?? "",
+  );
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -31,20 +51,26 @@ export default function JobOrderForm({
       setError("Jumlah slot harus minimal 1.");
       return;
     }
+    const payload = {
+      internal_employer_name: String(fd.get("internal_employer_name") ?? "").trim(),
+      public_employer_name: (fd.get("public_employer_name") as string) || null,
+      employer_city: (fd.get("employer_city") as string) || null,
+      intake_label: String(fd.get("intake_label") ?? "").trim(),
+      slot_count: slot,
+      deadline: (fd.get("deadline") as string) || null,
+      public_description: (fd.get("public_description") as string) || null,
+      notes: (fd.get("notes") as string) || null,
+    };
 
     start(async () => {
       try {
-        await createJobOrder({
-          position_slug: positionSlug,
-          internal_employer_name: String(fd.get("internal_employer_name") ?? "").trim(),
-          public_employer_name: (fd.get("public_employer_name") as string) || null,
-          employer_city: (fd.get("employer_city") as string) || null,
-          intake_label: String(fd.get("intake_label") ?? "").trim(),
-          slot_count: slot,
-          deadline: (fd.get("deadline") as string) || null,
-          public_description: (fd.get("public_description") as string) || null,
-          notes: (fd.get("notes") as string) || null,
-        });
+        if (isEdit && jobOrderId) {
+          const res = await updateJobOrder(jobOrderId, payload);
+          // Success redirects (returns void); a returned union means validation failed.
+          if (res && !res.ok) setError(res.error);
+        } else {
+          await createJobOrder({ position_slug: positionSlug, ...payload });
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Gagal menyimpan job order.");
       }
@@ -53,13 +79,18 @@ export default function JobOrderForm({
 
   return (
     <form onSubmit={handleSubmit} className="bg-pg-white border border-pg-ink-100 rounded-2xl p-5 md:p-6">
-      <Field label="Posisi" required>
+      <Field
+        label="Posisi"
+        required
+        help={isEdit ? "Posisi tidak bisa diubah — lamaran sudah terkait." : undefined}
+      >
         <select
           name="position_slug"
           required
           value={positionSlug}
           onChange={(e) => setPositionSlug(e.target.value)}
-          className={INPUT_CLASS}
+          disabled={isEdit}
+          className={`${INPUT_CLASS} disabled:opacity-60`}
         >
           <option value="" disabled>— Pilih posisi —</option>
           {positions.map((p) => (
@@ -80,6 +111,7 @@ export default function JobOrderForm({
             name="internal_employer_name"
             type="text"
             required
+            defaultValue={initial?.internal_employer_name ?? ""}
             placeholder="King Faisal Specialist Hospital"
             className={INPUT_CLASS}
           />
@@ -88,6 +120,7 @@ export default function JobOrderForm({
           <input
             name="public_employer_name"
             type="text"
+            defaultValue={initial?.public_employer_name ?? ""}
             placeholder="Rumah sakit di Saudi Arabia"
             className={INPUT_CLASS}
           />
@@ -99,6 +132,7 @@ export default function JobOrderForm({
           <input
             name="employer_city"
             type="text"
+            defaultValue={initial?.employer_city ?? ""}
             placeholder="Riyadh"
             className={INPUT_CLASS}
           />
@@ -108,6 +142,7 @@ export default function JobOrderForm({
             name="intake_label"
             type="text"
             required
+            defaultValue={initial?.intake_label ?? ""}
             placeholder="Batch Juni 2026"
             className={INPUT_CLASS}
           />
@@ -121,6 +156,7 @@ export default function JobOrderForm({
             type="number"
             min={1}
             required
+            defaultValue={initial?.slot_count ?? ""}
             placeholder="12"
             className={INPUT_CLASS}
           />
@@ -129,6 +165,7 @@ export default function JobOrderForm({
           <input
             name="deadline"
             type="date"
+            defaultValue={initial?.deadline ?? ""}
             className={INPUT_CLASS}
           />
         </Field>
@@ -142,6 +179,7 @@ export default function JobOrderForm({
           <textarea
             name="public_description"
             rows={3}
+            defaultValue={initial?.public_description ?? ""}
             className={INPUT_CLASS}
             placeholder="Misal: 'Khusus perawat ICU dengan minimal 3 tahun pengalaman.'"
           />
@@ -153,6 +191,7 @@ export default function JobOrderForm({
           <textarea
             name="notes"
             rows={3}
+            defaultValue={initial?.notes ?? ""}
             className={INPUT_CLASS}
             placeholder="Catatan untuk tim — kontak PIC employer, deadline khusus, dll."
           />
@@ -173,12 +212,13 @@ export default function JobOrderForm({
         <Button type="submit" variant="primary" disabled={pending}>
           {pending ? "Menyimpan…" : (
             <>
-              Simpan & publish <Icon name="arrow_right" size={18} />
+              {isEdit ? "Simpan perubahan" : "Simpan & publish"}{" "}
+              <Icon name="arrow_right" size={18} />
             </>
           )}
         </Button>
         <Link
-          href="/admin/job-orders"
+          href={isEdit && jobOrderId ? `/admin/job-orders/${jobOrderId}` : "/admin/job-orders"}
           className="inline-flex items-center justify-center gap-2 min-h-[52px] px-[22px] text-base font-semibold rounded-xl border-[1.5px] border-pg-ink-200 text-pg-ink-900 no-underline hover:bg-pg-ink-50"
         >
           Batal

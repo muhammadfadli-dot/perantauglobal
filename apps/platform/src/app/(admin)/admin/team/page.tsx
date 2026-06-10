@@ -50,6 +50,8 @@ export default async function TeamPage() {
         <div className="bg-pg-white border border-pg-ink-100 rounded-2xl overflow-hidden">
           {rows.map((r, i) => {
             const isMe = session?.email && session.email.toLowerCase() === r.email.toLowerCase();
+            // Bootstrap/founder accounts (not invited via this UI) are protected.
+            const isOwner = r.added_by == null;
             return (
               <div
                 key={r.email}
@@ -72,6 +74,14 @@ export default async function TeamPage() {
                           (kamu)
                         </span>
                       )}
+                      {isOwner && (
+                        <span
+                          className="ml-2 text-[10px] font-bold tracking-wide uppercase px-1.5 py-0.5 rounded"
+                          style={{ background: "var(--pg-ink-50)", color: "var(--pg-ink-700)" }}
+                        >
+                          Owner
+                        </span>
+                      )}
                     </div>
                     {r.notes && (
                       <div className="text-[13px] text-pg-ink-500 mt-0.5">{r.notes}</div>
@@ -83,7 +93,7 @@ export default async function TeamPage() {
                     )}
                   </div>
                 </div>
-                {!isMe && <RemoveButton email={r.email} />}
+                {!isMe && !isOwner && <RemoveButton email={r.email} />}
               </div>
             );
           })}

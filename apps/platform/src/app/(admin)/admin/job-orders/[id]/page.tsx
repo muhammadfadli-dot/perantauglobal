@@ -5,6 +5,7 @@ import AdminTopBar from "@/components/admin/TopBar";
 import { Icon } from "@/components/pg/Icon";
 import StatusControls from "./StatusControls";
 import NotesField from "./NotesField";
+import JobOrderKanbanBoard from "@/components/admin/JobOrderKanbanBoard";
 
 export const dynamic = "force-dynamic";
 
@@ -57,44 +58,6 @@ const COUNTRY_LABEL: Record<string, string> = {
   indonesia: "Indonesia",
 };
 
-type ColumnKey = "selecting" | "interview_doc" | "accepted" | "not_selected";
-
-const COLUMN_DEF: { key: ColumnKey; label: string; tone: "warn" | "warn2" | "ok" | "mute"; stages: string[] }[] = [
-  {
-    key: "selecting",
-    label: "Sedang diseleksi",
-    tone: "warn",
-    stages: ["applied", "screening", "voice_screen"],
-  },
-  {
-    key: "interview_doc",
-    label: "Wawancara & dokumen",
-    tone: "warn2",
-    stages: ["interview", "document_check", "briefing"],
-  },
-  {
-    key: "accepted",
-    label: "Diterima",
-    tone: "ok",
-    stages: ["selected", "trial", "training", "deployed", "active"],
-  },
-  {
-    key: "not_selected",
-    label: "Tidak terpilih",
-    tone: "mute",
-    stages: ["rejected", "exit"],
-  },
-];
-
-const STAGE_HINT: Record<string, { label: string; tone: "ok" | "warn" | "info" | "mute" }> = {
-  document_check: { label: "Butuh medical", tone: "warn" },
-  trial: { label: "Training", tone: "info" },
-  deployed: { label: "Sudah dideploy", tone: "ok" },
-  active: { label: "Active", tone: "ok" },
-  voice_screen: { label: "Voice screen", tone: "info" },
-  interview: { label: "Interview", tone: "info" },
-};
-
 export default async function JobOrderDetailPage({
   params,
 }: {
@@ -123,21 +86,6 @@ export default async function JobOrderDetailPage({
   const jo = joData as unknown as JobOrder | null;
   if (!jo) return notFound();
   const apps = (appsData ?? []) as unknown as LinkedApp[];
-
-  // Group apps by column
-  const byColumn = new Map<ColumnKey, LinkedApp[]>();
-  for (const col of COLUMN_DEF) byColumn.set(col.key, []);
-  for (const a of apps) {
-    const col = COLUMN_DEF.find((c) => c.stages.includes(a.pipeline_stage));
-    if (col) {
-      byColumn.get(col.key)!.push(a);
-    } else {
-      byColumn.get("selecting")!.push(a);
-    }
-  }
-
-  const acceptedCount =
-    byColumn.get("accepted")?.length ?? 0;
 
   // Days to deadline
   let daysToDeadline: number | null = null;
@@ -249,60 +197,9 @@ export default async function JobOrderDetailPage({
           </div>
         </div>
 
-        {/* Kanban */}
-        <div className="grid gap-4 lg:grid-cols-4">
-          {COLUMN_DEF.map((col) => {
-            const items = byColumn.get(col.key) ?? [];
-            const dotColor =
-              col.tone === "ok"
-                ? "var(--pg-ok-soft-fg)"
-                : col.tone === "warn"
-                ? "var(--pg-warn-soft-fg)"
-                : col.tone === "warn2"
-                ? "var(--pg-warn-soft-fg)"
-                : "var(--pg-ink-quaternary)";
-            const showCount =
-              col.key === "accepted" ? `${acceptedCount} / ${jo.slot_count}` : `${items.length}`;
-            return (
-              <div key={col.key} className="flex flex-col gap-3 min-w-0">
-                <div className="flex items-center justify-between px-1">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="w-2 h-2 rounded-full shrink-0"
-                      style={{ background: dotColor }}
-                    />
-                    <span className="text-[14px] font-bold text-pg-ink-primary">
-                      {col.label}
-                    </span>
-                  </div>
-                  <span
-                    className="text-[12px] font-semibold tabular-nums"
-                    style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
-                  >
-                    {showCount}
-                  </span>
-                </div>
-                <div className="flex flex-col gap-2.5 min-h-[200px]">
-                  {items.map((a) => (
-                    <KanbanCard key={a.id} app={a} muted={col.key === "not_selected"} />
-                  ))}
-                  {items.length === 0 && (
-                    <div
-                      className="rounded-xl px-4 py-6 text-center text-[12px]"
-                      style={{
-                        background: "var(--pg-paper)",
-                        border: "1px dashed var(--pg-border)",
-                        color: "var(--pg-ink-quaternary)",
-                      }}
-                    >
-                      Belum ada
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        {/* Pipeline kanban — interactive: each card carries a stage selector so a
+            recruiter can advance candidates from the job order itself. */}
+        <JobOrderKanbanBoard apps={apps} slotCount={jo.slot_count} />
 
         {/* Internal notes / employer info */}
         <div className="grid gap-4 lg:grid-cols-3">
@@ -351,16 +248,22 @@ export default async function JobOrderDetailPage({
               Aksi cepat
             </div>
             <Link
+              href={`/admin/job-orders/${jo.id}/edit`}
+              className="text-[13px] font-bold text-pg-ink-primary no-underline hover:text-pg-red-600 inline-flex items-center gap-1.5"
+            >
+              <Icon name="edit" size={14} /> Edit job order
+            </Link>
+            <Link
               href={`/admin/positions/${jo.position_slug}`}
               className="text-[13px] font-bold text-pg-ink-primary no-underline hover:text-pg-red-600 inline-flex items-center gap-1.5"
             >
               <Icon name="doc" size={14} /> Buka catalog posisi
             </Link>
             <Link
-              href={`/admin/applications?job_order=${jo.id}`}
+              href={`/admin/applications?position=${jo.position_slug}&pool=in_job_order`}
               className="text-[13px] font-bold text-pg-ink-primary no-underline hover:text-pg-red-600 inline-flex items-center gap-1.5"
             >
-              <Icon name="compass" size={14} /> Lihat semua lamaran ({apps.length})
+              <Icon name="compass" size={14} /> Lamaran posisi ini di pipeline ({apps.length})
             </Link>
             <Link
               href={`/admin/candidates?position=${jo.position_slug}`}
@@ -372,81 +275,6 @@ export default async function JobOrderDetailPage({
         </div>
       </main>
     </>
-  );
-}
-
-function KanbanCard({ app, muted }: { app: LinkedApp; muted?: boolean }) {
-  const c = app.candidates;
-  const initials =
-    c?.full_name
-      ?.split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((s) => s[0]?.toUpperCase())
-      .join("") ?? "??";
-  const stageHint = STAGE_HINT[app.pipeline_stage];
-  return (
-    <Link
-      href={`/admin/candidates/${app.candidate_id}`}
-      className="block bg-pg-white rounded-xl p-3 no-underline"
-      style={{
-        border: "1px solid var(--pg-border)",
-        opacity: muted ? 0.65 : 1,
-      }}
-    >
-      <div className="flex items-start gap-2.5">
-        <div
-          className="w-8 h-8 rounded-full grid place-items-center font-bold text-[11px] shrink-0"
-          style={{
-            background: muted ? "var(--pg-ink-50)" : "var(--pg-ink-primary)",
-            color: muted ? "var(--pg-ink-tertiary)" : "white",
-            fontFamily: "var(--font-mono)",
-          }}
-        >
-          {initials}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-[13px] font-bold text-pg-ink-primary leading-tight truncate">
-              {c?.full_name ?? "—"}
-            </div>
-          </div>
-          <div
-            className="text-[11px] mt-0.5 leading-tight truncate"
-            style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
-          >
-            {c?.city ?? "—"}
-          </div>
-        </div>
-      </div>
-      {stageHint && (
-        <div
-          className="mt-2 px-2 py-1 rounded-md text-[10px] font-bold tracking-[0.04em] uppercase"
-          style={{
-            background:
-              stageHint.tone === "ok"
-                ? "var(--pg-ok-soft-bg)"
-                : stageHint.tone === "warn"
-                ? "var(--pg-warn-soft-bg)"
-                : stageHint.tone === "info"
-                ? "var(--pg-info-bg)"
-                : "var(--pg-ink-50)",
-            color:
-              stageHint.tone === "ok"
-                ? "var(--pg-ok-soft-fg)"
-                : stageHint.tone === "warn"
-                ? "var(--pg-warn-soft-fg)"
-                : stageHint.tone === "info"
-                ? "var(--pg-info)"
-                : "var(--pg-ink-tertiary)",
-            fontFamily: "var(--font-mono)",
-            display: "inline-block",
-          }}
-        >
-          {stageHint.label}
-        </div>
-      )}
-    </Link>
   );
 }
 

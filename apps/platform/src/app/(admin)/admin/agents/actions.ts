@@ -93,6 +93,43 @@ async function insertReferralCodeWithRetry(
   throw new Error("Gagal membuat kode referral (kode bentrok berulang)");
 }
 
+/** Normalize an admin-entered custom code: trim + uppercase. */
+function normalizeCode(raw: string): string {
+  return raw.trim().toUpperCase();
+}
+
+/**
+ * Insert an admin-chosen custom (vanity) code, e.g. "WAHYU-2026". The whole reason
+ * affiliate produced 0 attributions is that agents distribute memorable codes verbally
+ * while the system only minted random machine codes — so a custom code is what makes
+ * the channel actually work. No randomize-retry: a taken code is a hard error so the
+ * admin picks another, not a silent mutation of their chosen handle.
+ */
+async function insertCustomReferralCode(
+  supabase: Awaited<ReturnType<typeof createServerClient>>,
+  agentId: string,
+  rawCode: string,
+): Promise<{ id: string; code: string }> {
+  const code = normalizeCode(rawCode);
+  if (!CODE_RE.test(code)) {
+    throw new Error(
+      "Kode harus 4–32 karakter, hanya huruf, angka, dan tanda hubung (mis. WAHYU-2026).",
+    );
+  }
+  const { data, error } = await supabase
+    .from("referral_codes")
+    .insert({ agent_id: agentId, code, status: "active" } as never)
+    .select("id, code")
+    .single();
+  if (error) {
+    if (error.code === "23505") {
+      throw new Error(`Kode "${code}" sudah dipakai — pilih yang lain.`);
+    }
+    throw new Error(error.message ?? "Gagal membuat kode referral");
+  }
+  return data as { id: string; code: string };
+}
+
 // ============================================================================
 // Agents
 // ============================================================================
@@ -104,6 +141,8 @@ export type CreateAffiliateAgentInput = {
   city?: string | null;
   notes?: string | null;
   status?: AffiliateAgentStatus;
+  /** Optional custom/vanity first code. Empty → auto-generate a random code. */
+  customCode?: string | null;
 };
 
 /**
@@ -153,9 +192,13 @@ export async function createAffiliateAgent(
     name: created.name,
   });
 
-  // Auto-generate the agent's first referral code.
+  // Create the agent's first referral code — a custom/vanity one if the admin
+  // chose it, otherwise a random machine code.
   try {
-    const code = await insertReferralCodeWithRetry(supabase, created.id, created.name);
+    const custom = input.customCode?.trim();
+    const code = custom
+      ? await insertCustomReferralCode(supabase, created.id, custom)
+      : await insertReferralCodeWithRetry(supabase, created.id, created.name);
     await logAdminAction("generate_referral_code", "referral_code", code.id, {
       agent_id: created.id,
       code: code.code,
@@ -233,7 +276,10 @@ export async function updateAffiliateAgent(
 // Referral codes
 // ============================================================================
 
-export async function generateReferralCode(agentId: string): Promise<ActionResult> {
+export async function generateReferralCode(
+  agentId: string,
+  customCode?: string | null,
+): Promise<ActionResult> {
   await assertAdmin();
   const supabase = await createServerClient();
 
@@ -246,11 +292,14 @@ export async function generateReferralCode(agentId: string): Promise<ActionResul
   if (!agent) return { ok: false, error: "Agen tidak ditemukan." };
 
   try {
-    const code = await insertReferralCodeWithRetry(
-      supabase,
-      agentId,
-      (agent as { name: string }).name,
-    );
+    const custom = customCode?.trim();
+    const code = custom
+      ? await insertCustomReferralCode(supabase, agentId, custom)
+      : await insertReferralCodeWithRetry(
+          supabase,
+          agentId,
+          (agent as { name: string }).name,
+        );
     await logAdminAction("generate_referral_code", "referral_code", code.id, {
       agent_id: agentId,
       code: code.code,

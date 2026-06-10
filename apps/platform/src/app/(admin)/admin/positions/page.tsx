@@ -150,7 +150,6 @@ export default async function AdminPositionsPage({
           { label: "Operasi" },
           { label: "Catalog posisi", emphasis: true },
         ]}
-        searchPlaceholder="Cari posisi atau negara…"
       />
       <main className="px-8 py-7 flex flex-col gap-6">
         {/* Header */}
@@ -216,24 +215,6 @@ export default async function AdminPositionsPage({
               count={totalInactive}
               active={tab === "inactive"}
             />
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-semibold text-pg-ink-secondary"
-              style={{ border: "1px solid var(--pg-border)", background: "var(--pg-white)" }}
-            >
-              <Icon name="filter" size={12} stroke={2} />
-              Filter negara
-            </button>
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-[12px] font-semibold text-pg-ink-secondary"
-              style={{ border: "1px solid var(--pg-border)", background: "var(--pg-white)" }}
-            >
-              <Icon name="sort" size={12} stroke={2} />
-              Sort: Lamaran
-            </button>
           </div>
         </div>
 

@@ -8,6 +8,7 @@ import CodeStatusButton from "./CodeStatusButton";
 import AgentStatusControls from "./AgentStatusControls";
 import CommissionLedger, { type LedgerEvent } from "./CommissionLedger";
 import { formatIDR } from "./format";
+import { stageLabel } from "@/lib/applicationStatus";
 import type {
   AffiliateAgentStatus,
   CommissionEventStatus,
@@ -70,22 +71,6 @@ const AGENT_STATUS_TONE: Record<string, { bg: string; fg: string }> = {
   active: { bg: "var(--pg-ok-soft-bg)", fg: "var(--pg-ok-soft-fg)" },
   inactive: { bg: "var(--pg-ink-50)", fg: "var(--pg-ink-tertiary)" },
   suspended: { bg: "var(--pg-err-bg)", fg: "var(--pg-err)" },
-};
-
-const STAGE_LABEL: Record<string, string> = {
-  applied: "Baru masuk",
-  screening: "Screening",
-  voice_screen: "Voice screen",
-  interview: "Wawancara",
-  document_check: "Cek dokumen",
-  briefing: "Briefing",
-  trial: "Trial / training",
-  selected: "Terpilih",
-  training: "Training",
-  deployed: "Sudah berangkat",
-  active: "Aktif di tempat",
-  rejected: "Tidak terpilih",
-  exit: "Selesai",
 };
 
 export default async function AgentDetailPage({
@@ -190,17 +175,26 @@ export default async function AgentDetailPage({
           { label: agent.name, emphasis: true },
         ]}
         rightSlot={
-          agent.phone ? (
-            <a
-              href={`https://wa.me/${agent.phone.replace(/\D/g, "")}`}
-              target="_blank"
-              rel="noreferrer"
+          <div className="flex items-center gap-2">
+            {agent.phone && (
+              <a
+                href={`https://wa.me/${agent.phone.replace(/\D/g, "")}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-bold text-pg-ink-secondary no-underline"
+                style={{ border: "1px solid var(--pg-border)", background: "var(--pg-white)" }}
+              >
+                <Icon name="phone" size={13} /> Hubungi
+              </a>
+            )}
+            <Link
+              href={`/admin/agents/${agent.id}/edit`}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-bold text-pg-ink-secondary no-underline"
               style={{ border: "1px solid var(--pg-border)", background: "var(--pg-white)" }}
             >
-              <Icon name="phone" size={13} /> Hubungi
-            </a>
-          ) : undefined
+              <Icon name="edit" size={13} /> Edit agen
+            </Link>
+          </div>
         }
       />
 
@@ -433,7 +427,7 @@ export default async function AgentDetailPage({
                                 }}
                                 title={a.positions?.name ?? undefined}
                               >
-                                {STAGE_LABEL[a.pipeline_stage] ?? a.pipeline_stage}
+                                {stageLabel(a.pipeline_stage)}
                               </span>
                             ))
                           )}

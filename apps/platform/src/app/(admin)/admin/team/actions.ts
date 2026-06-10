@@ -38,8 +38,33 @@ export async function removeAdmin(email: string) {
   if (session.email && session.email.toLowerCase() === cleaned) {
     throw new Error("Kamu tidak bisa hapus akun sendiri.");
   }
-  await logAdminAction("remove_admin", "admin_user", cleaned);
+
   const supabase = await createServerClient();
+
+  // Protect founder/bootstrap accounts: rows with added_by NULL were not invited
+  // through this UI (they bootstrapped the allowlist), so they can't be removed here.
+  // This stops any of the N admins from deleting the founder without needing an
+  // is_owner schema column.
+  const { data: target, error: targetErr } = await supabase
+    .from("admin_users")
+    .select("email, added_by")
+    .eq("email", email)
+    .maybeSingle();
+  if (targetErr) throw new Error(targetErr.message);
+  if (!target) throw new Error("Admin tidak ditemukan.");
+  if ((target as { added_by: string | null }).added_by == null) {
+    throw new Error("Akun owner/founder tidak bisa dihapus dari sini.");
+  }
+
+  // Anti-lockout: never remove the last remaining admin.
+  const { count } = await supabase
+    .from("admin_users")
+    .select("*", { count: "exact", head: true });
+  if ((count ?? 0) <= 1) {
+    throw new Error("Tidak bisa hapus admin terakhir.");
+  }
+
+  await logAdminAction("remove_admin", "admin_user", cleaned);
   const { error } = await supabase.from("admin_users").delete().eq("email", email);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/team");

@@ -114,10 +114,19 @@ export default async function AdminEventDetailPage({
             {ev.platform} · /event/{ev.slug}
           </div>
         </div>
-        <ExportRegistrationsButton
-          rows={exportRows}
-          filename={`pendaftar-${ev.slug}.csv`}
-        />
+        <div className="flex items-center gap-2">
+          <Link
+            href={`/admin/events/${ev.slug}/edit`}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-bold text-pg-ink-secondary no-underline"
+            style={{ border: "1px solid var(--pg-border)", background: "var(--pg-white)" }}
+          >
+            <Icon name="edit" size={13} /> Edit event
+          </Link>
+          <ExportRegistrationsButton
+            rows={exportRows}
+            filename={`pendaftar-${ev.slug}.csv`}
+          />
+        </div>
       </div>
 
       {/* KPI strip */}

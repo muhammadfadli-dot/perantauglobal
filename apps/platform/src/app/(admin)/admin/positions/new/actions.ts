@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { logAdminAction } from "@/lib/audit-log";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -83,6 +84,11 @@ export async function createPosition(
     // Worth alerting on; user can retry while we investigate.
     throw new Error(`DB error: ${error.message}`);
   }
+
+  await logAdminAction("create_position", "position", input.slug, {
+    name: input.name.trim(),
+    country: input.country,
+  });
 
   revalidatePath("/admin/positions");
   return { ok: true, slug: input.slug };

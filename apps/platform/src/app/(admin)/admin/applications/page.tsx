@@ -3,8 +3,10 @@ import { createServerClient } from "@/lib/supabase-server";
 import ApplicationFilters from "@/components/admin/ApplicationFilters";
 import { ReadinessBadge } from "@/components/admin/ReadinessBadge";
 import { JobOrderPicker } from "@/components/admin/JobOrderPicker";
-import { Badge } from "@/components/pg/primitives";
+import ReachOutToggle from "@/components/admin/ReachOutToggle";
+import QuickReject from "@/components/admin/QuickReject";
 import { Icon } from "@/components/pg/Icon";
+import { isRejectedStage, stageLabel } from "@/lib/applicationStatus";
 
 type PositionEntry = {
   slug: string;
@@ -226,13 +228,11 @@ export default async function ApplicationsPage({
                     <ReadinessBadge readiness={r.readiness} />
                   </td>
                   <td className="px-4 py-3 text-[13px]">
-                    {r.reached_out ? (
-                      <Badge variant="ok" icon="check">
-                        Sudah
-                      </Badge>
-                    ) : (
-                      <span className="text-pg-ink-400">—</span>
-                    )}
+                    <ReachOutToggle
+                      applicationId={r.id}
+                      reachedOut={r.reached_out}
+                      reachedOutAt={null}
+                    />
                   </td>
                   <td className="px-4 py-3 text-[12px] text-pg-ink-500 font-mono">
                     {new Date(r.created_at).toLocaleDateString("id-ID")}
@@ -254,12 +254,26 @@ export default async function ApplicationsPage({
                           {r.job_order_intake_label ?? "in JO"}
                         </span>
                       </Link>
+                    ) : isRejectedStage(r.pipeline_stage) ? (
+                      <span
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-bold"
+                        style={{ background: "var(--pg-ink-50)", color: "var(--pg-ink-tertiary)" }}
+                        title={`Stage: ${r.pipeline_stage}`}
+                      >
+                        <Icon name="x" size={11} stroke={2.4} /> {stageLabel(r.pipeline_stage)}
+                      </span>
                     ) : (
-                      <JobOrderPicker
-                        applicationId={r.id}
-                        candidateName={r.candidate_name ?? "kandidat"}
-                        openJobOrders={posJOs}
-                      />
+                      <div className="inline-flex flex-col items-end gap-1.5">
+                        <JobOrderPicker
+                          applicationId={r.id}
+                          candidateName={r.candidate_name ?? "kandidat"}
+                          openJobOrders={posJOs}
+                        />
+                        <QuickReject
+                          applicationId={r.id}
+                          candidateName={r.candidate_name ?? "kandidat"}
+                        />
+                      </div>
                     )}
                   </td>
                 </tr>

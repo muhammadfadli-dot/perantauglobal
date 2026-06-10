@@ -73,13 +73,24 @@ export default async function AdminEventsPage() {
       <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-red-600">
         Admin / Event
       </div>
-      <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-1.5">
-        Event &amp; pendaftar
-      </h1>
-      <p className="text-base text-pg-ink-700 mt-2 leading-relaxed max-w-2xl">
-        Pendaftar dari landing page event (sharing session / webinar). Lead-nya
-        ke-track lengkap dengan sumber iklan — beda dari Google Form.
-      </p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div className="max-w-2xl">
+          <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-1.5">
+            Event &amp; pendaftar
+          </h1>
+          <p className="text-base text-pg-ink-700 mt-2 leading-relaxed">
+            Pendaftar dari landing page event (sharing session / webinar). Lead-nya
+            ke-track lengkap dengan sumber iklan — beda dari Google Form.
+          </p>
+        </div>
+        <Link
+          href="/admin/events/new"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-[14px] font-bold text-white no-underline shrink-0"
+          style={{ background: "var(--pg-red-600)" }}
+        >
+          <Icon name="plus" size={16} stroke={2.4} /> Buat event
+        </Link>
+      </div>
 
       <div className="mt-7 grid gap-3">
         {events.length === 0 ? (

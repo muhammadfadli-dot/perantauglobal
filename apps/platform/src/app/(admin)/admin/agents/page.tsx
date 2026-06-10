@@ -105,7 +105,6 @@ export default async function AgentsListPage({
     <>
       <AdminTopBar
         crumbs={[{ label: "Operasi" }, { label: "Agen afiliasi", emphasis: true }]}
-        searchPlaceholder="Cari agen, kota, atau email…"
       />
       <main className="px-8 py-7 flex flex-col gap-5">
         <div className="flex items-start justify-between gap-4 flex-wrap">

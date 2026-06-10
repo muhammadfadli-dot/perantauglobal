@@ -4,7 +4,7 @@ import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import { Icon } from "@/components/pg/Icon";
 import { KpiStat } from "@/components/admin/Sparkline";
-import { isAcceptedStage } from "@/lib/applicationStatus";
+import { ACCEPTED_STAGES, PIPELINE_COLUMNS } from "@/lib/applicationStatus";
 import { getTimeOfDayGreeting } from "@/lib/journey";
 import { jakartaDayKey, jakartaDayOfMonth } from "@/lib/datetime";
 
@@ -44,29 +44,64 @@ export default async function AdminHomePage({
   const priorAgo = new Date(now.getTime() - 2 * days * 24 * 60 * 60 * 1000);
   const priorAgoIso = priorAgo.toISOString();
 
+  const acceptedStages = [...ACCEPTED_STAGES];
+
   const [
     { count: pendingDocs },
-    { count: openJobOrders },
+    { count: untriagedPool },
+    { count: inPipeline },
+    { count: inboxNew },
+    { count: openJoCount },
+    { data: openJOData },
+    { data: acceptedAppRows },
     { data: inflowRows },
-    { data: openJOWithPosition },
     { data: pendingDocsRecent },
+    // Pipeline snapshot — current stage distribution grouped into the 4 columns.
+    { count: cntSelection },
+    { count: cntInterviewDoc },
+    { count: cntAccepted },
+    { count: cntRejected },
   ] = await Promise.all([
     supabase
       .from("candidate_documents")
       .select("*", { count: "exact", head: true })
       .eq("verified", false)
       .is("rejected_at", null),
-    supabase.from("job_orders").select("*", { count: "exact", head: true }).eq("status", "open"),
     supabase
       .from("applications")
-      .select("created_at, pipeline_stage, position_slug")
-      .gte("created_at", priorAgoIso),
+      .select("*", { count: "exact", head: true })
+      .eq("pipeline_stage", "applied")
+      .is("job_order_id", null),
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .not("job_order_id", "is", null),
+    supabase
+      .from("contact_submissions")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "new"),
+    // Exact open-JO count for the KPI (the list below is capped at 1000 rows).
     supabase
       .from("job_orders")
-      .select("id, position_slug, public_employer_name, slot_count, slot_filled, deadline, positions(name, country)")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "open"),
+    supabase
+      .from("job_orders")
+      .select(
+        "id, position_slug, public_employer_name, internal_employer_name, slot_count, deadline, positions(name, country)",
+      )
       .eq("status", "open")
-      .order("deadline", { ascending: true })
-      .limit(3),
+      .order("deadline", { ascending: true, nullsFirst: false }),
+    // Linked apps at an accepted stage — used to compute true over-capacity per JO.
+    supabase
+      .from("applications")
+      .select("job_order_id")
+      .not("job_order_id", "is", null)
+      .in("pipeline_stage", acceptedStages),
+    supabase
+      .from("applications")
+      .select("created_at, position_slug")
+      .gte("created_at", priorAgoIso),
     supabase
       .from("candidate_documents")
       .select("doc_type, candidates(full_name)")
@@ -74,23 +109,61 @@ export default async function AdminHomePage({
       .is("rejected_at", null)
       .order("uploaded_at", { ascending: false })
       .limit(2),
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .in("pipeline_stage", [...PIPELINE_COLUMNS[0].stages]),
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .in("pipeline_stage", [...PIPELINE_COLUMNS[1].stages]),
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .in("pipeline_stage", [...PIPELINE_COLUMNS[2].stages]),
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .in("pipeline_stage", [...PIPELINE_COLUMNS[3].stages]),
   ]);
 
-  // Bucket inflow rows into current vs prior period; derive stats + daily series + top positions
+  // ── Job-order capacity / deadline signals ──────────────────────────────────
+  type OpenJO = {
+    id: string;
+    position_slug: string;
+    public_employer_name: string | null;
+    internal_employer_name: string;
+    slot_count: number;
+    deadline: string | null;
+    positions: { name: string; country: string } | null;
+  };
+  const openJOs = (openJOData ?? []) as unknown as OpenJO[];
+  const openJobOrders = openJoCount ?? openJOs.length;
+
+  // Accepted (placed) count per job order — drives "full" honestly, independent of
+  // the slot_filled column (which is being migrated to this same definition in 0069).
+  const acceptedByJO = new Map<string, number>();
+  for (const r of (acceptedAppRows ?? []) as { job_order_id: string | null }[]) {
+    if (r.job_order_id)
+      acceptedByJO.set(r.job_order_id, (acceptedByJO.get(r.job_order_id) ?? 0) + 1);
+  }
+  const overdueJOs = openJOs.filter(
+    (jo) => jo.deadline != null && new Date(jo.deadline) < now,
+  );
+  const fullJOs = openJOs.filter(
+    (jo) => jo.slot_count > 0 && (acceptedByJO.get(jo.id) ?? 0) >= jo.slot_count,
+  );
+  const soonestOverdue = overdueJOs[0];
+
+  // ── Inflow series for the range chart ──────────────────────────────────────
   const inflow = (inflowRows ?? []) as Array<{
     created_at: string;
-    pipeline_stage: string;
     position_slug: string;
   }>;
-
   const dailyCounts = new Map<string, number>();
-  const screeningDaily = new Map<string, number>();
-  const acceptedDaily = new Map<string, number>();
   const velocityMap = new Map<string, number>();
   let applicationsThisRange = 0;
   let applicationsPriorRange = 0;
-  let screeningStage = 0;
-  let acceptedStage = 0;
 
   for (const row of inflow) {
     const ts = new Date(row.created_at);
@@ -98,30 +171,17 @@ export default async function AdminHomePage({
       applicationsThisRange++;
       const key = dayKey(ts);
       dailyCounts.set(key, (dailyCounts.get(key) ?? 0) + 1);
-      if (row.pipeline_stage === "screening") {
-        screeningStage++;
-        screeningDaily.set(key, (screeningDaily.get(key) ?? 0) + 1);
-      }
-      if (isAcceptedStage(row.pipeline_stage)) {
-        acceptedStage++;
-        acceptedDaily.set(key, (acceptedDaily.get(key) ?? 0) + 1);
-      }
       velocityMap.set(row.position_slug, (velocityMap.get(row.position_slug) ?? 0) + 1);
     } else {
       applicationsPriorRange++;
     }
   }
 
-  // Build day-by-day series, filling zero days, oldest first
   const dailySeries: { date: Date; count: number }[] = [];
-  const screeningSeries: number[] = [];
-  const acceptedSeries: number[] = [];
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
     const k = dayKey(d);
     dailySeries.push({ date: d, count: dailyCounts.get(k) ?? 0 });
-    screeningSeries.push(screeningDaily.get(k) ?? 0);
-    acceptedSeries.push(acceptedDaily.get(k) ?? 0);
   }
   const inflowSeries = dailySeries.map((d) => d.count);
   const dailyMax = Math.max(...dailySeries.map((d) => d.count), 1);
@@ -131,7 +191,7 @@ export default async function AdminHomePage({
       : 0;
   const peakDay = dailySeries.reduce(
     (best, d) => (d.count > best.count ? d : best),
-    dailySeries[0]
+    dailySeries[0],
   );
 
   const topPositionSlugs = [...velocityMap.entries()]
@@ -139,7 +199,6 @@ export default async function AdminHomePage({
     .slice(0, 3)
     .map(([slug, count]) => ({ slug, count }));
 
-  // Fetch top positions metadata
   let topPositions: { slug: string; name: string; country: string; count: number }[] = [];
   if (topPositionSlugs.length > 0) {
     const { data: posMeta } = await supabase
@@ -147,17 +206,12 @@ export default async function AdminHomePage({
       .select("slug, name, country")
       .in(
         "slug",
-        topPositionSlugs.map((p) => p.slug)
+        topPositionSlugs.map((p) => p.slug),
       );
     const metaMap = new Map((posMeta ?? []).map((p) => [p.slug, p]));
     topPositions = topPositionSlugs.map(({ slug, count }) => {
       const m = metaMap.get(slug);
-      return {
-        slug,
-        name: m?.name ?? slug,
-        country: m?.country ?? "—",
-        count,
-      };
+      return { slug, name: m?.name ?? slug, country: m?.country ?? "—", count };
     });
   }
 
@@ -171,8 +225,8 @@ export default async function AdminHomePage({
     greetingName.charAt(0).toUpperCase() + greetingName.slice(1)
   }`;
 
-  // Compose top 3 attention items
-  const attentions: AttentionCard[] = [];
+  // ── URGENT / NEEDS ACTION TODAY — only items with a real backlog ────────────
+  const urgent: AttentionCard[] = [];
   if ((pendingDocs ?? 0) > 0) {
     const samples = (pendingDocsRecent ?? [])
       .map((d) => {
@@ -180,70 +234,72 @@ export default async function AdminHomePage({
         return c?.full_name?.split(" ")[0];
       })
       .filter(Boolean) as string[];
-    attentions.push({
+    urgent.push({
       tone: "urgent",
-      label: "URGENT",
+      label: "DOKUMEN",
       count: pendingDocs ?? 0,
       title: "Dokumen menunggu verifikasi",
       desc:
-        samples.length > 0
-          ? `Sertifikat & dokumen baru dari ${samples.join(", ")} — review supaya bisa dilanjut`
-          : "Sertifikat & dokumen baru perlu review supaya bisa dilanjut",
+        (samples.length > 0 ? `Terbaru dari ${samples.join(", ")}. ` : "") +
+        "Verifikasi supaya lamaran bisa dilanjut.",
       href: "/admin/documents",
       ctaLabel: "Verifikasi sekarang",
     });
   }
-  if ((openJobOrders ?? 0) > 0) {
-    const top = (openJOWithPosition ?? [])[0] as
-      | {
-          public_employer_name?: string | null;
-          deadline?: string | null;
-          positions?: { name?: string | null } | null;
-        }
-      | undefined;
-    let desc = "Pull dari talent pool ke pipeline";
-    if (top) {
-      const employer = top.public_employer_name ?? top.positions?.name ?? "Job order baru";
-      desc = `${employer} — pull dari talent pool ke pipeline`;
-    }
-    attentions.push({
-      tone: "ok",
-      label: "PERMINTAAN",
-      count: openJobOrders ?? 0,
-      title: "Job order buka",
-      desc,
-      href: "/admin/job-orders",
-      ctaLabel: "Buka pool",
+  if (overdueJOs.length > 0) {
+    urgent.push({
+      tone: "urgent",
+      label: "DEADLINE",
+      count: overdueJOs.length,
+      title: "Job order lewat deadline",
+      desc: soonestOverdue
+        ? `${
+            soonestOverdue.public_employer_name ??
+            soonestOverdue.positions?.name ??
+            soonestOverdue.internal_employer_name
+          } & lainnya masih open + tayang di www. Tutup atau perpanjang.`
+        : "Masih open + tayang di www. Tutup atau perpanjang.",
+      href: "/admin/job-orders?status=open",
+      ctaLabel: "Tinjau job order",
     });
   }
-  if (screeningStage > 0) {
-    attentions.push({
+  if (fullJOs.length > 0) {
+    urgent.push({
+      tone: "ok",
+      label: "KAPASITAS",
+      count: fullJOs.length,
+      title: "Job order sudah penuh",
+      desc: "Slot terisi penuh tapi status masih open. Tandai filled/closed.",
+      href: "/admin/job-orders?status=open",
+      ctaLabel: "Tutup job order",
+    });
+  }
+  if ((inboxNew ?? 0) > 0) {
+    urgent.push({
       tone: "warn",
-      label: range === "7d" ? "7 HARI TERAKHIR" : range === "14d" ? "14 HARI TERAKHIR" : "30 HARI TERAKHIR",
-      count: screeningStage,
-      title: "Lamaran maju ke screening",
-      desc: `${screeningStage} kandidat udah lengkap dokumen — review buat masuk wawancara`,
-      href: "/admin/applications?stage=screening",
-      ctaLabel: "Review screening",
+      label: "INBOX",
+      count: inboxNew ?? 0,
+      title: "Pesan masuk belum dibalas",
+      desc: "Termasuk pertanyaan login/reset yang sering bikin kandidat batal daftar.",
+      href: "/admin/inbox",
+      ctaLabel: "Buka inbox",
     });
   }
-  // Always have at least 3 placeholder slots; fill with a generic if empty
-  while (attentions.length < 3) {
-    attentions.push({
-      tone: "ok",
-      label: "AMAN",
-      count: 0,
-      title:
-        attentions.length === 0
-          ? "Pipeline lancar"
-          : attentions.length === 1
-          ? "Pipeline lancar"
-          : "Pipeline lancar",
-      desc: "Tidak ada item urgent. Semua tugas pipeline udah ditangani.",
-      href: "/admin/applications",
-      ctaLabel: "Lihat pipeline",
-    });
-  }
+
+  // ── Pipeline snapshot (all-time current state, grouped into the 4 columns) ──
+  const snapshot = [
+    { col: PIPELINE_COLUMNS[0], count: cntSelection ?? 0 },
+    { col: PIPELINE_COLUMNS[1], count: cntInterviewDoc ?? 0 },
+    { col: PIPELINE_COLUMNS[2], count: cntAccepted ?? 0 },
+    { col: PIPELINE_COLUMNS[3], count: cntRejected ?? 0 },
+  ];
+  const snapshotTotal = snapshot.reduce((n, s) => n + s.count, 0) || 1;
+  const SNAP_COLOR: Record<string, string> = {
+    selection: "var(--pg-warn-soft-fg)",
+    interview_doc: "var(--pg-info)",
+    accepted: "var(--pg-ok-soft-fg)",
+    rejected: "var(--pg-ink-300)",
+  };
 
   return (
     <>
@@ -254,49 +310,58 @@ export default async function AdminHomePage({
         <div className="flex flex-col gap-1.5">
           <Eyebrow>{greeting}</Eyebrow>
           <h1 className="text-[32px] font-extrabold leading-[36px] tracking-[-0.025em] text-pg-ink-primary">
-            {attentions.slice(0, 3).filter((a) => a.count > 0).length === 0
-              ? "Pipeline lancar — tidak ada urgent task"
-              : `${attentions.slice(0, 3).filter((a) => a.count > 0).length} hal yang butuh perhatian kamu`}
+            {urgent.length === 0
+              ? "Aman — tidak ada yang mendesak hari ini"
+              : `${urgent.length} hal yang butuh ditindak`}
           </h1>
         </div>
 
-        {/* KPI hero row — 5 stats with inline sparklines for the selected range */}
+        {/* URGENT block — only renders rows with a real backlog */}
+        {urgent.length > 0 ? (
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+            {urgent.map((a, i) => (
+              <AttentionCardView key={i} card={a} />
+            ))}
+          </div>
+        ) : (
+          <div
+            className="rounded-2xl px-5 py-4 flex items-center gap-3"
+            style={{ background: "var(--pg-ok-soft-bg)", border: "1.5px solid var(--pg-ok-soft-border)" }}
+          >
+            <Icon name="check" size={18} className="text-pg-ok-soft-fg" stroke={2.4} />
+            <span className="text-[14px] font-semibold text-pg-ink-secondary">
+              Tidak ada dokumen pending, job order lewat deadline, atau pesan baru.
+            </span>
+          </div>
+        )}
+
+        {/* KPI hero — honest operational numbers (no permanently-zero "Diterima") */}
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-5">
           <KpiStat
             label="Lamaran masuk"
             value={thisRange}
-            delta={
-              wowPct != null
-                ? `${wowPct >= 0 ? "+" : ""}${wowPct}%`
-                : undefined
-            }
-            deltaTone={
-              wowPct == null ? "mute" : wowPct >= 0 ? "ok" : "warn"
-            }
+            delta={wowPct != null ? `${wowPct >= 0 ? "+" : ""}${wowPct}%` : undefined}
+            deltaTone={wowPct == null ? "mute" : wowPct >= 0 ? "ok" : "warn"}
             sparkline={inflowSeries}
             caption={`vs ${RANGE_LABEL[range]} sebelumnya`}
           />
           <KpiStat
-            label="Maju ke screening"
-            value={screeningStage}
-            sparkline={screeningSeries}
-            caption={
-              thisRange > 0
-                ? `${Math.round((screeningStage / thisRange) * 100)}% dari lamaran`
-                : "Belum ada lamaran"
-            }
+            label="Pool belum ditindak"
+            value={untriagedPool ?? 0}
+            deltaTone={(untriagedPool ?? 0) > 0 ? "warn" : "mute"}
+            caption="Applied, belum masuk job order"
           />
           <KpiStat
-            label="Diterima"
-            value={acceptedStage}
-            sparkline={acceptedSeries}
-            deltaTone="ok"
-            caption={`Sepanjang ${RANGE_LABEL[range]}`}
+            label="Dalam pipeline"
+            value={inPipeline ?? 0}
+            caption="Sudah ditarik ke job order"
           />
           <KpiStat
             label="Job orders open"
-            value={openJobOrders ?? 0}
-            caption="Pull dari talent pool"
+            value={openJobOrders}
+            delta={overdueJOs.length > 0 ? `${overdueJOs.length} lewat deadline` : undefined}
+            deltaTone={overdueJOs.length > 0 ? "warn" : "mute"}
+            caption="Tayang di www /lowongan"
           />
           <KpiStat
             label="Doc pending"
@@ -307,48 +372,70 @@ export default async function AdminHomePage({
           />
         </div>
 
-        {/* Attention cards */}
-        <div className="grid gap-3 md:grid-cols-3">
-          {attentions.slice(0, 3).map((a, i) => (
-            <AttentionCardView key={i} card={a} />
-          ))}
-        </div>
-
-        {/* Pipeline activity + Top performer */}
+        {/* Pipeline snapshot + Top positions */}
         <div className="grid gap-4 lg:grid-cols-3">
           <div
-            className="lg:col-span-2 bg-pg-white rounded-2xl p-6 flex flex-col gap-3.5"
+            className="lg:col-span-2 bg-pg-white rounded-2xl p-6 flex flex-col gap-4"
             style={{ border: "1px solid var(--pg-border)" }}
           >
             <div className="flex items-start justify-between gap-3 flex-wrap">
               <div className="flex flex-col gap-0.5">
-                <Eyebrow>{RANGE_LABEL[range]} · {rangeDateRange(rangeAgo, now)}</Eyebrow>
+                <Eyebrow>Seluruh kandidat</Eyebrow>
                 <div className="text-[18px] font-extrabold leading-[22px] tracking-[-0.01em] text-pg-ink-primary">
-                  Talent inflow
+                  Posisi pipeline
                 </div>
               </div>
-              <RangeFilter range={range} />
+              <Link
+                href="/admin/analytics"
+                className="text-[12px] font-bold text-pg-red-600 no-underline hover:underline inline-flex items-center gap-1"
+              >
+                Analytics <Icon name="arrow_right" size={12} />
+              </Link>
             </div>
-            <div className="flex flex-wrap gap-6 py-3">
-              <Stat
-                value={String(thisRange)}
-                label="Lamaran masuk"
-                delta={wowPct != null ? `${wowPct >= 0 ? "↑" : "↓"} ${Math.abs(wowPct)}%` : undefined}
-                deltaPositive={wowPct == null ? undefined : wowPct >= 0}
-              />
-              <Stat value={`${dailyAvg}`} label="Rata-rata/hari" />
-              <Stat value={String(screeningStage)} label="Maju ke screening" />
-              <Stat value={String(acceptedStage)} label="Diterima" />
-              <Stat
-                value={
-                  thisRange > 0
-                    ? `${Math.round((screeningStage / thisRange) * 100)}%`
-                    : "—"
-                }
-                label="Conv applied → screen"
-              />
+
+            {/* Stacked bar */}
+            <div className="flex h-3 rounded-full overflow-hidden" style={{ background: "var(--pg-ink-50)" }}>
+              {snapshot.map((s) =>
+                s.count > 0 ? (
+                  <div
+                    key={s.col.key}
+                    style={{
+                      width: `${(s.count / snapshotTotal) * 100}%`,
+                      background: SNAP_COLOR[s.col.key],
+                    }}
+                    title={`${s.col.label}: ${s.count}`}
+                  />
+                ) : null,
+              )}
             </div>
-            <DailyInflowChart series={dailySeries} max={dailyMax} peak={peakDay} />
+
+            {/* Legend */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {snapshot.map((s) => (
+                <div key={s.col.key} className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ background: SNAP_COLOR[s.col.key] }}
+                    />
+                    <span
+                      className="text-[10px] font-semibold tracking-[0.06em] uppercase"
+                      style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
+                    >
+                      {s.col.label}
+                    </span>
+                  </div>
+                  <div className="text-[22px] font-extrabold leading-[26px] text-pg-ink-primary tabular-nums">
+                    {s.count}
+                  </div>
+                  {s.col.key === "accepted" && s.count === 0 && (
+                    <div className="text-[11px] text-pg-ink-tertiary leading-tight">
+                      Belum ada penempatan
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           <div
@@ -356,9 +443,9 @@ export default async function AdminHomePage({
             style={{ border: "1px solid var(--pg-border)" }}
           >
             <div className="flex flex-col gap-0.5">
-              <Eyebrow>Top performer</Eyebrow>
+              <Eyebrow>{RANGE_LABEL[range]} terakhir</Eyebrow>
               <div className="text-[18px] font-extrabold leading-[22px] tracking-[-0.01em] text-pg-ink-primary">
-                Posisi paling cepat
+                Posisi paling banyak dilamar
               </div>
             </div>
             <div className="flex flex-col gap-2.5">
@@ -398,16 +485,38 @@ export default async function AdminHomePage({
           </div>
         </div>
 
+        {/* Talent inflow chart */}
+        <div
+          className="bg-pg-white rounded-2xl p-6 flex flex-col gap-3.5"
+          style={{ border: "1px solid var(--pg-border)" }}
+        >
+          <div className="flex items-start justify-between gap-3 flex-wrap">
+            <div className="flex flex-col gap-0.5">
+              <Eyebrow>{RANGE_LABEL[range]} · {rangeDateRange(rangeAgo, now)}</Eyebrow>
+              <div className="text-[18px] font-extrabold leading-[22px] tracking-[-0.01em] text-pg-ink-primary">
+                Lamaran masuk per hari
+              </div>
+            </div>
+            <RangeFilter range={range} />
+          </div>
+          <div className="flex flex-wrap gap-6 py-1">
+            <Stat
+              value={String(thisRange)}
+              label="Total range ini"
+              delta={wowPct != null ? `${wowPct >= 0 ? "↑" : "↓"} ${Math.abs(wowPct)}%` : undefined}
+              deltaPositive={wowPct == null ? undefined : wowPct >= 0}
+            />
+            <Stat value={`${dailyAvg}`} label="Rata-rata/hari" />
+          </div>
+          <DailyInflowChart series={dailySeries} max={dailyMax} peak={peakDay} />
+        </div>
+
         {/* Quick actions */}
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-4">
           <QuickAction href="/admin/job-orders/new" icon="plus" title="Buat job order" />
-          <QuickAction
-            href="/admin/positions"
-            icon="doc"
-            title="Catalog posisi"
-          />
-          <QuickAction href="/admin/candidates" icon="users" title="Talent pool" />
-          <QuickAction href="/admin/analytics" icon="sparkle_dot" title="Analytics" />
+          <QuickAction href="/admin/documents" icon="doc_check" title="Review dokumen" />
+          <QuickAction href="/admin/inbox" icon="mail" title="Inbox pesan" />
+          <QuickAction href="/admin/positions" icon="doc" title="Catalog posisi" />
         </div>
       </main>
     </>
@@ -477,17 +586,11 @@ function AttentionCardView({ card }: { card: AttentionCard }) {
       <div className="text-[16px] font-extrabold leading-[20px] tracking-[-0.005em] text-pg-ink-primary">
         {card.title}
       </div>
-      <div
-        className="text-[12px] leading-4"
-        style={{ color: "var(--pg-ink-tertiary)" }}
-      >
+      <div className="text-[12px] leading-4" style={{ color: "var(--pg-ink-tertiary)" }}>
         {card.desc}
       </div>
       <div className="flex items-center gap-1.5 pt-2">
-        <span
-          className="text-[12px] font-bold leading-4"
-          style={{ color: colors.ctaFg }}
-        >
+        <span className="text-[12px] font-bold leading-4" style={{ color: colors.ctaFg }}>
           {card.ctaLabel} →
         </span>
       </div>
@@ -625,7 +728,6 @@ function DailyInflowChart({
   const shortDay = (d: Date) =>
     d.toLocaleDateString("id-ID", { timeZone: "Asia/Jakarta", day: "numeric", month: "short" });
 
-  // Label every Nth bar so labels don't crowd
   const n = series.length;
   const labelEvery = n <= 7 ? 1 : n <= 14 ? 2 : 5;
 

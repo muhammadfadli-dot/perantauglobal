@@ -17,43 +17,76 @@ type LogActionArgs = Database["public"]["Functions"]["log_admin_action"]["Args"]
  * admins can't impersonate or backdate entries.
  */
 
-export type AuditAction =
-  // Document operations (PII view)
-  | "view_document"
-  | "verify_document"
-  | "reject_document"
-  // Application pipeline operations
-  | "update_application_stage"
-  | "update_application_notes"
-  | "toggle_reached_out"
-  | "assign_tier"
-  | "clear_tier"
-  | "move_application_to_job_order"
-  // Admin allowlist operations (escalation events)
-  | "invite_admin"
-  | "remove_admin"
-  // Inbox triage
-  | "update_inbox_status"
-  | "update_inbox_notes"
-  // Affiliate / referral operations
-  | "create_affiliate_agent"
-  | "update_affiliate_agent"
-  | "generate_referral_code"
-  | "update_referral_code"
-  | "set_commission_amount"
-  | "approve_commission"
-  | "mark_commission_paid"
-  | "void_commission";
+export type AuditActionTone = "info" | "ok" | "warn" | "err" | "mute";
 
-export type AuditResourceType =
-  | "candidate_document"
-  | "application"
-  | "candidate"
-  | "admin_user"
-  | "contact_submission"
-  | "affiliate_agent"
-  | "referral_code"
-  | "commission_event";
+/**
+ * Single source of truth for admin audit actions: label (Indonesian) + display
+ * tone. The `AuditAction` union is DERIVED from these keys, so adding an action
+ * here updates the type AND the audit-log viewer's filter/label/tone maps at once
+ * — no more drift where a new mutating action is unlabelled or missing from filters.
+ */
+export const AUDIT_ACTIONS = {
+  // Document operations (PII view)
+  view_document: { label: "Lihat dokumen", tone: "info" },
+  verify_document: { label: "Verifikasi dokumen", tone: "ok" },
+  reject_document: { label: "Tolak dokumen", tone: "err" },
+  // Application pipeline operations
+  update_application_stage: { label: "Ubah stage", tone: "info" },
+  update_application_notes: { label: "Ubah notes lamaran", tone: "mute" },
+  toggle_reached_out: { label: "Reached out", tone: "info" },
+  assign_tier: { label: "Assign tier (legacy)", tone: "mute" },
+  clear_tier: { label: "Clear tier (legacy)", tone: "mute" },
+  move_application_to_job_order: { label: "Pindah ke job order", tone: "info" },
+  // Admin allowlist operations (escalation events)
+  invite_admin: { label: "Invite admin", tone: "ok" },
+  remove_admin: { label: "Remove admin", tone: "err" },
+  // Inbox triage
+  update_inbox_status: { label: "Ubah status inbox", tone: "mute" },
+  update_inbox_notes: { label: "Ubah notes inbox", tone: "mute" },
+  // Bulk / data export (PII egress)
+  export_candidates_csv: { label: "Export CSV kandidat", tone: "warn" },
+  // Job order operations
+  create_job_order: { label: "Buat job order", tone: "ok" },
+  update_job_order: { label: "Edit job order", tone: "info" },
+  update_job_order_status: { label: "Ubah status job order", tone: "info" },
+  update_job_order_notes: { label: "Ubah notes job order", tone: "mute" },
+  // Position catalog operations (content + visibility)
+  create_position: { label: "Buat posisi", tone: "ok" },
+  publish_position: { label: "Publish posisi", tone: "ok" },
+  discard_position_draft: { label: "Buang draft posisi", tone: "mute" },
+  delete_position: { label: "Hapus posisi", tone: "err" },
+  update_position_meta: { label: "Ubah meta/visibility posisi", tone: "info" },
+  // Event CMS operations
+  create_event: { label: "Buat event", tone: "ok" },
+  update_event: { label: "Edit event", tone: "info" },
+  // Affiliate / referral operations
+  create_affiliate_agent: { label: "Buat agen afiliasi", tone: "ok" },
+  update_affiliate_agent: { label: "Edit agen afiliasi", tone: "info" },
+  generate_referral_code: { label: "Generate kode referral", tone: "ok" },
+  update_referral_code: { label: "Ubah kode referral", tone: "info" },
+  set_commission_amount: { label: "Set nominal komisi", tone: "info" },
+  approve_commission: { label: "Approve komisi", tone: "ok" },
+  mark_commission_paid: { label: "Tandai komisi dibayar", tone: "ok" },
+  void_commission: { label: "Void komisi", tone: "err" },
+} as const satisfies Record<string, { label: string; tone: AuditActionTone }>;
+
+export type AuditAction = keyof typeof AUDIT_ACTIONS;
+
+export const AUDIT_RESOURCES = {
+  candidate_document: "Dokumen",
+  application: "Lamaran",
+  candidate: "Kandidat",
+  admin_user: "Admin user",
+  contact_submission: "Inbox",
+  affiliate_agent: "Agen afiliasi",
+  referral_code: "Kode referral",
+  commission_event: "Komisi",
+  job_order: "Job order",
+  position: "Posisi",
+  event: "Event",
+} as const satisfies Record<string, string>;
+
+export type AuditResourceType = keyof typeof AUDIT_RESOURCES;
 
 export type AuditMetadata = Record<string, string | number | boolean | null>;
 

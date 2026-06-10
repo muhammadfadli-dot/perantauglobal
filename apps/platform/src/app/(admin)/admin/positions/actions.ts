@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { logAdminAction } from "@/lib/audit-log";
 import type { PositionContent, ContentMedia, ContentSeo } from "@/lib/position-content";
 
 async function assertAdmin() {
@@ -44,6 +45,11 @@ export async function updatePositionMeta(
   patch: { name?: string; description?: string; active?: boolean }
 ) {
   await assertAdmin();
+  await logAdminAction("update_position_meta", "position", slug, {
+    ...(patch.active !== undefined ? { active: patch.active } : {}),
+    changed_name: patch.name !== undefined,
+    changed_description: patch.description !== undefined,
+  });
   const supabase = await createServerClient();
   const { error } = await supabase
     .from("positions")
@@ -72,6 +78,7 @@ export async function updatePositionMeta(
  */
 export async function deletePosition(slug: string): Promise<void> {
   await assertAdmin();
+  await logAdminAction("delete_position", "position", slug);
   const supabase = await createServerClient();
 
   const [{ count: appCount, error: appCountErr }, { count: joCount, error: joCountErr }] =
@@ -254,6 +261,8 @@ export async function publishPosition(slug: string): Promise<PublishActionResult
     };
   }
 
+  await logAdminAction("publish_position", "position", slug);
+
   const { error: writeErr } = await supabase
     .from("positions")
     .update({
@@ -282,6 +291,7 @@ export async function publishPosition(slug: string): Promise<PublishActionResult
  */
 export async function discardDraft(slug: string): Promise<PublishActionResult> {
   await assertAdmin();
+  await logAdminAction("discard_position_draft", "position", slug);
   const supabase = await createServerClient();
   const { error } = await supabase
     .from("positions")

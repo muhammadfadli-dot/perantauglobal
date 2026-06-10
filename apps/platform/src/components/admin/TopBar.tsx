@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { Icon } from "@/components/pg/Icon";
+import TopBarSearch from "./TopBarSearch";
 
 export type Crumb = { label: string; href?: string; emphasis?: boolean };
 
 export default function AdminTopBar({
   crumbs = [],
-  searchPlaceholder = "Cari kandidat, posisi, atau JO…",
+  searchPlaceholder,
   rightSlot,
 }: {
   crumbs?: Crumb[];
@@ -52,15 +52,7 @@ export default function AdminTopBar({
       {rightSlot ? (
         <div className="shrink-0">{rightSlot}</div>
       ) : (
-        <div
-          className="hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-lg w-[320px]"
-          style={{ background: "var(--pg-white)", border: "1px solid var(--pg-border)" }}
-        >
-          <Icon name="search" size={13} className="shrink-0 text-pg-ink-quaternary" />
-          <span className="text-[13px] text-pg-ink-quaternary">
-            {searchPlaceholder}
-          </span>
-        </div>
+        <TopBarSearch placeholder={searchPlaceholder} />
       )}
     </div>
   );

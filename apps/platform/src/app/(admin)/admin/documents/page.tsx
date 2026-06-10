@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import { Badge } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
+import { docTypeLabel, docTypeIcon } from "@/lib/doc-types";
 import DocActions from "./DocActions";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +10,11 @@ export const dynamic = "force-dynamic";
 type DocRow = {
   id: string;
   candidate_id: string;
-  doc_type: "ktp" | "passport" | "cv" | "certificate" | "medical" | "photo" | "other";
+  // String, not a fixed union: candidate_documents.doc_type carries the 8 extended
+  // types from migration 0021 (formal_photo, str_certificate, …) beyond the originals.
+  doc_type: string;
+  display_name: string | null;
+  expires_at: string | null;
   file_path: string;
   file_size: number | null;
   mime_type: string | null;
@@ -21,25 +26,11 @@ type DocRow = {
   candidates: { full_name: string; email: string | null; city: string | null } | null;
 };
 
-const DOC_LABEL: Record<string, string> = {
-  ktp: "KTP",
-  passport: "Passport",
-  cv: "CV",
-  certificate: "Sertifikat",
-  medical: "Medical",
-  photo: "Foto",
-  other: "Lainnya",
-};
-
-const DOC_ICON: Record<string, "id_card" | "passport" | "doc" | "camera"> = {
-  ktp: "id_card",
-  passport: "passport",
-  cv: "doc",
-  certificate: "doc",
-  medical: "doc",
-  photo: "camera",
-  other: "doc",
-};
+// Days until a document expires — negative if already expired.
+function daysUntil(iso: string | null): number | null {
+  if (!iso) return null;
+  return Math.ceil((new Date(iso).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+}
 
 export default async function DocumentReviewPage({
   searchParams,
@@ -53,7 +44,7 @@ export default async function DocumentReviewPage({
   let query = supabase
     .from("candidate_documents")
     .select(
-      "id, candidate_id, doc_type, file_path, file_size, mime_type, verified, verified_at, rejected_at, rejected_reason, uploaded_at, candidates (full_name, email, city)"
+      "id, candidate_id, doc_type, display_name, expires_at, file_path, file_size, mime_type, verified, verified_at, rejected_at, rejected_reason, uploaded_at, candidates (full_name, email, city)"
     )
     .order("uploaded_at", { ascending: false });
 
@@ -148,11 +139,13 @@ export default async function DocumentReviewPage({
                         : "var(--pg-warn)",
                   }}
                 >
-                  <Icon name={DOC_ICON[d.doc_type] ?? "doc"} size={22} stroke={2} />
+                  <Icon name={docTypeIcon(d.doc_type)} size={22} stroke={2} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2 flex-wrap">
-                    <div className="text-base font-extrabold">{DOC_LABEL[d.doc_type]}</div>
+                    <div className="text-base font-extrabold">
+                      {d.display_name ?? docTypeLabel(d.doc_type)}
+                    </div>
                     {d.verified ? (
                       <Badge variant="ok" icon="check">Verified</Badge>
                     ) : d.rejected_at ? (
@@ -160,6 +153,19 @@ export default async function DocumentReviewPage({
                     ) : (
                       <Badge variant="warn">Pending</Badge>
                     )}
+                    {(() => {
+                      const days = daysUntil(d.expires_at);
+                      if (days == null) return null;
+                      if (days < 0)
+                        return <Badge variant="err" icon="warn">Kadaluarsa</Badge>;
+                      if (days <= 60)
+                        return (
+                          <Badge variant="warn" icon="warn">
+                            Kadaluarsa {days} hari lagi
+                          </Badge>
+                        );
+                      return null;
+                    })()}
                   </div>
                   <div className="text-[13px] text-pg-ink-500 mt-0.5">
                     <Link
