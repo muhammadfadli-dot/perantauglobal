@@ -13,7 +13,8 @@
     "./schemas/*": "./schemas/*",
     "./schemas/requirements": "./schemas/requirements/index.ts",
     "./schemas/requirements/library": "./schemas/requirements/library.ts",
-    "./schemas/documents": "./schemas/documents/index.ts"
+    "./schemas/documents": "./schemas/documents/index.ts",
+    "./schemas/cv": "./schemas/cv/index.ts"
   },
   "scripts": {
     "migrate": "echo 'Run via Supabase MCP or CLI — see migrations/README.md'",

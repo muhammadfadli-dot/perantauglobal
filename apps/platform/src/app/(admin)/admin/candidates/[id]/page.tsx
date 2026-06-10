@@ -2,10 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServerClient } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
-import ApplicationCard from "@/components/admin/ApplicationCard";
+import ApplicationCard, { type CvFit } from "@/components/admin/ApplicationCard";
 import { Icon } from "@/components/pg/Icon";
 import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
 import type { ReadinessResultV3 } from "@/components/admin/ApplicationCard";
+import CvAssessmentCard, { type CvAssessment } from "@/components/admin/CvAssessmentCard";
 
 export const dynamic = "force-dynamic";
 
@@ -129,6 +130,7 @@ export default async function CandidateDetailPage({
     { data: apps },
     { data: documents },
     { data: openJOs },
+    { data: cvAssessment },
   ] = await Promise.all([
     supabase
       .from("candidates")
@@ -156,6 +158,15 @@ export default async function CandidateDetailPage({
       )
       .eq("status", "open")
       .order("created_at", { ascending: false }),
+    // Latest CV assessment (AI grader, migration 0071). One row per CV doc;
+    // take the most recent for this candidate.
+    supabase
+      .from("cv_assessments")
+      .select("status, error, quality_score, quality, derived, parsed, model, created_at")
+      .eq("candidate_id", id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   if (!candidate) return notFound();
@@ -174,6 +185,20 @@ export default async function CandidateDetailPage({
   }
 
   const applications = (apps ?? []) as unknown as AppRow[];
+
+  // CV-to-position fit per application (migration 0071, Batch 2).
+  const fitByApp = new Map<string, CvFit>();
+  const appIds = applications.map((a) => a.id);
+  if (appIds.length) {
+    const { data: fitsData } = await supabase
+      .from("application_cv_fit")
+      .select("application_id, fit_score, reasons, verification, has_flags, status")
+      .in("application_id", appIds);
+    for (const f of fitsData ?? []) {
+      fitByApp.set((f as { application_id: string }).application_id, f as unknown as CvFit);
+    }
+  }
+
   const docs = (documents ?? []) as Document[];
   const openJobOrders = (openJOs ?? []) as OpenJobOrder[];
   const jobOrdersByPosition = new Map<string, OpenJobOrder[]>();
@@ -517,6 +542,8 @@ export default async function CandidateDetailPage({
               </div>
             )}
           </div>
+
+          <CvAssessmentCard a={cvAssessment as CvAssessment | null} />
         </div>
 
         {/* RIGHT — applications + activity */}
@@ -552,6 +579,7 @@ export default async function CandidateDetailPage({
                     openJobOrders={jobOrdersByPosition.get(a.position_slug) ?? []}
                     readiness={readinessByApp.get(a.id) ?? null}
                     formFields={formFieldsByPosition.get(a.position_slug) ?? []}
+                    fit={fitByApp.get(a.id) ?? null}
                   />
                 ))}
               </div>

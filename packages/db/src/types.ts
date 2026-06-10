@@ -11,6 +11,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -259,13 +261,13 @@ export type Database = {
       academy_programs: {
         Row: {
           capacity: number | null
+          category: string
           content: Json
           country: string | null
           cover_image: string | null
           created_at: string
           credential_delivery: string
           credential_issuer: string | null
-          category: string
           delivery_mode: string
           duration_label: string | null
           external_url: string | null
@@ -286,13 +288,13 @@ export type Database = {
         }
         Insert: {
           capacity?: number | null
+          category?: string
           content?: Json
           country?: string | null
           cover_image?: string | null
           created_at?: string
           credential_delivery?: string
           credential_issuer?: string | null
-          category?: string
           delivery_mode?: string
           duration_label?: string | null
           external_url?: string | null
@@ -313,13 +315,13 @@ export type Database = {
         }
         Update: {
           capacity?: number | null
+          category?: string
           content?: Json
           country?: string | null
           cover_image?: string | null
           created_at?: string
           credential_delivery?: string
           credential_issuer?: string | null
-          category?: string
           delivery_mode?: string
           duration_label?: string | null
           external_url?: string | null
@@ -339,56 +341,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      program_registration_fields: {
-        Row: {
-          created_at: string
-          field_help: string | null
-          field_key: string
-          field_label: string
-          field_type: Database["public"]["Enums"]["form_field_type"]
-          id: string
-          options: Json | null
-          program_slug: string
-          required: boolean
-          sort_order: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          field_help?: string | null
-          field_key: string
-          field_label: string
-          field_type: Database["public"]["Enums"]["form_field_type"]
-          id?: string
-          options?: Json | null
-          program_slug: string
-          required?: boolean
-          sort_order?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          field_help?: string | null
-          field_key?: string
-          field_label?: string
-          field_type?: Database["public"]["Enums"]["form_field_type"]
-          id?: string
-          options?: Json | null
-          program_slug?: string
-          required?: boolean
-          sort_order?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "program_registration_fields_program_slug_fkey"
-            columns: ["program_slug"]
-            isOneToOne: false
-            referencedRelation: "academy_programs"
-            referencedColumns: ["slug"]
-          },
-        ]
       }
       admin_audit_log: {
         Row: {
@@ -450,6 +402,201 @@ export type Database = {
         }
         Relationships: []
       }
+      affiliate_agents: {
+        Row: {
+          city: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      affiliate_commission_events: {
+        Row: {
+          agent_id: string
+          amount: number | null
+          application_id: string | null
+          approved_at: string | null
+          approved_by: string | null
+          candidate_id: string
+          created_at: string
+          currency: string
+          event_type: string
+          id: string
+          notes: string | null
+          paid_at: string | null
+          status: string
+          triggered_stage: Database["public"]["Enums"]["pipeline_stage"] | null
+          updated_at: string
+        }
+        Insert: {
+          agent_id: string
+          amount?: number | null
+          application_id?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          candidate_id: string
+          created_at?: string
+          currency?: string
+          event_type: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: string
+          triggered_stage?: Database["public"]["Enums"]["pipeline_stage"] | null
+          updated_at?: string
+        }
+        Update: {
+          agent_id?: string
+          amount?: number | null
+          application_id?: string | null
+          approved_at?: string | null
+          approved_by?: string | null
+          candidate_id?: string
+          created_at?: string
+          currency?: string
+          event_type?: string
+          id?: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: string
+          triggered_stage?: Database["public"]["Enums"]["pipeline_stage"] | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "affiliate_commission_events_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_commission_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "application_readiness_view"
+            referencedColumns: ["application_id"]
+          },
+          {
+            foreignKeyName: "affiliate_commission_events_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "affiliate_commission_events_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      application_cv_fit: {
+        Row: {
+          application_id: string
+          assessment_id: string | null
+          cost_usd: number | null
+          created_at: string
+          fit_score: number | null
+          has_flags: boolean
+          id: string
+          model: string | null
+          position_slug: string
+          prompt_version: string | null
+          reasons: Json
+          status: string
+          updated_at: string
+          verification: Json
+        }
+        Insert: {
+          application_id: string
+          assessment_id?: string | null
+          cost_usd?: number | null
+          created_at?: string
+          fit_score?: number | null
+          has_flags?: boolean
+          id?: string
+          model?: string | null
+          position_slug: string
+          prompt_version?: string | null
+          reasons?: Json
+          status?: string
+          updated_at?: string
+          verification?: Json
+        }
+        Update: {
+          application_id?: string
+          assessment_id?: string | null
+          cost_usd?: number | null
+          created_at?: string
+          fit_score?: number | null
+          has_flags?: boolean
+          id?: string
+          model?: string | null
+          position_slug?: string
+          prompt_version?: string | null
+          reasons?: Json
+          status?: string
+          updated_at?: string
+          verification?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_cv_fit_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "application_readiness_view"
+            referencedColumns: ["application_id"]
+          },
+          {
+            foreignKeyName: "application_cv_fit_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_cv_fit_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "cv_assessments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       application_status_history: {
         Row: {
           application_id: string
@@ -482,6 +629,13 @@ export type Database = {
           to_stage?: Database["public"]["Enums"]["pipeline_stage"]
         }
         Relationships: [
+          {
+            foreignKeyName: "application_status_history_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "application_readiness_view"
+            referencedColumns: ["application_id"]
+          },
           {
             foreignKeyName: "application_status_history_application_id_fkey"
             columns: ["application_id"]
@@ -639,6 +793,13 @@ export type Database = {
             foreignKeyName: "candidate_documents_application_id_fkey"
             columns: ["application_id"]
             isOneToOne: false
+            referencedRelation: "application_readiness_view"
+            referencedColumns: ["application_id"]
+          },
+          {
+            foreignKeyName: "candidate_documents_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
             referencedRelation: "applications"
             referencedColumns: ["id"]
           },
@@ -741,156 +902,6 @@ export type Database = {
           },
         ]
       }
-      affiliate_agents: {
-        Row: {
-          city: string | null
-          created_at: string
-          created_by: string | null
-          email: string | null
-          id: string
-          name: string
-          notes: string | null
-          phone: string | null
-          status: string
-          updated_at: string
-        }
-        Insert: {
-          city?: string | null
-          created_at?: string
-          created_by?: string | null
-          email?: string | null
-          id?: string
-          name: string
-          notes?: string | null
-          phone?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Update: {
-          city?: string | null
-          created_at?: string
-          created_by?: string | null
-          email?: string | null
-          id?: string
-          name?: string
-          notes?: string | null
-          phone?: string | null
-          status?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      affiliate_commission_events: {
-        Row: {
-          agent_id: string
-          amount: number | null
-          application_id: string | null
-          approved_at: string | null
-          approved_by: string | null
-          candidate_id: string
-          created_at: string
-          currency: string
-          event_type: string
-          id: string
-          notes: string | null
-          paid_at: string | null
-          status: string
-          triggered_stage: Database["public"]["Enums"]["pipeline_stage"] | null
-          updated_at: string
-        }
-        Insert: {
-          agent_id: string
-          amount?: number | null
-          application_id?: string | null
-          approved_at?: string | null
-          approved_by?: string | null
-          candidate_id: string
-          created_at?: string
-          currency?: string
-          event_type: string
-          id?: string
-          notes?: string | null
-          paid_at?: string | null
-          status?: string
-          triggered_stage?: Database["public"]["Enums"]["pipeline_stage"] | null
-          updated_at?: string
-        }
-        Update: {
-          agent_id?: string
-          amount?: number | null
-          application_id?: string | null
-          approved_at?: string | null
-          approved_by?: string | null
-          candidate_id?: string
-          created_at?: string
-          currency?: string
-          event_type?: string
-          id?: string
-          notes?: string | null
-          paid_at?: string | null
-          status?: string
-          triggered_stage?: Database["public"]["Enums"]["pipeline_stage"] | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "affiliate_commission_events_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "affiliate_agents"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "affiliate_commission_events_candidate_id_fkey"
-            columns: ["candidate_id"]
-            isOneToOne: false
-            referencedRelation: "candidates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "affiliate_commission_events_application_id_fkey"
-            columns: ["application_id"]
-            isOneToOne: false
-            referencedRelation: "applications"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      referral_codes: {
-        Row: {
-          agent_id: string
-          code: string
-          created_at: string
-          id: string
-          label: string | null
-          status: string
-        }
-        Insert: {
-          agent_id: string
-          code: string
-          created_at?: string
-          id?: string
-          label?: string | null
-          status?: string
-        }
-        Update: {
-          agent_id?: string
-          code?: string
-          created_at?: string
-          id?: string
-          label?: string | null
-          status?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "referral_codes_agent_id_fkey"
-            columns: ["agent_id"]
-            isOneToOne: false
-            referencedRelation: "affiliate_agents"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       consents: {
         Row: {
           candidate_id: string | null
@@ -981,6 +992,78 @@ export type Database = {
         }
         Relationships: []
       }
+      cv_assessments: {
+        Row: {
+          candidate_id: string
+          cost_usd: number | null
+          created_at: string
+          derived: Json
+          document_id: string
+          error: string | null
+          id: string
+          model: string | null
+          parsed: Json
+          prompt_version: string | null
+          quality: Json
+          quality_score: number | null
+          status: string
+          tokens_in: number | null
+          tokens_out: number | null
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          cost_usd?: number | null
+          created_at?: string
+          derived?: Json
+          document_id: string
+          error?: string | null
+          id?: string
+          model?: string | null
+          parsed?: Json
+          prompt_version?: string | null
+          quality?: Json
+          quality_score?: number | null
+          status?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          cost_usd?: number | null
+          created_at?: string
+          derived?: Json
+          document_id?: string
+          error?: string | null
+          id?: string
+          model?: string | null
+          parsed?: Json
+          prompt_version?: string | null
+          quality?: Json
+          quality_score?: number | null
+          status?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cv_assessments_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cv_assessments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       employer_inquiries: {
         Row: {
           additional_requirements: string | null
@@ -1042,7 +1125,7 @@ export type Database = {
           full_name: string
           id: string
           interest: string | null
-          ip_address: unknown | null
+          ip_address: unknown
           meta_event_id: string | null
           profession: string | null
           referrer_url: string | null
@@ -1068,7 +1151,7 @@ export type Database = {
           full_name: string
           id?: string
           interest?: string | null
-          ip_address?: unknown | null
+          ip_address?: unknown
           meta_event_id?: string | null
           profession?: string | null
           referrer_url?: string | null
@@ -1094,7 +1177,7 @@ export type Database = {
           full_name?: string
           id?: string
           interest?: string | null
-          ip_address?: unknown | null
+          ip_address?: unknown
           meta_event_id?: string | null
           profession?: string | null
           referrer_url?: string | null
@@ -1407,6 +1490,91 @@ export type Database = {
         }
         Relationships: []
       }
+      program_registration_fields: {
+        Row: {
+          created_at: string
+          field_help: string | null
+          field_key: string
+          field_label: string
+          field_type: Database["public"]["Enums"]["form_field_type"]
+          id: string
+          options: Json | null
+          program_slug: string
+          required: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          field_help?: string | null
+          field_key: string
+          field_label: string
+          field_type: Database["public"]["Enums"]["form_field_type"]
+          id?: string
+          options?: Json | null
+          program_slug: string
+          required?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          field_help?: string | null
+          field_key?: string
+          field_label?: string
+          field_type?: Database["public"]["Enums"]["form_field_type"]
+          id?: string
+          options?: Json | null
+          program_slug?: string
+          required?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "program_registration_fields_program_slug_fkey"
+            columns: ["program_slug"]
+            isOneToOne: false
+            referencedRelation: "academy_programs"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
+      referral_codes: {
+        Row: {
+          agent_id: string
+          code: string
+          created_at: string
+          id: string
+          label: string | null
+          status: string
+        }
+        Insert: {
+          agent_id: string
+          code: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          status?: string
+        }
+        Update: {
+          agent_id?: string
+          code?: string
+          created_at?: string
+          id?: string
+          label?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_codes_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "affiliate_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       application_readiness_view: {
@@ -1415,6 +1583,18 @@ export type Database = {
           candidate_id: string | null
           hard_pass: boolean | null
           position_slug: string | null
+        }
+        Insert: {
+          application_id?: string | null
+          candidate_id?: string | null
+          hard_pass?: never
+          position_slug?: string | null
+        }
+        Update: {
+          application_id?: string | null
+          candidate_id?: string | null
+          hard_pass?: never
+          position_slug?: string | null
         }
         Relationships: [
           {
@@ -1435,6 +1615,25 @@ export type Database = {
       }
     }
     Functions: {
+      _assert_academy_enrollment_owner: {
+        Args: { p_enrollment_id: string }
+        Returns: string
+      }
+      _attribute_candidate_referral: {
+        Args: { p_candidate_id: string; p_raw: string }
+        Returns: undefined
+      }
+      _recompute_academy_enrollment: {
+        Args: { p_enrollment_id: string }
+        Returns: undefined
+      }
+      applications_stage_counts: {
+        Args: { p_position?: string; p_search?: string }
+        Returns: {
+          count: number
+          pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
+        }[]
+      }
       complete_academy_reading: {
         Args: { p_enrollment_id: string; p_lesson_id: string }
         Returns: undefined
@@ -1452,15 +1651,7 @@ export type Database = {
         Args: { p_answers: Json; p_enrollment_id: string; p_lesson_id: string }
         Returns: Json
       }
-      applications_stage_counts: {
-        Args: { p_position?: string; p_search?: string }
-        Returns: {
-          count: number
-          pipeline_stage: Database["public"]["Enums"]["pipeline_stage"]
-        }[]
-      }
       is_admin: { Args: never; Returns: boolean }
-      validate_referral_code: { Args: { p_code: string }; Returns: boolean }
       list_applications_for_admin: {
         Args: {
           p_limit?: number
@@ -1500,6 +1691,7 @@ export type Database = {
         }
         Returns: string
       }
+      validate_referral_code: { Args: { p_code: string }; Returns: boolean }
     }
     Enums: {
       application_field_importance: "required" | "optional"
@@ -1668,48 +1860,6 @@ export type CompositeTypes<
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
 
-// =========================================================================
-// Convenience aliases — hand-added (not regenerated).
-// Re-add these if generate_typescript_types overwrites this file.
-// =========================================================================
-export type PipelineStage = Database["public"]["Enums"]["pipeline_stage"]
-export type DocType = Database["public"]["Enums"]["doc_type"]
-export type FormFieldType = Database["public"]["Enums"]["form_field_type"]
-export type JobOrderStatus = Database["public"]["Enums"]["job_order_status"]
-export type UserRole = Database["public"]["Enums"]["user_role"]
-export type ApplicationFieldImportance = Database["public"]["Enums"]["application_field_importance"]
-export type ApplicationFieldSection = Database["public"]["Enums"]["application_field_section"]
-
-// Akademi Perantau (migration 0060). Regenerate via generate_typescript_types
-// after the migration is applied to prod to confirm parity.
-export type AcademyProgram = Database["public"]["Tables"]["academy_programs"]["Row"]
-export type AcademyModule = Database["public"]["Tables"]["academy_modules"]["Row"]
-export type AcademyLesson = Database["public"]["Tables"]["academy_lessons"]["Row"]
-export type AcademyEnrollment = Database["public"]["Tables"]["academy_enrollments"]["Row"]
-export type AcademyLessonProgress = Database["public"]["Tables"]["academy_lesson_progress"]["Row"]
-export type ProgramRegistrationField = Database["public"]["Tables"]["program_registration_fields"]["Row"]
-export type AcademyDeliveryMode = "in_app" | "webinar" | "offline" | "external"
-export type AcademyCategory = "paspor" | "masterclass" | "sertifikasi" | "vokasi"
-export type AcademyOutputType = "certificate" | "psikotes_result" | "completion" | "none"
-export type AcademyEnrollmentStatus =
-  | "registered"
-  | "in_progress"
-  | "completed"
-  | "passed"
-  | "failed"
-  | "cancelled"
-
-// Affiliate / referral system (migration 0067). Regenerate via
-// generate_typescript_types after the migration is applied to prod.
-export type AffiliateAgent = Database["public"]["Tables"]["affiliate_agents"]["Row"]
-export type ReferralCode = Database["public"]["Tables"]["referral_codes"]["Row"]
-export type AffiliateCommissionEvent =
-  Database["public"]["Tables"]["affiliate_commission_events"]["Row"]
-export type AffiliateAgentStatus = "active" | "inactive" | "suspended"
-export type ReferralCodeStatus = "active" | "inactive"
-export type CommissionEventType = "registration" | "departure"
-export type CommissionEventStatus = "pending" | "approved" | "paid" | "void"
-
 export const Constants = {
   public: {
     Enums: {
@@ -1761,3 +1911,49 @@ export const Constants = {
     },
   },
 } as const
+
+// =========================================================================
+// Convenience aliases — hand-added (not regenerated).
+// Re-add these if generate_typescript_types overwrites this file.
+// =========================================================================
+export type PipelineStage = Database["public"]["Enums"]["pipeline_stage"]
+export type DocType = Database["public"]["Enums"]["doc_type"]
+export type FormFieldType = Database["public"]["Enums"]["form_field_type"]
+export type JobOrderStatus = Database["public"]["Enums"]["job_order_status"]
+export type UserRole = Database["public"]["Enums"]["user_role"]
+export type ApplicationFieldImportance = Database["public"]["Enums"]["application_field_importance"]
+export type ApplicationFieldSection = Database["public"]["Enums"]["application_field_section"]
+
+// Akademi Perantau (migration 0060). Regenerate via generate_typescript_types
+// after the migration is applied to prod to confirm parity.
+export type AcademyProgram = Database["public"]["Tables"]["academy_programs"]["Row"]
+export type AcademyModule = Database["public"]["Tables"]["academy_modules"]["Row"]
+export type AcademyLesson = Database["public"]["Tables"]["academy_lessons"]["Row"]
+export type AcademyEnrollment = Database["public"]["Tables"]["academy_enrollments"]["Row"]
+export type AcademyLessonProgress = Database["public"]["Tables"]["academy_lesson_progress"]["Row"]
+export type ProgramRegistrationField = Database["public"]["Tables"]["program_registration_fields"]["Row"]
+export type AcademyDeliveryMode = "in_app" | "webinar" | "offline" | "external"
+export type AcademyCategory = "paspor" | "masterclass" | "sertifikasi" | "vokasi"
+export type AcademyOutputType = "certificate" | "psikotes_result" | "completion" | "none"
+export type AcademyEnrollmentStatus =
+  | "registered"
+  | "in_progress"
+  | "completed"
+  | "passed"
+  | "failed"
+  | "cancelled"
+
+// Affiliate / referral system (migration 0067). Regenerate via
+// generate_typescript_types after the migration is applied to prod.
+export type AffiliateAgent = Database["public"]["Tables"]["affiliate_agents"]["Row"]
+export type ReferralCode = Database["public"]["Tables"]["referral_codes"]["Row"]
+export type AffiliateCommissionEvent =
+  Database["public"]["Tables"]["affiliate_commission_events"]["Row"]
+export type AffiliateAgentStatus = "active" | "inactive" | "suspended"
+export type ReferralCodeStatus = "active" | "inactive"
+export type CommissionEventType = "registration" | "departure"
+export type CommissionEventStatus = "pending" | "approved" | "paid" | "void"
+
+// CV grader (migration 0071).
+export type CvAssessmentRow = Database["public"]["Tables"]["cv_assessments"]["Row"]
+export type ApplicationCvFitRow = Database["public"]["Tables"]["application_cv_fit"]["Row"]

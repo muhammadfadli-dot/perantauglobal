@@ -95,7 +95,22 @@ export interface ApplicationCardProps {
   openJobOrders?: OpenJobOrder[];
   readiness?: ReadinessResultV3 | null;
   formFields?: FormField[];
+  fit?: CvFit | null;
 }
+
+/** Per-application CV-to-position fit (application_cv_fit, migration 0071). */
+export type CvFit = {
+  fit_score: number | null;
+  reasons: { alasan?: string; yang_kurang?: string[] } | null;
+  verification: Array<{
+    field_label: string;
+    claim: string;
+    evidence: string | null;
+    verdict: "confirmed" | "unconfirmed" | "contradicted";
+  }> | null;
+  has_flags: boolean;
+  status: "ok" | "skipped" | "error";
+};
 
 export default function ApplicationCard({
   application: a,
@@ -103,6 +118,7 @@ export default function ApplicationCard({
   openJobOrders = [],
   readiness = null,
   formFields = [],
+  fit = null,
 }: ApplicationCardProps) {
   const inJobOrder = !!a.job_order_id;
 
@@ -124,6 +140,7 @@ export default function ApplicationCard({
               {a.positions?.name ?? a.position_slug}
             </h3>
             <ReadinessBadge readiness={readiness} />
+            <CvFitBadge fit={fit} />
           </div>
           <div className="text-[12px] text-pg-ink-500 mt-1">
             Didaftarkan {new Date(a.created_at).toLocaleDateString("id-ID")}
@@ -176,6 +193,9 @@ export default function ApplicationCard({
           </div>
         )}
       </div>
+
+      {/* CV-to-position fit (AI) */}
+      <CvFitPanel fit={fit} />
 
       {/* Pipeline stage — only meaningful when in job order */}
       {inJobOrder && (
@@ -336,4 +356,98 @@ function optionLabel(value: unknown, field: FormField): string {
   const opt = field.options?.find((o) => String(o.value) === stringVal);
   if (opt) return opt.label;
   return stringVal;
+}
+
+/* ── CV-to-position fit (migration 0071, Batch 2) ───────────────────────── */
+
+function fitColor(score: number | null): { fg: string; bg: string } {
+  if (score === null) return { fg: "var(--pg-ink-500)", bg: "var(--pg-ink-50)" };
+  if (score >= 75) return { fg: "var(--pg-ok-soft-fg)", bg: "var(--pg-ok-soft-bg)" };
+  if (score >= 50) return { fg: "var(--pg-warn-soft-fg)", bg: "var(--pg-warn-soft-bg)" };
+  return { fg: "var(--pg-err)", bg: "var(--pg-err-bg)" };
+}
+
+function CvFitBadge({ fit }: { fit?: CvFit | null }) {
+  if (!fit || fit.status !== "ok" || fit.fit_score === null) return null;
+  const c = fitColor(fit.fit_score);
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold"
+      style={{ background: c.bg, color: c.fg }}
+      title="Kecocokan CV dengan posisi (AI)"
+    >
+      <Icon name="sparkle" size={11} />
+      CV {fit.fit_score}%
+      {fit.has_flags && <Icon name="warn" size={11} />}
+    </span>
+  );
+}
+
+function CvFitPanel({ fit }: { fit?: CvFit | null }) {
+  if (!fit) return null;
+
+  if (fit.status === "skipped") {
+    return (
+      <div className="mt-4 text-[12px] text-pg-ink-400 italic flex items-center gap-1.5">
+        <Icon name="sparkle" size={12} />
+        Kecocokan CV: kandidat belum punya CV untuk dinilai.
+      </div>
+    );
+  }
+  if (fit.status !== "ok") return null;
+
+  const c = fitColor(fit.fit_score);
+  const alasan = fit.reasons?.alasan;
+  const kurang = fit.reasons?.yang_kurang ?? [];
+  const flags = (fit.verification ?? []).filter((v) => v.verdict === "contradicted");
+
+  return (
+    <div className="mt-4 rounded-lg border border-pg-ink-100 overflow-hidden">
+      <div className="flex items-center gap-2 px-3 py-2 bg-pg-ink-50">
+        <Icon name="sparkle" size={13} className="text-pg-ink-500" />
+        <span className="text-[11px] font-bold tracking-[0.08em] uppercase text-pg-ink-500">
+          Kecocokan CV ke posisi
+        </span>
+        <span
+          className="ml-auto text-[13px] font-extrabold px-2 py-0.5 rounded-md tabular-nums"
+          style={{ background: c.bg, color: c.fg }}
+        >
+          {fit.fit_score ?? "—"}%
+        </span>
+      </div>
+      <div className="px-3 py-2.5 flex flex-col gap-2">
+        {alasan && <p className="text-[12px] leading-[1.5] text-pg-ink-700">{alasan}</p>}
+        {kurang.length > 0 && (
+          <div className="flex flex-col gap-1">
+            {kurang.slice(0, 4).map((k, i) => (
+              <div key={i} className="flex items-start gap-1.5 text-[11px] text-pg-ink-500">
+                <span className="mt-[5px] w-1 h-1 rounded-full bg-pg-ink-300 shrink-0" />
+                <span>{k}</span>
+              </div>
+            ))}
+          </div>
+        )}
+        {flags.length > 0 && (
+          <div
+            className="flex flex-col gap-1.5 rounded-md px-2.5 py-2"
+            style={{ background: "var(--pg-warn-soft-bg)" }}
+          >
+            <div
+              className="flex items-center gap-1.5 text-[10px] font-bold tracking-[0.08em] uppercase"
+              style={{ color: "var(--pg-warn-soft-fg)" }}
+            >
+              <Icon name="warn" size={11} />
+              Perlu dikonfirmasi admin
+            </div>
+            {flags.map((v, i) => (
+              <div key={i} className="text-[11px] text-pg-ink-700 leading-snug">
+                <span className="font-semibold">{v.field_label}</span>: klaim &quot;{v.claim}&quot;
+                {v.evidence ? <> — di CV: {v.evidence}</> : <> — tidak terlihat di CV</>}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
