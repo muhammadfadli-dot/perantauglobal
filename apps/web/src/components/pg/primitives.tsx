@@ -20,7 +20,7 @@ type ButtonProps = {
 };
 
 const BTN_BASE =
-  "inline-flex items-center justify-center gap-2 font-semibold border-0 cursor-pointer no-underline transition-transform duration-75 active:scale-[0.985] tracking-tight";
+  "inline-flex items-center justify-center gap-2 font-semibold border-0 cursor-pointer no-underline transition-transform duration-75 active:scale-[0.985] tracking-tight disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100";
 
 const BTN_VARIANTS: Record<ButtonVariant, string> = {
   primary: "bg-pg-red-600 text-white hover:bg-pg-red-700",
@@ -507,7 +507,9 @@ export function Field({
       </label>
       {children}
       {error ? (
-        <div className="text-[12px] text-pg-err font-medium">{error}</div>
+        <div role="alert" className="text-[12px] text-pg-err font-medium">
+          {error}
+        </div>
       ) : helper ? (
         <div className="text-[12px] text-pg-ink-500">{helper}</div>
       ) : null}

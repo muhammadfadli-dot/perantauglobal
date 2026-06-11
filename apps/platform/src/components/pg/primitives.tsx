@@ -180,3 +180,109 @@ export function Eyebrow({
     <div className={`text-[12px] font-bold uppercase tracking-[0.12em] ${color}`}>{children}</div>
   );
 }
+
+/* ============================================================
+   Form primitives — ported from apps/web for cross-app parity, so the portal
+   stops hand-rolling inputs and a fix in one app reaches both. Field exposes an
+   accessible `error` slot (role=alert + aria binding via htmlFor).
+   ============================================================ */
+
+const FIELD_INPUT_CLASS =
+  "block w-full min-h-[48px] px-4 py-3 text-base rounded-xl border border-pg-ink-200 bg-pg-white text-pg-ink-900 placeholder:text-pg-ink-400 focus:outline-none focus:border-pg-red-600 focus:ring-2 focus:ring-pg-red-100 transition-colors";
+
+export function Chip({
+  active,
+  href,
+  children,
+  className,
+}: {
+  active?: boolean;
+  href?: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const cls = [
+    "inline-flex items-center gap-1.5 h-9 px-3.5 text-sm font-semibold rounded-full whitespace-nowrap border-[1.5px] transition-colors no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-pg-red-600 focus-visible:ring-offset-1",
+    active
+      ? "bg-pg-ink-900 text-white border-pg-ink-900"
+      : "bg-pg-white text-pg-ink-700 border-pg-ink-200 hover:border-pg-ink-300",
+    className ?? "",
+  ].join(" ");
+  if (href) {
+    return (
+      <Link href={href} className={cls}>
+        {children}
+      </Link>
+    );
+  }
+  return <span className={cls}>{children}</span>;
+}
+
+export function Field({
+  label,
+  required,
+  helper,
+  error,
+  children,
+  htmlFor,
+}: {
+  label: React.ReactNode;
+  required?: boolean;
+  helper?: React.ReactNode;
+  error?: React.ReactNode;
+  children: React.ReactNode;
+  htmlFor?: string;
+}) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={htmlFor} className="text-[13px] font-bold text-pg-ink-900">
+        {label}
+        {required && (
+          <span className="text-pg-red-600 ml-1" aria-hidden>
+            *
+          </span>
+        )}
+      </label>
+      {children}
+      {error ? (
+        <div role="alert" className="text-[12px] text-pg-err font-medium">
+          {error}
+        </div>
+      ) : helper ? (
+        <div className="text-[12px] text-pg-ink-500">{helper}</div>
+      ) : null}
+    </div>
+  );
+}
+
+export const Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(function Input({ className, ...rest }, ref) {
+  return <input ref={ref} {...rest} className={`${FIELD_INPUT_CLASS} ${className ?? ""}`} />;
+});
+
+export const Textarea = React.forwardRef<
+  HTMLTextAreaElement,
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>
+>(function Textarea({ className, rows = 4, ...rest }, ref) {
+  return (
+    <textarea
+      ref={ref}
+      rows={rows}
+      {...rest}
+      className={`${FIELD_INPUT_CLASS} min-h-[unset] resize-y ${className ?? ""}`}
+    />
+  );
+});
+
+export const Select = React.forwardRef<
+  HTMLSelectElement,
+  React.SelectHTMLAttributes<HTMLSelectElement>
+>(function Select({ className, children, ...rest }, ref) {
+  return (
+    <select ref={ref} {...rest} className={`${FIELD_INPUT_CLASS} pr-10 ${className ?? ""}`}>
+      {children}
+    </select>
+  );
+});
