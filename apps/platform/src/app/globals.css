@@ -95,6 +95,10 @@
   --pg-err-bg: #fde5e7;
   --pg-info: #1e5aa8;
   --pg-info-bg: #e4edf8;
+  /* On-dark variants of info/warn — legible as status accents over the dark
+     photo heroes (replaces ad-hoc cyan/yellow on JourneyHero). */
+  --pg-info-on-dark: #8fbcf2;
+  --pg-warn-on-dark: #f2c879;
 
   /* Paper v2 admin tokens (Apr 2026) — match Paper artboards exactly */
   --pg-border: #ececea;

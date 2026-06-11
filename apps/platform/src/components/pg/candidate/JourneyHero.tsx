@@ -7,11 +7,12 @@ import {
 } from "@perantauglobal/db/country";
 import { positionHeroUrl, countryImageUrl } from "@perantauglobal/db/media";
 
-const PIPELINE_STAGES = [
-  { key: "applied", label: "Daftar" },
-  { key: "lengkapi", label: "Lengkapi" },
-  { key: "review", label: "Review" },
-  { key: "wawancara", label: "Wawancara" },
+// Canonical candidate-facing journey: 3 stages, not the internal 5-stage
+// machinery. Terkirim → Diproses (covers verifikasi/lengkapi/wawancara) → Hasil.
+// Matches the applicationStatus model + the detail-page roadmap's groupings.
+const JOURNEY_STAGES = [
+  { key: "terkirim", label: "Terkirim" },
+  { key: "diproses", label: "Diproses" },
   { key: "hasil", label: "Hasil" },
 ];
 
@@ -53,8 +54,12 @@ export function JourneyHero({
     ? `url(${positionHeroUrl(positionSlug)}), url(${countryImageUrl(key)})`
     : `url(${positionHeroUrl(positionSlug)})`;
 
-  const stageIdx = mode === "applying" ? 1 : 2; // applying=lengkapi, processing=review
-  const dotColor = mode === "processing" ? "#7ad7ff" : "#ffd166";
+  // Hero only renders for in-progress lamaran (terminal states use TerminalCard),
+  // so the current stage is always "Diproses" (1). The applying/processing nuance
+  // lives in the status text + dot color, not a separate top-level stage.
+  const stageIdx = 1;
+  const dotColor =
+    mode === "processing" ? "var(--pg-info-on-dark)" : "var(--pg-warn-on-dark)";
   const stageBadge = mode === "processing" ? "Diproses tim" : "Dokumen kamu";
   const statusTitle =
     mode === "processing"
@@ -146,9 +151,9 @@ export function JourneyHero({
             </span>
           </div>
 
-          {/* 5-stage progress */}
-          <div className="grid grid-cols-5 gap-1">
-            {PIPELINE_STAGES.map((s, i) => {
+          {/* 3-stage progress: Terkirim → Diproses → Hasil + readable labels */}
+          <div className="grid grid-cols-3 gap-1.5">
+            {JOURNEY_STAGES.map((s, i) => {
               const done = i < stageIdx;
               const current = i === stageIdx;
               return (
@@ -165,6 +170,20 @@ export function JourneyHero({
                 />
               );
             })}
+          </div>
+          <div className="grid grid-cols-3 gap-1.5 mt-2 text-[11px] font-bold tracking-[-0.005em]">
+            {JOURNEY_STAGES.map((s, i) => (
+              <span
+                key={s.key}
+                className="text-center"
+                style={{
+                  color:
+                    i === stageIdx ? "#fff" : "rgba(255,255,255,0.55)",
+                }}
+              >
+                {s.label}
+              </span>
+            ))}
           </div>
 
           <div className="flex items-center justify-between gap-3 mt-3">

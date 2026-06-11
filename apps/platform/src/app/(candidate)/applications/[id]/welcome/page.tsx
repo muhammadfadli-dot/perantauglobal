@@ -4,31 +4,9 @@ import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { Icon } from "@/components/pg/Icon";
 import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
 import { countryLabelFromDb } from "@perantauglobal/db/country";
+import { PipelineTimeline } from "@/components/pg/candidate/PipelineTimeline";
 
 export const dynamic = "force-dynamic";
-
-const STEPS = [
-  {
-    label: "Lengkapi syarat",
-    desc: "Upload sertifikat & jawab pertanyaan singkat",
-    state: "current" as const,
-  },
-  {
-    label: "Tim review profil",
-    desc: "Recruitment officer cek profil & dokumen kamu (3–5 hari kerja)",
-    state: "future" as const,
-  },
-  {
-    label: "Wawancara & cek dokumen",
-    desc: "Sesi tatap muka via video call + verifikasi paspor & ijazah",
-    state: "future" as const,
-  },
-  {
-    label: "Berangkat",
-    desc: "Briefing pre-departure, training bahasa, & visa kerja",
-    state: "future" as const,
-  },
-];
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -181,57 +159,9 @@ export default async function ApplyWelcomePage({ params }: PageProps) {
             className="bg-pg-white rounded-2xl p-5"
             style={{ border: "1px solid var(--pg-border)" }}
           >
-            {STEPS.map((step, i) => (
-              <div key={i} className="grid grid-cols-[28px_1fr] gap-3 relative">
-                <div className="relative">
-                  <div
-                    className="w-6 h-6 rounded-full grid place-items-center text-[11px] font-bold mt-0.5"
-                    style={{
-                      background: i === 0 ? "var(--pg-red-600)" : "transparent",
-                      color: i === 0 ? "white" : "var(--pg-ink-tertiary)",
-                      border:
-                        i === 0 ? "none" : "1.5px solid var(--pg-ink-200)",
-                    }}
-                  >
-                    {i + 1}
-                  </div>
-                  {i < STEPS.length - 1 && (
-                    <div
-                      className="absolute left-[11px] top-7 w-0.5"
-                      style={{
-                        background: "var(--pg-border)",
-                        bottom: "-12px",
-                      }}
-                    />
-                  )}
-                </div>
-                <div className={i < STEPS.length - 1 ? "pb-4" : ""}>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[15px] font-bold text-pg-ink-primary leading-tight">
-                      {step.label}
-                    </span>
-                    {i === 0 && (
-                      <span
-                        className="px-1.5 py-0.5 rounded text-[9px] font-bold tracking-[0.06em] uppercase"
-                        style={{
-                          background: "var(--pg-red-soft-bg)",
-                          color: "var(--pg-red-600)",
-                          fontFamily: "var(--font-mono)",
-                        }}
-                      >
-                        Sekarang
-                      </span>
-                    )}
-                  </div>
-                  <p
-                    className="text-[12px] mt-1 leading-tight"
-                    style={{ color: "var(--pg-ink-tertiary)" }}
-                  >
-                    {step.desc}
-                  </p>
-                </div>
-              </div>
-            ))}
+            {/* Same roadmap component the lamaran-detail page uses — so the steps,
+                labels, and timeframes never diverge between the two screens. */}
+            <PipelineTimeline currentIdx={requiredMissing > 0 ? 2 : 1} />
           </div>
         </div>
 
