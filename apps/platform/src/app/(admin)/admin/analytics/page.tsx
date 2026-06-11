@@ -107,20 +107,29 @@ export default async function AnalyticsPage({
     { data: stageData },
     { data: openJobOrders },
   ] = await Promise.all([
-    // Apps in selected range — for KPIs, leaderboard, sparklines
-    since
-      ? supabase
-          .from("applications")
-          .select("created_at, pipeline_stage, position_slug")
-          .gte("created_at", since)
-      : supabase
-          .from("applications")
-          .select("created_at, pipeline_stage, position_slug"),
+    // Apps in selected range — for KPIs, leaderboard, sparklines.
+    // Paginated past the 1000-row cap so total/stage/city KPIs don't silently
+    // plateau as the pool grows (apps already ~973).
+    fetchAllRows((f, t) =>
+      since
+        ? supabase
+            .from("applications")
+            .select("created_at, pipeline_stage, position_slug")
+            .gte("created_at", since)
+            .range(f, t)
+        : supabase
+            .from("applications")
+            .select("created_at, pipeline_stage, position_slug")
+            .range(f, t),
+    ).then((data) => ({ data })),
     // Apps in last 12 weeks — for historical trend (always 12 weeks)
-    supabase
-      .from("applications")
-      .select("created_at")
-      .gte("created_at", twelveWeeksAgoIso),
+    fetchAllRows((f, t) =>
+      supabase
+        .from("applications")
+        .select("created_at")
+        .gte("created_at", twelveWeeksAgoIso)
+        .range(f, t),
+    ).then((data) => ({ data })),
     supabase
       .from("candidate_documents")
       .select("*", { count: "exact", head: true })
@@ -130,14 +139,21 @@ export default async function AnalyticsPage({
       .from("job_orders")
       .select("*", { count: "exact", head: true })
       .eq("status", "open"),
-    since
-      ? supabase
-          .from("candidates")
-          .select("utm_source, source")
-          .gte("created_at", since)
-      : supabase.from("candidates").select("utm_source, source"),
-    supabase.from("candidates").select("city"),
-    supabase.from("applications").select("pipeline_stage"),
+    fetchAllRows((f, t) =>
+      since
+        ? supabase
+            .from("candidates")
+            .select("utm_source, source")
+            .gte("created_at", since)
+            .range(f, t)
+        : supabase.from("candidates").select("utm_source, source").range(f, t),
+    ).then((data) => ({ data })),
+    fetchAllRows((f, t) => supabase.from("candidates").select("city").range(f, t)).then(
+      (data) => ({ data }),
+    ),
+    fetchAllRows((f, t) =>
+      supabase.from("applications").select("pipeline_stage").range(f, t),
+    ).then((data) => ({ data })),
     supabase
       .from("job_orders")
       .select(

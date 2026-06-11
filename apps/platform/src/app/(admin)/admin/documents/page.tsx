@@ -32,13 +32,16 @@ function daysUntil(iso: string | null): number | null {
   return Math.ceil((new Date(iso).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
+const PAGE_SIZE = 40;
+
 export default async function DocumentReviewPage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; page?: string }>;
 }) {
-  const { filter } = await searchParams;
+  const { filter, page: pageParam } = await searchParams;
   const filterValue = filter ?? "pending";
+  const page = Math.max(1, parseInt(pageParam ?? "1", 10) || 1);
   const supabase = await createServerClient();
 
   let query = supabase
@@ -46,7 +49,10 @@ export default async function DocumentReviewPage({
     .select(
       "id, candidate_id, doc_type, display_name, expires_at, file_path, file_size, mime_type, verified, verified_at, rejected_at, rejected_reason, uploaded_at, candidates (full_name, email, city)"
     )
-    .order("uploaded_at", { ascending: false });
+    .order("uploaded_at", { ascending: false })
+    // Page the list so the queue doesn't render hundreds of joined cards (601
+    // pending today) and doesn't silently drop rows past the 1000-row cap.
+    .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1);
 
   if (filterValue === "pending") {
     query = query.eq("verified", false).is("rejected_at", null);
@@ -72,6 +78,16 @@ export default async function DocumentReviewPage({
       supabase.from("candidate_documents").select("*", { count: "exact", head: true }).eq("verified", true),
       supabase.from("candidate_documents").select("*", { count: "exact", head: true }).not("rejected_at", "is", null),
     ]);
+
+  const totalForFilter =
+    filterValue === "verified"
+      ? verifiedCount ?? 0
+      : filterValue === "rejected"
+        ? rejectedCount ?? 0
+        : pendingCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalForFilter / PAGE_SIZE));
+  const pageHref = (p: number) =>
+    `/admin/documents?filter=${filterValue}&page=${p}`;
 
   return (
     <main className="p-6 lg:p-10 max-w-6xl">
@@ -200,6 +216,42 @@ export default async function DocumentReviewPage({
           ))
         )}
       </div>
+
+      {totalForFilter > PAGE_SIZE && (
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <span className="text-[13px] text-pg-ink-500 font-mono">
+            Hal {page} / {totalPages} · {totalForFilter} dokumen
+          </span>
+          <div className="flex items-center gap-2">
+            {page > 1 ? (
+              <Link
+                href={pageHref(page - 1)}
+                className="inline-flex items-center gap-1 min-h-[40px] px-4 rounded-xl text-[13px] font-bold text-pg-ink-900 no-underline"
+                style={{ background: "var(--pg-white)", border: "1px solid var(--pg-ink-200)" }}
+              >
+                <Icon name="arrow_left" size={14} /> Sebelumnya
+              </Link>
+            ) : (
+              <span className="inline-flex items-center min-h-[40px] px-4 rounded-xl text-[13px] font-bold text-pg-ink-300" style={{ border: "1px solid var(--pg-ink-100)" }}>
+                Sebelumnya
+              </span>
+            )}
+            {page < totalPages ? (
+              <Link
+                href={pageHref(page + 1)}
+                className="inline-flex items-center gap-1 min-h-[40px] px-4 rounded-xl text-[13px] font-bold text-white no-underline"
+                style={{ background: "var(--pg-red-600)" }}
+              >
+                Berikutnya <Icon name="arrow_right" size={14} />
+              </Link>
+            ) : (
+              <span className="inline-flex items-center min-h-[40px] px-4 rounded-xl text-[13px] font-bold text-pg-ink-300" style={{ border: "1px solid var(--pg-ink-100)" }}>
+                Berikutnya
+              </span>
+            )}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -8,6 +8,7 @@ import {
   countryLabelFromDb,
   countryInitialsFromDb,
 } from "@perantauglobal/db/country";
+import { fetchAllRows } from "@/lib/fetch-all-rows";
 
 /**
  * Compute days-ago index in Asia/Jakarta time (most recent = 0, 6 days ago = 6).
@@ -63,12 +64,21 @@ export default async function AdminPositionsPage({
       .order("country")
       .order("name"),
     supabase.from("job_orders").select("position_slug, status, slot_count, slot_filled").eq("status", "open"),
-    supabase.from("applications").select("position_slug"),
-    supabase
-      .from("applications")
-      .select("position_slug, created_at")
-      .gte("created_at", sevenDaysAgoIso),
-    supabase.from("application_readiness_view").select("position_slug, hard_pass"),
+    // Paginated: per-position lamaran/qualified counts undercount once these
+    // cross the 1000-row cap (apps already ~973).
+    fetchAllRows((f, t) =>
+      supabase.from("applications").select("position_slug").range(f, t),
+    ).then((data) => ({ data })),
+    fetchAllRows((f, t) =>
+      supabase
+        .from("applications")
+        .select("position_slug, created_at")
+        .gte("created_at", sevenDaysAgoIso)
+        .range(f, t),
+    ).then((data) => ({ data })),
+    fetchAllRows((f, t) =>
+      supabase.from("application_readiness_view").select("position_slug, hard_pass").range(f, t),
+    ).then((data) => ({ data })),
     supabase.from("candidates").select("*", { count: "exact", head: true }),
     supabase
       .from("applications")

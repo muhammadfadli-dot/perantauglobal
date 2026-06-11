@@ -7,6 +7,7 @@ import { KpiStat } from "@/components/admin/Sparkline";
 import { ACCEPTED_STAGES, PIPELINE_COLUMNS } from "@/lib/applicationStatus";
 import { getTimeOfDayGreeting } from "@/lib/journey";
 import { jakartaDayKey, jakartaDayOfMonth } from "@/lib/datetime";
+import { fetchAllRows } from "@/lib/fetch-all-rows";
 
 export const dynamic = "force-dynamic";
 
@@ -93,15 +94,22 @@ export default async function AdminHomePage({
       .eq("status", "open")
       .order("deadline", { ascending: true, nullsFirst: false }),
     // Linked apps at an accepted stage — used to compute true over-capacity per JO.
-    supabase
-      .from("applications")
-      .select("job_order_id")
-      .not("job_order_id", "is", null)
-      .in("pipeline_stage", acceptedStages),
-    supabase
-      .from("applications")
-      .select("created_at, position_slug")
-      .gte("created_at", priorAgoIso),
+    // Paginated: accepted apps + the inflow window both grow past the 1000 cap.
+    fetchAllRows((f, t) =>
+      supabase
+        .from("applications")
+        .select("job_order_id")
+        .not("job_order_id", "is", null)
+        .in("pipeline_stage", acceptedStages)
+        .range(f, t),
+    ).then((data) => ({ data })),
+    fetchAllRows((f, t) =>
+      supabase
+        .from("applications")
+        .select("created_at, position_slug")
+        .gte("created_at", priorAgoIso)
+        .range(f, t),
+    ).then((data) => ({ data })),
     supabase
       .from("candidate_documents")
       .select("doc_type, candidates(full_name)")
