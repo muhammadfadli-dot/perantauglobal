@@ -167,3 +167,41 @@ export const COUNTRY_OPTIONS: {
   })),
   { value: "any", label: "Lainnya / Global", initials: "GL" },
 ];
+
+// City per position slug (mirrors apps/web) so portal cards can show a city
+// like the public ones do, instead of country-only.
+const CITY_BY_SLUG: Record<string, string> = {
+  "perawat-saudi-arabia": "Riyadh",
+  "barista-saudi-arabia": "Jeddah",
+  "waiter-saudi-arabia": "Riyadh",
+  "waitress-saudi-arabia": "Riyadh",
+  "chef-bakery-saudi-arabia": "Jeddah",
+  "head-barista-saudi-arabia": "Riyadh",
+  "roaster-saudi-arabia": "Jeddah",
+  "chef-pastry-saudi-arabia": "Riyadh",
+  "spa-therapist-saudi-arabia": "Jeddah",
+  "laundry-worker-saudi-arabia": "Riyadh",
+  "heavy-diesel-mechanic-saudi-arabia": "Dammam",
+  "truck-driver-jepang": "Osaka",
+  "food-service-jepang": "Tokyo",
+  "kaigo-jepang": "Nagoya",
+  "pengolahan-makanan-jepang": "Hokkaido",
+  "manufaktur-pengelasan": "Aichi",
+  "caregiver-taiwan": "Taipei",
+  "spg-indonesia": "Jakarta",
+  "head-driller": "Balkan",
+  "assistant-driller": "Balkan",
+};
+
+const FALLBACK_CITY: Record<CountryKey, string> = {
+  saudi: "Riyadh",
+  jepang: "Tokyo",
+  taiwan: "Taipei",
+  indonesia: "Jakarta",
+  europe: "Balkan",
+};
+
+/** City for a position slug, falling back to the country's primary city. */
+export function cityForSlug(slug: string, countryKey: CountryKey): string {
+  return CITY_BY_SLUG[slug] ?? FALLBACK_CITY[countryKey];
+}

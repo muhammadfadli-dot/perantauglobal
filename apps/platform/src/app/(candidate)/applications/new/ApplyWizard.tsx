@@ -15,6 +15,14 @@ type Position = {
   description: string | null;
 };
 
+type WizardDetail = {
+  salary: string | null;
+  salaryNote: string | null;
+  jobDescription: string[];
+  benefits: { icon: string; label: string; value: string }[];
+  fee: { amount: string; breakdown: string[]; note?: string } | null;
+};
+
 type JobOrder = {
   id: string;
   intake_label: string;
@@ -55,6 +63,7 @@ const DOC_LABEL: Record<DocStatus["type"], string> = {
 
 export default function ApplyWizard({
   position,
+  detail,
   jobOrder,
   reqStatus,
   hardMissingCount,
@@ -63,6 +72,7 @@ export default function ApplyWizard({
   fields,
 }: {
   position: Position;
+  detail: WizardDetail;
   jobOrder: JobOrder | null;
   reqStatus: ReqStatus[];
   hardMissingCount: number;
@@ -158,6 +168,7 @@ export default function ApplyWizard({
       {step === 1 && (
         <Step1
           position={position}
+          detail={detail}
           jobOrder={jobOrder}
           reqStatus={reqStatus}
           hardMissingCount={hardMissingCount}
@@ -240,6 +251,7 @@ export default function ApplyWizard({
 
 function Step1({
   position,
+  detail,
   jobOrder,
   reqStatus,
   hardMissingCount,
@@ -247,12 +259,18 @@ function Step1({
   docMissingCount,
 }: {
   position: Position;
+  detail: WizardDetail;
   jobOrder: JobOrder | null;
   reqStatus: ReqStatus[];
   hardMissingCount: number;
   docStatus: DocStatus[];
   docMissingCount: number;
 }) {
+  const hasDetail =
+    !!detail.salary ||
+    detail.jobDescription.length > 0 ||
+    detail.benefits.length > 0 ||
+    !!detail.fee;
   return (
     <div>
       <section className="px-5 pt-5">
@@ -295,6 +313,76 @@ function Step1({
           </div>
         </div>
       </section>
+
+      {/* Decision content — salary, job description, benefits, fee (parity with
+          the public lowongan detail; previously hidden from logged-in users). */}
+      {hasDetail && (
+        <section className="px-5 pt-4">
+          <div className="bg-pg-white border border-pg-ink-100 rounded-2xl p-5 flex flex-col gap-4">
+            {detail.salary && (
+              <div>
+                <div className="text-[11px] font-bold tracking-[0.12em] uppercase text-pg-ink-500">
+                  Gaji
+                </div>
+                <div className="text-[20px] font-extrabold tracking-tight mt-0.5">
+                  {detail.salary}{" "}
+                  {detail.salaryNote && (
+                    <span className="text-[13px] font-medium text-pg-ink-500">
+                      {detail.salaryNote}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            {detail.jobDescription.length > 0 && (
+              <div>
+                <div className="text-[11px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-1.5">
+                  Deskripsi kerja
+                </div>
+                <ul className="flex flex-col gap-1.5">
+                  {detail.jobDescription.slice(0, 6).map((d, i) => (
+                    <li
+                      key={i}
+                      className="flex items-start gap-2 text-[14px] text-pg-ink-700 leading-snug"
+                    >
+                      <span className="mt-[7px] w-1.5 h-1.5 rounded-full bg-pg-red-600 shrink-0" />
+                      <span>{d}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {detail.benefits.length > 0 && (
+              <div>
+                <div className="text-[11px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-1.5">
+                  Benefit
+                </div>
+                <div className="grid gap-1.5">
+                  {detail.benefits.slice(0, 6).map((b, i) => (
+                    <div
+                      key={i}
+                      className="flex items-baseline justify-between gap-3 text-[14px]"
+                    >
+                      <span className="text-pg-ink-700">{b.label}</span>
+                      <span className="font-bold text-right">{b.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {detail.fee && (
+              <div className="rounded-xl p-3" style={{ background: "var(--pg-ok-bg)" }}>
+                <div className="text-[13px] font-bold" style={{ color: "var(--pg-ok)" }}>
+                  Biaya: {detail.fee.amount}
+                </div>
+                {detail.fee.note && (
+                  <div className="text-[12px] text-pg-ink-600 mt-0.5">{detail.fee.note}</div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Requirements check */}
       <section className="px-5 pt-5">

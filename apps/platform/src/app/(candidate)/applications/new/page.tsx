@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { Icon } from "@/components/pg/Icon";
 import ApplyWizard from "./ApplyWizard";
+import { parseContent } from "@/lib/position-content";
 
 export const dynamic = "force-dynamic";
 
@@ -69,7 +70,7 @@ export default async function ApplyNewPage({
   // Filter section='syarat_utama' = LP-stage questions for this portal apply
   // form. importance=required → required boolean for ApplyWizard props.
   const [{ data: positionData }, { data: fieldsData }, { data: jobOrderData }, { data: docsData }] = await Promise.all([
-    supabase.from("positions").select("slug, name, country, description").eq("slug", positionSlug).maybeSingle(),
+    supabase.from("positions").select("slug, name, country, description, content").eq("slug", positionSlug).maybeSingle(),
     supabase
       .from("position_application_fields")
       .select("id, field_key, field_label, field_help, field_type, options, importance, sort_order")
@@ -84,6 +85,20 @@ export default async function ApplyNewPage({
 
   const position = positionData as Position | null;
   if (!position) redirect("/explore");
+
+  // Decision content (salary, jobdesc, benefits, fee) the public site shows but
+  // the portal used to hide — surfaced in the wizard's first step so the
+  // logged-in experience isn't strictly poorer than the logged-out one.
+  const content = parseContent(
+    (positionData as { content?: unknown } | null)?.content as never,
+  );
+  const detail = {
+    salary: content.cardMeta?.salary ?? null,
+    salaryNote: content.cardMeta?.salaryNote ?? null,
+    jobDescription: content.jobDescription ?? [],
+    benefits: content.benefits ?? [],
+    fee: content.fee ?? null,
+  };
 
   const rawFields = (fieldsData ?? []) as Array<{
     id: string;
@@ -149,6 +164,7 @@ export default async function ApplyNewPage({
 
       <ApplyWizard
         position={position}
+        detail={detail}
         jobOrder={jobOrder}
         reqStatus={reqStatus}
         hardMissingCount={hardMissing.length}

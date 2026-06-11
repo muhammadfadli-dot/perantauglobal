@@ -15,6 +15,7 @@ import {
   COUNTRY_META,
   COUNTRY_KEYS,
   COUNTRY_DB_VALUE,
+  cityForSlug,
 } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
@@ -101,6 +102,7 @@ export default async function ExplorePage({ searchParams }: PageProps) {
       slug: p.slug,
       name: p.name,
       country,
+      city: cityForSlug(p.slug, country),
       salary: meta.salary ?? "—",
       salaryNote: meta.salaryNote,
       status: jo ? "open" : "queue",
