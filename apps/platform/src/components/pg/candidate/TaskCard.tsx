@@ -56,7 +56,7 @@ export function TaskCard({
         <div className="flex flex-col items-end gap-1 shrink-0">
           {deadline && (
             <span
-              className="inline-flex items-center px-2 py-0.5 rounded-md font-mono text-[9.5px] font-bold tracking-[0.06em] uppercase"
+              className="inline-flex items-center px-2 py-0.5 rounded-md font-mono text-[11px] font-bold tracking-[0.06em] uppercase"
               style={
                 urgent
                   ? { background: "var(--pg-err-bg)", color: "var(--pg-err)" }

@@ -541,10 +541,10 @@ function ExploreCard({
           {countryLabel}
         </span>
         <span
-          className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[9.5px] font-bold uppercase tracking-[0.06em]"
+          className="absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-0.5 rounded-full font-mono text-[11px] font-bold uppercase tracking-[0.06em]"
           style={
             status === "open"
-              ? { background: "var(--pg-red-600)", color: "#fff" }
+              ? { background: "var(--pg-ok)", color: "#fff" }
               : { background: "rgba(255,255,255,0.92)", color: "var(--pg-ink-700)" }
           }
         >

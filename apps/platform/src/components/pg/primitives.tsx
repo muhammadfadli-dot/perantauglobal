@@ -117,6 +117,54 @@ export function Card({
   );
 }
 
+/** Content-shaped loading placeholder. Use in loading.tsx skeletons. */
+export function Skeleton({
+  className,
+  style,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <div
+      aria-hidden
+      className={`animate-pulse rounded-xl bg-pg-ink-100 ${className ?? ""}`}
+      style={style}
+    />
+  );
+}
+
+/** Specific, friendly empty state for data-driven lists. */
+export function EmptyState({
+  icon,
+  title,
+  sub,
+  action,
+}: {
+  icon?: IconName;
+  title: string;
+  sub?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-12 px-6">
+      {icon && (
+        <span
+          className="w-12 h-12 rounded-2xl grid place-items-center mb-3"
+          style={{ background: "var(--pg-ink-50)", color: "var(--pg-ink-400)" }}
+        >
+          <Icon name={icon} size={22} stroke={1.8} />
+        </span>
+      )}
+      <div className="text-[15px] font-extrabold text-pg-ink-900">{title}</div>
+      {sub && (
+        <div className="text-[13px] text-pg-ink-500 mt-1 max-w-xs">{sub}</div>
+      )}
+      {action && <div className="mt-4">{action}</div>}
+    </div>
+  );
+}
+
 export function Eyebrow({
   children,
   tone = "red",

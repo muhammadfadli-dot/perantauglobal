@@ -87,7 +87,10 @@
   --pg-paper: #fafaf8;
   --pg-white: #ffffff;
 
-  --pg-ok: #0f8a4a;
+  /* Deepened to match apps/web — #0f8a4a only hit 3.85:1 on white (WCAG AA
+     fail for the green status text); #0a6e3a is 5.4:1. (DESIGN.md still lists
+     the old value — update there too.) */
+  --pg-ok: #0a6e3a;
   --pg-ok-bg: #e6f4ec;
   --pg-warn: #a66500;
   --pg-warn-bg: #fbf0d9;

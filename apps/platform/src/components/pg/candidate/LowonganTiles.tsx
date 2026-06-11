@@ -170,7 +170,7 @@ export function FeaturedJobCard({
         </span>
         <span
           className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-white"
-          style={{ background: "var(--pg-red-600)" }}
+          style={{ background: "var(--pg-ok)" }}
         >
           <span
             aria-hidden
@@ -234,7 +234,7 @@ export function FeaturedJobCard({
             }}
           >
             <div className="flex flex-col">
-              <span className="font-mono text-[8.5px] uppercase tracking-[0.1em] text-white/65">
+              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/65">
                 Batch
               </span>
               <span className="text-[11.5px] font-extrabold text-white truncate">
@@ -242,7 +242,7 @@ export function FeaturedJobCard({
               </span>
             </div>
             <div className="flex flex-col">
-              <span className="font-mono text-[8.5px] uppercase tracking-[0.1em] text-white/65">
+              <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/65">
                 Slot
               </span>
               <span className="text-[11.5px] font-extrabold text-white">
@@ -254,7 +254,7 @@ export function FeaturedJobCard({
             </div>
             {job.batch.deadline && (
               <div className="flex flex-col">
-                <span className="font-mono text-[8.5px] uppercase tracking-[0.1em] text-white/65">
+                <span className="font-mono text-[10px] uppercase tracking-[0.1em] text-white/65">
                   Tutup
                 </span>
                 <span className="text-[11.5px] font-extrabold text-white truncate">
@@ -302,7 +302,7 @@ export function RowJobCard({
         aria-hidden
       />
       <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-        <span className="font-mono text-[9.5px] font-bold uppercase tracking-[0.06em] text-pg-ink-500">
+        <span className="font-mono text-[11px] font-bold uppercase tracking-[0.06em] text-pg-ink-500">
           {COUNTRY_FLAG[tint]} {COUNTRY_LABEL[tint]}
           {job.city ? <span className="opacity-70"> · {job.city}</span> : null}
         </span>
@@ -321,14 +321,14 @@ export function RowJobCard({
       <div className="flex flex-col items-end gap-1 shrink-0">
         {job.appliedHref ? (
           <span
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono text-[9px] font-bold uppercase tracking-[0.06em]"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono text-[11px] font-bold uppercase tracking-[0.06em]"
             style={{ background: "var(--pg-info-bg)", color: "var(--pg-info)" }}
           >
             Dilamar
           </span>
         ) : isNew ? (
           <span
-            className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono text-[9px] font-bold uppercase tracking-[0.06em]"
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono text-[11px] font-bold uppercase tracking-[0.06em]"
             style={{ background: "var(--pg-red-50)", color: "var(--pg-red-600)" }}
           >
             Baru

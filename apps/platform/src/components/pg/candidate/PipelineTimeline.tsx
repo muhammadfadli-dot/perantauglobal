@@ -110,7 +110,7 @@ export function DocStateBadge({
       : { bg: "var(--pg-ink-50)", fg: "var(--pg-ink-500)", label: "Nanti" };
   return (
     <span
-      className="inline-flex items-center px-2 py-0.5 rounded font-mono text-[9.5px] font-bold uppercase tracking-[0.06em]"
+      className="inline-flex items-center px-2 py-0.5 rounded font-mono text-[11px] font-bold uppercase tracking-[0.06em]"
       style={{ background: colors.bg, color: colors.fg }}
     >
       {colors.label}
