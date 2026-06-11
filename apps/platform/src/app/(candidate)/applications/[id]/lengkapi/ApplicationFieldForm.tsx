@@ -216,6 +216,7 @@ export default function ApplicationFieldForm({
                 candidateId={candidateId}
                 docType={field.document_type}
                 prefillMetadata={{}}
+                applicationId={applicationId}
               />
             )}
           </>

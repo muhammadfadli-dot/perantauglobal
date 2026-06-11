@@ -340,6 +340,8 @@ export function ApplyForm({
 
           {errorMsg && (
             <div
+              role="alert"
+              aria-live="assertive"
               className="mt-4 px-4 py-3 rounded-lg text-sm flex items-start gap-2"
               style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
             >
@@ -439,6 +441,8 @@ export function ApplyForm({
 
           {errorMsg && (
             <div
+              role="alert"
+              aria-live="assertive"
               className="mt-4 px-4 py-3 rounded-lg text-sm flex items-start gap-2"
               style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
             >
@@ -672,7 +676,7 @@ function FieldQuestion({
               return (
                 <label
                   key={opt.value}
-                  className={`flex items-center gap-3 px-3.5 py-3 min-h-[52px] rounded-xl border-[1.5px] cursor-pointer ${
+                  className={`flex items-center gap-3 px-3.5 py-3 min-h-[52px] rounded-xl border-[1.5px] cursor-pointer focus-within:ring-2 focus-within:ring-pg-red-600 focus-within:ring-offset-1 ${
                     selected
                       ? "border-pg-red-600 bg-pg-red-50"
                       : "border-pg-ink-200 bg-pg-white"
@@ -715,11 +719,12 @@ function FieldQuestion({
                   onClick={() =>
                     setValue(selected ? arr.filter((v) => v !== opt.value) : [...arr, opt.value])
                   }
-                  className={`inline-flex items-center gap-1.5 min-h-[40px] px-3.5 text-sm font-bold rounded-full border-[1.5px] ${
+                  className={`inline-flex items-center gap-1.5 min-h-[44px] px-3.5 text-sm font-bold rounded-full border-[1.5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-pg-red-600 focus-visible:ring-offset-1 ${
                     selected
                       ? "bg-pg-red-50 border-pg-red-600 text-pg-red-800"
                       : "bg-pg-white border-pg-ink-200 text-pg-ink-700"
                   }`}
+                  aria-pressed={selected}
                 >
                   {selected && <Icon name="check" size={12} stroke={2.4} />}
                   {opt.label}
@@ -897,6 +902,8 @@ function SingleStepForm({
 
       {errorMsg && (
         <div
+          role="alert"
+          aria-live="assertive"
           className="mt-4 px-4 py-3 rounded-lg text-sm flex items-start gap-2"
           style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
         >

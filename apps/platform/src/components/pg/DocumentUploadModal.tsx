@@ -21,6 +21,11 @@ export type DocumentUploadModalProps = {
   /** Pre-fill metadata (e.g. when triggered from a requirement that targets
    *  driving_license with class=b1). Greys out the field as auto-derived. */
   prefillMetadata?: Record<string, string>;
+  /** When the upload satisfies a specific application's file-type requirement,
+   *  pass its id so the row is linked. The completeness engine + readiness view
+   *  match documents by application_id, so omitting it leaves file requirements
+   *  permanently unsatisfiable. */
+  applicationId?: string;
   /** Called after successful insert so caller can refresh data. */
   onUploaded?: () => void;
 };
@@ -38,6 +43,7 @@ export default function DocumentUploadModal({
   candidateId,
   docType,
   prefillMetadata = {},
+  applicationId,
   onUploaded,
 }: DocumentUploadModalProps) {
   if (!open) return null;
@@ -48,6 +54,7 @@ export default function DocumentUploadModal({
       candidateId={candidateId}
       docType={docType}
       prefillMetadata={prefillMetadata}
+      applicationId={applicationId}
       onUploaded={onUploaded}
     />
   );
@@ -58,6 +65,7 @@ function SheetBody({
   candidateId,
   docType,
   prefillMetadata,
+  applicationId,
   onUploaded,
 }: Omit<DocumentUploadModalProps, "open"> & { prefillMetadata: Record<string, string> }) {
   const router = useRouter();
@@ -154,6 +162,9 @@ function SheetBody({
           metadata: cleanMeta,
           expires_at: expiresAt,
           display_name: schema.label,
+          // Link to the application when this upload satisfies a file requirement,
+          // so the completeness engine / readiness view can match it.
+          ...(applicationId ? { application_id: applicationId } : {}),
         } as never)
         .select("id")
         .single();
@@ -234,7 +245,11 @@ function SheetBody({
       </div>
 
       {error && (
-        <div className="px-5 pt-3 text-[13px] text-pg-err flex gap-1.5 items-start">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="px-5 pt-3 text-[13px] text-pg-err flex gap-1.5 items-start"
+        >
           <Icon name="warn" size={14} className="mt-0.5 shrink-0" />
           <span>{error}</span>
         </div>

@@ -182,6 +182,8 @@ export default function ApplyWizard({
       {error && (
         <div className="px-5 pt-3">
           <div
+            role="alert"
+            aria-live="assertive"
             className="px-3.5 py-3 rounded-lg flex items-start gap-2 text-sm"
             style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
           >
@@ -450,7 +452,7 @@ function FieldInput({
               return (
                 <label
                   key={opt.value}
-                  className={`flex items-center gap-3 px-3.5 py-3 min-h-[48px] rounded-xl border-[1.5px] cursor-pointer ${
+                  className={`flex items-center gap-3 px-3.5 py-3 min-h-[48px] rounded-xl border-[1.5px] cursor-pointer focus-within:ring-2 focus-within:ring-pg-red-600 focus-within:ring-offset-1 ${
                     selected
                       ? "border-pg-red-600 bg-pg-red-50"
                       : "border-pg-ink-200 bg-pg-white hover:border-pg-ink-300"
@@ -491,11 +493,12 @@ function FieldInput({
                   onClick={() =>
                     setValue(selected ? arr.filter((v) => v !== opt.value) : [...arr, opt.value])
                   }
-                  className={`inline-flex items-center gap-1.5 min-h-[40px] px-3.5 text-sm font-bold rounded-full border-[1.5px] ${
+                  className={`inline-flex items-center gap-1.5 min-h-[44px] px-3.5 text-sm font-bold rounded-full border-[1.5px] focus:outline-none focus-visible:ring-2 focus-visible:ring-pg-red-600 focus-visible:ring-offset-1 ${
                     selected
                       ? "bg-pg-red-50 border-pg-red-600 text-pg-red-800"
                       : "bg-pg-white border-pg-ink-200 text-pg-ink-700"
                   }`}
+                  aria-pressed={selected}
                 >
                   {selected && <Icon name="check" size={12} stroke={2.4} />}
                   {opt.label}
@@ -509,7 +512,9 @@ function FieldInput({
             type={field.field_type === "number" ? "number" : "text"}
             value={typeof value === "string" ? value : ""}
             onChange={(e) => setValue(e.target.value)}
-            className="w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3.5 py-3 text-base focus:border-pg-red-600 outline-none"
+            aria-required={field.required}
+            aria-label={field.field_label}
+            className="w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3.5 py-3 text-base focus:border-pg-red-600 outline-none focus-visible:ring-2 focus-visible:ring-pg-red-200"
           />
         )}
         {field.field_type === "textarea" && (
@@ -517,7 +522,9 @@ function FieldInput({
             value={typeof value === "string" ? value : ""}
             onChange={(e) => setValue(e.target.value)}
             rows={4}
-            className="w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3.5 py-3 text-base focus:border-pg-red-600 outline-none"
+            aria-required={field.required}
+            aria-label={field.field_label}
+            className="w-full bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3.5 py-3 text-base focus:border-pg-red-600 outline-none focus-visible:ring-2 focus-visible:ring-pg-red-200"
           />
         )}
       </div>
@@ -587,11 +594,12 @@ function Step3({
       )}
 
       <section className="px-5 pt-5 pb-6">
-        <label className="flex gap-3 items-start cursor-pointer">
+        <label className="flex gap-3 items-start cursor-pointer rounded-xl p-1 -m-1 focus-within:ring-2 focus-within:ring-pg-red-600 focus-within:ring-offset-1">
           <input
             type="checkbox"
             checked={agree}
             onChange={(e) => setAgree(e.target.checked)}
+            aria-required
             className="sr-only"
           />
           <div
