@@ -3,18 +3,11 @@ import { createServerClient } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import CandidateFilters from "@/components/admin/CandidateFilters";
 import { Icon } from "@/components/pg/Icon";
+import { countryLabelFromDb } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 25;
-
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Arab Saudi",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-  any: "Global",
-};
 
 type Search = {
   q?: string;
@@ -378,9 +371,10 @@ export default async function CandidatesListPage({
                           className="text-[11px] mt-0.5 leading-tight truncate"
                           style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
                         >
-                          {COUNTRY_LABEL[apps.latest_position_country ?? ""] ??
-                            apps.latest_position_country ??
-                            "—"}
+                          {countryLabelFromDb(
+                            apps.latest_position_country,
+                            apps.latest_position_country ?? "—",
+                          )}
                           {apps.count > 1 ? ` · +${apps.count - 1} lain` : ""}
                         </div>
                       </div>

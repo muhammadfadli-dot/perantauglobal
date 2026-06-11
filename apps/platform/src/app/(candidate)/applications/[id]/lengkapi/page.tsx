@@ -4,16 +4,9 @@ import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
 import ApplicationFieldForm from "./ApplicationFieldForm";
+import { countryLabelFromDb } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
-
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Arab Saudi",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-  any: "Global",
-};
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -59,7 +52,7 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
             style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
           >
             {application.positions.name} —{" "}
-            {COUNTRY_LABEL[application.positions.country] ?? application.positions.country}
+            {countryLabelFromDb(application.positions.country, application.positions.country)}
           </div>
         </section>
 

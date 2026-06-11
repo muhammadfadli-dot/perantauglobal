@@ -4,6 +4,7 @@ import AdminTopBar from "@/components/admin/TopBar";
 import { KpiStat, Sparkline } from "@/components/admin/Sparkline";
 import { isAcceptedStage } from "@/lib/applicationStatus";
 import { jakartaDayKey } from "@/lib/datetime";
+import { countryLabelFromDb } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
 
@@ -65,13 +66,6 @@ function bucketWeekly(timestamps: string[], now: Date): number[] {
   }
   return series;
 }
-
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Saudi Arabia",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-};
 
 export default async function AnalyticsPage({
   searchParams,
@@ -502,7 +496,7 @@ export default async function AnalyticsPage({
                             fontFamily: "var(--font-mono)",
                           }}
                         >
-                          {COUNTRY_LABEL[p.country] ?? p.country}
+                          {countryLabelFromDb(p.country, p.country)}
                         </div>
                         <div className="mt-1.5 h-1 bg-pg-ink-100 rounded-full overflow-hidden">
                           <div

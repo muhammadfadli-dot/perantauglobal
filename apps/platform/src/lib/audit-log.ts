@@ -56,6 +56,12 @@ export const AUDIT_ACTIONS = {
   discard_position_draft: { label: "Buang draft posisi", tone: "mute" },
   delete_position: { label: "Hapus posisi", tone: "err" },
   update_position_meta: { label: "Ubah meta/visibility posisi", tone: "info" },
+  // Application-field (screening) operations — these drive hard_pass/readiness,
+  // so every mutation is tracked (PDP + scoring accountability).
+  create_application_field: { label: "Tambah field lamaran", tone: "ok" },
+  update_application_field: { label: "Ubah field lamaran", tone: "info" },
+  delete_application_field: { label: "Hapus field lamaran", tone: "err" },
+  reorder_application_field: { label: "Urut ulang field lamaran", tone: "mute" },
   // Event CMS operations
   create_event: { label: "Buat event", tone: "ok" },
   update_event: { label: "Edit event", tone: "info" },
@@ -83,6 +89,7 @@ export const AUDIT_RESOURCES = {
   commission_event: "Komisi",
   job_order: "Job order",
   position: "Posisi",
+  application_field: "Field lamaran",
   event: "Event",
 } as const satisfies Record<string, string>;
 

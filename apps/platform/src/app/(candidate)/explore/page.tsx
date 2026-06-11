@@ -11,6 +11,11 @@ import {
   type CountryKey,
   type JobCardData,
 } from "@/components/pg/candidate/LowonganTiles";
+import {
+  COUNTRY_META,
+  COUNTRY_KEYS,
+  COUNTRY_DB_VALUE,
+} from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
 
@@ -33,13 +38,6 @@ type JobOrderRow = {
 interface PageProps {
   searchParams: Promise<{ country?: string; position?: string }>;
 }
-
-const COUNTRY_DB_BY_KEY: Record<CountryKey, string> = {
-  saudi: "saudi_arabia",
-  jepang: "japan",
-  taiwan: "taiwan",
-  indonesia: "indonesia",
-};
 
 const NEW_DAYS = 14;
 
@@ -123,9 +121,15 @@ export default async function ExplorePage({ searchParams }: PageProps) {
     });
   }
 
-  // Per-country counts (all, pre-filter)
-  const counts: Record<CountryKey, number> = { saudi: 0, jepang: 0, taiwan: 0, indonesia: 0 };
+  // Per-country counts (all, pre-filter) — derived over every known country.
+  const counts = Object.fromEntries(
+    COUNTRY_KEYS.map((k) => [k, 0]),
+  ) as Record<CountryKey, number>;
   for (const j of all) counts[j.country]++;
+  // Only surface tiles for countries that actually have active positions, so a
+  // newly-advertised country (e.g. europe) appears automatically and an empty
+  // one never shows a dead filter.
+  const presentKeys = COUNTRY_KEYS.filter((k) => counts[k] > 0);
 
   const filtered = activeCountry ? all.filter((j) => j.country === activeCountry) : all;
   const open = filtered.filter((j) => j.status === "open");
@@ -148,7 +152,7 @@ export default async function ExplorePage({ searchParams }: PageProps) {
             Mau ke mana?
           </h1>
           <p className="text-[13px] text-pg-ink-500 mt-1 m-0">
-            {all.length} posisi · 4 negara · resmi P3MI
+            {all.length} posisi · {presentKeys.length} negara · resmi P3MI
           </p>
         </div>
 
@@ -181,14 +185,14 @@ export default async function ExplorePage({ searchParams }: PageProps) {
                 active={!activeCountry}
                 href="/explore"
               />
-              {(["saudi", "jepang", "taiwan", "indonesia"] as CountryKey[]).map((k) => (
+              {presentKeys.map((k) => (
                 <CountryFilterTile
                   key={k}
                   kind="country"
                   countryKey={k}
                   count={counts[k]}
                   active={activeCountry === k}
-                  href={`/explore?country=${COUNTRY_DB_BY_KEY[k]}`}
+                  href={`/explore?country=${COUNTRY_DB_VALUE[k]}`}
                 />
               ))}
             </div>
@@ -203,19 +207,9 @@ export default async function ExplorePage({ searchParams }: PageProps) {
               className="inline-flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-full bg-pg-ink-900 text-white no-underline font-mono text-[11px] font-bold tracking-[0.04em]"
             >
               <span aria-hidden className="text-[12px] leading-none">
-                {activeCountry === "saudi" && "🇸🇦"}
-                {activeCountry === "jepang" && "🇯🇵"}
-                {activeCountry === "taiwan" && "🇹🇼"}
-                {activeCountry === "indonesia" && "🇮🇩"}
+                {COUNTRY_META[activeCountry].flag}
               </span>
-              {activeCountry === "saudi"
-                ? "Arab Saudi"
-                : activeCountry === "jepang"
-                ? "Jepang"
-                : activeCountry === "taiwan"
-                ? "Taiwan"
-                : "Indonesia"}{" "}
-              · {filtered.length}
+              {COUNTRY_META[activeCountry].label} · {filtered.length}
               <span aria-hidden className="ml-1 inline-grid place-items-center w-4 h-4 rounded-full bg-white/15">
                 <Icon name="x" size={9} stroke={2.5} />
               </span>

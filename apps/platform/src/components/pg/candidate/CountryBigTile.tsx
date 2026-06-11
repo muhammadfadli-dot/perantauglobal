@@ -1,4 +1,6 @@
 import Link from "next/link";
+import type { CountryKey } from "@perantauglobal/db/country";
+import { countryImageUrl } from "@perantauglobal/db/media";
 
 /**
  * CountryBigTile — large country picker tile used in S1 (no-application) Beranda.
@@ -13,7 +15,7 @@ export function CountryBigTile({
   count,
   href,
 }: {
-  slug: "saudi" | "jepang" | "taiwan" | "indonesia";
+  slug: CountryKey;
   flag: string;
   name: string;
   count: string;
@@ -26,7 +28,7 @@ export function CountryBigTile({
       style={{
         width: 168,
         aspectRatio: "4/5",
-        backgroundImage: `url(/images/countries/${slug}.jpg)`,
+        backgroundImage: `url(${countryImageUrl(slug)})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         boxShadow: "0 4px 16px rgba(20,16,12,0.10)",

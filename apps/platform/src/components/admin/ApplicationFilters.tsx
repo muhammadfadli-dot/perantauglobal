@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Icon } from "@/components/pg/Icon";
+import {
+  COUNTRY_OPTIONS,
+  COUNTRY_META,
+  normalizeCountryKey,
+} from "@perantauglobal/db/country";
 
 const SELECT_CLASS =
   "bg-pg-white border-[1.5px] border-pg-ink-200 rounded-lg px-3 py-2 text-sm text-pg-ink-900 outline-none focus:border-pg-red-600 transition-colors";
@@ -21,30 +26,19 @@ type PositionEntry = {
   app_count: number;
 };
 
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Saudi Arabia",
-  japan: "Jepang",
-  indonesia: "Indonesia",
-  taiwan: "Taiwan",
-  any: "Lainnya",
-};
-
-const COUNTRY_FLAG: Record<string, string> = {
-  saudi_arabia: "🇸🇦",
-  japan: "🇯🇵",
-  indonesia: "🇮🇩",
-  taiwan: "🇹🇼",
-  any: "🌐",
-};
-
-const COUNTRY_ORDER = ["saudi_arabia", "japan", "indonesia", "taiwan", "any"];
+// Filter labels/flags/order derived from the shared country source (incl. europe).
+const COUNTRY_LABEL_BY_DB: Record<string, string> = Object.fromEntries(
+  COUNTRY_OPTIONS.map((o) => [o.value, o.label]),
+);
+const COUNTRY_ORDER = COUNTRY_OPTIONS.map((o) => o.value);
 
 function countryLabel(c: string) {
-  return COUNTRY_LABEL[c] ?? c;
+  return COUNTRY_LABEL_BY_DB[c] ?? c;
 }
 
 function countryFlag(c: string) {
-  return COUNTRY_FLAG[c] ?? "🌐";
+  const k = normalizeCountryKey(c);
+  return k ? COUNTRY_META[k].flag : "🌐";
 }
 
 export default function ApplicationFilters({

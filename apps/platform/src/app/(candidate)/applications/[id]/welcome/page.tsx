@@ -3,16 +3,9 @@ import { notFound } from "next/navigation";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { Icon } from "@/components/pg/Icon";
 import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
+import { countryLabelFromDb } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
-
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Arab Saudi",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-  any: "Global",
-};
 
 const STEPS = [
   {
@@ -126,7 +119,7 @@ export default async function ApplyWelcomePage({ params }: PageProps) {
             className="text-[10px] font-semibold tracking-[0.12em] uppercase"
             style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
           >
-            {COUNTRY_LABEL[application.positions.country] ?? application.positions.country} ·
+            {countryLabelFromDb(application.positions.country, application.positions.country)} ·
             Lamaran kamu
           </div>
           <div className="text-[24px] font-extrabold tracking-[-0.02em] text-pg-ink-primary leading-tight">

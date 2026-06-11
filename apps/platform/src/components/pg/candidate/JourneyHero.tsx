@@ -1,35 +1,11 @@
 import Link from "next/link";
 import { Icon } from "@/components/pg/Icon";
-
-const COUNTRY_KEY: Record<string, "saudi" | "jepang" | "taiwan" | "indonesia"> = {
-  saudi_arabia: "saudi",
-  saudi: "saudi",
-  japan: "jepang",
-  jepang: "jepang",
-  taiwan: "taiwan",
-  indonesia: "indonesia",
-};
-
-const COUNTRY_FLAG: Record<string, string> = {
-  saudi: "🇸🇦",
-  jepang: "🇯🇵",
-  taiwan: "🇹🇼",
-  indonesia: "🇮🇩",
-};
-
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi: "Arab Saudi",
-  jepang: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-};
-
-const COUNTRY_TINT: Record<string, string> = {
-  saudi: "saturate(1.05) brightness(0.94) sepia(0.16)",
-  jepang: "saturate(0.85) brightness(0.92) hue-rotate(-8deg)",
-  taiwan: "saturate(1.1) brightness(0.95)",
-  indonesia: "saturate(1.05) brightness(0.93)",
-};
+import {
+  COUNTRY_META,
+  COUNTRY_TINT_FILTER,
+  normalizeCountryKey,
+} from "@perantauglobal/db/country";
+import { positionHeroUrl, countryImageUrl } from "@perantauglobal/db/media";
 
 const PIPELINE_STAGES = [
   { key: "applied", label: "Daftar" },
@@ -65,11 +41,17 @@ export function JourneyHero({
   ctaLabel?: string;
   ctaHref?: string;
 }) {
-  const key = COUNTRY_KEY[countrySlug] ?? "jepang";
-  const flag = COUNTRY_FLAG[key];
-  const label = COUNTRY_LABEL[key];
-  const tint = COUNTRY_TINT[key];
-  const heroImg = `/images/lowongan/${positionSlug}.jpg`;
+  // No silent "jepang" fallback — an unmapped country (e.g. "any") shows a
+  // neutral eyebrow rather than the wrong flag/label.
+  const key = normalizeCountryKey(countrySlug);
+  const meta = key ? COUNTRY_META[key] : null;
+  const flag = meta?.flag ?? "";
+  const label = meta?.label ?? "";
+  const tint = key ? COUNTRY_TINT_FILTER[key] : "none";
+  // Layered fallback: position photo → country photo (when known) → ink-900.
+  const heroBg = key
+    ? `url(${positionHeroUrl(positionSlug)}), url(${countryImageUrl(key)})`
+    : `url(${positionHeroUrl(positionSlug)})`;
 
   const stageIdx = mode === "applying" ? 1 : 2; // applying=lengkapi, processing=review
   const dotColor = mode === "processing" ? "#7ad7ff" : "#ffd166";
@@ -96,7 +78,7 @@ export function JourneyHero({
       <div
         aria-hidden
         className="absolute inset-0 z-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImg})`, filter: tint }}
+        style={{ backgroundImage: heroBg, filter: tint }}
       />
       {/* Fallback color when image missing */}
       <div aria-hidden className="absolute inset-0 -z-10 bg-pg-ink-900" />

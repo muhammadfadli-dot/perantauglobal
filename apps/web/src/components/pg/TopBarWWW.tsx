@@ -52,7 +52,7 @@ export function TopBarWWW() {
         <div className="flex items-center gap-2">
           <a
             href={APP_URL}
-            className="inline-flex items-center justify-center min-h-[36px] md:min-h-[40px] px-2.5 sm:px-3.5 text-[13px] sm:text-sm font-semibold rounded-xl bg-pg-red-600 text-white hover:bg-pg-red-700 no-underline transition-colors whitespace-nowrap"
+            className="inline-flex items-center justify-center min-h-[44px] md:min-h-[40px] px-2.5 sm:px-3.5 text-[13px] sm:text-sm font-semibold rounded-xl bg-pg-red-600 text-white hover:bg-pg-red-700 no-underline transition-colors whitespace-nowrap"
           >
             <span className="sm:hidden">Daftar</span>
             <span className="hidden sm:inline">Buka Perantau Global</span>
@@ -60,7 +60,7 @@ export function TopBarWWW() {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="md:hidden w-9 h-9 sm:w-10 sm:h-10 rounded-[10px] border border-pg-ink-200 bg-pg-white grid place-items-center cursor-pointer flex-shrink-0"
+            className="md:hidden w-11 h-11 rounded-[10px] border border-pg-ink-200 bg-pg-white grid place-items-center cursor-pointer flex-shrink-0"
             aria-label="Menu"
           >
             <Icon name={open ? "x" : "menu"} size={18} />

@@ -1,45 +1,25 @@
 import Link from "next/link";
 import { Icon } from "@/components/pg/Icon";
+import {
+  COUNTRY_FLAG,
+  COUNTRY_LABEL,
+  COUNTRY_TINT,
+  normalizeCountryKey,
+  type CountryKey,
+} from "@perantauglobal/db/country";
+import { positionHeroUrl, countryImageUrl } from "@perantauglobal/db/media";
 
 /**
  * Lowongan tab UI: country filter tiles + featured/row job cards.
  * Mirrors web's /lowongan but mobile-first.
+ *
+ * Country lookups come from the shared @perantauglobal/db/country source so
+ * web, portal, and admin can't drift (e.g. the europe gap).
  */
 
-type CountryKey = "saudi" | "jepang" | "taiwan" | "indonesia";
-
-const COUNTRY_KEY: Record<string, CountryKey> = {
-  saudi_arabia: "saudi",
-  saudi: "saudi",
-  japan: "jepang",
-  jepang: "jepang",
-  taiwan: "taiwan",
-  indonesia: "indonesia",
-};
-
-const COUNTRY_TINT: Record<CountryKey, string> = {
-  saudi: "#8a5a14",
-  jepang: "#1c3d6e",
-  taiwan: "#1e6d4d",
-  indonesia: "#b8341c",
-};
-
-const COUNTRY_FLAG: Record<CountryKey, string> = {
-  saudi: "🇸🇦",
-  jepang: "🇯🇵",
-  taiwan: "🇹🇼",
-  indonesia: "🇮🇩",
-};
-
-const COUNTRY_LABEL: Record<CountryKey, string> = {
-  saudi: "Arab Saudi",
-  jepang: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-};
-
+/** Map a raw positions.country value to a CountryKey (null when unmapped, e.g. "any"). */
 function normalizeCountry(s: string): CountryKey | null {
-  return COUNTRY_KEY[s] ?? null;
+  return normalizeCountryKey(s);
 }
 
 export { normalizeCountry, COUNTRY_FLAG, COUNTRY_LABEL, COUNTRY_TINT };
@@ -72,7 +52,7 @@ export function CountryFilterTile({
         height: 88,
         background: isAll
           ? "linear-gradient(135deg, var(--pg-ink-700), var(--pg-ink-900))"
-          : `url(/images/countries/${countryKey}.jpg) center/cover`,
+          : `url(${countryImageUrl(countryKey!)}) center/cover`,
         outline: active ? "2.5px solid var(--pg-ink-900)" : "1px solid var(--pg-ink-100)",
         outlineOffset: active ? 2 : 0,
         boxShadow: active
@@ -150,7 +130,8 @@ export function FeaturedJobCard({
   newApplyHref: string;
 }) {
   const tint = job.country;
-  const heroImg = `/images/lowongan/${job.slug}.jpg`;
+  // Layered fallback: position photo → country photo → solid tint (parent bg).
+  const heroBg = `url(${positionHeroUrl(job.slug)}), url(${countryImageUrl(job.country)})`;
   const pct = job.batch
     ? Math.round((job.batch.slotsFilled / job.batch.slotsTotal) * 100)
     : 0;
@@ -168,7 +149,7 @@ export function FeaturedJobCard({
       <div
         aria-hidden
         className="absolute inset-0 z-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImg})` }}
+        style={{ backgroundImage: heroBg }}
       />
       <div
         aria-hidden
@@ -302,7 +283,6 @@ export function RowJobCard({
   isNew?: boolean;
 }) {
   const tint = job.country;
-  const heroImg = `/images/lowongan/${job.slug}.jpg`;
   return (
     <Link
       href={job.appliedHref ?? newApplyHref}
@@ -315,7 +295,8 @@ export function RowJobCard({
       <div
         className="relative w-14 h-14 rounded-[10px] overflow-hidden shrink-0 bg-cover bg-center"
         style={{
-          backgroundImage: `url(${heroImg}), linear-gradient(135deg, ${COUNTRY_TINT[tint]}, ${COUNTRY_TINT[tint]})`,
+          backgroundImage: `url(${positionHeroUrl(job.slug)}), url(${countryImageUrl(tint)})`,
+          backgroundColor: COUNTRY_TINT[tint],
           backgroundSize: "cover, cover",
         }}
         aria-hidden

@@ -11,6 +11,7 @@ import {
   COUNTRY_TINT,
   normalizeCountry,
 } from "@/components/pg/candidate/LowonganTiles";
+import { positionHeroUrl, countryImageUrl } from "@perantauglobal/db/media";
 
 export const dynamic = "force-dynamic";
 
@@ -94,7 +95,9 @@ export default async function ApplicationsListPage() {
                   a.positions?.country ? normalizeCountry(a.positions.country) : null;
                 const countryLabel =
                   countryKey ? COUNTRY_LABEL_PORTAL[countryKey] : a.positions?.country ?? "—";
-                const heroImg = `/images/lowongan/${a.position_slug}.jpg`;
+                const heroImg = countryKey
+                  ? `url(${positionHeroUrl(a.position_slug)}), url(${countryImageUrl(countryKey)})`
+                  : `url(${positionHeroUrl(a.position_slug)})`;
                 const tintBg = countryKey ? COUNTRY_TINT[countryKey] : "var(--pg-ink-700)";
 
                 return (
@@ -113,7 +116,7 @@ export default async function ApplicationsListPage() {
                       className="w-16 h-16 rounded-[12px] overflow-hidden shrink-0 bg-cover bg-center"
                       style={{
                         backgroundColor: tintBg,
-                        backgroundImage: `url(${heroImg})`,
+                        backgroundImage: heroImg,
                       }}
                       aria-hidden
                     />

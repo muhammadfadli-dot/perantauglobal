@@ -18,6 +18,7 @@ import ApplicationFieldsEditor, {
 import { EditorTabsHeader } from "@/components/admin/EditorTabsHeader";
 import { BannerMetric } from "@/components/admin/BannerMetric";
 import { parseContent } from "@/lib/position-content";
+import { countryLabelFromDb } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
 
@@ -44,12 +45,6 @@ type JobOrder = {
   created_at: string;
 };
 
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Saudi Arabia",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-};
 
 export default async function PositionDetailPage({
   params,
@@ -187,7 +182,7 @@ export default async function PositionDetailPage({
               className="text-[11px] font-semibold tracking-[0.12em] uppercase"
               style={{ color: "var(--pg-red-600)", fontFamily: "var(--font-mono)" }}
             >
-              {COUNTRY_LABEL[position.country] ?? position.country}
+              {countryLabelFromDb(position.country, position.country)}
             </div>
             <h1 className="text-[28px] font-extrabold leading-[32px] tracking-[-0.025em]">
               {position.name}
@@ -362,7 +357,7 @@ export default async function PositionDetailPage({
       <PreviewMount
         slug={position.slug}
         name={position.name}
-        country={COUNTRY_LABEL[position.country] ?? position.country}
+        country={countryLabelFromDb(position.country, position.country)}
         description={position.description}
         initialContent={editorContent}
         fields={fields.map((f) => ({

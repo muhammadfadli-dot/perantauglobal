@@ -4,16 +4,7 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/pg/Icon";
 import { createPosition } from "./actions";
-
-type Country = "saudi_arabia" | "japan" | "taiwan" | "indonesia" | "any";
-
-const COUNTRY_OPTIONS: { value: Country; label: string; flag: string }[] = [
-  { value: "saudi_arabia", label: "Arab Saudi", flag: "SA" },
-  { value: "japan", label: "Jepang", flag: "JP" },
-  { value: "taiwan", label: "Taiwan", flag: "TW" },
-  { value: "indonesia", label: "Indonesia", flag: "ID" },
-  { value: "any", label: "Lainnya / Global", flag: "GL" },
-];
+import { COUNTRY_OPTIONS } from "@perantauglobal/db/country";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -32,7 +23,7 @@ export default function PositionCreateForm() {
   const [name, setName] = React.useState("");
   const [slugInput, setSlugInput] = React.useState("");
   const [slugTouched, setSlugTouched] = React.useState(false);
-  const [country, setCountry] = React.useState<Country | "">("");
+  const [country, setCountry] = React.useState<string>("");
   const [error, setError] = React.useState<string | null>(null);
 
   const effectiveSlug = slugTouched ? slugInput : slugify(name);
@@ -50,7 +41,7 @@ export default function PositionCreateForm() {
         const result = await createPosition({
           name: name.trim(),
           slug: effectiveSlug,
-          country: country as Country,
+          country,
         });
         if (!result.ok) {
           // Expected validation / duplicate slug — show inline, don't navigate.
@@ -149,7 +140,7 @@ export default function PositionCreateForm() {
         </Field>
 
         <Field label="Negara penempatan" required>
-          <div className="grid grid-cols-5 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {COUNTRY_OPTIONS.map((c) => {
               const active = country === c.value;
               return (
@@ -175,7 +166,7 @@ export default function PositionCreateForm() {
                       fontSize: "10px",
                     }}
                   >
-                    {c.flag}
+                    {c.initials}
                   </span>
                   <span
                     className="text-[11px] font-bold"

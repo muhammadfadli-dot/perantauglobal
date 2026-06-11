@@ -18,6 +18,7 @@ import {
   COUNTRY_TINT,
   normalizeCountry,
 } from "@/components/pg/candidate/LowonganTiles";
+import { positionHeroUrl, countryImageUrl } from "@perantauglobal/db/media";
 
 export const dynamic = "force-dynamic";
 
@@ -177,7 +178,9 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               aria-hidden
               className="absolute inset-0 z-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url(/images/lowongan/${application.position_slug}.jpg)`,
+                backgroundImage: countryKey
+                  ? `url(${positionHeroUrl(application.position_slug)}), url(${countryImageUrl(countryKey)})`
+                  : `url(${positionHeroUrl(application.position_slug)})`,
               }}
             />
             <div

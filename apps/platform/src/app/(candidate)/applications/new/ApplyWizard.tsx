@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { Icon } from "@/components/pg/Icon";
 import { Button, Badge } from "@/components/pg/primitives";
+import { countryLabelFromDb } from "@perantauglobal/db/country";
 import { submitApplication } from "./actions";
 
 type Position = {
@@ -50,13 +51,6 @@ type FormField = {
 const DOC_LABEL: Record<DocStatus["type"], string> = {
   ktp: "KTP",
   passport: "Passport",
-};
-
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Saudi Arabia",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
 };
 
 export default function ApplyWizard({
@@ -276,7 +270,7 @@ function Step1({
             }}
           >
             <div className="text-[11px] font-bold tracking-[0.14em] uppercase opacity-85">
-              {COUNTRY_LABEL[position.country] ?? position.country}
+              {countryLabelFromDb(position.country, position.country)}
             </div>
             <div className="text-2xl font-extrabold tracking-tight mt-1">{position.name}.</div>
           </div>
@@ -561,7 +555,7 @@ function Step3({
             Posisi
           </div>
           <div className="text-xl font-extrabold tracking-tight mt-1">
-            {position.name} · {COUNTRY_LABEL[position.country] ?? position.country}
+            {position.name} · {countryLabelFromDb(position.country, position.country)}
           </div>
           {jobOrder && (
             <div className="text-sm text-pg-ink-500 mt-1">{jobOrder.intake_label}</div>

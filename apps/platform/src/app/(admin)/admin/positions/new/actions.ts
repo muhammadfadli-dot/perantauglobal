@@ -57,18 +57,22 @@ export async function createPosition(
 
   // positions.role is NOT NULL — historically picked from a fixed list in the
   // old wizard. The new editor doesn't surface it (apps/web reads `role` from
-  // the static lib/positions catalog, not from DB), so we seed it as the
-  // canonical role-segment of the slug (best-effort: first hyphen-segment, or
-  // the whole slug if no hyphen). Admin can revisit if needed.
-  const role = input.slug.split("-")[0] || input.slug;
+  // the static lib/positions catalog, not from DB), so we seed it from the full
+  // slug rather than the first hyphen-segment (which produced garbage like
+  // "head"/"assistant" the admin could never see or fix).
+  const role = input.slug;
 
+  // Born as a DRAFT, never live: a new shell has empty content + zero screening
+  // fields. Going active before publish lets candidates apply with no screening
+  // and show as 100% ready (the machine-operator leak). Admin flips active from
+  // the editor once content + syarat_utama fields exist (guarded server-side).
   const { error } = await supabase.from("positions").insert({
     slug: input.slug,
     name: input.name.trim(),
     country: input.country,
     role,
     description: null,
-    active: true,
+    active: false,
   } as never);
 
   if (error) {

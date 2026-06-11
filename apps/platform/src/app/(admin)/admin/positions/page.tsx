@@ -4,6 +4,10 @@ import AdminTopBar from "@/components/admin/TopBar";
 import { Icon } from "@/components/pg/Icon";
 import { Sparkline } from "@/components/admin/Sparkline";
 import { jakartaDayKey } from "@/lib/datetime";
+import {
+  countryLabelFromDb,
+  countryInitialsFromDb,
+} from "@perantauglobal/db/country";
 
 /**
  * Compute days-ago index in Asia/Jakarta time (most recent = 0, 6 days ago = 6).
@@ -24,22 +28,6 @@ type PositionRow = {
   country: string;
   active: boolean;
   updated_at: string;
-};
-
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Arab Saudi",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-  any: "—",
-};
-
-const COUNTRY_INITIALS: Record<string, string> = {
-  saudi_arabia: "SA",
-  japan: "JP",
-  taiwan: "TW",
-  indonesia: "ID",
-  any: "GL",
 };
 
 type Search = { tab?: string };
@@ -270,7 +258,7 @@ export default async function AdminPositionsPage({
                       fontSize: "11px",
                     }}
                   >
-                    {COUNTRY_INITIALS[p.country] ?? "GL"}
+                    {countryInitialsFromDb(p.country)}
                   </div>
                   <div className="min-w-0">
                     <div className="text-[14px] font-bold text-pg-ink-primary leading-tight truncate">
@@ -285,7 +273,7 @@ export default async function AdminPositionsPage({
                   </div>
                 </Link>
                 <span className="text-[13px] text-pg-ink-secondary">
-                  {COUNTRY_LABEL[p.country] ?? p.country}
+                  {countryLabelFromDb(p.country, p.country)}
                 </span>
                 <span className="flex items-center gap-1.5 text-[13px] text-pg-ink-secondary">
                   {openCount > 0 ? (

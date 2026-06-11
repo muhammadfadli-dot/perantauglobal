@@ -6,6 +6,7 @@ import { Icon } from "@/components/pg/Icon";
 import StatusControls from "./StatusControls";
 import NotesField from "./NotesField";
 import JobOrderKanbanBoard from "@/components/admin/JobOrderKanbanBoard";
+import { countryLabelFromDb } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
 
@@ -49,13 +50,6 @@ const STATUS_TONE: Record<string, { bg: string; fg: string }> = {
   filled: { bg: "var(--pg-info-bg)", fg: "var(--pg-info)" },
   closed: { bg: "var(--pg-ink-50)", fg: "var(--pg-ink-tertiary)" },
   cancelled: { bg: "var(--pg-err-bg)", fg: "var(--pg-err)" },
-};
-
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Arab Saudi",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
 };
 
 export default async function JobOrderDetailPage({
@@ -135,7 +129,7 @@ export default async function JobOrderDetailPage({
                 style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
               >
                 {jo.positions?.name ?? jo.position_slug} —{" "}
-                {COUNTRY_LABEL[jo.positions?.country ?? ""] ?? jo.positions?.country}
+                {countryLabelFromDb(jo.positions?.country, jo.positions?.country ?? "—")}
                 {jo.employer_city ? ` · ${jo.employer_city}` : ""}
               </span>
             </div>

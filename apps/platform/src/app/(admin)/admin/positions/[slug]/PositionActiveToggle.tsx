@@ -39,7 +39,11 @@ export default function PositionActiveToggle({
     setActive(next); // optimistic
     start(async () => {
       try {
-        await updatePositionMeta(slug, { active: next });
+        const res = await updatePositionMeta(slug, { active: next });
+        if (!res.ok) {
+          setActive(!next); // revert — guard refused (returned, survives prod)
+          setError(res.error);
+        }
       } catch (err) {
         setActive(!next); // revert
         setError(err instanceof Error ? err.message : "Gagal mengubah status");

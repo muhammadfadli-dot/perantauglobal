@@ -293,7 +293,10 @@ export async function fetchPositionsForCatalog(): Promise<Position[]> {
   try {
     const sb = supabaseV2();
     const [posResult, jobOrders] = await Promise.all([
-      sb.from("positions").select("slug, name, role, country, active, content").eq("active", true),
+      // Fetch ALL positions (incl. inactive) so we know which slugs the DB owns.
+      // An inactive slug must be HIDDEN, not resurrected from the static catalog
+      // — backfilling it produced a live card whose apply 404s on submit.
+      sb.from("positions").select("slug, name, role, country, active, content"),
       fetchOpenJobOrders(),
     ]);
     if (posResult.error || !posResult.data) {
@@ -302,9 +305,11 @@ export async function fetchPositionsForCatalog(): Promise<Position[]> {
 
     const rows = posResult.data as DbPositionRow[];
     const out: Position[] = [];
-    const seenSlugs = new Set<string>();
+    // Every slug the DB owns (active OR inactive) — static backfill skips these.
+    const knownInDb = new Set<string>(rows.map((r) => r.slug));
 
     for (const row of rows) {
+      if (!row.active) continue; // known to DB but intentionally hidden
       const staticEntry = getStaticPosition(row.slug);
       const card = resolveCard(row, staticEntry);
       if (!card) continue;
@@ -314,7 +319,6 @@ export async function fetchPositionsForCatalog(): Promise<Position[]> {
       const cardMeta = pickCardMeta(row.content);
       const hasCardMeta = Boolean(nonEmpty(cardMeta.salary) && nonEmpty(cardMeta.age));
       if (!hasCardMeta && !staticEntry) continue;
-      seenSlugs.add(row.slug);
       const jo = jobOrders.get(row.slug);
       if (jo) {
         out.push({
@@ -338,11 +342,11 @@ export async function fetchPositionsForCatalog(): Promise<Position[]> {
       }
     }
 
-    // Backfill any static-only positions that aren't in the DB yet — e.g.
-    // legacy entries that haven't been migrated. Keeps the public list
-    // stable during the transition.
+    // Backfill static-only positions the DB doesn't own yet — e.g. legacy
+    // entries not migrated. A slug that exists in the DB as INACTIVE is
+    // intentionally hidden, so knownInDb (not just the active ones) gates this.
     for (const p of POSITIONS) {
-      if (seenSlugs.has(p.slug)) continue;
+      if (knownInDb.has(p.slug)) continue;
       const jo = jobOrders.get(p.slug);
       if (jo) {
         out.push({
@@ -398,15 +402,22 @@ export async function fetchPositionForDetail(slug: string): Promise<Position | u
       .from("positions")
       .select("slug, name, role, country, active, content")
       .eq("slug", slug)
-      .eq("active", true)
       .maybeSingle();
-    if (error || !data) {
-      // DB row missing/inactive — only return if static catalog has it
+    if (error) {
+      // DB error (not a missing row) — fall back to static for resilience.
       return staticEntry;
     }
-    const card = resolveCard(data as DbPositionRow, staticEntry);
-    if (!card) return staticEntry;
-    return { ...card, status: "queue" };
+    if (data) {
+      // Row exists in DB. If it's inactive it's intentionally hidden — return
+      // undefined so the page 404s instead of resurrecting it from the static
+      // catalog (which let candidates fill the form then 404 on submit).
+      if (!(data as DbPositionRow).active) return undefined;
+      const card = resolveCard(data as DbPositionRow, staticEntry);
+      if (!card) return staticEntry;
+      return { ...card, status: "queue" };
+    }
+    // No DB row at all → legacy slug that only lives in the static catalog.
+    return staticEntry;
   } catch {
     return staticEntry;
   }

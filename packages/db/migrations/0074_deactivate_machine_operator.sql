@@ -1,0 +1,16 @@
+-- 0074: Reconcile the machine-operator leak.
+--
+-- machine-operator was active=true, published_at NULL, content='{}', with 0
+-- syarat_utama fields — yet it collected 5 applicants who all showed as 100%
+-- ready to admin because getApplicationCompleteness returns hard_pass=true for
+-- zero fields. Candidates applied via the wizard with no screening at all.
+--
+-- Code-side this is now prevented two ways (PR batch 1):
+--   * createPosition defaults active=false (a new shell is a draft, not live)
+--   * updatePositionMeta refuses active=true unless published_at is set AND
+--     content is non-empty AND >=1 syarat_utama field exists
+--
+-- This migration fixes the one existing leaked row by deactivating it. Its 5
+-- existing applicants (all pipeline_stage='applied') are intentionally left
+-- untouched for manual triage — no one is auto-rejected.
+update positions set active = false where slug = 'machine-operator';

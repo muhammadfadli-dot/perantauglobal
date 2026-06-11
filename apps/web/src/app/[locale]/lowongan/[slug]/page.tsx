@@ -21,6 +21,7 @@ import {
 import { resolvePositionDetail } from "@/lib/positionContent";
 import { COUNTRY_META, countryKeyFromName, cityForSlug } from "@/lib/lowonganCountries";
 import { waLink } from "@/lib/contact";
+import { SITE_URL } from "@/lib/site";
 
 type RouteParams = { locale: string; slug: string };
 
@@ -59,10 +60,14 @@ export async function generateMetadata({
     cms?.seo?.metaDescription?.trim() ||
     `Lowongan ${p.role} di ${p.country}. Gaji ${p.salary}, ${p.contractLabel ?? "kontrak resmi"}. Bebas biaya sebelum offering letter. Daftar di Perantau Global.`;
   const ogImage = cms?.media?.ogImageUrl?.trim() || cms?.media?.heroUrl?.trim();
+  // Job-detail pages are id-only; emit a canonical so duplicate/query-string
+  // URLs don't split ranking across the catalog's high-intent pages.
+  const canonical = `${SITE_URL}/id/lowongan/${slug}`;
   return {
     title,
     description,
-    ...(ogImage ? { openGraph: { images: [ogImage] } } : {}),
+    alternates: { canonical },
+    ...(ogImage ? { openGraph: { images: [ogImage], url: canonical } } : {}),
   };
 }
 

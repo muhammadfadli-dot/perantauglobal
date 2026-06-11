@@ -21,36 +21,16 @@ import { CountryBigTile } from "@/components/pg/candidate/CountryBigTile";
 import { ProgressNudge } from "@/components/pg/candidate/ProgressNudge";
 import { PendampingCard } from "@/components/pg/candidate/PendampingCard";
 import { TerminalCard } from "@/components/pg/candidate/TerminalCard";
+import {
+  COUNTRY_KEYS,
+  COUNTRY_META,
+  normalizeCountryKey,
+  countryLabelFromDb,
+  type CountryKey,
+} from "@perantauglobal/db/country";
+import { positionHeroUrl } from "@perantauglobal/db/media";
 
 export const dynamic = "force-dynamic";
-
-const COUNTRY_LABEL: Record<string, string> = {
-  saudi_arabia: "Arab Saudi",
-  japan: "Jepang",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-  any: "Global",
-};
-
-const COUNTRY_TILES: Array<{
-  slug: "saudi" | "jepang" | "taiwan" | "indonesia";
-  flag: string;
-  name: string;
-  dbKey: string;
-}> = [
-  { slug: "jepang", flag: "🇯🇵", name: "Jepang", dbKey: "japan" },
-  { slug: "saudi", flag: "🇸🇦", name: "Arab Saudi", dbKey: "saudi_arabia" },
-  { slug: "taiwan", flag: "🇹🇼", name: "Taiwan", dbKey: "taiwan" },
-  { slug: "indonesia", flag: "🇮🇩", name: "Indonesia", dbKey: "indonesia" },
-];
-
-// DB country key → card display (slug/flag/name), derived from COUNTRY_TILES.
-const COUNTRY_CARD: Record<
-  string,
-  { slug: string; flag: string; name: string }
-> = Object.fromEntries(
-  COUNTRY_TILES.map((t) => [t.dbKey, { slug: t.slug, flag: t.flag, name: t.name }]),
-);
 
 type ExploreCardData = {
   slug: string;
@@ -110,9 +90,12 @@ export default async function DashboardPage() {
     content: unknown;
   }>;
 
-  const positionCounts: Record<string, number> = {};
+  const positionCounts = Object.fromEntries(
+    COUNTRY_KEYS.map((k) => [k, 0]),
+  ) as Record<CountryKey, number>;
   for (const row of activePositions) {
-    positionCounts[row.country] = (positionCounts[row.country] || 0) + 1;
+    const k = normalizeCountryKey(row.country);
+    if (k) positionCounts[k]++;
   }
 
   // Slugs with an open job_order → "open", otherwise "queue" (talent-pool).
@@ -128,12 +111,13 @@ export default async function DashboardPage() {
   const exploreCards: ExploreCardData[] = activePositions
     .filter((p) => !appliedSlugs.has(p.slug))
     .map((p) => {
-      const tile = COUNTRY_CARD[p.country];
+      const k = normalizeCountryKey(p.country);
+      const meta = k ? COUNTRY_META[k] : null;
       return {
         slug: p.slug,
-        country: tile?.slug ?? p.country,
-        flag: tile?.flag ?? "🌐",
-        countryLabel: tile?.name ?? COUNTRY_LABEL[p.country] ?? p.country,
+        country: meta?.key ?? p.country,
+        flag: meta?.flag ?? "🌐",
+        countryLabel: meta?.label ?? p.country,
         role: p.name,
         salary: pickSalary(p.content),
         status: openSlugs.has(p.slug) ? ("open" as const) : ("queue" as const),
@@ -209,9 +193,10 @@ function BerandaS1({
   memberId?: string;
   identityFilled: number;
   identityTotal: number;
-  positionCounts: Record<string, number>;
+  positionCounts: Record<CountryKey, number>;
 }) {
-  const totalOpen = Object.values(positionCounts).reduce((a, b) => a + b, 0);
+  const presentKeys = COUNTRY_KEYS.filter((k) => positionCounts[k] > 0);
+  const totalOpen = presentKeys.reduce((a, k) => a + positionCounts[k], 0);
   const profileIncomplete = identityFilled < identityTotal;
   return (
     <>
@@ -223,22 +208,22 @@ function BerandaS1({
             Mau kerja <span style={{ color: "var(--pg-red-600)" }}>di mana</span>?
           </>
         }
-        sub={`${totalOpen} lowongan di 4 negara. Pilih satu dulu, lengkapi profil sambil jalan.`}
+        sub={`${totalOpen} lowongan di ${presentKeys.length} negara. Pilih satu dulu, lengkapi profil sambil jalan.`}
       />
 
-      {/* Country picker — horizontal scroll */}
+      {/* Country picker — horizontal scroll, derived from active positions */}
       <div className="pl-5">
         <div className="flex gap-3 overflow-x-auto pb-1 pr-5 scrollbar-none" style={{ scrollbarWidth: "none" as const }}>
-          {COUNTRY_TILES.map((c) => {
-            const count = positionCounts[c.dbKey] ?? 0;
+          {presentKeys.map((k) => {
+            const meta = COUNTRY_META[k];
             return (
               <CountryBigTile
-                key={c.slug}
-                slug={c.slug}
-                flag={c.flag}
-                name={c.name}
-                count={`${count} posisi`}
-                href={`/explore?country=${encodeURIComponent(c.dbKey)}`}
+                key={k}
+                slug={k}
+                flag={meta.flag}
+                name={meta.label}
+                count={`${positionCounts[k]} posisi`}
+                href={`/explore?country=${encodeURIComponent(meta.dbValue)}`}
               />
             );
           })}
@@ -280,7 +265,7 @@ function BerandaS2({
   primary: LamaranJourney;
   exploreCards: ExploreCardData[];
 }) {
-  const countryLabel = COUNTRY_LABEL[primary.country] ?? primary.country;
+  const countryLabel = countryLabelFromDb(primary.country, primary.country);
   return (
     <>
       <BerandaHeader
@@ -381,7 +366,7 @@ function BerandaS3({
   memberId?: string;
   primary: LamaranJourney;
 }) {
-  const countryLabel = COUNTRY_LABEL[primary.country] ?? primary.country;
+  const countryLabel = countryLabelFromDb(primary.country, primary.country);
   return (
     <>
       <BerandaHeader
@@ -439,7 +424,7 @@ function BerandaTerminal({
   primary: LamaranJourney;
   outcome: "diterima" | "ditolak";
 }) {
-  const countryLabel = COUNTRY_LABEL[primary.country] ?? primary.country;
+  const countryLabel = countryLabelFromDb(primary.country, primary.country);
   return (
     <>
       <BerandaHeader
@@ -504,7 +489,7 @@ function ExploreCard({
     >
       <div
         className="relative h-[110px] bg-cover bg-center bg-pg-ink-50"
-        style={{ backgroundImage: `url(/images/lowongan/${slug}.jpg)` }}
+        style={{ backgroundImage: `url(${positionHeroUrl(slug)})` }}
       >
         <div
           aria-hidden

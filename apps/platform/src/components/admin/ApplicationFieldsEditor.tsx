@@ -29,9 +29,9 @@ export type Field = {
   field_type: string;
   /**
    * `qualifying` (added 2026-05-28) marks options that count as "passing"
-   * for the qualification gate (used by application_readiness_view).
-   * The admin editor preserves this flag when round-tripping; UI for
-   * setting it is not yet exposed (set via migration for now).
+   * for the qualification gate (used by application_readiness_view). The
+   * editor exposes a per-option "Lolos" toggle and preserves the flag when
+   * round-tripping.
    */
   options: { value: string; label: string; qualifying?: boolean }[] | null;
   importance: "required" | "optional";
@@ -486,10 +486,35 @@ function FieldForm(props: FieldFormProps) {
     ? fieldKey
     : slugify(label) || "";
 
+  // A 'file' field in Syarat utama is a funnel-killer: the apply forms (web +
+  // portal) don't render file inputs at that stage, so a required file question
+  // can never be answered → the candidate can never submit. Files belong to the
+  // later "Lengkapi" stage. Block it here.
+  const fileInSyaratUtama = section === "syarat_utama" && fieldType === "file";
+
   const canSubmit =
     label.trim().length >= 2 &&
     (mode === "edit" || effectiveKey.length > 0) &&
+    !fileInSyaratUtama &&
     (!typeMeta.hasOptions || options.some((o) => o.label.trim().length > 0));
+
+  /**
+   * Switching a choice type → a non-choice type drops every option, INCLUDING
+   * any `qualifying` flags that drive hard_pass/readiness. Warn before that
+   * silently changes who passes screening for a position with live applicants.
+   */
+  function handleTypeChange(next: FieldTypeKey) {
+    const nextHasOptions = TYPE_BY_KEY.get(next)?.hasOptions ?? false;
+    const losingOptions = typeMeta.hasOptions && !nextHasOptions;
+    const hasQualifying = options.some((o) => o.qualifying);
+    if (losingOptions && hasQualifying) {
+      const ok = window.confirm(
+        "Ganti ke jenis ini akan menghapus semua pilihan jawaban beserta tanda 'Lolos' (kualifikasi) yang sudah diset. Ini mengubah penilaian kelayakan kandidat. Lanjut?",
+      );
+      if (!ok) return;
+    }
+    setFieldType(next);
+  }
 
   function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -579,12 +604,19 @@ function FieldForm(props: FieldFormProps) {
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {FIELD_TYPES.map((t) => {
             const active = fieldType === t.key;
+            const disabled = t.key === "file" && section === "syarat_utama";
             return (
               <button
                 type="button"
                 key={t.key}
-                onClick={() => setFieldType(t.key)}
-                className="text-left px-3 py-3 rounded-lg transition-colors"
+                onClick={() => handleTypeChange(t.key)}
+                disabled={disabled}
+                title={
+                  disabled
+                    ? "Upload dokumen tidak bisa di Syarat utama — dikumpulkan di tahap Lengkapi."
+                    : undefined
+                }
+                className="text-left px-3 py-3 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{
                   border: active
                     ? "1.5px solid var(--pg-red-600)"
@@ -621,6 +653,19 @@ function FieldForm(props: FieldFormProps) {
         <div className="mt-2 text-[11px] text-pg-ink-tertiary italic">
           Contoh: {typeMeta.example}
         </div>
+        {fileInSyaratUtama && (
+          <div
+            className="mt-2 flex items-start gap-1.5 text-[11px] font-semibold rounded-lg px-2.5 py-2"
+            style={{ background: "var(--pg-err-bg, #fdecea)", color: "var(--pg-err)" }}
+          >
+            <Icon name="warn" size={12} className="shrink-0 mt-0.5" />
+            <span>
+              Upload dokumen tidak bisa jadi Syarat utama — kandidat nggak bisa
+              upload di tahap Lamar, jadi formnya nggak akan bisa di-submit. Pindah
+              ke section &ldquo;Kualifikasi&rdquo; atau pakai jenis lain.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Step 3 (conditional): Options editor for choice types */}
@@ -654,6 +699,37 @@ function FieldForm(props: FieldFormProps) {
                   placeholder={`Pilihan ${idx + 1}`}
                   className={`${INPUT_CLASS} flex-1`}
                 />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setOptions((prev) => {
+                      const next = [...prev];
+                      next[idx] = {
+                        ...next[idx],
+                        qualifying: !next[idx].qualifying,
+                      };
+                      return next;
+                    })
+                  }
+                  aria-pressed={!!opt.qualifying}
+                  title="Tandai opsi ini sebagai 'lolos' syarat — memengaruhi kelayakan/readiness kandidat"
+                  className="shrink-0 inline-flex items-center gap-1 px-2 h-7 rounded-md text-[10.5px] font-bold transition-colors"
+                  style={
+                    opt.qualifying
+                      ? {
+                          background: "var(--pg-ok-bg)",
+                          color: "var(--pg-ok)",
+                          border: "1px solid var(--pg-ok)",
+                        }
+                      : {
+                          background: "var(--pg-white)",
+                          color: "var(--pg-ink-tertiary)",
+                          border: "1px solid var(--pg-border)",
+                        }
+                  }
+                >
+                  {opt.qualifying ? "✓ Lolos" : "Lolos?"}
+                </button>
                 {options.length > 2 && (
                   <button
                     type="button"
@@ -678,6 +754,10 @@ function FieldForm(props: FieldFormProps) {
             >
               <Icon name="plus" size={12} stroke={2.4} /> Tambah pilihan
             </button>
+            <p className="text-[11px] text-pg-ink-tertiary mt-1.5 leading-snug">
+              Tandai <b>Lolos</b> pada opsi yang dianggap memenuhi syarat. Kalau
+              tidak ada yang ditandai, semua jawaban dianggap lolos.
+            </p>
           </div>
         </div>
       )}

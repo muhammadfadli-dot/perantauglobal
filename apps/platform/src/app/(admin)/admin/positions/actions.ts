@@ -40,17 +40,57 @@ async function notifyWebRevalidate(slug: string): Promise<void> {
   }
 }
 
+export type UpdatePositionMetaResult = { ok: true } | { ok: false; error: string };
+
 export async function updatePositionMeta(
   slug: string,
   patch: { name?: string; description?: string; active?: boolean }
-) {
+): Promise<UpdatePositionMetaResult> {
   await assertAdmin();
+  const supabase = await createServerClient();
+
+  // Guard: refuse to activate a position that can't actually serve candidates.
+  // A live-but-empty position (never published, empty content, zero screening
+  // fields) is the machine-operator leak — candidates apply with no screening
+  // and show as 100% ready. Activation requires: published at least once +
+  // non-empty content + >=1 syarat_utama field.
+  if (patch.active === true) {
+    const [{ data: pos }, { count: fieldCount }] = await Promise.all([
+      supabase
+        .from("positions")
+        .select("published_at, content")
+        .eq("slug", slug)
+        .maybeSingle(),
+      supabase
+        .from("position_application_fields")
+        .select("*", { count: "exact", head: true })
+        .eq("position_slug", slug)
+        .eq("section", "syarat_utama"),
+    ]);
+    const row = pos as { published_at: string | null; content: unknown } | null;
+    const published = row?.published_at != null;
+    const hasContent =
+      !!row?.content &&
+      typeof row.content === "object" &&
+      Object.keys(row.content as object).length > 0;
+    const hasScreening = (fieldCount ?? 0) >= 1;
+    if (!published || !hasContent || !hasScreening) {
+      const missing: string[] = [];
+      if (!published) missing.push("belum pernah di-publish");
+      if (!hasContent) missing.push("konten masih kosong");
+      if (!hasScreening) missing.push("belum ada syarat utama");
+      return {
+        ok: false,
+        error: `Belum bisa diaktifkan: ${missing.join(", ")}. Lengkapi konten + syarat utama lalu Publish dulu.`,
+      };
+    }
+  }
+
   await logAdminAction("update_position_meta", "position", slug, {
     ...(patch.active !== undefined ? { active: patch.active } : {}),
     changed_name: patch.name !== undefined,
     changed_description: patch.description !== undefined,
   });
-  const supabase = await createServerClient();
   const { error } = await supabase
     .from("positions")
     .update({
@@ -62,6 +102,12 @@ export async function updatePositionMeta(
   if (error) throw new Error(error.message);
   revalidatePath("/admin/positions");
   revalidatePath(`/admin/positions/${slug}`);
+  // Visibility/name changes affect the public catalog — bust apps/web cache so
+  // a deactivated position disappears immediately instead of lingering ~60s.
+  if (patch.active !== undefined || patch.name !== undefined) {
+    await notifyWebRevalidate(slug);
+  }
+  return { ok: true };
 }
 
 /**
@@ -329,6 +375,13 @@ export type ApplicationFieldInput = {
 
 export async function createApplicationField(positionSlug: string, input: ApplicationFieldInput) {
   await assertAdmin();
+  await logAdminAction("create_application_field", "application_field", positionSlug, {
+    field_key: input.field_key,
+    field_type: input.field_type,
+    section: input.section ?? "kualifikasi",
+    importance: input.importance ?? "optional",
+    options_count: input.options?.length ?? 0,
+  });
   const supabase = await createServerClient();
   const { error } = await supabase.from("position_application_fields").insert({
     position_slug: positionSlug,
@@ -354,6 +407,13 @@ export async function updateApplicationField(
   patch: Partial<ApplicationFieldInput>,
 ) {
   await assertAdmin();
+  await logAdminAction("update_application_field", "application_field", positionSlug, {
+    field_id: id,
+    changed_type: patch.field_type !== undefined,
+    changed_options: patch.options !== undefined,
+    changed_importance: patch.importance !== undefined,
+    ...(patch.field_type !== undefined ? { field_type: patch.field_type } : {}),
+  });
   const supabase = await createServerClient();
   const { error } = await supabase
     .from("position_application_fields")
@@ -376,6 +436,9 @@ export async function updateApplicationField(
 
 export async function deleteApplicationField(id: string, positionSlug: string) {
   await assertAdmin();
+  await logAdminAction("delete_application_field", "application_field", positionSlug, {
+    field_id: id,
+  });
   const supabase = await createServerClient();
   const { error } = await supabase.from("position_application_fields").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -389,6 +452,10 @@ export async function reorderApplicationField(
   direction: "up" | "down",
 ) {
   await assertAdmin();
+  await logAdminAction("reorder_application_field", "application_field", positionSlug, {
+    field_id: id,
+    direction,
+  });
   const supabase = await createServerClient();
   const { data, error: fetchErr } = await supabase
     .from("position_application_fields")
