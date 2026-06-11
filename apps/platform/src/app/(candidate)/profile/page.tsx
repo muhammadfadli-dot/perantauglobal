@@ -40,7 +40,7 @@ export default async function ProfilePage() {
       .single(),
     supabase
       .from("candidate_documents")
-      .select("doc_type, verified, uploaded_at")
+      .select("doc_type, verified, rejected_at, uploaded_at")
       .eq("candidate_id", candidateId)
       .order("uploaded_at", { ascending: false }),
     supabase
@@ -55,6 +55,7 @@ export default async function ProfilePage() {
   const docsRows = (docsRes.data ?? []) as Array<{
     doc_type: string;
     verified: boolean;
+    rejected_at: string | null;
   }>;
   const appsRows = (appsRes.data ?? []) as Array<{ id: string; pipeline_stage: string }>;
 
@@ -70,14 +71,41 @@ export default async function ProfilePage() {
   const identityTotal = identityFields.length;
   const identityComplete = identityFilled === identityTotal;
 
-  // Documents
-  const docsLatestByType = new Map<string, boolean>();
+  // Documents — 4-state per required type so an uploaded-but-pending doc is NOT
+  // mislabeled "belum upload" (mirrors profile/dokumen + DocUploader semantics).
+  const docsLatestByType = new Map<string, { verified: boolean; rejected: boolean }>();
   for (const d of docsRows) {
     const key = d.doc_type === "photo" ? "formal_photo" : d.doc_type;
-    if (!docsLatestByType.has(key)) docsLatestByType.set(key, d.verified);
+    if (!docsLatestByType.has(key))
+      docsLatestByType.set(key, { verified: d.verified, rejected: !!d.rejected_at });
   }
-  const docsVerified = REQUIRED_DOCS.filter((t) => docsLatestByType.get(t)).length;
   const docsTotal = REQUIRED_DOCS.length;
+  let docsVerified = 0;
+  let docsPending = 0;
+  let docsMissing = 0;
+  let docsRejected = 0;
+  for (const t of REQUIRED_DOCS) {
+    const row = docsLatestByType.get(t);
+    if (!row) docsMissing++;
+    else if (row.rejected) docsRejected++;
+    else if (row.verified) docsVerified++;
+    else docsPending++;
+  }
+  // Caption priority: needs-action (rejected → missing) before pending before done.
+  const docsCaption =
+    docsVerified === docsTotal
+      ? "Lengkap"
+      : docsRejected > 0
+        ? `${docsRejected} perlu diganti`
+        : docsMissing > 0
+          ? `${docsMissing} belum upload`
+          : `${docsPending} sedang dicek`;
+  const docsTone: "ok" | "warn" | "info" =
+    docsVerified === docsTotal
+      ? "ok"
+      : docsRejected > 0 || docsMissing > 0
+        ? "warn"
+        : "info";
 
   // Applications
   const appsActive = appsRows.filter(
@@ -203,11 +231,7 @@ export default async function ProfilePage() {
               tone="ok"
               label="Dokumen"
               value={`${docsVerified}/${docsTotal}`}
-              caption={
-                docsVerified === docsTotal
-                  ? "Lengkap"
-                  : `${docsTotal - docsVerified} belum upload`
-              }
+              caption={docsCaption}
             />
             <StatTile
               icon="user"
@@ -240,18 +264,15 @@ export default async function ProfilePage() {
             <SettingRow
               icon="passport"
               label="Dokumen"
-              detail={`${docsVerified} dari ${docsTotal}`}
-              tone={docsVerified === docsTotal ? "ok" : "warn"}
+              detail={docsVerified === docsTotal ? "Lengkap" : docsCaption}
+              tone={docsTone}
               href="/profile/dokumen"
             />
             <SettingRow
               icon="shield"
               label="Privasi & izin data"
-            />
-            <SettingRow
-              icon="info"
-              label="Notifikasi"
-              detail="Aktif"
+              href="https://perantauglobal.com/id/privacy"
+              external
             />
             {candidate.phone && (
               <SettingRow
@@ -338,13 +359,15 @@ function SettingRow({
   detail,
   tone,
   href,
+  external,
   last,
 }: {
   icon: IconName;
   label: string;
   detail?: string;
-  tone?: "ok" | "warn";
+  tone?: "ok" | "warn" | "info";
   href?: string;
+  external?: boolean;
   last?: boolean;
 }) {
   const detailColor =
@@ -352,6 +375,8 @@ function SettingRow({
       ? "var(--pg-ok)"
       : tone === "warn"
       ? "var(--pg-warn)"
+      : tone === "info"
+      ? "var(--pg-info)"
       : "var(--pg-ink-500)";
 
   const inner = (
@@ -378,11 +403,26 @@ function SettingRow({
           {detail}
         </span>
       )}
-      <Icon name="chevron_right" size={15} className="text-pg-ink-400 shrink-0" />
+      {/* Chevron only when the row actually navigates — no dead affordance. */}
+      {href && (
+        <Icon name="chevron_right" size={15} className="text-pg-ink-400 shrink-0" />
+      )}
     </div>
   );
 
   if (!href) return inner;
+  if (external) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="block no-underline text-pg-ink-900"
+      >
+        {inner}
+      </a>
+    );
+  }
   return (
     <Link href={href} className="block no-underline text-pg-ink-900">
       {inner}

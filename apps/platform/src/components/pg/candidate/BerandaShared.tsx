@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { Icon } from "@/components/pg/Icon";
+import { waLink } from "@/lib/contact";
 
 /**
- * BerandaTopBar — slim brand + title + notif bell.
+ * BerandaTopBar — slim brand + title + WhatsApp help.
  *
  * Different from the regular TopBarApp: this is the home-tab specific top bar
  * that anchors the journey-style Beranda. Brand mark left, page title center,
- * info/notif right.
+ * a real WhatsApp-help affordance right (anti-calo trust play — a reachable
+ * human, not a dead notif bell).
  */
-export function BerandaTopBar({ notif = 0 }: { notif?: number }) {
+export function BerandaTopBar() {
   return (
     <div
       className="sticky top-0 z-30 flex items-center justify-between gap-3 px-5 pt-2 pb-3"
@@ -38,26 +40,20 @@ export function BerandaTopBar({ notif = 0 }: { notif?: number }) {
       >
         Perantau Global
       </span>
-      <button
-        type="button"
-        className="relative w-9 h-9 rounded-[11px] grid place-items-center bg-pg-white text-pg-ink-700"
+      <a
+        href={waLink("Halo Perantau Global, saya butuh bantuan.")}
+        target="_blank"
+        rel="noreferrer"
+        className="relative inline-flex items-center gap-1.5 h-9 pl-2.5 pr-3 rounded-[11px] bg-pg-white text-pg-ink-700 no-underline"
         style={{
           border: "1px solid var(--pg-ink-100)",
           boxShadow: "0 1px 2px rgba(20,20,20,0.04)",
         }}
-        aria-label="Informasi"
+        aria-label="Bantuan lewat WhatsApp"
       >
-        <Icon name="info" size={18} />
-        {notif > 0 && (
-          <span
-            className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full"
-            style={{
-              background: "var(--pg-red-600)",
-              boxShadow: "0 0 0 2px #fff",
-            }}
-          />
-        )}
-      </button>
+        <Icon name="phone" size={16} />
+        <span className="text-[12px] font-bold tracking-[-0.005em]">Bantuan</span>
+      </a>
     </div>
   );
 }

@@ -100,9 +100,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
 
   const position = application.positions;
   const { fields: requirements, hard_pass } = completeness;
-  const totalReqs = requirements.length;
-  const passedReqs = requirements.filter((r) => r.passed).length;
-  const openCount = totalReqs - passedReqs;
+  // Split required (blocking → urgent) vs optional/bonus (neutral nudge). The
+  // old openCount lumped both, so a candidate who'd passed every requirement was
+  // still shown an alarming red "Lengkapi N syarat" for leftover Bonus fields.
+  const requiredOpen = requirements.filter(
+    (r) => r.importance === "required" && !r.passed,
+  ).length;
 
   const status = getApplicationStatus({
     pipelineStage: application.pipeline_stage,
@@ -110,7 +113,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   });
   const isRejected = status.key === "rejected";
   const isAccepted = status.key === "accepted";
-  const showLengkapi = !isRejected && openCount > 0;
+  const showLengkapi = !isRejected && requiredOpen > 0;
 
   const countryKey = normalizeCountry(position.country);
   const countryLabel = countryKey
@@ -263,7 +266,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                         >
                           <Icon name="info" size={14} stroke={2.2} />
                           <span className="flex-1">
-                            {openCount} syarat belum lengkap.
+                            {requiredOpen} syarat belum lengkap.
                           </span>
                           <Link
                             href={`/applications/${application.id}/lengkapi`}
@@ -284,7 +287,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
         <div className="px-5 pt-5">
           <SectionHead
             title="Dokumen kamu"
-            sub={`${docsVerifiedCount} dari ${REQUIRED_DOCS.length} lengkap`}
+            sub={`${docsVerifiedCount} dari ${REQUIRED_DOCS.length} terverifikasi`}
             allHref="/profile/dokumen"
           />
           <div className="flex flex-col gap-2">
@@ -302,16 +305,13 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                   href="/profile/dokumen"
                   className="flex items-center gap-3 p-3 rounded-[12px] bg-pg-white no-underline text-pg-ink-900"
                   style={{
-                    border:
-                      state === "missing"
-                        ? "1px solid var(--pg-red-200)"
-                        : "1px solid var(--pg-ink-100)",
+                    // Documents are collected at the Cek Dokumen stage, so a
+                    // not-yet-uploaded doc is a calm to-do (amber), not a red
+                    // alarm. Red is reserved for real blockers.
+                    border: "1px solid var(--pg-ink-100)",
                     boxShadow:
                       "0 1px 2px rgba(20,16,12,0.04), 0 4px 12px rgba(20,16,12,0.04)",
-                    background:
-                      state === "missing"
-                        ? "linear-gradient(180deg, #fff 0%, var(--pg-red-50) 100%)"
-                        : "var(--pg-white)",
+                    background: "var(--pg-white)",
                   }}
                 >
                   <span
@@ -321,7 +321,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                         ? { background: "var(--pg-ok-bg)", color: "var(--pg-ok)" }
                         : state === "review"
                         ? { background: "var(--pg-info-bg)", color: "var(--pg-info)" }
-                        : { background: "var(--pg-red-600)", color: "#fff" }
+                        : { background: "var(--pa-amber-100)", color: "var(--pa-amber-700)" }
                     }
                   >
                     <Icon
@@ -338,12 +338,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                   </div>
                   <span
                     className="text-[12px] font-extrabold"
-                    style={{
-                      color:
-                        state === "missing"
-                          ? "var(--pg-red-600)"
-                          : "var(--pg-ink-700)",
-                    }}
+                    style={{ color: "var(--pg-ink-700)" }}
                   >
                     {state === "missing" ? "Upload ›" : "Lihat ›"}
                   </span>
@@ -384,7 +379,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
               boxShadow: "0 4px 12px rgba(215,38,47,0.20)",
             }}
           >
-            Lengkapi {openCount} syarat <Icon name="arrow_right" size={16} />
+            Lengkapi {requiredOpen} syarat <Icon name="arrow_right" size={16} />
           </Link>
         </div>
       )}

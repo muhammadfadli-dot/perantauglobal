@@ -70,6 +70,12 @@ export default async function ApplyWelcomePage({ params }: PageProps) {
   const firstName = (candData?.full_name ?? session.email ?? "kamu").split(" ")[0];
 
   const { score_pct, fields } = await getApplicationCompleteness(application.id, supabase);
+  // Required-missing blocks review (urgent); total missing is just the road to
+  // 100% (neutral bonus nudge). Don't conflate them — a candidate who passed
+  // every requirement shouldn't be told review is blocked by leftover Bonus.
+  const requiredMissing = fields.filter(
+    (f) => f.importance === "required" && !f.passed,
+  ).length;
   const missing = fields.filter((f) => !f.passed).length;
   const requirements = fields; // alias for downstream usage below
 
@@ -105,8 +111,8 @@ export default async function ApplyWelcomePage({ params }: PageProps) {
         </h1>
         <p className="text-[14px] text-pg-ink-tertiary leading-relaxed">
           Lamaran kamu udah masuk pool kandidat.{" "}
-          {missing > 0
-            ? `Lengkapi ${missing} syarat di bawah biar tim recruitment bisa lanjutin review.`
+          {requiredMissing > 0
+            ? `Lengkapi ${requiredMissing} syarat wajib di bawah biar tim recruitment bisa lanjutin review.`
             : "Tim recruitment akan review profil kamu dalam 3–5 hari kerja."}
         </p>
 

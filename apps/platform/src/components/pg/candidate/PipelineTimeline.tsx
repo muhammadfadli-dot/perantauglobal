@@ -106,7 +106,7 @@ export function DocStateBadge({
       : state === "review"
       ? { bg: "var(--pg-info-bg)", fg: "var(--pg-info)", label: "Dicek" }
       : state === "missing"
-      ? { bg: "var(--pg-red-50)", fg: "var(--pg-red-700)", label: "Belum" }
+      ? { bg: "var(--pa-amber-100)", fg: "var(--pa-amber-700)", label: "Belum" }
       : { bg: "var(--pg-ink-50)", fg: "var(--pg-ink-500)", label: "Nanti" };
   return (
     <span

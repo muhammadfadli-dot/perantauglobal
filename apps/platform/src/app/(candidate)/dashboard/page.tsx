@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { BottomNav } from "@/components/pg/AppChrome";
+import { Icon } from "@/components/pg/Icon";
 import {
   getDashboardData,
   getTimeOfDayGreeting,
@@ -150,6 +151,7 @@ export default async function DashboardPage() {
             memberId={memberId}
             primary={primary}
             exploreCards={exploreCards}
+            lamaranCount={dashboard.lamaran.length}
           />
         )}
         {state === "S3" && primary && (
@@ -157,6 +159,7 @@ export default async function DashboardPage() {
             greeting={greeting}
             memberId={memberId}
             primary={primary}
+            lamaranCount={dashboard.lamaran.length}
           />
         )}
         {state === "hasil-diterima" && primary && (
@@ -177,6 +180,29 @@ export default async function DashboardPage() {
         )}
       </main>
       <BottomNav />
+    </div>
+  );
+}
+
+// ─── "Semua lamaran (N)" row — only when the candidate has 2+ applications, so
+// their non-primary lamaran are reachable (the dashboard only surfaces one). ──
+function AllApplicationsLink({ count }: { count: number }) {
+  if (count <= 1) return null;
+  return (
+    <div className="px-5 pt-4">
+      <Link
+        href="/applications"
+        className="flex items-center justify-between gap-2 px-4 py-3 rounded-[14px] bg-pg-white no-underline"
+        style={{
+          border: "1px solid var(--pg-ink-100)",
+          boxShadow: "0 1px 2px rgba(20,16,12,0.04)",
+        }}
+      >
+        <span className="text-[13.5px] font-bold tracking-[-0.005em] text-pg-ink-900">
+          Semua lamaran ({count})
+        </span>
+        <Icon name="chevron_right" size={15} className="text-pg-ink-400 shrink-0" />
+      </Link>
     </div>
   );
 }
@@ -247,7 +273,7 @@ function BerandaS1({
             Belajar duluan, sambil milih
           </span>
         </div>
-        <PasporInviteCard variant="compact" countryLabel="Jepang" />
+        <PasporInviteCard variant="compact" countryLabel="negara tujuanmu" />
       </div>
     </>
   );
@@ -259,11 +285,13 @@ function BerandaS2({
   memberId,
   primary,
   exploreCards,
+  lamaranCount,
 }: {
   greeting: string;
   memberId?: string;
   primary: LamaranJourney;
   exploreCards: ExploreCardData[];
+  lamaranCount: number;
 }) {
   const countryLabel = countryLabelFromDb(primary.country, primary.country);
   return (
@@ -289,6 +317,8 @@ function BerandaS2({
           positionSlug={primary.positionSlug}
         />
       </div>
+
+      <AllApplicationsLink count={lamaranCount} />
 
       {/* Tasks hari ini */}
       <div className="px-5 pt-5">
@@ -361,10 +391,12 @@ function BerandaS3({
   greeting,
   memberId,
   primary,
+  lamaranCount,
 }: {
   greeting: string;
   memberId?: string;
   primary: LamaranJourney;
+  lamaranCount: number;
 }) {
   const countryLabel = countryLabelFromDb(primary.country, primary.country);
   return (
@@ -390,6 +422,8 @@ function BerandaS3({
           positionSlug={primary.positionSlug}
         />
       </div>
+
+      <AllApplicationsLink count={lamaranCount} />
 
       {/* Paspor jadi primer */}
       <div className="px-5 pt-5">
@@ -478,7 +512,7 @@ function ExploreCard({
 }) {
   return (
     <Link
-      href={`/explore?position=${encodeURIComponent(slug)}`}
+      href={`/applications/new?position=${encodeURIComponent(slug)}`}
       className="flex flex-col shrink-0 rounded-[14px] overflow-hidden bg-pg-white no-underline transition-transform hover:-translate-y-0.5"
       style={{
         width: 220,

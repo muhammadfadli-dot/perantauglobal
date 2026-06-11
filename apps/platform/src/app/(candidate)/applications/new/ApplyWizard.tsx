@@ -384,8 +384,8 @@ function Step1({
           </Link>
         )}
         <div className="mt-3 text-[12px] text-pg-ink-500 leading-relaxed">
-          Dokumen tidak wajib lengkap untuk apply, tapi lamaran kamu hanya akan diproses setelah
-          KTP & passport ter-upload.
+          Dokumen tidak wajib lengkap sekarang. KTP yang utama; paspor, foto, &
+          CV diminta nanti di tahap Cek Dokumen.
         </div>
       </section>
     </div>
@@ -603,7 +603,16 @@ function Step3({
           </div>
           <div className="text-[14px] leading-relaxed text-pg-ink-700">
             Saya menyatakan semua data yang saya berikan benar dan saya setuju dengan{" "}
-            <b className="text-pg-red-600">syarat & ketentuan</b> Perantau Global.
+            <a
+              href="https://perantauglobal.com/id/terms"
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="font-bold text-pg-red-600 underline"
+            >
+              syarat &amp; ketentuan
+            </a>{" "}
+            Perantau Global.
           </div>
         </label>
       </section>

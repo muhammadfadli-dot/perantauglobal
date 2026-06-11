@@ -156,22 +156,6 @@ export default async function ExplorePage({ searchParams }: PageProps) {
           </p>
         </div>
 
-        {/* Search stub — placeholder until real search ships */}
-        <div className="px-5">
-          <div
-            className="flex items-center gap-2.5 px-3.5 py-3 rounded-[14px] bg-pg-white"
-            style={{
-              border: "1px solid var(--pg-ink-100)",
-              boxShadow: "0 1px 2px rgba(20,16,12,0.04)",
-            }}
-          >
-            <Icon name="search" size={16} className="text-pg-ink-400 shrink-0" />
-            <span className="text-[13px] text-pg-ink-500">
-              Cari posisi atau negara (mis. perawat, barista)…
-            </span>
-          </div>
-        </div>
-
         {/* Country picker — horizontal rich tiles */}
         <div className="pt-5">
           <div className="px-5 mb-2">
@@ -248,7 +232,7 @@ export default async function ExplorePage({ searchParams }: PageProps) {
               }}
             >
               {open.length > 0
-                ? "Semua posisi di chapter ini sedang lagi buka."
+                ? "Semua posisi di negara ini sedang lagi buka."
                 : "Belum ada posisi antrian aktif."}
             </div>
           ) : (
