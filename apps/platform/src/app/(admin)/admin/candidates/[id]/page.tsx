@@ -7,6 +7,7 @@ import { Icon } from "@/components/pg/Icon";
 import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
 import type { ReadinessResultV3 } from "@/components/admin/ApplicationCard";
 import CvAssessmentCard, { type CvAssessment } from "@/components/admin/CvAssessmentCard";
+import DocViewButton from "./DocViewButton";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +70,7 @@ type Document = {
   expires_at: string | null;
   uploaded_at: string;
   display_name: string | null;
+  file_path: string;
 };
 
 type Activity = {
@@ -148,7 +150,7 @@ export default async function CandidateDetailPage({
       .order("created_at", { ascending: false }),
     supabase
       .from("candidate_documents")
-      .select("id, doc_type, verified, rejected_at, expires_at, uploaded_at, display_name")
+      .select("id, doc_type, verified, rejected_at, expires_at, uploaded_at, display_name, file_path")
       .eq("candidate_id", id)
       .order("uploaded_at", { ascending: false }),
     supabase
@@ -528,14 +530,7 @@ export default async function CandidateDetailPage({
                           </div>
                         )}
                       </div>
-                      {!isOk && !isRejected && (
-                        <Link
-                          href={`/admin/documents`}
-                          className="text-[11px] font-bold text-pg-red-600 no-underline shrink-0"
-                        >
-                          Lihat
-                        </Link>
-                      )}
+                      <DocViewButton filePath={d.file_path} />
                     </div>
                   );
                 })}
