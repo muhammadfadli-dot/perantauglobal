@@ -42,6 +42,10 @@ Deno.serve(async (req) => {
   // 1. AUTH: hanya kandidat sendiri yang boleh materialize CV-nya.
   const sub = subFromJwt(req);
   if (!sub) return json({ error: "unauthorized" }, 401);
+  // Authorization kandidat di-forward ke grade-cv nanti: grade-cv nolak service-role
+  // (403) tapi nerima JWT kandidat lewat owner-check (candidate = own CV), persis
+  // pola portal. Pakai token caller, bukan service key, buat invoke grade-cv.
+  const authHeader = req.headers.get("Authorization") ?? "";
 
   const { data: candidate } = await svc
     .from("candidates")
@@ -91,10 +95,14 @@ Deno.serve(async (req) => {
     return json({ ok: false, materialized: true, graded: false, error: `update path: ${upErr.message}` }, 200);
   }
 
-  // 5. Trigger grading (engine existing, ZERO change). Privileged via service key.
+  // 5. Trigger grading (engine existing, ZERO change). Pakai Authorization KANDIDAT
+  //    (bukan service key -> grade-cv 403). grade-cv owner-check: candidate = own CV.
   //    Fire-and-forget: kegagalan grading TIDAK nge-fail materialize.
   try {
-    await svc.functions.invoke("grade-cv", { body: { document_id: doc.id } });
+    await svc.functions.invoke("grade-cv", {
+      body: { document_id: doc.id },
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+    });
   } catch (e) {
     return json({ ok: true, materialized: true, graded: false, error: `grade-invoke: ${String(e).slice(0, 200)}`, document_id: doc.id }, 200);
   }
