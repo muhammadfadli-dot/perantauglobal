@@ -11,8 +11,12 @@
 // boarded a plane. Departure logistics are an admin-side concern.
 //
 // `needsDocs` is a parallel signal that overrides the stage label when true: the
-// candidate has unfilled hard requirements blocking the application from progressing,
-// regardless of where it sits in the pipeline.
+// candidate still has REQUIRED fields they haven't answered/uploaded. It is
+// presence-based (application_completeness_view.all_required_filled), NOT the
+// qualifying hard_pass — so a candidate who answered everything honestly but
+// doesn't meet the gate is treated as "done" (moves on to "diproses") rather
+// than parked forever on "Lengkapi syarat lamaran". Admin eligibility stays on
+// application_readiness_view.hard_pass.
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@perantauglobal/db";
@@ -50,7 +54,7 @@ export async function getDashboardData(
   candidateId: string,
   client: SupabaseClient<Database>,
 ): Promise<DashboardData> {
-  const [{ data: candData }, { data: appsData }, { data: readinessData }] = await Promise.all([
+  const [{ data: candData }, { data: appsData }, { data: completenessData }] = await Promise.all([
     client
       .from("candidates")
       .select("full_name, phone, city, birth_date, gender, education")
@@ -64,8 +68,8 @@ export async function getDashboardData(
       .eq("candidate_id", candidateId)
       .order("created_at", { ascending: false }),
     client
-      .from("application_readiness_view")
-      .select("application_id, hard_pass")
+      .from("application_completeness_view")
+      .select("application_id, all_required_filled")
       .eq("candidate_id", candidateId),
   ]);
 
@@ -87,11 +91,11 @@ export async function getDashboardData(
     created_at: string;
     positions: { name: string; country: string } | null;
   }>;
-  const readiness = (readinessData ?? []) as Array<{
+  const completeness = (completenessData ?? []) as Array<{
     application_id: string | null;
-    hard_pass: boolean | null;
+    all_required_filled: boolean | null;
   }>;
-  const readinessByApp = new Map(readiness.map((r) => [r.application_id, r]));
+  const completenessByApp = new Map(completeness.map((r) => [r.application_id, r]));
 
   const identityFields = [
     cand?.phone,
@@ -111,7 +115,7 @@ export async function getDashboardData(
       country: a.positions!.country,
       appliedAt: a.created_at,
       stage: deriveStage(a.pipeline_stage, a.job_order_id),
-      needsDocs: readinessByApp.get(a.id)?.hard_pass === false,
+      needsDocs: completenessByApp.get(a.id)?.all_required_filled === false,
     }));
 
   return {

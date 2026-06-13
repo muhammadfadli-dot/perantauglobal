@@ -47,14 +47,16 @@ export default async function ApplyWelcomePage({ params }: PageProps) {
     .single();
   const firstName = (candData?.full_name ?? session.email ?? "kamu").split(" ")[0];
 
-  const { score_pct, fields } = await getApplicationCompleteness(application.id, supabase);
-  // Required-missing blocks review (urgent); total missing is just the road to
-  // 100% (neutral bonus nudge). Don't conflate them — a candidate who passed
-  // every requirement shouldn't be told review is blocked by leftover Bonus.
-  const requiredMissing = fields.filter(
-    (f) => f.importance === "required" && !f.passed,
-  ).length;
-  const missing = fields.filter((f) => !f.passed).length;
+  const { score_pct, fields, required_remaining } = await getApplicationCompleteness(
+    application.id,
+    supabase,
+  );
+  // Required-missing = required fields not yet ANSWERED (presence) — this is what
+  // keeps a lamaran in the "lengkapi" state. NOT qualifying hard_pass: an honest
+  // non-qualifying answer is done, so we don't tell that candidate review is
+  // blocked. Total missing is just the neutral road to 100% (incl. Bonus fields).
+  const requiredMissing = required_remaining;
+  const missing = fields.filter((f) => !f.filled).length;
   const requirements = fields; // alias for downstream usage below
 
   return (
@@ -165,9 +167,11 @@ export default async function ApplyWelcomePage({ params }: PageProps) {
           </div>
         </div>
 
-        {/* CTAs */}
+        {/* CTAs — primary action keys off REQUIRED-missing (presence). Optional
+            fields left unfilled are a neutral "biar 100%" nudge in the card
+            above, not a reason to push the candidate back into lengkapi. */}
         <div className="flex flex-col gap-3 mt-2">
-          {missing > 0 ? (
+          {requiredMissing > 0 ? (
             <Link
               href={`/applications/${id}/lengkapi`}
               className="inline-flex items-center justify-center gap-1.5 min-h-[52px] px-5 rounded-xl text-[15px] font-bold text-white no-underline"

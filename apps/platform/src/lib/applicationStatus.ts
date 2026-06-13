@@ -1,6 +1,12 @@
-// Candidate-facing status derived from internal pipeline_stage + readiness hard_pass.
-// Internal pipeline stages (applied/screening/interview/etc.) are deliberately
-// NOT exposed to candidates — they only see one of four outcomes.
+// Candidate-facing status derived from internal pipeline_stage + completeness
+// (all required fields ANSWERED — presence, not qualifying). Internal pipeline
+// stages (applied/screening/interview/etc.) are deliberately NOT exposed to
+// candidates — they only see one of four outcomes.
+//
+// NOTE: this keys off "all required answered", NOT readiness hard_pass. A
+// candidate who answered everything honestly but doesn't meet the qualifying
+// gate is "diproses" here (nothing left for them to do); real eligibility is an
+// admin concern carried by application_readiness_view.hard_pass.
 
 export type ApplicationStatusKey =
   | "needs_docs"
@@ -156,9 +162,9 @@ export function isPastPool(stage: string): boolean {
 
 export function getApplicationStatus(input: {
   pipelineStage: string;
-  hardPass: boolean | null | undefined;
+  allRequiredFilled: boolean | null | undefined;
 }): ApplicationStatus {
-  const { pipelineStage, hardPass } = input;
+  const { pipelineStage, allRequiredFilled } = input;
 
   if (REJECTED_SET.has(pipelineStage)) {
     return {
@@ -182,7 +188,7 @@ export function getApplicationStatus(input: {
     };
   }
 
-  if (hardPass === false) {
+  if (allRequiredFilled === false) {
     return {
       key: "needs_docs",
       label: "Lengkapi dokumen",

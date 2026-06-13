@@ -1577,6 +1577,42 @@ export type Database = {
       }
     }
     Views: {
+      application_completeness_view: {
+        Row: {
+          all_required_filled: boolean | null
+          application_id: string | null
+          candidate_id: string | null
+          position_slug: string | null
+        }
+        Insert: {
+          all_required_filled?: never
+          application_id?: string | null
+          candidate_id?: string | null
+          position_slug?: string | null
+        }
+        Update: {
+          all_required_filled?: never
+          application_id?: string | null
+          candidate_id?: string | null
+          position_slug?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "applications_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "applications_position_slug_fkey"
+            columns: ["position_slug"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["slug"]
+          },
+        ]
+      }
       application_readiness_view: {
         Row: {
           application_id: string | null

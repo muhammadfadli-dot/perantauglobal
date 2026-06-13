@@ -40,7 +40,11 @@ type ApplicationRow = {
 };
 
 // Map pipeline_stage → timeline currentIdx (0-4)
-function deriveTimelineIdx(stage: string, jobOrderId: string | null, hardPass: boolean): number {
+function deriveTimelineIdx(
+  stage: string,
+  jobOrderId: string | null,
+  allRequiredFilled: boolean,
+): number {
   // Terminal stages — move to step 5 (Keputusan)
   if (["selected", "training", "deployed", "active"].includes(stage)) return 4;
   if (["rejected", "exit"].includes(stage)) return 4;
@@ -51,8 +55,8 @@ function deriveTimelineIdx(stage: string, jobOrderId: string | null, hardPass: b
     return 2;
   }
   // No job order yet = talent pool stage
-  if (!hardPass) return 2; // needs docs — at step 3 "Lengkapi dokumen"
-  return 1; // verified, waiting for job_order assignment
+  if (!allRequiredFilled) return 2; // still has required fields to answer — at "Lengkapi dokumen"
+  return 1; // everything answered, waiting for job_order assignment
 }
 
 const REQUIRED_DOCS = [
@@ -99,17 +103,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   }>;
 
   const position = application.positions;
-  const { fields: requirements, hard_pass } = completeness;
-  // Split required (blocking → urgent) vs optional/bonus (neutral nudge). The
-  // old openCount lumped both, so a candidate who'd passed every requirement was
-  // still shown an alarming red "Lengkapi N syarat" for leftover Bonus fields.
-  const requiredOpen = requirements.filter(
-    (r) => r.importance === "required" && !r.passed,
-  ).length;
+  const { all_required_filled, required_remaining } = completeness;
+  // Candidate-facing "still has work" = required fields not yet ANSWERED
+  // (presence), NOT whether the answers qualify. An honest non-qualifying answer
+  // is done from the candidate's side — eligibility is an admin concern
+  // (hard_pass). Optional/Bonus fields never drive this red nudge.
+  const requiredOpen = required_remaining;
 
   const status = getApplicationStatus({
     pipelineStage: application.pipeline_stage,
-    hardPass: hard_pass,
+    allRequiredFilled: all_required_filled,
   });
   const isRejected = status.key === "rejected";
   const isAccepted = status.key === "accepted";
@@ -125,7 +128,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const timelineIdx = deriveTimelineIdx(
     application.pipeline_stage,
     application.job_order_id,
-    hard_pass,
+    all_required_filled,
   );
 
   // Doc state lookup

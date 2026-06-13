@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
@@ -32,19 +33,25 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
   } | null;
   if (!application || !application.positions) notFound();
 
-  const { fields, hard_pass, score_pct } = await getApplicationCompleteness(id, supabase);
+  const { fields, all_required_filled, required_remaining, score_pct } =
+    await getApplicationCompleteness(id, supabase);
 
   // Group by section. Each section = a step in the candidate's mental model.
-  const sekarang = fields.filter((f) => f.section === "syarat_utama" && !f.passed);
-  const berikutnya = fields.filter((f) => f.section === "kualifikasi" && !f.passed);
-  const nanti = fields.filter((f) => f.section === "screening" && !f.passed);
-  const completed = fields.filter((f) => f.passed);
+  // Sections show fields the candidate hasn't ANSWERED yet (presence). Once a
+  // field is answered — even with a non-qualifying option like "Belum punya
+  // SSW" — it moves to "completed", so an honest answer never keeps the
+  // candidate stuck here. Whether that answer qualifies is an admin concern
+  // (hard_pass), deliberately not surfaced to the candidate.
+  const sekarang = fields.filter((f) => f.section === "syarat_utama" && !f.filled);
+  const berikutnya = fields.filter((f) => f.section === "kualifikasi" && !f.filled);
+  const nanti = fields.filter((f) => f.section === "screening" && !f.filled);
+  const completed = fields.filter((f) => f.filled);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
       <TopBarApp title="Lengkapi lamaran" back backHref={`/applications/${id}`} />
 
-      <main className="flex-1 pb-8">
+      <main className="flex-1 pb-32">
         {/* Position context */}
         <section className="px-5 pt-3">
           <div
@@ -94,10 +101,10 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
               />
             </div>
             <p className="text-[13px] text-pg-ink-secondary mt-1 leading-tight">
-              {hard_pass
-                ? "Semua syarat utama udah terpenuhi. Tambahkan kualifikasi tambahan biar peluang makin gede."
-                : sekarang.length > 0
-                  ? `Tinggal ${sekarang.length} hal wajib biar lamaran lanjut ke tahap berikutnya.`
+              {all_required_filled
+                ? "Semua syarat wajib udah kamu isi. Tim Perantau Global yang lanjut review — kamu nggak perlu ngapa-ngapain lagi di sini."
+                : required_remaining > 0
+                  ? `Tinggal ${required_remaining} hal wajib biar lamaran kamu masuk antrean review.`
                   : "Lengkapi syarat tambahan biar makin kompetitif."}
             </p>
           </div>
@@ -212,6 +219,41 @@ export default async function LengkapiLamaranPage({ params }: PageProps) {
           </div>
         </section>
       </main>
+
+      {/* Sticky exit. Every answer auto-saves, so there is no per-field
+          "next"/"submit" — this is the candidate's clear, always-present way
+          out, so nobody gets trapped on this screen. Label + tone adapt to
+          whether all required fields are done. */}
+      <div
+        className="fixed bottom-[68px] left-0 right-0 z-30 px-5 py-3 border-t"
+        style={{
+          background: "rgba(255,255,255,0.96)",
+          borderColor: "var(--pg-ink-100)",
+          backdropFilter: "blur(10px)",
+          WebkitBackdropFilter: "blur(10px)",
+        }}
+      >
+        <Link
+          href={`/applications/${id}`}
+          className="inline-flex items-center justify-center gap-2 w-full px-5 py-3.5 rounded-[12px] font-extrabold text-[14px] text-white no-underline"
+          style={{
+            background: all_required_filled ? "var(--pg-ok)" : "var(--pg-red-600)",
+            boxShadow: all_required_filled
+              ? "0 4px 12px rgba(15,138,74,0.20)"
+              : "0 4px 12px rgba(215,38,47,0.20)",
+          }}
+        >
+          {all_required_filled ? (
+            <>
+              <Icon name="check" size={16} stroke={2.6} /> Selesai · Lihat status lamaran
+            </>
+          ) : (
+            <>
+              Simpan &amp; kembali ke lamaran <Icon name="arrow_right" size={16} />
+            </>
+          )}
+        </Link>
+      </div>
 
       <BottomNav />
     </div>

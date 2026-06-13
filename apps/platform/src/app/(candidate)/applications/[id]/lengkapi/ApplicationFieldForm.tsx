@@ -94,7 +94,7 @@ export default function ApplicationFieldForm({
             >
               {field.importance === "required" ? "Wajib" : "Bonus"}
             </span>
-            {field.passed && (
+            {field.filled && (
               <span
                 className="text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded inline-flex items-center gap-0.5"
                 style={{ color: "var(--pg-ok-soft-fg)", background: "var(--pg-ok-soft-bg)" }}

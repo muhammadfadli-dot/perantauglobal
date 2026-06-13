@@ -34,16 +34,18 @@ export default async function ApplicationsListPage() {
 
   const applications = (appsData ?? []) as unknown as ApplicationRow[];
 
-  // Per-application hard_pass in ONE query via application_readiness_view (same
-  // source the dashboard/journey.ts uses), instead of N×3 per-app completeness
-  // calls — render time was scaling linearly with the candidate's lamaran count.
-  const { data: readinessData } = await supabase
-    .from("application_readiness_view")
-    .select("application_id, hard_pass")
+  // Per-application "all required answered" in ONE query via
+  // application_completeness_view (same source the dashboard/journey.ts uses),
+  // instead of N×3 per-app completeness calls — render time was scaling linearly
+  // with the candidate's lamaran count. Presence-based, NOT qualifying hard_pass:
+  // an answered-but-non-qualifying lamaran reads as "diproses", not "lengkapi".
+  const { data: completenessData } = await supabase
+    .from("application_completeness_view")
+    .select("application_id, all_required_filled")
     .eq("candidate_id", candidateId);
-  const hardPassByAppId = new Map<string, boolean>(
-    ((readinessData ?? []) as Array<{ application_id: string; hard_pass: boolean }>).map(
-      (r) => [r.application_id, r.hard_pass],
+  const filledByAppId = new Map<string, boolean>(
+    ((completenessData ?? []) as Array<{ application_id: string; all_required_filled: boolean }>).map(
+      (r) => [r.application_id, r.all_required_filled],
     ),
   );
 
@@ -89,7 +91,7 @@ export default async function ApplicationsListPage() {
               {applications.map((a) => {
                 const status = getApplicationStatus({
                   pipelineStage: a.pipeline_stage,
-                  hardPass: hardPassByAppId.get(a.id),
+                  allRequiredFilled: filledByAppId.get(a.id),
                 });
                 const muted = status.key === "rejected";
                 const needsDocs = status.key === "needs_docs";

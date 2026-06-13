@@ -51,7 +51,7 @@ export type ApplicationField = {
   /** A doc has been uploaded for this field (file fields only). */
   doc_uploaded: boolean;
   /**
-   * Field is satisfied for hard_pass:
+   * Field is satisfied for hard_pass (ADMIN eligibility, qualifying-aware):
    * - file: doc uploaded
    * - radio/select/text with options carrying `qualifying`: answer matches a qualifying option
    * - multiselect with options carrying `qualifying`: at least one selected value is qualifying
@@ -63,17 +63,33 @@ export type ApplicationField = {
    * for showing a "answered but not qualifying" state in admin UI.
    */
   answered: boolean;
+  /**
+   * CANDIDATE-facing "done from your side": the candidate has supplied this
+   * field (file → doc uploaded; everything else → a non-empty answer),
+   * REGARDLESS of whether that answer qualifies. This is what drives whether a
+   * candidate is still asked to "melengkapi". Eligibility is a separate
+   * (admin) concern carried by `passed`/`hard_pass` — so an honest
+   * "Belum punya SSW" counts as filled (nothing left to do) but not passed.
+   */
+  filled: boolean;
 };
 
 export type ApplicationCompleteness = {
   fields: ApplicationField[];
+  /** ADMIN eligibility — every required field has a QUALIFYING answer. */
   hard_pass: boolean;
+  /** CANDIDATE done-ness — every required field has been answered (presence). */
+  all_required_filled: boolean;
+  /** Count of required fields the candidate still hasn't answered. */
+  required_remaining: number;
   score_pct: number;
 };
 
 const EMPTY: ApplicationCompleteness = {
   fields: [],
   hard_pass: true,
+  all_required_filled: true,
+  required_remaining: 0,
   score_pct: 100,
 };
 
@@ -169,6 +185,9 @@ export async function getApplicationCompleteness(
       passed = opt?.qualifying === true;
     }
 
+    // "filled" = candidate supplied something (presence), qualifying-agnostic.
+    const filled = f.field_type === "file" ? docUploaded : answered;
+
     return {
       field_key: f.field_key,
       field_label: f.field_label,
@@ -185,23 +204,30 @@ export async function getApplicationCompleteness(
       doc_uploaded: docUploaded,
       passed,
       answered,
+      filled,
     };
   });
 
   const required = fields.filter((f) => f.importance === "required");
+  // hard_pass = ADMIN eligibility (qualifying-aware). all_required_filled =
+  // CANDIDATE done-ness (presence). They diverge for an honest non-qualifying
+  // answer: filled but not passed. Candidate surfaces key off filled-ness so
+  // they aren't dead-ended; admin keys off hard_pass for real eligibility.
   const hardPass = required.every((f) => f.passed);
+  const requiredRemaining = required.filter((f) => !f.filled).length;
+  const allRequiredFilled = requiredRemaining === 0;
 
-  // score_pct = completeness (how much of the form is filled). This is the
-  // candidate-facing progress signal — fills as they answer questions,
-  // regardless of whether their answer is qualifying. Admin uses
-  // `hard_pass` (qualifying-aware) for the actual eligibility check.
+  // score_pct = completeness (how much of the form is filled). Candidate-facing
+  // progress — fills as they answer, regardless of whether answers qualify.
   const total = fields.length;
-  const answeredCount = fields.filter((f) => f.answered || (f.field_type === "file" && f.doc_uploaded)).length;
-  const scorePct = total === 0 ? 100 : Math.round((answeredCount / total) * 100);
+  const filledCount = fields.filter((f) => f.filled).length;
+  const scorePct = total === 0 ? 100 : Math.round((filledCount / total) * 100);
 
   return {
     fields,
     hard_pass: hardPass,
+    all_required_filled: allRequiredFilled,
+    required_remaining: requiredRemaining,
     score_pct: scorePct,
     positionSlug,
   };
