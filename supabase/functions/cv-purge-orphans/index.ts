@@ -27,7 +27,10 @@ const svc = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: fa
 
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "method not allowed" }, 405);
-  if (PURGE_SECRET && req.headers.get("X-Purge-Secret") !== PURGE_SECRET) {
+  // FAIL-CLOSED: wajib PURGE_CRON_SECRET ke-set di env fungsi DAN header X-Purge-Secret
+  // cocok. Kalau secret belum di-set atau header salah -> 403. Jadi fungsi destruktif
+  // ini TERKUNCI sampai di-konfigurasi (bukan kebuka kalau lupa set secret).
+  if (!PURGE_SECRET || req.headers.get("X-Purge-Secret") !== PURGE_SECRET) {
     return json({ error: "forbidden" }, 403);
   }
 

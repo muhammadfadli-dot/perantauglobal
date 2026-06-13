@@ -1,0 +1,45 @@
+name: cv-purge-orphans (pending-cv cleanup)
+
+# Kenapa: CV yang di-upload anon di LP nyangkut di bucket `pending-cv` kalau pelamar
+# dropout (gak verify email; ~50%). cv-materialize cuma mindahin file SETELAH verify.
+# Sisa = orphan: PII numpuk (langgar PDP data-minimization) + biaya storage + spam.
+# Edge fn `cv-purge-orphans` hapus orphan > 48 jam. pg_cron TIDAK terinstall di
+# Supabase project ini, jadi GitHub Action ini = scheduler-nya (manggil fn harian).
+#
+# Butuh repo secret: PURGE_CRON_SECRET (sama persis dgn env PURGE_CRON_SECRET di
+# Supabase Edge Function cv-purge-orphans). Fungsi fail-closed: 403 kalau secret salah.
+
+on:
+  schedule:
+    - cron: "17 19 * * *" # tiap hari 19:17 UTC = 02:17 WIB (jam sepi)
+  workflow_dispatch: {} # bisa di-trigger manual dari tab Actions
+
+concurrency:
+  group: cv-purge-orphans
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger cv-purge-orphans edge function
+        env:
+          PURGE_CRON_SECRET: ${{ secrets.PURGE_CRON_SECRET }}
+        run: |
+          set -euo pipefail
+          if [ -z "${PURGE_CRON_SECRET:-}" ]; then
+            echo "::error::PURGE_CRON_SECRET repo secret belum di-set. Lihat docs/cv-grader-fase2-design.md."
+            exit 1
+          fi
+          code=$(curl -sS -o /tmp/resp.json -w "%{http_code}" -X POST \
+            "https://jeadtvxgxmqnsqwxjmhj.supabase.co/functions/v1/cv-purge-orphans" \
+            -H "X-Purge-Secret: ${PURGE_CRON_SECRET}" \
+            -H "Content-Type: application/json" \
+            --data '{}')
+          echo "HTTP ${code}"
+          cat /tmp/resp.json || true
+          echo ""
+          if [ "${code}" != "200" ]; then
+            echo "::error::cv-purge-orphans returned HTTP ${code} (bukan 200)."
+            exit 1
+          fi
