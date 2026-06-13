@@ -5,6 +5,8 @@ import { Icon } from "./Icon";
 import { Button, Field, Input, Textarea } from "./primitives";
 import { trackEvent, generateEventId, getMetaCookies } from "@/lib/tracking";
 import type { AppliedFormField } from "@/lib/positions-db";
+import { uploadPendingCv, validateCvFile, isCvUploadConfigured } from "@/lib/supabase-storage-anon";
+import { CV_UPLOAD_MICROCOPY, CV_CONSENT_TEXT } from "@/lib/cv-consent";
 
 type ApplyFormProps = {
   positionSlug: string;
@@ -64,7 +66,7 @@ export function ApplyForm({
 
   // Optional affiliate referral code ("kode agen"). Normalized on change; a
   // non-blocking debounced check just shows a subtle ✓/✗ hint. The code itself
-  // travels in the POST payload as `ref` regardless of the hint — attribution
+  // travels in the POST payload as `ref` regardless of the hint - attribution
   // is resolved server-side by the DB trigger, never gated here.
   const [referralCode, setReferralCode] = useState("");
   const [referralCheck, setReferralCheck] = useState<
@@ -74,6 +76,30 @@ export function ApplyForm({
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [submittedEmail, setSubmittedEmail] = useState("");
+
+  // Fase 2 CV grader: CV di depan funnel. Variant + pendingId di-init client-side
+  // via lazy initializer (LP statis SSG; bukan setState-in-effect biar lolos lint).
+  // pendingId dipakai sebagai path upload anon DAN PK pending_submissions nanti.
+  const [pendingId] = useState<string>(() =>
+    typeof window !== "undefined" && typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : "",
+  );
+  // Treatment A/B "CV wajib" diaktifin lewat ?ab=cv_req (kontrol = opsional).
+  const [cvRequired] = useState<boolean>(
+    () =>
+      typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("ab") === "cv_req",
+  );
+  const cvUploadAvailable = isCvUploadConfigured();
+  const [cvStatus, setCvStatus] = useState<"idle" | "uploading" | "uploaded" | "error">("idle");
+  const [cvPath, setCvPath] = useState("");
+  const [cvMime, setCvMime] = useState("");
+  const [cvSize, setCvSize] = useState(0);
+  const [cvFileName, setCvFileName] = useState("");
+  const [cvError, setCvError] = useState("");
+  // Honeypot: hidden field, bots fill it, humans never see/tab to it.
+  const [honeypot, setHoneypot] = useState("");
 
   function setIdentityField<K extends keyof Identity>(key: K, value: Identity[K]) {
     setIdentity((prev) => ({ ...prev, [key]: value }));
@@ -85,18 +111,18 @@ export function ApplyForm({
 
   function handleReferralChange(raw: string) {
     setReferralCode(normalizeReferral(raw));
-    // Reset the hint on input (event handler — allowed). The effect below only
+    // Reset the hint on input (event handler - allowed). The effect below only
     // runs the async check and never sets state synchronously, satisfying the
     // react-hooks/set-state-in-effect rule.
     setReferralCheck("idle");
   }
 
-  // Debounced, NON-blocking validity hint. Never gates submit — a bad/unknown
+  // Debounced, NON-blocking validity hint. Never gates submit - a bad/unknown
   // code is fine; the server still stages it and the trigger no-ops on
   // unresolved. Aborts in-flight checks on each keystroke; ignores network
   // errors (hint just goes back to neutral).
   useEffect(() => {
-    // Only the async result is set here (inside the timeout/promise) — never a
+    // Only the async result is set here (inside the timeout/promise) - never a
     // synchronous setState in the effect body (react-hooks/set-state-in-effect).
     // The "idle"/"checking" reset happens in handleReferralChange on input.
     if (referralCode.length < REFERRAL_MIN_LEN) return;
@@ -110,7 +136,7 @@ export function ApplyForm({
           setReferralCheck(d?.valid ? "valid" : "invalid");
         })
         .catch(() => {
-          // Abort or network error — drop the hint silently, don't block.
+          // Abort or network error - drop the hint silently, don't block.
           if (!controller.signal.aborted) setReferralCheck("idle");
         });
     }, 400);
@@ -138,6 +164,44 @@ export function ApplyForm({
     setStep(2);
   }
 
+  async function handleCvChange(file: File | null) {
+    setCvError("");
+    if (!file) {
+      setCvStatus("idle");
+      setCvPath("");
+      setCvMime("");
+      setCvSize(0);
+      setCvFileName("");
+      return;
+    }
+    const v = validateCvFile(file);
+    if (!v.ok) {
+      setCvError(v.error);
+      setCvStatus("error");
+      return;
+    }
+    if (!pendingId) {
+      setCvError("Sesi belum siap. Muat ulang halaman lalu coba lagi.");
+      setCvStatus("error");
+      return;
+    }
+    setCvFileName(file.name);
+    setCvStatus("uploading");
+    const res = await uploadPendingCv(pendingId, file);
+    if (res.ok) {
+      setCvPath(res.path);
+      setCvMime(res.mime);
+      setCvSize(res.size);
+      setCvStatus("uploaded");
+    } else {
+      setCvError(res.error);
+      setCvStatus("error");
+      setCvPath("");
+      setCvMime("");
+      setCvSize(0);
+    }
+  }
+
   async function handleSubmit() {
     setErrorMsg("");
 
@@ -154,6 +218,16 @@ export function ApplyForm({
     }
     if (password !== confirmPassword) {
       setErrorMsg("Password dan konfirmasi tidak cocok.");
+      return;
+    }
+
+    // Treatment "CV wajib": hard gate. Submit baru boleh kalau CV udah ke-upload.
+    if (cvRequired && cvUploadAvailable && cvStatus !== "uploaded") {
+      setErrorMsg(
+        cvStatus === "uploading"
+          ? "Tunggu CV selesai diunggah dulu."
+          : "Lampirkan CV dulu (wajib) untuk lanjut daftar.",
+      );
       return;
     }
 
@@ -180,6 +254,13 @@ export function ApplyForm({
       // (>= 4 chars, matching the server normalizeRef + DB CHECK); shorter input
       // can never resolve. The live ✓/✗ hint never blocks this from being sent.
       ...(referralCode.length >= REFERRAL_MIN_LEN ? { ref: referralCode } : {}),
+      // Fase 2 CV grader: pending_id (path upload == PK) + pointer CV staged.
+      ...(pendingId ? { pending_id: pendingId } : {}),
+      ...(cvStatus === "uploaded" && cvPath
+        ? { cv_path: cvPath, cv_mime: cvMime, cv_size: cvSize }
+        : {}),
+      ab_variant: cvRequired ? "cv_required" : "control",
+      hp: honeypot,
       eventId,
       fbp,
       fbc,
@@ -279,12 +360,24 @@ export function ApplyForm({
     >
       <StepIndicator step={step} />
 
+      {/* Honeypot: hidden anti-bot field. Humans never see it / tab to it. */}
+      <input
+        type="text"
+        name="company_website"
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        value={honeypot}
+        onChange={(e) => setHoneypot(e.target.value)}
+        style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+      />
+
       {step === 1 ? (
         <>
           <div className="mt-4">
             <h3 className="text-xl md:text-2xl font-extrabold tracking-tight">Mulai dari sini.</h3>
             <p className="text-sm text-pg-ink-500 mt-1.5 leading-relaxed">
-              Isi data dasar — kami pakai untuk hubungi kamu kalau cocok.
+              Isi data dasar - kami pakai untuk hubungi kamu kalau cocok.
             </p>
           </div>
 
@@ -360,7 +453,7 @@ export function ApplyForm({
             >
               <Icon name="info" size={14} className="shrink-0 mt-0.5" />
               <div className="text-[12px] leading-relaxed">
-                Belum bikin akun di langkah ini. {fields.length} pertanyaan kualifikasi dulu — baru
+                Belum bikin akun di langkah ini. {fields.length} pertanyaan kualifikasi dulu - baru
                 daftar.
               </div>
             </div>
@@ -392,6 +485,91 @@ export function ApplyForm({
               />
             ))}
           </div>
+
+          {cvUploadAvailable && (
+            <div className="mt-6 border-t border-pg-ink-100 pt-5">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="text-sm font-bold text-pg-ink-900">
+                  Lampirkan CV {cvRequired ? "(wajib)" : "(opsional)"}
+                </div>
+                {cvRequired && (
+                  <span
+                    className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold tracking-[0.06em] uppercase"
+                    style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
+                  >
+                    Wajib
+                  </span>
+                )}
+              </div>
+              <p className="text-[13px] text-pg-ink-500 leading-relaxed mb-3">
+                {cvRequired
+                  ? `Lamaran kamu langsung dinilai tim kami. ${CV_UPLOAD_MICROCOPY}`
+                  : `Bikin lamaran kamu lebih kuat dan langsung dinilai. ${CV_UPLOAD_MICROCOPY}`}
+              </p>
+
+              <label
+                className={`flex items-center gap-3 px-3.5 py-3 min-h-[52px] rounded-xl border-[1.5px] cursor-pointer focus-within:ring-2 focus-within:ring-pg-red-600 focus-within:ring-offset-1 ${
+                  cvStatus === "uploaded"
+                    ? "border-pg-red-600 bg-pg-red-50"
+                    : "border-pg-ink-200 bg-pg-white"
+                }`}
+              >
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,.webp,application/pdf,image/*"
+                  className="sr-only"
+                  disabled={cvStatus === "uploading"}
+                  onChange={(e) => void handleCvChange(e.target.files?.[0] ?? null)}
+                />
+                <div
+                  className="w-8 h-8 rounded-full grid place-items-center shrink-0"
+                  style={{
+                    background: cvStatus === "uploaded" ? "var(--pg-ok)" : "var(--pg-ink-50)",
+                    color: cvStatus === "uploaded" ? "#fff" : "var(--pg-ink-500)",
+                  }}
+                >
+                  <Icon
+                    name={cvStatus === "uploaded" ? "check" : cvStatus === "error" ? "warn" : "upload"}
+                    size={16}
+                    stroke={2.4}
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  {cvStatus === "uploading" ? (
+                    <div className="text-[13px] font-bold text-pg-ink-900">Mengunggah CV…</div>
+                  ) : cvStatus === "uploaded" ? (
+                    <>
+                      <div className="text-[13px] font-bold text-pg-ink-900 truncate">
+                        {cvFileName || "CV terlampir"}
+                      </div>
+                      <div className="text-[12px] text-pg-ink-500">CV terunggah. Tap untuk ganti.</div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-[13px] font-bold text-pg-ink-900">Pilih file CV</div>
+                      <div className="text-[12px] text-pg-ink-500">PDF atau gambar, maks 5MB.</div>
+                    </>
+                  )}
+                </div>
+              </label>
+
+              {cvError && (
+                <div
+                  className="text-[12px] mt-2 flex items-center gap-1.5"
+                  style={{ color: "var(--pg-err)" }}
+                >
+                  <Icon name="warn" size={13} /> {cvError}
+                </div>
+              )}
+
+              {/* Teks consent yang DI-LOG (shown == logged, PDP). Tampil saat ada CV. */}
+              {cvStatus === "uploaded" && (
+                <p className="text-[11px] text-pg-ink-400 leading-relaxed mt-2">
+                  {CV_CONSENT_TEXT}
+                </p>
+              )}
+            </div>
+          )}
 
           <div className="mt-6 border-t border-pg-ink-100 pt-5">
             <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-ink-500 mb-1">
@@ -434,7 +612,7 @@ export function ApplyForm({
                 />
               </Field>
               <div className="text-[12px] text-pg-ink-500 leading-relaxed">
-                Huruf besar, kecil, dan angka. Disimpan aman — kami tidak bisa lihat password kamu.
+                Huruf besar, kecil, dan angka. Disimpan aman - kami tidak bisa lihat password kamu.
               </div>
             </div>
           </div>
@@ -480,7 +658,7 @@ export function ApplyForm({
           >
             <Icon name="info" size={16} className="shrink-0 mt-0.5" />
             <div className="text-[12px] leading-relaxed">
-              <b>Cek email setelah daftar</b> — kamu perlu klik link verifikasi di email untuk
+              <b>Cek email setelah daftar</b> - kamu perlu klik link verifikasi di email untuk
               aktifkan akun Perantau Global.
             </div>
           </div>
@@ -572,7 +750,7 @@ function IdentitySummary({ identity, onEdit }: { identity: Identity; onEdit: () 
       </div>
       <div className="min-w-0 flex-1">
         <div className="text-[13px] font-bold text-pg-ink-900 truncate">
-          {identity.fullName || "—"}
+          {identity.fullName || "-"}
           {identity.city && <span className="text-pg-ink-500"> · {identity.city}</span>}
         </div>
         {subtitle && (
@@ -894,7 +1072,7 @@ function SingleStepForm({
             />
           </Field>
           <div className="text-[12px] text-pg-ink-500 leading-relaxed">
-            Kombinasi huruf besar, huruf kecil, dan angka. Disimpan aman — kami nggak bisa lihat
+            Kombinasi huruf besar, huruf kecil, dan angka. Disimpan aman - kami nggak bisa lihat
             password kamu.
           </div>
         </div>

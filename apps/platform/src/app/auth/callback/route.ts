@@ -123,6 +123,25 @@ export async function GET(request: NextRequest) {
     })(),
   );
 
+  // Fase 2 CV grader: materialize a CV that was staged anon at the LP (move
+  // pending-cv -> candidate-documents + auto-grade) via the cv-materialize edge
+  // fn, authenticated as the candidate (session set above). The DB trigger has
+  // already INSERTed the candidate_documents metadata row in the same confirm
+  // transaction; this moves the physical file + invokes grade-cv. Fire-and-forget:
+  // a no-CV signup is a no-op, and any failure must never block the redirect.
+  waitUntil(
+    (async () => {
+      try {
+        const { error: mErr } = await supabase.functions.invoke("cv-materialize", {
+          body: {},
+        });
+        if (mErr) console.error("[auth/callback] cv-materialize failed:", mErr.message);
+      } catch (err) {
+        console.error("[auth/callback] cv-materialize threw:", err);
+      }
+    })(),
+  );
+
   // Success — root page.tsx will route them to /admin or /dashboard.
   return response;
 }

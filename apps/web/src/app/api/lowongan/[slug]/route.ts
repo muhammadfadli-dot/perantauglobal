@@ -3,11 +3,15 @@ import { waitUntil } from "@vercel/functions";
 import { sendMetaEvent } from "@/lib/meta-capi";
 import { writePendingSubmission } from "@/lib/pending-write";
 import { supabaseV2 } from "@/lib/supabase-v2";
+import { CV_CONSENT_PURPOSE, CV_CONSENT_TEXT, CV_CONSENT_VERSION } from "@/lib/cv-consent";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const MAX_CV_BYTES = 5 * 1024 * 1024;
 
 /**
  * Resolve a slug to its role + country via the positions table. Replaces the
  * old hardcoded SLUG_MAP (which drifted out of sync every time we shipped a
- * new position — half of the 2026-05 ad rollout had broken submit URLs because
+ * new position - half of the 2026-05 ad rollout had broken submit URLs because
  * 4 new slugs were never added to the whitelist).
  *
  * Anon read of `positions` where active=true is allowed by RLS policy
@@ -48,7 +52,7 @@ interface CandidatePayload {
    * Apply-stage qualifying answers. Keys must match
    * `position_application_fields.field_key` (section='syarat_utama') for the
    * slug; values are string (radio/select/text/number) or string[]
-   * (multiselect). Materialized into `applications.answers` only — no longer
+   * (multiselect). Materialized into `applications.answers` only - no longer
    * mirrored to `candidates.profile_data` (per-app fresh-start model post-Fase 5).
    */
   role_data?: Record<string, string | string[]>;
@@ -60,16 +64,56 @@ interface CandidatePayload {
    * no-op and never blocks registration.
    */
   ref?: string;
+  /**
+   * Fase 2 CV grader (CV di depan funnel). The LP uploads the CV anon to
+   * `pending-cv/pending/<pending_id>/cv.*` BEFORE submit, then sends the
+   * pre-generated `pending_id` + resulting `cv_path`/`cv_mime`/`cv_size` here.
+   * Server re-validates the path strictly against `pending_id` and only then
+   * stages the pointer in form_data.cv. A bad/missing CV is dropped, never blocks.
+   */
+  pending_id?: string;
+  cv_path?: string;
+  cv_mime?: string;
+  cv_size?: number;
+  /** A/B variant tag: 'cv_required' (treatment) | anything else -> 'control'. */
+  ab_variant?: string;
+  /** Honeypot: hidden field, bots fill it, humans never see it. Non-empty = drop. */
+  hp?: string;
   eventId?: string;
   fbp?: string;
   fbc?: string;
 }
 
 /**
+ * Validate a staged CV pointer. Only trust a path that strictly matches the
+ * caller's own pending_id (so a submit can't point at another person's staged
+ * object). Returns the validated pending_id + cv descriptor, or null to drop
+ * the CV silently (submit still proceeds without it).
+ */
+function validatePendingCv(
+  pendingId: unknown,
+  cvPath: unknown,
+  cvMime: unknown,
+  cvSize: unknown,
+): { pendingId: string; cv: { path: string; mime: string; size: number } } | null {
+  if (typeof pendingId !== "string" || !UUID_RE.test(pendingId)) return null;
+  if (typeof cvPath !== "string") return null;
+  const re = new RegExp(`^pending/${pendingId}/cv\\.(pdf|jpe?g|png|heic|heif|webp)$`, "i");
+  if (!re.test(cvPath)) return null;
+  const mime = typeof cvMime === "string" && cvMime.length > 0 && cvMime.length <= 100
+    ? cvMime
+    : "application/pdf";
+  const size = typeof cvSize === "number" && cvSize > 0 && cvSize <= MAX_CV_BYTES
+    ? Math.round(cvSize)
+    : 0;
+  return { pendingId, cv: { path: cvPath, mime, size } };
+}
+
+/**
  * Normalize a candidate-typed referral code to the canonical stored shape:
  * uppercase, whitespace-trimmed, charset [A-Z0-9-], 1–32 chars. Returns null
  * for anything that can't be a code (empty, too long, illegal chars) so we only
- * ever stage a clean token — the DB trigger does the authoritative resolution.
+ * ever stage a clean token - the DB trigger does the authoritative resolution.
  */
 function normalizeRef(raw: unknown): string | null {
   if (typeof raw !== "string") return null;
@@ -84,8 +128,8 @@ function normalizeRef(raw: unknown): string | null {
 /**
  * Extract the `fbclid` query param from the submitted source URL. Used to
  * reconstruct an `_fbc` value when the Pixel cookie hasn't been written yet
- * (race between page load and a fast form submit) so CAPI match quality — and
- * the downstream CompleteRegistration attribution — don't silently depend on
+ * (race between page load and a fast form submit) so CAPI match quality - and
+ * the downstream CompleteRegistration attribution - don't silently depend on
  * the cookie being present.
  */
 function parseFbclid(sourceUrl?: string): string | undefined {
@@ -147,6 +191,13 @@ export async function POST(
 
     const body = (await request.json()) as CandidatePayload;
 
+    // Anti-abuse: honeypot. The hidden field is invisible to humans; a filled
+    // value means a bot. Return a 200 success shape (don't tip off the bot) but
+    // skip every write.
+    if (typeof body.hp === "string" && body.hp.trim() !== "") {
+      return NextResponse.json({ success: true });
+    }
+
     // Sub-5-field LP capture (Fase 3 trim): only name + WA + email + password
     // are required. City + birth_date + gender + education ditanya post-apply
     // di portal /onboarding biar drop-off di LP minim.
@@ -179,6 +230,41 @@ export async function POST(
 
     const email = body.email.toLowerCase().trim();
 
+    const clientIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      null;
+
+    // Anti-abuse: DB-level rate limit per email + per IP (migration 0079).
+    // Fail-open if the RPC errors (e.g. not yet applied) so a transient issue
+    // never blocks legitimate submits.
+    try {
+      // RPC ditambah migration 0079; generated DB types baru include-nya setelah
+      // migration di-apply + types di-regen (Fase 5). Cast ke signature generik
+      // (bukan `any`) supaya typecheck lolos sebelum itu.
+      const rpc = supabaseV2().rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: boolean | null; error: { message: string } | null }>;
+      const { data: underLimit, error: rlErr } = await rpc("check_apply_rate_limit", {
+        p_email: email,
+        p_ip: clientIp,
+      });
+      if (!rlErr && underLimit === false) {
+        return NextResponse.json(
+          { error: "Terlalu banyak percobaan. Coba lagi dalam beberapa menit." },
+          { status: 429 },
+        );
+      }
+    } catch {
+      // ignore - fail open
+    }
+
+    // CV staged anon (Fase 2). Strict re-validation server-side; invalid -> drop
+    // the pointer (submit still proceeds without a CV).
+    const cvStaging = validatePendingCv(body.pending_id, body.cv_path, body.cv_mime, body.cv_size);
+    const abVariant = body.ab_variant === "cv_required" ? "cv_required" : "control";
+
     // Reconstruct _fbc from fbclid when the Pixel cookie wasn't set in time
     // (Meta accepts `fb.1.<ts>.<fbclid>`). Rescues attribution for the ~25% of
     // ad clicks whose _fbc cookie hadn't been written at submit. Used for both
@@ -192,6 +278,9 @@ export async function POST(
     // flip to materialize candidate + application.
     const writeResult = await writePendingSubmission(
       {
+        // CV staged under pending/<pending_id>/cv.* must reuse that exact id as
+        // the pending_submissions PK so the trigger + cv-materialize reconnect.
+        pendingId: cvStaging?.pendingId,
         position_slug: slug,
         email,
         phone: body.whatsapp,
@@ -208,6 +297,8 @@ export async function POST(
           source_url: body.source_url ?? null,
           role_data: sanitizeRoleData(body.role_data),
           ref: normalizeRef(body.ref),
+          ab_variant: abVariant,
+          ...(cvStaging ? { cv: cvStaging.cv } : {}),
         },
         consents: [
           {
@@ -217,6 +308,18 @@ export async function POST(
             version: "2026-04-23",
             granted: true,
           },
+          // Granular CV/AI-profiling consent (UU PDP) only when a CV is staged.
+          // SoT import keeps shown-text (ApplyForm) == logged-text here.
+          ...(cvStaging
+            ? [
+                {
+                  purpose: CV_CONSENT_PURPOSE,
+                  purpose_text: CV_CONSENT_TEXT,
+                  version: CV_CONSENT_VERSION,
+                  granted: true,
+                },
+              ]
+            : []),
         ],
       },
       request,
@@ -332,6 +435,10 @@ export async function POST(
           customData: {
             content_name: `lowongan_${mapping.role}`,
             content_category: "lowongan",
+            // Lead stays = submit (volume unchanged); has_cv lets Meta optimize
+            // toward CV-bearing leads. A/B arm tagged for downstream analysis.
+            has_cv: cvStaging ? "true" : "false",
+            ab_variant: abVariant,
           },
         })
       );

@@ -8,14 +8,22 @@ import { supabaseV2, isV2Configured } from "./supabase-v2";
  */
 export interface WritePendingArgs {
   /**
+   * Optional caller-provided pending id. When the LP staged a CV upload anon to
+   * `pending-cv/pending/<id>/cv.*` BEFORE submit (Fase 2 CV grader), the upload
+   * path must equal this pending_submissions PK so the trigger + cv-materialize
+   * can reconnect file -> candidate. Caller passes the SAME uuid it uploaded
+   * under. Falls back to a fresh uuid (no-CV path) when omitted.
+   */
+  pendingId?: string;
+  /**
    * Intent of the submission. 'job' → materializes an application; 'academy' →
    * materializes an academy_enrollment (migration 0060). Defaults to 'job' for
    * backward compatibility with the existing apply flow.
    */
   intent?: "job" | "academy";
-  /** Position slug — required when intent='job'. Must match `positions.slug`. */
+  /** Position slug - required when intent='job'. Must match `positions.slug`. */
   position_slug?: string;
-  /** Program slug — required when intent='academy'. Must match `academy_programs.slug`. */
+  /** Program slug - required when intent='academy'. Must match `academy_programs.slug`. */
   program_slug?: string;
   /** Candidate email used for magic-link auth + dedupe. */
   email: string;
@@ -30,9 +38,9 @@ export interface WritePendingArgs {
    * Consent records. PDP UU 27/2022 compliance log.
    *
    * Common purposes:
-   *   - "application_processing" — required to apply
-   *   - "marketing_email" — optional
-   *   - "marketing_whatsapp" — optional
+   *   - "application_processing" - required to apply
+   *   - "marketing_email" - optional
+   *   - "marketing_whatsapp" - optional
    */
   consents: Array<{
     purpose: string;
@@ -50,7 +58,7 @@ export type WritePendingResult =
  * Canonical write of a pending_submission + linked consents.
  *
  * Previously this was a fire-and-forget "shadow" alongside a legacy gt-tools
- * insert. Post-Phase-2 cleanup, this is the only write path — if it fails we
+ * insert. Post-Phase-2 cleanup, this is the only write path - if it fails we
  * surface the error to the caller so the form returns 500.
  */
 export async function writePendingSubmission(
@@ -69,7 +77,11 @@ export async function writePendingSubmission(
 
   // Pre-generate the pending_submission id so we can link consents without
   // needing a SELECT policy for anon (RLS blocks reading back after INSERT).
-  const pendingId = crypto.randomUUID();
+  // Caller may supply one (CV staged under pending/<id>/ must match this PK);
+  // validate shape defensively before trusting a client-influenced value.
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const pendingId =
+    args.pendingId && UUID_RE.test(args.pendingId) ? args.pendingId : crypto.randomUUID();
 
   try {
     const db = supabaseV2();
