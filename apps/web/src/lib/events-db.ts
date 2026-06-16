@@ -17,6 +17,8 @@ export type EventSpeaker = {
   role?: string;
   org?: string;
   photo?: string;
+  /** Icon name (from @/components/pg/Icon) shown when there's no photo. */
+  icon?: string;
 };
 
 /** Co-brand strip rows, e.g. { label: "Bersama", items: ["UI", "LSP UI"] }. */
@@ -31,7 +33,17 @@ export type EventFormConfig = {
   professionOptions?: string[];
   interestLabel?: string;
   interestOptions?: string[];
+  /** Small trust line shown under the form heading, e.g. "Gratis · Tanpa calo". */
+  note?: string;
 };
+
+/** Trust-band stat, e.g. { value: "3–10×", label: "Lompatan gaji" }. */
+export type EventStat = { value: string; label: string; icon?: string };
+/** "What you'll learn" agenda item. */
+export type EventAgendaItem = { title: string; desc?: string };
+/** Rich benefit card (title + sub-line), richer than the plain benefits[]. */
+export type EventBenefit = { title: string; desc?: string; icon?: string };
+export type EventFaqItem = { q: string; a: string };
 
 export type EventContent = {
   /** Hero style. "campus" = playful multi-color hero; default = red hero. */
@@ -49,6 +61,18 @@ export type EventContent = {
   partners?: EventPartnerGroup[];
   /** Registration-form field overrides. */
   form?: EventFormConfig;
+  /** Small note under the hero CTA, e.g. "Gratis · Kuota terbatas 300 peserta". */
+  ctaNote?: string;
+  /** Trust band (3 quick credibility hits) under the hero. */
+  stats?: EventStat[];
+  /** "Sesi ini buat kamu yang…" self-selection bullets. */
+  whoFor?: string[];
+  /** "Yang bakal kamu dapat di sesi ini" agenda. */
+  agenda?: EventAgendaItem[];
+  /** Rich benefit cards (title + desc); falls back to benefits[] if absent. */
+  benefitsDetail?: EventBenefit[];
+  /** FAQ (objection handling). */
+  faq?: EventFaqItem[];
 };
 
 export type EventDetail = {

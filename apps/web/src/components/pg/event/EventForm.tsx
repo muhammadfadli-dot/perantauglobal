@@ -36,6 +36,7 @@ export function EventForm({
   professionOptions,
   interestLabel = "Negara/posisi yang diminati",
   interestOptions,
+  note,
 }: {
   eventSlug: string;
   eventTitle: string;
@@ -44,6 +45,7 @@ export function EventForm({
   professionOptions?: string[];
   interestLabel?: string;
   interestOptions?: string[];
+  note?: string;
 }) {
   const professions =
     professionOptions && professionOptions.length > 0
@@ -174,6 +176,12 @@ export function EventForm({
         <p className="text-[13px] text-pg-ink-500 mt-1">
           Gratis. Cukup 30 detik.
         </p>
+        {note && (
+          <div className="mt-2.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-bold"
+            style={{ background: "var(--pg-ok-bg)", color: "var(--pg-ok)" }}>
+            <Icon name="shield" size={13} /> {note}
+          </div>
+        )}
       </div>
 
       <Field label="Nama lengkap" required htmlFor="full_name">

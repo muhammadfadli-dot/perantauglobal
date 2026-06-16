@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
-import { Icon } from "@/components/pg/Icon";
+import { Icon, type IconName } from "@/components/pg/Icon";
 import { Eyebrow, Section, SectionHeader } from "@/components/pg/primitives";
 import { EventForm } from "@/components/pg/event/EventForm";
 import {
@@ -79,7 +79,7 @@ export default async function EventPage({
   const { content } = ev;
   const { dateLabel } = formatEventWhen(ev.startsAt, ev.timezone);
 
-  // Time range (uses ends_at when present): "14.00–15.30 WIB".
+  // Time range (uses ends_at when present): "10.00–11.00 WIB".
   const tzAbbr = ev.timezone === "Asia/Jakarta" ? "WIB" : ev.timezone;
   const fmtTime = (iso: string) =>
     new Date(iso).toLocaleTimeString("id-ID", {
@@ -93,8 +93,13 @@ export default async function EventPage({
 
   const poster = content.poster || ev.coverImage;
   const speakers = content.speakers ?? [];
-  const benefits = content.benefits ?? [];
+  const benefitsSimple = content.benefits ?? [];
+  const benefitsRich = content.benefitsDetail ?? [];
   const partners = content.partners ?? [];
+  const stats = content.stats ?? [];
+  const whoFor = content.whoFor ?? [];
+  const agenda = content.agenda ?? [];
+  const faq = content.faq ?? [];
   const isCampus = content.theme === "campus";
 
   const meta = [
@@ -130,6 +135,35 @@ export default async function EventPage({
         </div>
       )}
 
+      {/* ── Trust band (stats) ─────────────────────────────────── */}
+      {stats.length > 0 && (
+        <Section tone="white" size="md" border="bottom">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+            {stats.map((s, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3.5 p-4 rounded-2xl bg-pg-ink-50 border border-pg-ink-100"
+              >
+                <span
+                  className="w-11 h-11 rounded-xl grid place-items-center shrink-0"
+                  style={{ background: "var(--pg-blue-600)", color: "#fff" }}
+                >
+                  <Icon name={(s.icon ?? "check") as IconName} size={20} />
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[17px] font-extrabold text-pg-ink-900 leading-tight">
+                    {s.value}
+                  </div>
+                  <div className="text-[12.5px] text-pg-ink-500 leading-snug mt-0.5">
+                    {s.label}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
       {/* ── Intro narrative ────────────────────────────────────── */}
       {content.intro && (
         <Section tone="paper" size="lg">
@@ -142,35 +176,133 @@ export default async function EventPage({
         </Section>
       )}
 
-      {/* ── Benefits ───────────────────────────────────────────── */}
-      {benefits.length > 0 && (
+      {/* ── Who it's for ───────────────────────────────────────── */}
+      {whoFor.length > 0 && (
         <Section tone="white" size="lg" border="top">
           <SectionHeader
-            eyebrow="Yang kamu dapat"
+            eyebrow="Buat siapa"
             title={
               <>
-                Pulang bawa <span className="text-pg-red-600">kejelasan.</span>
+                Sesi ini buat <span className="text-pg-red-600">kamu yang…</span>
               </>
             }
           />
           <div className="mt-7 grid md:grid-cols-2 gap-3.5">
-            {benefits.map((b, i) => (
+            {whoFor.map((w, i) => (
               <div
                 key={i}
-                className="flex gap-3.5 items-start p-4 rounded-2xl bg-pg-white border border-pg-ink-100"
+                className="flex gap-3.5 items-start p-4 rounded-2xl bg-pg-ink-50 border border-pg-ink-100"
               >
                 <span
-                  className="w-8 h-8 rounded-full grid place-items-center shrink-0 mt-0.5"
-                  style={{ background: "var(--pg-ok-bg)", color: "var(--pg-ok)" }}
+                  className="w-7 h-7 rounded-full grid place-items-center shrink-0 mt-0.5"
+                  style={{ background: "var(--pg-blue-600)", color: "#fff" }}
                 >
-                  <Icon name="check" size={16} stroke={3} />
+                  <Icon name="check" size={15} stroke={3} />
                 </span>
                 <span className="text-[15px] md:text-[16px] leading-relaxed text-pg-ink-700">
-                  {b}
+                  {w}
                 </span>
               </div>
             ))}
           </div>
+        </Section>
+      )}
+
+      {/* ── Agenda — what you'll learn ─────────────────────────── */}
+      {agenda.length > 0 && (
+        <Section tone="paper" size="lg" border="top">
+          <SectionHeader
+            eyebrow="Agenda"
+            title={
+              <>
+                Yang bakal kamu <span className="text-pg-red-600">dapat di sesi ini.</span>
+              </>
+            }
+          />
+          <div className="mt-7 grid md:grid-cols-2 gap-3.5">
+            {agenda.map((a, i) => (
+              <div
+                key={i}
+                className="flex gap-4 items-start p-5 rounded-2xl bg-pg-white border border-pg-ink-100"
+                style={{ boxShadow: "var(--shadow-card)" }}
+              >
+                <span
+                  className="font-extrabold text-[22px] leading-none shrink-0"
+                  style={{ color: CAMPUS_WORD_COLORS[i % CAMPUS_WORD_COLORS.length] }}
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0">
+                  <div className="text-[15.5px] md:text-[16px] font-extrabold text-pg-ink-900 leading-snug">
+                    {a.title}
+                  </div>
+                  {a.desc && (
+                    <div className="text-[13.5px] text-pg-ink-500 leading-relaxed mt-1">
+                      {a.desc}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* ── Benefits ───────────────────────────────────────────── */}
+      {(benefitsRich.length > 0 || benefitsSimple.length > 0) && (
+        <Section tone="white" size="lg" border="top">
+          <SectionHeader
+            eyebrow="Bonus buat peserta"
+            title={
+              <>
+                Daftar, langsung <span className="text-pg-red-600">dapat ini.</span>
+              </>
+            }
+          />
+          {benefitsRich.length > 0 ? (
+            <div className="mt-7 grid md:grid-cols-3 gap-3.5">
+              {benefitsRich.map((b, i) => (
+                <div
+                  key={i}
+                  className="p-5 rounded-2xl bg-pg-ink-50 border border-pg-ink-100"
+                >
+                  <span
+                    className="w-11 h-11 rounded-xl grid place-items-center"
+                    style={{ background: "var(--pg-gold-200)", color: "var(--pg-gold-900)" }}
+                  >
+                    <Icon name={(b.icon ?? "sparkle") as IconName} size={20} />
+                  </span>
+                  <div className="mt-3.5 text-[15.5px] font-extrabold text-pg-ink-900 leading-snug">
+                    {b.title}
+                  </div>
+                  {b.desc && (
+                    <div className="text-[13.5px] text-pg-ink-500 leading-relaxed mt-1.5">
+                      {b.desc}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="mt-7 grid md:grid-cols-2 gap-3.5">
+              {benefitsSimple.map((b, i) => (
+                <div
+                  key={i}
+                  className="flex gap-3.5 items-start p-4 rounded-2xl bg-pg-white border border-pg-ink-100"
+                >
+                  <span
+                    className="w-8 h-8 rounded-full grid place-items-center shrink-0 mt-0.5"
+                    style={{ background: "var(--pg-ok-bg)", color: "var(--pg-ok)" }}
+                  >
+                    <Icon name="check" size={16} stroke={3} />
+                  </span>
+                  <span className="text-[15px] md:text-[16px] leading-relaxed text-pg-ink-700">
+                    {b}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </Section>
       )}
 
@@ -195,7 +327,7 @@ export default async function EventPage({
                   className="flex items-center gap-4 p-4 rounded-2xl bg-pg-white border border-pg-ink-100"
                   style={{ boxShadow: "var(--shadow-card)" }}
                 >
-                  <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 bg-pg-ink-100 ring-2 ring-pg-red-100">
+                  <div className="w-16 h-16 rounded-full overflow-hidden shrink-0 bg-pg-ink-100 ring-2 ring-pg-red-100 grid place-items-center text-pg-ink-400">
                     {s.photo ? (
                       <Image
                         src={s.photo}
@@ -205,9 +337,7 @@ export default async function EventPage({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="w-full h-full grid place-items-center text-pg-ink-400">
-                        <Icon name="user" size={26} />
-                      </span>
+                      <Icon name={(s.icon ?? "user") as IconName} size={26} />
                     )}
                   </div>
                   <div className="min-w-0">
@@ -232,8 +362,63 @@ export default async function EventPage({
         </Section>
       )}
 
+      {/* ── Mid-page CTA (campus) ──────────────────────────────── */}
+      {isCampus && (
+        <section style={{ background: "var(--pg-red-900)" }}>
+          <div className="max-w-6xl mx-auto px-5 md:px-8 py-12 md:py-14 flex flex-col items-center text-center gap-4">
+            <h2
+              className="text-[24px] md:text-[34px] font-extrabold tracking-[-0.02em] leading-tight"
+              style={{ color: "var(--pg-cream)" }}
+            >
+              Langkah pertamamu ke karier global, mulai hari ini.
+            </h2>
+            <a
+              href="#daftar"
+              className="inline-flex items-center justify-center gap-2 min-h-[54px] px-8 rounded-2xl font-extrabold text-[16px] md:text-[17px] no-underline"
+              style={{ background: "var(--pg-cream)", color: "var(--pg-red-700)", boxShadow: "var(--shadow-cta-cream)" }}
+            >
+              Daftar gratis sekarang <Icon name="arrow_right" size={18} />
+            </a>
+            {content.ctaNote && (
+              <span className="text-[12.5px] font-semibold" style={{ color: "var(--pg-cream)", opacity: 0.9 }}>
+                {content.ctaNote}
+              </span>
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── FAQ ────────────────────────────────────────────────── */}
+      {faq.length > 0 && (
+        <Section tone="white" size="lg" border="top">
+          <SectionHeader
+            eyebrow="Masih ragu?"
+            title={
+              <>
+                Pertanyaan yang <span className="text-pg-red-600">sering ditanya.</span>
+              </>
+            }
+          />
+          <div className="mt-7 grid md:grid-cols-2 gap-x-8 gap-y-5">
+            {faq.map((f, i) => (
+              <div key={i} className="border-b border-pg-ink-100 pb-4">
+                <div className="flex gap-2.5 items-start">
+                  <Icon name="info" size={17} className="shrink-0 mt-0.5 text-pg-red-600" />
+                  <div className="text-[15px] font-extrabold text-pg-ink-900 leading-snug">
+                    {f.q}
+                  </div>
+                </div>
+                <p className="mt-2 ml-[27px] text-[14px] text-pg-ink-600 leading-relaxed">
+                  {f.a}
+                </p>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
       {/* ── Daftar (form) ──────────────────────────────────────── */}
-      <Section tone="white" size="lg" border="top">
+      <Section tone="paper" size="lg" border="top">
         <div id="daftar" className="scroll-mt-24 grid md:grid-cols-[0.85fr_1.15fr] gap-8 md:gap-12 items-start">
           {/* Recap */}
           <div>
@@ -246,7 +431,7 @@ export default async function EventPage({
               }
               intro="Isi data di samping. Link Zoom dikirim ke email & WhatsApp kamu sebelum acara."
             />
-            <div className="mt-6 rounded-2xl bg-pg-ink-50 border border-pg-ink-100 divide-y divide-pg-ink-100">
+            <div className="mt-6 rounded-2xl bg-pg-white border border-pg-ink-100 divide-y divide-pg-ink-100">
               {[
                 { label: "Tanggal", value: dateLabel },
                 { label: "Waktu", value: timeRange },
@@ -263,6 +448,11 @@ export default async function EventPage({
                 </div>
               ))}
             </div>
+            {content.ctaNote && (
+              <p className="mt-3 text-[12.5px] font-semibold text-pg-ink-500">
+                {content.ctaNote}
+              </p>
+            )}
           </div>
 
           {/* Form */}
@@ -278,10 +468,25 @@ export default async function EventPage({
               professionOptions={content.form?.professionOptions}
               interestLabel={content.form?.interestLabel}
               interestOptions={content.form?.interestOptions}
+              note={content.form?.note}
             />
           </div>
         </div>
       </Section>
+
+      {/* ── Sticky mobile CTA (campus) ─────────────────────────── */}
+      {isCampus && (
+        <>
+          <a
+            href="#daftar"
+            className="fixed bottom-0 inset-x-0 z-50 md:hidden flex items-center justify-center gap-2 min-h-[56px] font-extrabold text-[16px] text-white no-underline"
+            style={{ background: "var(--pg-red-600)", boxShadow: "0 -6px 20px rgba(0,0,0,0.18)" }}
+          >
+            Daftar gratis sekarang <Icon name="arrow_right" size={18} />
+          </a>
+          <div className="h-[56px] md:hidden" aria-hidden />
+        </>
+      )}
     </main>
   );
 }
@@ -420,7 +625,7 @@ function CampusHero({
       <div className="relative z-10 max-w-6xl mx-auto px-5 md:px-8 py-12 md:py-20 grid md:grid-cols-[1.15fr_0.85fr] gap-10 md:gap-12 items-center">
         {/* Left — title block */}
         <div className="flex flex-col items-start">
-          <Eyebrow tone="gold">Sharing Session · Gratis · Online</Eyebrow>
+          <Eyebrow tone="gold">Webinar Gratis · Vokasi UI × Perantau Global</Eyebrow>
 
           <h1 className="mt-4 font-extrabold tracking-[-0.04em] leading-[0.92] text-[44px] sm:text-[60px] md:text-[78px]">
             {words.map((w, i) => (
@@ -465,7 +670,7 @@ function CampusHero({
             ))}
           </div>
 
-          <div className="mt-7 flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <div className="mt-7 flex flex-col items-start gap-2.5">
             <a
               href="#daftar"
               className="inline-flex items-center justify-center gap-2 min-h-[54px] px-7 rounded-2xl font-extrabold text-[16px] md:text-[17px] text-white no-underline transition-transform active:scale-[0.985]"
@@ -473,15 +678,15 @@ function CampusHero({
             >
               Daftar gratis sekarang <Icon name="arrow_right" size={18} />
             </a>
-            {content.audience && (
-              <span className="text-[12.5px] font-semibold text-pg-ink-500 max-w-[16rem]">
-                {content.audience}
+            {content.ctaNote && (
+              <span className="text-[12.5px] font-semibold text-pg-ink-500">
+                {content.ctaNote}
               </span>
             )}
           </div>
         </div>
 
-        {/* Right — boarding-pass style schedule card, or poster if provided */}
+        {/* Right — poster (or boarding-pass card fallback) */}
         {poster ? (
           <div className="mx-auto max-w-[340px] w-full">
             <div
@@ -538,12 +743,6 @@ function CampusHero({
                 >
                   <Icon name="check" size={14} stroke={3} /> Gratis
                 </span>
-              </div>
-              <div
-                className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-md font-extrabold text-[13px] -rotate-1"
-                style={{ background: "var(--pg-blue-600)", color: "#fff" }}
-              >
-                <Icon name="globe" size={15} /> Let&apos;s Go Global!
               </div>
             </div>
           </div>
