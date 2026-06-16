@@ -6,7 +6,7 @@ import { Field, Input, Select } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
 import { generateEventId, getMetaCookies, trackEvent } from "@/lib/tracking";
 
-const PROFESSIONS = [
+const DEFAULT_PROFESSIONS = [
   "Perawat",
   "Bidan",
   "Mahasiswa keperawatan / kebidanan",
@@ -32,11 +32,23 @@ export function EventForm({
   eventSlug,
   eventTitle,
   joinUrl: initialJoinUrl,
+  professionLabel = "Profesi",
+  professionOptions,
+  interestLabel = "Negara/posisi yang diminati",
+  interestOptions,
 }: {
   eventSlug: string;
   eventTitle: string;
   joinUrl: string | null;
+  professionLabel?: string;
+  professionOptions?: string[];
+  interestLabel?: string;
+  interestOptions?: string[];
 }) {
+  const professions =
+    professionOptions && professionOptions.length > 0
+      ? professionOptions
+      : DEFAULT_PROFESSIONS;
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [joinUrl, setJoinUrl] = useState<string | null>(initialJoinUrl);
@@ -184,12 +196,12 @@ export function EventForm({
         <Input id="email" name="email" type="email" autoComplete="email" placeholder="email@kamu.com" required />
       </Field>
 
-      <Field label="Profesi" htmlFor="profession">
+      <Field label={professionLabel} htmlFor="profession">
         <Select id="profession" name="profession" defaultValue="">
           <option value="" disabled>
-            Pilih profesi
+            Pilih salah satu
           </option>
-          {PROFESSIONS.map((p) => (
+          {professions.map((p) => (
             <option key={p} value={p}>
               {p}
             </option>
@@ -197,8 +209,21 @@ export function EventForm({
         </Select>
       </Field>
 
-      <Field label="Negara/posisi yang diminati" htmlFor="interest" helper="Opsional — bantu kami kasih info yang relevan.">
-        <Input id="interest" name="interest" placeholder="mis. Perawat Saudi Arabia" />
+      <Field label={interestLabel} htmlFor="interest" helper="Opsional — bantu kami kasih info yang relevan.">
+        {interestOptions && interestOptions.length > 0 ? (
+          <Select id="interest" name="interest" defaultValue="">
+            <option value="" disabled>
+              Pilih salah satu
+            </option>
+            {interestOptions.map((o) => (
+              <option key={o} value={o}>
+                {o}
+              </option>
+            ))}
+          </Select>
+        ) : (
+          <Input id="interest" name="interest" placeholder="mis. Perawat Saudi Arabia" />
+        )}
       </Field>
 
       <label className="flex items-start gap-2.5 cursor-pointer">

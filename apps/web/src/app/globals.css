@@ -100,6 +100,12 @@
   /* Cream — hero copy on red */
   --pg-cream: #f6efe0;
 
+  /* Blue accent — SCOPED to the "campus" event hero (Travel.Work.Repeat).
+     Not part of the global system; only used by the playful event LP. */
+  --pg-blue-200: #b9d2ff;
+  --pg-blue-600: #1d5fd8;
+  --pg-blue-900: #123a86;
+
   /* WhatsApp brand */
   --pg-wa-green: #25D366;
 

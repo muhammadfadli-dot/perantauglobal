@@ -12,13 +12,30 @@
 import { supabaseV2 } from "./supabase-v2";
 
 export type EventSpeaker = {
-  name: string;
+  /** Optional — omit for a role-only lineup card (no real name/photo yet). */
+  name?: string;
   role?: string;
   org?: string;
   photo?: string;
 };
 
+/** Co-brand strip rows, e.g. { label: "Bersama", items: ["UI", "LSP UI"] }. */
+export type EventPartnerGroup = {
+  label: string;
+  items: string[];
+};
+
+/** Per-event registration field config (overrides the default nurse-centric list). */
+export type EventFormConfig = {
+  professionLabel?: string;
+  professionOptions?: string[];
+  interestLabel?: string;
+  interestOptions?: string[];
+};
+
 export type EventContent = {
+  /** Hero style. "campus" = playful multi-color hero; default = red hero. */
+  theme?: "default" | "campus";
   tagline?: string;
   intro?: string;
   audience?: string;
@@ -26,6 +43,12 @@ export type EventContent = {
   poster?: string;
   benefits?: string[];
   speakers?: EventSpeaker[];
+  /** Lead paragraph above the speaker grid (replaces the hardcoded fallback). */
+  speakersIntro?: string;
+  /** Co-branding partners shown as a text strip under the hero. */
+  partners?: EventPartnerGroup[];
+  /** Registration-form field overrides. */
+  form?: EventFormConfig;
 };
 
 export type EventDetail = {
