@@ -45,11 +45,12 @@ export async function generateMetadata({
   };
 }
 
-/** Cycle of accent colors for the campus-theme stacked title words. */
+/** Cycle of accent colors for the campus-theme stacked title words.
+ * Matches the poster: Work=dark ink, Travel=blue, Repeat=red. */
 const CAMPUS_WORD_COLORS = [
+  "var(--pg-ink-900)",
   "var(--pg-blue-600)",
   "var(--pg-red-600)",
-  "var(--pg-gold-700)",
 ];
 
 /**
