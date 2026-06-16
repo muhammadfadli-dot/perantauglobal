@@ -65,6 +65,7 @@ export const AUDIT_ACTIONS = {
   // Event CMS operations
   create_event: { label: "Buat event", tone: "ok" },
   update_event: { label: "Edit event", tone: "info" },
+  set_registration_status: { label: "Ubah status pendaftar event", tone: "info" },
   // Affiliate / referral operations
   create_affiliate_agent: { label: "Buat agen afiliasi", tone: "ok" },
   update_affiliate_agent: { label: "Edit agen afiliasi", tone: "info" },
@@ -91,6 +92,7 @@ export const AUDIT_RESOURCES = {
   position: "Posisi",
   application_field: "Field lamaran",
   event: "Event",
+  event_registration: "Pendaftar event",
 } as const satisfies Record<string, string>;
 
 export type AuditResourceType = keyof typeof AUDIT_RESOURCES;

@@ -169,3 +169,33 @@ export async function updateEvent(
   revalidatePath(`/admin/events/${slug}`);
   redirect(`/admin/events/${slug}`);
 }
+
+const REG_STATUSES = ["registered", "reminded", "attended", "no_show"] as const;
+
+/** Update a single registration's lifecycle status (attendance tracking). */
+export async function setRegistrationStatus(
+  slug: string,
+  id: string,
+  status: string,
+): Promise<EventActionResult> {
+  await assertAdmin();
+  if (!(REG_STATUSES as readonly string[]).includes(status)) {
+    return { ok: false, error: "Status tidak valid." };
+  }
+
+  const supabase = await createServerClient();
+  const { error } = await supabase
+    .from("event_registrations")
+    .update({ status } as never)
+    .eq("id", id);
+  if (error) {
+    throw new Error(`DB error: ${error.message}`);
+  }
+
+  await logAdminAction("set_registration_status", "event_registration", id, {
+    status,
+    event_slug: slug,
+  });
+  revalidatePath(`/admin/events/${slug}`);
+  return { ok: true };
+}

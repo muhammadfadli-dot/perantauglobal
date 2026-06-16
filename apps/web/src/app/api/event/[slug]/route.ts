@@ -32,6 +32,7 @@ interface EventRegPayload {
   eventId?: string;
   fbp?: string;
   fbc?: string;
+  website?: string; // honeypot — humans never fill this
 }
 
 /** Trim + cap a free-text field; returns null for empty so we don't store "". */
@@ -75,6 +76,12 @@ export async function POST(
 
     const body = (await request.json()) as EventRegPayload;
 
+    // Honeypot: bots fill the hidden `website` field. Return a clean 200 (so the
+    // bot thinks it succeeded) WITHOUT inserting a row or firing Meta CAPI.
+    if (typeof body.website === "string" && body.website.trim() !== "") {
+      return NextResponse.json({ success: true });
+    }
+
     const full_name = clean(body.full_name, 120);
     const whatsapp = clean(body.whatsapp, 32);
     const emailRaw = clean(body.email, 160);
@@ -99,6 +106,30 @@ export async function POST(
       null;
     const userAgent = request.headers.get("user-agent") || null;
     const referrer = clean(body.source_url, 500) || request.headers.get("referer");
+
+    // Rate limit (DB-level, mirrors apply flow): cap per-email + per-IP in a 10-min
+    // window so a script can't flood event_registrations or manufacture Meta CAPI
+    // conversions. Fail-open: if the RPC errors (e.g. malformed IP), let it through.
+    try {
+      // RPC from migration 0080; generated DB types include it only after a regen,
+      // so cast to a generic signature (not `any`) — mirrors the apply flow.
+      const rpc = db.rpc as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: boolean | null; error: { message: string } | null }>;
+      const { data: allowed, error: rlErr } = await rpc("check_event_reg_rate_limit", {
+        p_email: email,
+        p_ip: ip,
+      });
+      if (!rlErr && allowed === false) {
+        return NextResponse.json(
+          { error: "Terlalu banyak percobaan. Coba lagi beberapa menit lagi." },
+          { status: 429 },
+        );
+      }
+    } catch {
+      // fail-open — never block a legit registration on a rate-limit hiccup
+    }
 
     const { error: insertErr } = await db.from("event_registrations").insert({
       event_slug: slug,

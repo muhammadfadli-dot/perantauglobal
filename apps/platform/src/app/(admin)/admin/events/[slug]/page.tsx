@@ -5,8 +5,16 @@ import { Icon } from "@/components/pg/Icon";
 import ExportRegistrationsButton, {
   type ExportRow,
 } from "./ExportRegistrationsButton";
+import RegistrationStatusCell from "./RegistrationStatusCell";
 
 export const dynamic = "force-dynamic";
+
+const REG_STATUS_LABEL: Record<string, string> = {
+  registered: "Terdaftar",
+  reminded: "Diingatkan",
+  attended: "Hadir",
+  no_show: "Tidak hadir",
+};
 
 type EventRow = {
   slug: string;
@@ -25,6 +33,7 @@ type RegRow = {
   city: string | null;
   profession: string | null;
   interest: string | null;
+  status: string;
   consent_marketing: boolean;
   utm_source: string | null;
   utm_campaign: string | null;
@@ -63,7 +72,7 @@ export default async function AdminEventDetailPage({
   const { data, error } = await supabase
     .from("event_registrations")
     .select(
-      "id, full_name, whatsapp, email, city, profession, interest, consent_marketing, utm_source, utm_campaign, utm_medium, fbc, created_at",
+      "id, full_name, whatsapp, email, city, profession, interest, status, consent_marketing, utm_source, utm_campaign, utm_medium, fbc, created_at",
     )
     .eq("event_slug", slug)
     .order("created_at", { ascending: false });
@@ -87,6 +96,7 @@ export default async function AdminEventDetailPage({
     profesi: r.profession ?? "",
     kota: r.city ?? "",
     minat: r.interest ?? "",
+    status: REG_STATUS_LABEL[r.status] ?? r.status,
     consent_marketing: r.consent_marketing ? "ya" : "tidak",
     utm_source: r.utm_source ?? "",
     utm_medium: r.utm_medium ?? "",
@@ -167,6 +177,7 @@ export default async function AdminEventDetailPage({
                   <th className="font-semibold px-4 py-3">Profesi</th>
                   <th className="font-semibold px-4 py-3">Kota</th>
                   <th className="font-semibold px-4 py-3">Minat</th>
+                  <th className="font-semibold px-4 py-3">Status</th>
                   <th className="font-semibold px-4 py-3">Sumber</th>
                   <th className="font-semibold px-4 py-3 whitespace-nowrap">Tgl daftar</th>
                 </tr>
@@ -190,6 +201,9 @@ export default async function AdminEventDetailPage({
                     <td className="px-4 py-3 text-pg-ink-700">{r.profession ?? "—"}</td>
                     <td className="px-4 py-3 text-pg-ink-700">{r.city ?? "—"}</td>
                     <td className="px-4 py-3 text-pg-ink-700">{r.interest ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      <RegistrationStatusCell slug={ev.slug} id={r.id} value={r.status} />
+                    </td>
                     <td className="px-4 py-3 text-pg-ink-500 font-mono text-[12px]">
                       {r.utm_source ? r.utm_source : r.fbc ? "fb" : "organic"}
                     </td>

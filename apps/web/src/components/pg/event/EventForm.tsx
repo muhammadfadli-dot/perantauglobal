@@ -54,6 +54,7 @@ export function EventForm({
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const [joinUrl, setJoinUrl] = useState<string | null>(initialJoinUrl);
+  const [duplicate, setDuplicate] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -101,6 +102,7 @@ export function EventForm({
           profession: String(fd.get("profession") || "").trim() || undefined,
           interest: String(fd.get("interest") || "").trim() || undefined,
           consent_marketing: fd.get("consent_marketing") === "on",
+          website: String(fd.get("website") || ""), // honeypot
           source_url: typeof window !== "undefined" ? window.location.href : undefined,
           utm,
           eventId,
@@ -113,6 +115,7 @@ export function EventForm({
         success?: boolean;
         joinUrl?: string | null;
         error?: string;
+        duplicate?: boolean;
       };
 
       if (!res.ok || !data.success) {
@@ -122,6 +125,7 @@ export function EventForm({
       }
 
       if (data.joinUrl) setJoinUrl(data.joinUrl);
+      setDuplicate(data.duplicate === true);
       setStatus("success");
     } catch {
       setError("Koneksi bermasalah. Coba lagi sebentar.");
@@ -139,11 +143,17 @@ export function EventForm({
           <Icon name="check" size={28} stroke={3} />
         </span>
         <h3 className="mt-4 text-[20px] font-extrabold text-pg-ink-900">
-          Pendaftaran berhasil!
+          {duplicate ? "Kamu sudah terdaftar ✓" : "Pendaftaran berhasil!"}
         </h3>
         <p className="mt-2 text-[14px] text-pg-ink-600 leading-relaxed max-w-sm">
-          Sampai jumpa di <strong>{eventTitle}</strong>. Link Zoom &amp; pengingat
-          akan kami kirim ke email dan WhatsApp kamu sebelum acara dimulai.
+          {duplicate ? (
+            <>Kamu sudah terdaftar di <strong>{eventTitle}</strong>. Nggak perlu daftar
+            lagi — pastikan WhatsApp &amp; email kamu aktif ya.</>
+          ) : (
+            <>Sampai jumpa di <strong>{eventTitle}</strong>. Menjelang acara, link Zoom
+            &amp; pengingat kami kirim ke WhatsApp dan email kamu — dari kontak resmi
+            Perantau Global. Pastikan WhatsApp kamu aktif ya.</>
+          )}
         </p>
         {joinUrl && (
           <a
@@ -169,6 +179,14 @@ export function EventForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
+      {/* Honeypot: off-screen (not display:none, which bots skip). Humans never fill it. */}
+      <div aria-hidden className="absolute -left-[9999px] top-auto w-px h-px overflow-hidden">
+        <label>
+          Website
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
+
       <div>
         <h3 className="text-[18px] md:text-[20px] font-extrabold text-pg-ink-900">
           Daftar Sekarang
