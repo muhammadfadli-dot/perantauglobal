@@ -23,9 +23,9 @@ const LOWONGAN = [
   "pengolahan-makanan-jepang", "perawat-saudi-arabia", "perawatan-otomotif",
   "plant-engineer", "roaster-saudi-arabia", "sales-engineering",
   "spa-therapist-saudi-arabia", "truck-driver-jepang", "waiter-saudi-arabia",
-  "waitress-saudi-arabia",
+  "waitress-saudi-arabia", "welder-heavy-steel-plate-fabrication",
 ];
-const COUNTRIES = ["europe", "indonesia", "jepang", "saudi", "taiwan"];
+const COUNTRIES = ["europe", "indonesia", "jepang", "saudi", "taiwan", "mexico"];
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {

@@ -60,6 +60,7 @@ export default async function LowonganIndexPage({
     jepang: [],
     taiwan: [],
     europe: [],
+    mexico: [],
     indonesia: [],
   };
   for (const p of positions) {
@@ -72,6 +73,7 @@ export default async function LowonganIndexPage({
     jepang: byCountry.jepang.length,
     taiwan: byCountry.taiwan.length,
     europe: byCountry.europe.length,
+    mexico: byCountry.mexico.length,
     indonesia: byCountry.indonesia.length,
   };
 

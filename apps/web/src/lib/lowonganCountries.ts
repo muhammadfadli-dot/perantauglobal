@@ -1,7 +1,7 @@
 import type { PositionCountry } from "./positions";
 
 export type CountryMeta = {
-  key: "saudi" | "jepang" | "taiwan" | "indonesia" | "europe";
+  key: "saudi" | "jepang" | "taiwan" | "indonesia" | "europe" | "mexico";
   name: PositionCountry;
   short: string;
   flag: string;
@@ -81,9 +81,22 @@ export const COUNTRY_META: Record<CountryMeta["key"], CountryMeta> = {
     imgFilter: "saturate(0.95) brightness(0.93)",
     tint: "#4f6d7a",
   },
+  mexico: {
+    key: "mexico",
+    name: "Meksiko",
+    short: "Meksiko",
+    flag: "🇲🇽",
+    currency: "USD / peso",
+    contract: "Kontrak 1 tahun",
+    img: "/images/countries/mexico.jpg",
+    tagline:
+      "Posisi welder fabrikasi baja berat di Meksiko. Untuk tenaga las berpengalaman & bersertifikat — kontrak resmi lewat jalur yang benar.",
+    imgFilter: "saturate(1.08) brightness(0.93) sepia(0.08)",
+    tint: "#9c5a2a",
+  },
 };
 
-export const COUNTRY_KEYS: CountryMeta["key"][] = ["saudi", "jepang", "taiwan", "europe", "indonesia"];
+export const COUNTRY_KEYS: CountryMeta["key"][] = ["saudi", "jepang", "taiwan", "europe", "mexico", "indonesia"];
 
 export function countryKeyFromName(name: PositionCountry): CountryMeta["key"] {
   switch (name) {
@@ -92,6 +105,7 @@ export function countryKeyFromName(name: PositionCountry): CountryMeta["key"] {
     case "Taiwan": return "taiwan";
     case "Indonesia": return "indonesia";
     case "Eropa Timur": return "europe";
+    case "Meksiko": return "mexico";
   }
 }
 
@@ -118,6 +132,7 @@ const CITY_BY_SLUG: Record<string, string> = {
   "spg-indonesia": "Jakarta",
   "head-driller": "Balkan",
   "assistant-driller": "Balkan",
+  "welder-heavy-steel-plate-fabrication": "Monterrey",
 };
 
 const FALLBACK_CITY: Record<CountryMeta["key"], string> = {
@@ -126,6 +141,7 @@ const FALLBACK_CITY: Record<CountryMeta["key"], string> = {
   taiwan: "Taipei",
   indonesia: "Jakarta",
   europe: "Balkan",
+  mexico: "Monterrey",
 };
 
 export function cityForSlug(slug: string, countryKey: CountryMeta["key"]): string {

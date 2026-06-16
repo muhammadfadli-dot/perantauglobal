@@ -24,12 +24,30 @@ export default function PositionCreateForm() {
   const [slugInput, setSlugInput] = React.useState("");
   const [slugTouched, setSlugTouched] = React.useState(false);
   const [country, setCountry] = React.useState<string>("");
+  // "Negara lain" → admin types a country not in the canonical list. Stored as
+  // a slugified token (lowercase + underscores) to match positions.country
+  // convention ("saudi_arabia", "japan", "mexico"). The public landing visuals
+  // (label, flag, card image) get wired by the web team on-request — see the
+  // info note below. Until then the position works fully in admin.
+  const [customMode, setCustomMode] = React.useState(false);
+  const [customCountry, setCustomCountry] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
+  const customCountryValue = customCountry
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+
   const effectiveSlug = slugTouched ? slugInput : slugify(name);
+  const effectiveCountry = customMode ? customCountryValue : country;
   const nameOk = name.trim().length >= 2;
   const slugOk = SLUG_RE.test(effectiveSlug);
-  const countryOk = country !== "";
+  const countryOk = customMode
+    ? customCountryValue.length >= 2
+    : country !== "";
   const canSubmit = nameOk && slugOk && countryOk && !pending;
 
   function onSubmit(e: React.FormEvent) {
@@ -41,7 +59,7 @@ export default function PositionCreateForm() {
         const result = await createPosition({
           name: name.trim(),
           slug: effectiveSlug,
-          country,
+          country: effectiveCountry,
         });
         if (!result.ok) {
           // Expected validation / duplicate slug — show inline, don't navigate.
@@ -139,15 +157,22 @@ export default function PositionCreateForm() {
           )}
         </Field>
 
-        <Field label="Negara penempatan" required>
+        <Field
+          label="Negara penempatan"
+          hint="Platform terbuka untuk semua negara. Kalau negaranya belum ada di daftar, pilih “Negara lain” dan ketik sendiri."
+          required
+        >
           <div className="grid grid-cols-3 gap-2">
             {COUNTRY_OPTIONS.map((c) => {
-              const active = country === c.value;
+              const active = !customMode && country === c.value;
               return (
                 <button
                   key={c.value}
                   type="button"
-                  onClick={() => setCountry(c.value)}
+                  onClick={() => {
+                    setCustomMode(false);
+                    setCountry(c.value);
+                  }}
                   className="flex flex-col items-center gap-1.5 px-2 py-3 rounded-lg transition-colors"
                   style={{
                     border: active
@@ -181,7 +206,75 @@ export default function PositionCreateForm() {
                 </button>
               );
             })}
+            <button
+              type="button"
+              onClick={() => {
+                setCustomMode(true);
+                setCountry("");
+              }}
+              className="flex flex-col items-center gap-1.5 px-2 py-3 rounded-lg transition-colors"
+              style={{
+                border: customMode
+                  ? "1.5px solid var(--pg-red-600)"
+                  : "1.5px dashed var(--pg-border)",
+                background: customMode ? "var(--pg-red-soft-bg)" : "transparent",
+              }}
+            >
+              <span
+                className="w-8 h-8 rounded-md grid place-items-center font-bold text-white"
+                style={{
+                  background: customMode
+                    ? "var(--pg-red-600)"
+                    : "var(--pg-ink-primary)",
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "14px",
+                }}
+              >
+                +
+              </span>
+              <span
+                className="text-[11px] font-bold"
+                style={{
+                  color: customMode
+                    ? "var(--pg-red-600)"
+                    : "var(--pg-ink-secondary)",
+                }}
+              >
+                Negara lain
+              </span>
+            </button>
           </div>
+
+          {customMode && (
+            <div className="mt-3">
+              <input
+                type="text"
+                value={customCountry}
+                onChange={(e) => setCustomCountry(e.target.value)}
+                placeholder="Contoh: Meksiko, Vietnam, Polandia"
+                className="w-full text-[15px] px-3.5 py-2.5 rounded-lg outline-none focus:border-pg-red-600 transition-colors"
+                style={{ border: "1.5px solid var(--pg-border)" }}
+                autoFocus
+              />
+              {customCountryValue.length > 0 && (
+                <div className="text-[11px] text-pg-ink-tertiary mt-1.5 font-mono">
+                  Tersimpan sebagai:{" "}
+                  <span className="font-bold">{customCountryValue}</span>
+                </div>
+              )}
+              <div
+                className="mt-2 px-3 py-2.5 rounded-lg flex items-start gap-2 text-[11px] leading-relaxed"
+                style={{ background: "var(--pg-paper)", color: "var(--pg-ink-tertiary)" }}
+              >
+                <Icon name="info" size={13} className="shrink-0 mt-0.5 text-pg-info" />
+                <div>
+                  Posisi langsung jalan di admin. Tampilan landing page publik
+                  (label, bendera, foto kartu negara) difinalisasi tim web
+                  setelah kamu submit posisinya — kasih tau Panji ya.
+                </div>
+              </div>
+            </div>
+          )}
         </Field>
 
         {error && (

@@ -11,7 +11,13 @@
  * `dbValue` is the literal value stored in `positions.country`.
  */
 
-export type CountryKey = "saudi" | "jepang" | "taiwan" | "indonesia" | "europe";
+export type CountryKey =
+  | "saudi"
+  | "jepang"
+  | "taiwan"
+  | "indonesia"
+  | "europe"
+  | "mexico";
 
 export type CountryMeta = {
   key: CountryKey;
@@ -75,6 +81,15 @@ export const COUNTRY_META: Record<CountryKey, CountryMeta> = {
     tintHex: "#4f6d7a",
     tintFilter: "saturate(0.95) brightness(0.93)",
   },
+  mexico: {
+    key: "mexico",
+    dbValue: "mexico",
+    label: "Meksiko",
+    initials: "MX",
+    flag: "🇲🇽",
+    tintHex: "#9c5a2a",
+    tintFilter: "saturate(1.08) brightness(0.93) sepia(0.08)",
+  },
 };
 
 /** Display order for tiles/filters. */
@@ -83,6 +98,7 @@ export const COUNTRY_KEYS: CountryKey[] = [
   "jepang",
   "taiwan",
   "europe",
+  "mexico",
   "indonesia",
 ];
 
@@ -101,6 +117,9 @@ const ALIASES: Record<string, CountryKey> = {
   eropa: "europe",
   "eropa timur": "europe",
   ee: "europe",
+  mexico: "mexico",
+  meksiko: "mexico",
+  mx: "mexico",
 };
 
 /** Map any stored/aliased country string to a key. Returns null for "any"/unknown. */
@@ -191,6 +210,7 @@ const CITY_BY_SLUG: Record<string, string> = {
   "spg-indonesia": "Jakarta",
   "head-driller": "Balkan",
   "assistant-driller": "Balkan",
+  "welder-heavy-steel-plate-fabrication": "Monterrey",
 };
 
 const FALLBACK_CITY: Record<CountryKey, string> = {
@@ -199,6 +219,7 @@ const FALLBACK_CITY: Record<CountryKey, string> = {
   taiwan: "Taipei",
   indonesia: "Jakarta",
   europe: "Balkan",
+  mexico: "Monterrey",
 };
 
 /** City for a position slug, falling back to the country's primary city. */
