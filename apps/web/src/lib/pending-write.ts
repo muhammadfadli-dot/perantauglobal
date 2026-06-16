@@ -20,11 +20,13 @@ export interface WritePendingArgs {
    * materializes an academy_enrollment (migration 0060). Defaults to 'job' for
    * backward compatibility with the existing apply flow.
    */
-  intent?: "job" | "academy";
+  intent?: "job" | "academy" | "event";
   /** Position slug - required when intent='job'. Must match `positions.slug`. */
   position_slug?: string;
   /** Program slug - required when intent='academy'. Must match `academy_programs.slug`. */
   program_slug?: string;
+  /** Event slug - required when intent='event'. Must match `events.slug` (migration 0081). */
+  event_slug?: string;
   /** Candidate email used for magic-link auth + dedupe. */
   email: string;
   /** Candidate phone (WhatsApp). */
@@ -87,17 +89,21 @@ export async function writePendingSubmission(
     const db = supabaseV2();
 
     const intent = args.intent ?? "job";
+    // `event_slug` lives only in the DB after migration 0081 (types not yet
+    // regenerated), so cast the row — mirrors the codebase's `as never` insert
+    // pattern. Other fields keep their shape.
     const { error: pendingErr } = await db.from("pending_submissions").insert({
       id: pendingId,
       intent,
       position_slug: intent === "job" ? (args.position_slug ?? null) : null,
       program_slug: intent === "academy" ? (args.program_slug ?? null) : null,
+      event_slug: intent === "event" ? (args.event_slug ?? null) : null,
       email: args.email.toLowerCase().trim(),
       phone: args.phone || null,
       form_data: args.form_data as unknown as Json,
       ip_address: ip ?? undefined,
       user_agent: userAgent,
-    });
+    } as never);
 
     if (pendingErr) {
       console.warn("[pending-write] pending_submissions insert failed:", pendingErr.message);

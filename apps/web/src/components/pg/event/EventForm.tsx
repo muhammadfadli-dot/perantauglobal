@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Field, Input, Select } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
+import { EventAccountUpsell } from "@/components/pg/event/EventAccountUpsell";
 import { generateEventId, getMetaCookies, trackEvent } from "@/lib/tracking";
 
 const DEFAULT_PROFESSIONS = [
@@ -55,6 +56,11 @@ export function EventForm({
   const [error, setError] = useState<string | null>(null);
   const [joinUrl, setJoinUrl] = useState<string | null>(initialJoinUrl);
   const [duplicate, setDuplicate] = useState(false);
+  const [submitted, setSubmitted] = useState<{
+    full_name: string;
+    whatsapp: string;
+    email: string;
+  } | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -126,6 +132,7 @@ export function EventForm({
 
       if (data.joinUrl) setJoinUrl(data.joinUrl);
       setDuplicate(data.duplicate === true);
+      setSubmitted({ full_name, whatsapp, email });
       setStatus("success");
     } catch {
       setError("Koneksi bermasalah. Coba lagi sebentar.");
@@ -165,6 +172,10 @@ export function EventForm({
             <Icon name="zoom" size={18} /> Buka link Zoom
           </a>
         )}
+        {submitted && (
+          <EventAccountUpsell eventSlug={eventSlug} prefill={submitted} />
+        )}
+
         <Link
           href="/lowongan"
           className="mt-4 text-[13px] font-semibold text-pg-red-700 hover:text-pg-red-800 no-underline"
