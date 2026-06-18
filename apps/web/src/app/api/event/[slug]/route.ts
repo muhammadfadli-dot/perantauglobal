@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
 import { sendMetaEvent } from "@/lib/meta-capi";
 import { supabaseV2 } from "@/lib/supabase-v2";
+import { sendEmail, buildEventThankYouEmail } from "@/lib/email";
 
 /**
  * Event registration endpoint.
@@ -55,7 +56,7 @@ export async function POST(
     // too, but checking lets us 404/410 cleanly + grab the join_url to return).
     const { data: event, error: lookupErr } = await db
       .from("events")
-      .select("slug, title, status, join_url")
+      .select("slug, title, status, join_url, starts_at, timezone, platform")
       .eq("slug", slug)
       .eq("status", "published")
       .maybeSingle();
@@ -196,6 +197,40 @@ export async function POST(
         }),
       );
     }
+
+    // Thank-you email (NOT an auth email) — branded confirmation that states
+    // the Zoom link goes out H-1. Best-effort, fire-and-forget; a mail hiccup
+    // must never fail a registration. Only on fresh insert (duplicate returns
+    // earlier), so we don't re-spam re-submitters.
+    waitUntil(
+      (async () => {
+        try {
+          const tz = event.timezone || "Asia/Jakarta";
+          const whenLabel = event.starts_at
+            ? `${new Intl.DateTimeFormat("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                timeZone: tz,
+              }).format(new Date(event.starts_at))} · ${new Intl.DateTimeFormat("id-ID", {
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: tz,
+              }).format(new Date(event.starts_at))} WIB`
+            : "Jadwal menyusul";
+          const { subject, html } = buildEventThankYouEmail({
+            firstName: full_name,
+            eventTitle: event.title,
+            whenLabel,
+            platform: event.platform || "Zoom",
+          });
+          await sendEmail({ to: email, subject, html });
+        } catch (err) {
+          console.error("[event] thank-you email failed:", err);
+        }
+      })(),
+    );
 
     return NextResponse.json({
       success: true,
