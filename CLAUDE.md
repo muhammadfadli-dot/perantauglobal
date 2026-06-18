@@ -3,6 +3,8 @@
 Website + candidate portal + internal CRM untuk PT Daya Talenta Global (P3MI brand: **Perantau Global**).
 
 > **⚡ New session picking up work?** Read [TASKS.md](./TASKS.md) first — it has the current phase, punch list, and decision log from the previous session.
+>
+> **Doc convention:** `CLAUDE.md` = stable architecture + conventions (this file). `TASKS.md` = the living session handoff (what's in flight, dated newest-first). Per-fact memory lives in `.claude/projects/.../memory/` (indexed by `MEMORY.md`). On every session wrap-up (`/session-wrap`), update TASKS.md + memory, and refresh the **Phase status** / **Major milestones** section below when something architectural changed (new app, table, edge fn, or model shift) — not for routine content/copy edits.
 
 ## Architecture
 
@@ -76,32 +78,25 @@ Magic link flow: form → `pending_submissions` (nonce) → magic link sent → 
 
 ## Phase status
 
-- [x] Monorepo scaffolded
-- [x] Supabase project `perantauglobal` created (Dayalima Pro)
-- [x] Schema migration 0001 applied
-- [x] Positions seeded (17 active)
-- [x] apps/web ported from legacy repo
-- [x] apps/platform candidate portal built
-- [x] apps/platform admin ported from legacy dashboard
-- [x] Data backfill from gt-tools
-- [x] Production cutover (2026-04-22)
-- [x] Position model rework — Fase 0–4 (2026-05-24/25)
-- [x] Position model rework — Fase 5 schema drop + lengkapi flip (2026-05-24, migrations 0034–0037). Only WA/SMS OTP wiring remains (tracked under Phase 2 / Deferred).
+**Foundation (done):** monorepo scaffolded · Supabase `perantauglobal` created (Dayalima Pro) · schema 0001 · positions seeded · apps/web + candidate portal + admin CRM built · gt-tools backfill · **production cutover 2026-04-22**.
 
-### Position model rework progress (Fase 0–4 done)
+**Position model rework — fully done** (2026-05-24, PRs #45/#47/#48/#49 + migrations 0031–0037): dropped shared `profile_data.credentials`, consolidated requirements + form_fields into `position_application_fields`, moved landing content into `positions.content` JSONB, unified admin Position Editor with live preview. `/applications/[id]/lengkapi` reads fields + `answers`; `/profile/kualifikasi` removed; `position_form_fields` / `positions.requirements` / `application_tiers` dropped. Only WA/SMS OTP wiring remains open (see Deferred; sketch route at `/auth/whatsapp`).
 
-- **Fase 0** — Meta CAPI cross-domain attribution (PR #45)
-- **Fase 1** — schema migrations 0031–0033 (PR #47): `position_application_fields`, `positions.content` JSONB, `candidate_documents.application_id`
-- **Fase 2** — unified Position Editor + live preview (PR #48): replaces raw-JSON edit + 4 fragmented widgets; new `ContentEditor`, `PositionPreview`, `ApplicationFieldsEditor`
-- **Fase 3** — candidate-side flip (PR #49): `/lowongan` reads `positions.content` from DB (fallback to static), apply form reads from `position_application_fields`, LP form trimmed to 3 required fields, WA OTP sketch route
-- **Fase 4** — code sunset (this PR): delete dead editors, dead actions; PositionWizard dual-write retained until Fase 5
+### Major milestones since launch
 
-**Fase 5 — DONE (2026-05-24), except WA OTP:**
-1. ✅ `/applications/[id]/lengkapi` reads `position_application_fields` + `applications.answers` (no longer `profile_data.credentials`)
-2. ✅ `handle_new_auth_user` trigger stopped writing `profile_data.credentials` (migration 0034)
-3. ✅ `/profile/kualifikasi` page removed
-4. ✅ Dropped `position_form_fields` table + `positions.requirements` column (migrations 0035 + 0037); `application_tiers` dropped (0036)
-5. ⏳ Wire up WhatsApp / SMS OTP (Twilio bridge) per [project-wa-otp-promoted](.claude/memory/project_wa_otp_promoted.md) — STILL PENDING (sketch route at `/auth/whatsapp`)
+Newest first. Each has a memory note under `.claude/projects/.../memory/` (indexed in `MEMORY.md`); ongoing detail lives in `TASKS.md`.
+
+- **2026-06-16** — Open-country support (PR #167): admin can create a position for ANY country; Meksiko / Welding Mexico = first case. Making a new country first-class on the public web = 5 code spots + 2 images → see `project_open_country_add_country`.
+- **2026-06-13** — Completeness vs qualifying split (PR #157, migration 0077): candidate "done" = presence (`application_completeness_view`); admin eligibility = qualifying (`hard_pass`). Never key candidate surfaces off `hard_pass`.
+- **2026-06-12** — UI/UX audit, 10-batch execution (PRs #147–155, migrations 0074–0076).
+- **2026-06-10** — Admin portal deep audit + overhaul (PR #144, migrations 0069+0070): driveable pipeline kanban, dashboard rebuild, audit-log governance, events CMS. Living detail in `TASKS.md`.
+- **2026-06-10** — AI CV grader (migration 0071, edge fn `grade-cv`): Flash-Lite extract + Flash fit via Vercel AI Gateway. CV = score, not a gate.
+- **2026-06-04** — Affiliate / referral system LIVE (migrations 0067+0068, PR #141): admin-managed codes + commission ledger.
+- **2026-06-02** — Akademi Perantau learning-platform foundation (migration 0060); first product = paid **Paspor Perantau Global** cert bundle.
+- **2026-05-28** — Event registration platform (events + event_registrations): standalone no-auth `/event/[slug]` LP.
+- **2026-05-27** — apps/web full redesign (Airbnb-style) + admin draft/publish flow (`positions.draft_content` + `published_at`, migration 0043).
+
+> Migrations now climb past 0080; the list above is curated, not exhaustive. `packages/db/migrations/` is the ledger of record — always apply via Supabase MCP `apply_migration`, never the SQL editor (`project_migration_apply_discipline`). Position landing content (salary, fee, benefits, etc.) is **DB data in `positions.content`**, edited via the admin Position Editor — not code; it goes live through `/lowongan` ISR (`revalidate=60`).
 
 ## Related
 
