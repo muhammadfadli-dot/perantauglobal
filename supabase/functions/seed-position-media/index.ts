@@ -17,7 +17,8 @@ const BUCKET = "position-media";
 
 const LOWONGAN = [
   "assistant-driller", "barista-saudi-arabia", "caregiver-taiwan",
-  "chef-bakery-saudi-arabia", "chef-pastry-saudi-arabia", "food-service-jepang",
+  "chef-bakery-saudi-arabia", "chef-pastry-saudi-arabia",
+  "espresso-equipment-maintenance-technician", "food-service-jepang",
   "head-barista-saudi-arabia", "head-driller", "heavy-diesel-mechanic-saudi-arabia",
   "kaigo-jepang", "konstruksi", "laundry-worker-saudi-arabia", "manufaktur-pengelasan",
   "pengolahan-makanan-jepang", "perawat-saudi-arabia", "perawatan-otomotif",
