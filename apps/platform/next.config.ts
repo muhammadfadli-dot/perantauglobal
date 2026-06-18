@@ -26,7 +26,11 @@ const cspDirectives = [
   // 'unsafe-inline' is required by Next.js for hydration markers/runtime.
   // Migrate to nonce-based CSP when Next.js App Router fully supports it.
   // GTM/GA/FB pixel + va.vercel-scripts.com for the Vercel Analytics script.
-  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://va.vercel-scripts.com",
+  // capi-automation.s3...amazonaws.com hosts Meta's CAPI param-builder
+  // (clientParamBuilder.bundle.js), auto-injected by connect.facebook.net to
+  // enrich fbc/fbp for browser-side CAPI matching — must be allowed or it's
+  // blocked and CompleteRegistration match quality drops on the portal.
+  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://connect.facebook.net https://va.vercel-scripts.com https://capi-automation.s3.us-east-2.amazonaws.com",
   // Tailwind 4 + inline style attributes from React components.
   "style-src 'self' 'unsafe-inline'",
   // Self-hosted fonts via next/font (no external font CDN).

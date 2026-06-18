@@ -558,6 +558,10 @@ function ExploreCard({
         <span className="font-mono text-[11px] text-pg-ink-500 tracking-[0.02em]">
           {salary === "—" ? (
             "Gaji menyusul"
+          ) : salary.includes("/") ? (
+            // Salary already carries its own unit (e.g. "¥300.000/bulan",
+            // "¥1.600/jam") — don't append a second "/bulan".
+            salary
           ) : (
             <>
               {salary} <span style={{ opacity: 0.6 }}>/bulan</span>
