@@ -50,6 +50,7 @@ type AppRow = {
   cv_fit_score: number | null;
   cv_fit_status: string | null;
   cv_has_flags: boolean;
+  candidate_has_cv: boolean;
   total_count: number;
 };
 
@@ -187,7 +188,7 @@ export default async function ApplicationsPage({
             <tr className="text-left text-[11px] font-bold tracking-[0.1em] uppercase text-pg-ink-500">
               <th className="px-4 py-3">Kandidat</th>
               <th className="px-4 py-3">Posisi</th>
-              <th className="px-4 py-3">Readiness</th>
+              <th className="px-4 py-3">Syarat</th>
               <th className="px-4 py-3">Fit CV</th>
               <th className="px-4 py-3">Outreach</th>
               <th className="px-4 py-3">Masuk</th>
@@ -232,7 +233,12 @@ export default async function ApplicationsPage({
                     <ReadinessBadge readiness={r.readiness} />
                   </td>
                   <td className="px-4 py-3">
-                    <FitCell score={r.cv_fit_score} status={r.cv_fit_status} hasFlags={r.cv_has_flags} />
+                    <FitCell
+                      score={r.cv_fit_score}
+                      status={r.cv_fit_status}
+                      hasFlags={r.cv_has_flags}
+                      candidateHasCv={r.candidate_has_cv}
+                    />
                   </td>
                   <td className="px-4 py-3 text-[13px]">
                     <ReachOutToggle
@@ -364,20 +370,32 @@ function FitCell({
   score,
   status,
   hasFlags,
+  candidateHasCv,
 }: {
   score: number | null;
   status: string | null;
   hasFlags: boolean;
+  candidateHasCv: boolean;
 }) {
   if (score === null) {
-    // Distinguish "no CV yet" (skipped) from "errored" from "not graded".
-    const label = status === "skipped" ? "Belum CV" : status === "error" ? "Gagal" : "—";
-    const title =
-      status === "skipped"
-        ? "Kandidat belum punya CV"
-        : status === "error"
-        ? "Penilaian CV gagal — buka kandidat"
-        : "CV belum dinilai";
+    // No fit score. Disambiguate the reason off the candidate's actual CV doc
+    // (candidate_has_cv) rather than the grader status — the grader hasn't run on
+    // every app, so status alone left no-CV rows showing an ambiguous "—".
+    //   no CV doc at all       → "Belum CV"     (CV is optional; most candidates)
+    //   has CV but errored     → "Gagal"
+    //   has CV, not yet graded → "Belum dinilai"
+    let label: string;
+    let title: string;
+    if (!candidateHasCv) {
+      label = "Belum CV";
+      title = "Kandidat belum upload CV";
+    } else if (status === "error") {
+      label = "Gagal";
+      title = "Penilaian CV gagal — buka kandidat";
+    } else {
+      label = "Belum dinilai";
+      title = "CV sudah ada, tapi belum dinilai AI";
+    }
     return (
       <span className="text-[11px] text-pg-ink-400" title={title}>
         {label}
