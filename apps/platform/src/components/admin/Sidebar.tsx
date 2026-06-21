@@ -73,6 +73,7 @@ export default function AdminSidebar({
           : undefined,
       },
       { href: "/admin/events", label: "Event", icon: "bell" },
+      { href: "/admin/academy", label: "Akademi", icon: "sparkle" },
       { href: "/admin/analytics", label: "Analytics", icon: "sparkle_dot" },
     ],
   };

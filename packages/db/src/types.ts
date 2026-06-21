@@ -31,6 +31,11 @@ export type Database = {
           external_status: string | null
           external_url: string | null
           id: string
+          paid_at: string | null
+          payment_amount: number | null
+          payment_channel: string | null
+          payment_ref: string | null
+          payment_status: string
           program_slug: string
           progress_pct: number
           score: number | null
@@ -50,6 +55,11 @@ export type Database = {
           external_status?: string | null
           external_url?: string | null
           id?: string
+          paid_at?: string | null
+          payment_amount?: number | null
+          payment_channel?: string | null
+          payment_ref?: string | null
+          payment_status?: string
           program_slug: string
           progress_pct?: number
           score?: number | null
@@ -69,6 +79,11 @@ export type Database = {
           external_status?: string | null
           external_url?: string | null
           id?: string
+          paid_at?: string | null
+          payment_amount?: number | null
+          payment_channel?: string | null
+          payment_ref?: string | null
+          payment_status?: string
           program_slug?: string
           progress_pct?: number
           score?: number | null
@@ -219,6 +234,7 @@ export type Database = {
       }
       academy_modules: {
         Row: {
+          content: Json
           created_at: string
           id: string
           module_num: number
@@ -229,6 +245,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          content?: Json
           created_at?: string
           id?: string
           module_num: number
@@ -239,6 +256,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          content?: Json
           created_at?: string
           id?: string
           module_num?: number
@@ -1687,6 +1705,19 @@ export type Database = {
         Args: { p_answers: Json; p_enrollment_id: string; p_lesson_id: string }
         Returns: Json
       }
+      mark_academy_enrollment_paid: {
+        Args: {
+          p_amount?: number
+          p_channel?: string
+          p_enrollment_id: string
+          p_payment_ref?: string
+        }
+        Returns: Json
+      }
+      set_academy_enrollment_payment_pending: {
+        Args: { p_enrollment_id: string; p_payment_ref: string }
+        Returns: undefined
+      }
       is_admin: { Args: never; Returns: boolean }
       list_applications_for_admin: {
         Args: {
@@ -1966,6 +1997,12 @@ export type AcademyProgram = Database["public"]["Tables"]["academy_programs"]["R
 export type AcademyModule = Database["public"]["Tables"]["academy_modules"]["Row"]
 export type AcademyLesson = Database["public"]["Tables"]["academy_lessons"]["Row"]
 export type AcademyEnrollment = Database["public"]["Tables"]["academy_enrollments"]["Row"]
+export type AcademyPaymentStatus =
+  | "unpaid"
+  | "pending"
+  | "paid"
+  | "waived"
+  | "refunded"
 export type AcademyLessonProgress = Database["public"]["Tables"]["academy_lesson_progress"]["Row"]
 export type ProgramRegistrationField = Database["public"]["Tables"]["program_registration_fields"]["Row"]
 export type AcademyDeliveryMode = "in_app" | "webinar" | "offline" | "external"

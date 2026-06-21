@@ -75,6 +75,9 @@ export const AUDIT_ACTIONS = {
   approve_commission: { label: "Approve komisi", tone: "ok" },
   mark_commission_paid: { label: "Tandai komisi dibayar", tone: "ok" },
   void_commission: { label: "Void komisi", tone: "err" },
+  // Akademi payment operations
+  mark_enrollment_paid: { label: "Tandai pembayaran lunas", tone: "ok" },
+  waive_enrollment_fee: { label: "Bebaskan biaya (waive)", tone: "info" },
 } as const satisfies Record<string, { label: string; tone: AuditActionTone }>;
 
 export type AuditAction = keyof typeof AUDIT_ACTIONS;
@@ -93,6 +96,7 @@ export const AUDIT_RESOURCES = {
   application_field: "Field lamaran",
   event: "Event",
   event_registration: "Pendaftar event",
+  academy_enrollment: "Pendaftaran akademi",
 } as const satisfies Record<string, string>;
 
 export type AuditResourceType = keyof typeof AUDIT_RESOURCES;

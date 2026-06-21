@@ -1,0 +1,3216 @@
+{
+ "program": {
+  "slug": "paspor-arab-saudi",
+  "title": "Paspor Perantau Global – Arab Saudi",
+  "subtitle": "Kursus Siap Kerja Arab Saudi + Psikotes DayaLima — bekal biar berangkat benar, tahu hakmu, dan siap kerja",
+  "category": "paspor",
+  "delivery_mode": "in_app",
+  "facilitated_by": "Daya Skill",
+  "country": "saudi_arabia",
+  "is_free": false,
+  "price": 500000,
+  "output_type": "certificate",
+  "credential_issuer": "Perantau Global",
+  "credential_delivery": "in_app",
+  "pass_threshold": 70,
+  "duration_label": "Sekitar 2–2,5 jam, bisa dicicil per pelajaran",
+  "status": "draft",
+  "sort_order": 1,
+  "content": {
+   "intro": "Kelas berbayar untuk kamu yang mau kerja ke Arab Saudi sebagai pekerja rumah tangga atau perawat — terutama yang baru pertama berangkat dan takut kena calo. Di sini kamu disiapkan biar berangkat lewat jalur yang benar, tahu hakmu, paham aturan hidup di rumah majikan, bisa minta tolong saat darurat, dan tahu harus lapor ke mana kalau ada masalah. Ini bekal mandiri seharga Rp500.000 — dirancang supaya kamu berangkat lebih aman dan bisa bertahan di sana, bukan sekadar formalitas.",
+   "benefits": [
+    "Bisa cek sendiri penyalur asli atau calo lewat SISKOP2MI dalam beberapa menit dari HP — termasuk cek Perantau Global / PT Daya Talenta Global",
+    "Hafal tanda calo dan tanda perdagangan orang (TPPO): paspor diminta sejak di kampung, dijanjikan kerja A jadi kerja B, dilarang kontak keluarga — biar kamu bisa mundur sebelum terlambat",
+    "Tahu hakmu yang dilindungi aturan resmi Saudi: maksimal 10 jam kerja sehari, istirahat berlanjut minimal 8 jam, 1 hari libur penuh tiap minggu, dan paspormu tetap di tanganmu (majikan dilarang menahannya)",
+    "Tahu cara membaca isi kontrak/PK sebelum tanda tangan: nominal gaji tertulis, jenis & lokasi kerja jelas, jam kerja, hari libur, dan siapa menanggung tiket pulang",
+    "Paham do/don't budaya & agama Saudi dan lima garis merah berisiko pidana berat — biar kamu aman, dihormati, dan tidak gampang dituduh",
+    "Hafal frasa Arab inti untuk paham perintah rumah dan minta izin, plus Kartu Frasa Darurat yang bisa kamu cetak & bawa (enam kata penyelamat + nomor darurat 911)",
+    "Punya Kartu SOS cetak berisi nomor penting — hotline Saudi 19911, darurat 911, KBRI Riyadh, KJRI Jeddah, KP2MI, dan lapor diri peduliwni.kemlu.go.id — plus rencana cadangan kalau HP-mu disita",
+    "Tahu persiapan kesehatan sebelum berangkat (vaksin, obat rutin + surat dokter, beresin gigi & mata) dan langkah benar saat gaji ditahan atau disakiti: lapor resmi dulu, jangan kabur diam-diam"
+   ],
+   "learning_outcomes": [
+    "Membedakan jalur resmi dari jebakan calo: bisa cek penyalur di SISKOP2MI, beda visa kerja vs visa umroh/turis, dan mengenali tanda perdagangan orang (TPPO)",
+    "Membaca kontrak kerja sendiri dan tahu hakmu yang dikunci aturan resmi Saudi — maksimal 10 jam kerja/hari, istirahat berlanjut minimal 8 jam, libur 1 hari penuh seminggu, masa percobaan maksimal 90 hari, dan paspor tetap milikmu",
+    "Hidup di rumah majikan sesuai norma budaya & agama Saudi dan menghindari lima garis merah berisiko pidana berat",
+    "Memakai frasa Arab inti untuk paham perintah dan minta izin, serta hafal mati kata-kata darurat dan nomor 911 untuk minta tolong",
+    "Menyiapkan badan sebelum berangkat (vaksin, obat rutin, gigi & mata), mengenali bahaya heat stroke, dan menjaga diri saat rindu kampung di bulan-bulan pertama",
+    "Tahu langkah lapor yang benar saat gaji ditahan, paspor disita, atau ada kekerasan — lewat KBRI/KJRI, hotline 19911, dan tim Perantau Global — tanpa mengambil risiko huroob"
+   ],
+   "final_cta": {
+    "heading": "Tinggal Selangkah Lagi Menuju Sertifikat Paspormu",
+    "body": "Setelah menuntaskan kursus ini, kamu tinggal mengerjakan psikotes DayaLima — asesmen profesional dari DayaLima yang menilai kesiapan mentalmu. Tenang, dikerjakan online dan dipandu tim Perantau Global; di bagian kepribadian tidak ada jawaban benar atau salah, cukup jujur jadi diri sendiri. Begitu kursus dan psikotes selesai, kamu mendapat Sertifikat Paspor Perantau Global - Arab Saudi. Anggap psikotes dan sertifikat ini sebagai bekal yang memperkuat kesiapanmu, bukan penghalang untuk berangkat.",
+    "offer": "Selesaikan psikotes DayaLima dan ambil Sertifikat Paspor Perantau Global - Arab Saudi. Ingat: untuk kerja domestik jalur resmi, biaya penempatan ditanggung majikan dan gratis bagi PMI — Paspor Perantau Global adalah bekal mandiri berbayar yang terpisah, yang kamu pilih untuk menyiapkan diri. Kalau ada yang belum jelas soal jalur berangkatmu, konsultasi dulu dengan tim Perantau Global."
+   }
+  }
+ },
+ "modules": [
+  {
+   "module_num": 1,
+   "title": "Berangkatnya Dulu yang Benar: Jalur Resmi vs Jebakan Calo",
+   "summary": "Di modul ini kamu akan belajar membedakan jalur kerja yang aman dari jebakan calo — supaya kamu berangkat terlindungi, bukan terjebak.",
+   "content": {
+    "outcomes": [
+     "Selesai modul ini, kamu bisa membedakan tawaran resmi dan tawaran calo dari tanda-tandanya.",
+     "Selesai modul ini, kamu bisa mengecek sendiri apakah sebuah penyalur terdaftar resmi di SISKOP2MI.",
+     "Selesai modul ini, kamu bisa mengenali 4 tanda bahaya perdagangan orang dan tahu harus melapor ke mana."
+    ],
+    "est_minutes": 32
+   },
+   "lessons": [
+    {
+     "lesson_num": 1,
+     "title": "Kenapa yang 'Cepat dan Gampang' Justru yang Paling Bahaya",
+     "lesson_type": "reading",
+     "estimated_minutes": 6,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Coba pikir dulu sebentar",
+       "anchor": "pikir-dulu",
+       "media": {
+        "alt": "Seseorang duduk sendirian merenung di teras rumah sederhana, memandang ke langit sore"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Bayangkan ada orang menawari kamu kerja ke Arab Saudi. Katanya bisa berangkat minggu depan. Gajinya besar. Prosesnya gampang, tidak usah pelatihan, tidak usah ribet-ribet. Menurut kamu itu kabar baik atau tanda bahaya?"
+      },
+      {
+       "type": "paragraph",
+       "text": "Jawabannya mungkin bikin kamu melongo: itu justru tanda bahaya. Janji yang terlalu manis itu pola khas calo. Mari lihat ceritanya lewat dua orang."
+      },
+      {
+       "type": "heading",
+       "text": "Cerita Wati: Buru-Buru, Lalu Hilang",
+       "anchor": "cerita-wati",
+       "media": {
+        "alt": "Seorang perempuan muda berdiri di bandara dengan koper kecil, tampak bingung sendirian tanpa ada yang mendampingi"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Wati buru-buru. Ada yang menawari berangkat cepat lewat visa umroh, gajinya dijanjikan besar. Wati senang, langsung ikut."
+      },
+      {
+       "type": "paragraph",
+       "text": "Tidak ada pelatihan, tidak ada kontrak yang ditandatangani sendiri, namanya tidak tercatat di negara. Begitu di Saudi, dia kerja pakai visa yang salah. Saat ada masalah, tidak ada yang tahu dia di mana."
+      },
+      {
+       "type": "heading",
+       "text": "Cerita Nuri: Sabar, Lalu Terlindungi",
+       "anchor": "cerita-nuri",
+       "media": {
+        "alt": "Seorang perempuan tersenyum sambil menandatangani dokumen di meja kantor resmi, didampingi petugas berseragam"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Nuri memilih sabar. Dia lewat perusahaan penyalur resmi yang disebut P3MI. Memang lebih lama: harus pelatihan, periksa kesehatan, tanda tangan kontrak sendiri, dan datanya dicatat negara."
+      },
+      {
+       "type": "paragraph",
+       "text": "Terasa ribet. Tapi justru karena tercatat resmi, kalau ada apa-apa di Saudi, negara tahu di mana Nuri dan bisa menolongnya."
+      },
+      {
+       "type": "quote",
+       "text": "Keribetan jalur resmi itu bukan halangan — itu perlindunganmu."
+      },
+      {
+       "type": "heading",
+       "text": "Dua kata yang perlu kamu kenal",
+       "anchor": "nonprosedural-vs-prosedural",
+       "media": {
+        "alt": "Dua jalan setapak: satu jalan lebar dengan rambu resmi, satu jalan sempit gelap tanpa tanda"
+       }
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Arti dua kata ini",
+       "text": "Nonprosedural = berangkat lewat jalan tikus, tidak tercatat negara. Prosedural = jalur resmi yang tercatat, sehingga negara bisa menolong kalau ada masalah. Nggak usah dihafal — intinya: yang tercatat itu yang aman."
+      },
+      {
+       "type": "paragraph",
+       "text": "Lembaga pemerintah yang melindungi pekerja migran sekarang bernama KP2MI. Dulu namanya BP2MI atau BNP2TKI. Kalau kamu dengar dua nama lama itu, maksudnya lembaga yang sama. Mereka melindungi kamu dan tidak memungut bayaran untuk itu."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Curigai tawaran 'berangkat cepat, gaji besar, gampang, tanpa pelatihan' — itu pola calo.",
+        "Pilih jalur resmi (P3MI) walaupun terasa lebih lama. Lambat = aman.",
+        "Ingat: KP2MI (dulu BP2MI/BNP2TKI) melindungi kamu secara gratis."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Pelajaran",
+       "text": "Yang menjanjikan jalan pintas hampir selalu menjual jalan masuk ke masalah. Pintu yang benar terasa lebih lambat — dan itu memang seharusnya."
+      }
+     ]
+    },
+    {
+     "lesson_num": 2,
+     "title": "Visa Kerja, Bukan Visa Umroh: Satu Kata yang Menentukan Nasibmu",
+     "lesson_type": "reading",
+     "estimated_minutes": 7,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Coba pikir dulu sebentar",
+       "anchor": "pikir-dulu-visa",
+       "media": {
+        "alt": "Tangan memegang buku paspor terbuka, menunjukkan halaman stiker visa dengan tulisan jelas"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kamu mau kerja di Arab Saudi. Tapi visamu tertulis 'umroh' atau 'turis'. Apakah boleh kamu kerja dengan visa itu? Jawabannya: tidak boleh. Satu kata di visamu bisa menentukan apakah kamu jadi pekerja yang dilindungi, atau orang ilegal yang ketakutan."
+      },
+      {
+       "type": "heading",
+       "text": "Visa kerja itu beda dari visa umroh atau turis",
+       "anchor": "visa-kerja-vs-visa-lain",
+       "media": {
+        "alt": "Tiga lembar stiker visa berjejer: satu bertulisan 'Work', satu 'Umrah', satu 'Tourist' — masing-masing diberi warna berbeda"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kamu hanya boleh bekerja kalau visamu adalah VISA KERJA. Visa umroh, ziarah, atau turis bukan untuk kerja. Jangan percaya omongan saja. Minta LIHAT SENDIRI tulisan jenis visamu sebelum berangkat."
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Modus jebakan paling umum",
+       "text": "Calo memberangkatkan kamu pakai visa umroh atau turis, lalu menyuruh kerja di sana. Begitu visa habis, kamu jadi overstay alias tinggal ilegal. Gajimu bisa ditahan, kamu gampang ditangkap, dan susah ditolong."
+      },
+      {
+       "type": "paragraph",
+       "text": "Untuk calon PRT atau pengasuh seperti kamu, pintu yang sah adalah lewat perusahaan penyalur berizin (P3MI), seperti Perantau Global. Di luar jalur resmi yang terdaftar, itu namanya nonprosedural — dan kamu tidak terlindungi."
+      },
+      {
+       "type": "heading",
+       "text": "Jangan buru-buru percaya 'sudah dibuka'",
+       "anchor": "hati-hati-kabar-sudah-dibuka",
+       "media": {
+        "alt": "Seseorang memperlihatkan pesan di layar HP kepada temannya, sambil menunjuk tulisan di layar dengan ekspresi curiga"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kamu mungkin dengar 'penempatan PRT ke Saudi sudah dibuka'. Hati-hati. Per data resmi terakhir (Februari 2026), penempatan PRT ke Saudi masih DALAM PERSIAPAN lewat sistem satu kanal — BUKAN dibuka bebas."
+      },
+      {
+       "type": "paragraph",
+       "text": "Ada juga modus baru: orang dikirim pakai visa 'support worker' supaya kelihatan resmi, padahal itu tetap jalur ilegal."
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Yang harus kamu lakukan",
+       "text": "Sebelum percaya kabar 'sudah dibuka', tanyakan dulu status terbaru ke Perantau Global atau KP2MI. Jangan ambil keputusan berdasarkan janji calo."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Minta lihat sendiri jenis visamu — pastikan tertulis VISA KERJA.",
+        "Tolak kalau disuruh kerja pakai visa umroh, ziarah, atau turis.",
+        "Waspadai modus visa 'support worker'.",
+        "Cek status penempatan terbaru ke PG atau KP2MI, jangan percaya janji calo."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Pelajaran",
+       "text": "Satu kata di visamu — KERJA atau bukan — menentukan apakah kamu pekerja yang dilindungi atau orang ilegal yang ditakuti. Selalu minta lihat visanya sendiri."
+      }
+     ]
+    },
+    {
+     "lesson_num": 3,
+     "title": "Cek Sendiri dalam 2 Menit: Penyalur Ini Asli atau Calo?",
+     "lesson_type": "reading",
+     "estimated_minutes": 7,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Coba pikir dulu sebentar",
+       "anchor": "pikir-dulu-cek",
+       "media": {
+        "alt": "Seseorang memegang HP murah dan mengetik alamat website di browser, duduk di teras rumah"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Sebelum kamu percaya siapa pun yang menjanjikan kerja ke Saudi, ada satu cara mudah untuk tahu dia asli atau calo. Kamu bisa cek sendiri dari HP, gratis, dalam beberapa menit. Yuk kita pelajari."
+      },
+      {
+       "type": "heading",
+       "text": "Cara cek penyalur asli atau palsu",
+       "anchor": "cara-cek-siskop2mi",
+       "media": {
+        "alt": "Layar HP menampilkan halaman website SISKOP2MI dengan kotak pencarian di tengah"
+       }
+      },
+      {
+       "type": "steps",
+       "items": [
+        "Buka SISKOP2MI di alamat siskop2mi.bp2mi.go.id dari HP-mu.",
+        "Cari nama perusahaan penyalur yang menawarkan kerja ke kamu.",
+        "Kalau namanya ADA di daftar resmi, perusahaan itu terdaftar. Perantau Global / PT Daya Talenta Global bisa kamu cek di sana.",
+        "Kalau namanya TIDAK ADA di daftar, STOP. Jangan lanjut. Itu kemungkinan besar calo."
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "Kalau mau, kamu bahkan boleh mendaftar mandiri lewat siskop2mi.bp2mi.go.id/publik/daftar. Artinya kamu tidak harus bergantung pada perantara yang minta bayaran."
+      },
+      {
+       "type": "heading",
+       "text": "Diminta bayar puluhan juta? Itu lampu merah",
+       "anchor": "biaya-penempatan-gratis",
+       "media": {
+        "alt": "Tangan menolak amplop berisi uang yang disodorkan seseorang — gestur menolak dengan telapak tangan ke depan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Ini bagian penting. Untuk biaya PENEMPATAN — tiket, visa, medical, paspor, jasa agen — kamu TIDAK BOLEH dimintai bayar. Itu kewajiban majikan, bukan kamu. Jadi kalau ada yang minta puluhan juta sebagai 'biaya berangkat', curigai itu calo."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Yang gratis vs yang berbayar",
+       "text": "Penempatan resmi = GRATIS bagi PMI (ditanggung majikan). Bekal pelatihan atau sertifikasi mandiri seperti Paspor Perantau Global = pilihan berbayar yang terpisah — itu bukan biaya penempatan ilegal. Dua hal ini beda, jangan tertukar."
+      },
+      {
+       "type": "heading",
+       "text": "Jangan mau skip medical atau OPP",
+       "anchor": "jangan-skip-medical-opp",
+       "media": {
+        "alt": "Petugas kesehatan berseragam putih memeriksa dokumen tes darah seorang perempuan di klinik resmi"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Medical GAMCA/Wafid (tes darah, urine, rontgen dada) dan OPP (kelas pembekalan wajib) adalah tahap resmi yang tidak boleh dilompati. Kalau ada yang menyuruh skip biar 'cepat berangkat', itu juga tanda calo."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Sedikit istilah",
+       "text": "GAMCA sekarang resmi bernama Wafid — itu standar pemeriksaan kesehatan untuk negara Teluk. Portal resminya wafid.com. OPP = kelas pembekalan wajib sebelum berangkat. Nggak usah dihafal namanya, yang penting: kalau disuruh melompati, curigai."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Cek nama penyalur di SISKOP2MI sebelum percaya. Tidak ada di daftar = berhenti.",
+        "Jangan mau bayar puluhan juta untuk biaya penempatan — itu beban majikan.",
+        "Jangan mau melompati medical atau OPP demi 'cepat berangkat'.",
+        "Minta rincian tertulis dan minta lihat dokumenmu sendiri. Kamu berhak bertanya."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Pelajaran",
+       "text": "Sebelum percaya siapa pun, cek namanya di SISKOP2MI. Diminta bayar puluhan juta untuk yang harusnya gratis? Itu lampu merah calo."
+      }
+     ]
+    },
+    {
+     "lesson_num": 4,
+     "title": "Tanda Bahaya Perdagangan Orang: Saat 'Tawaran Kerja' Sebenarnya Jebakan",
+     "lesson_type": "reading",
+     "estimated_minutes": 7,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Coba pikir dulu sebentar",
+       "anchor": "pikir-dulu-tppo",
+       "media": {
+        "alt": "Seorang perempuan berdiri di persimpangan jalan, terlihat ragu memilih arah mana yang harus diambil"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Ada tawaran kerja yang sebenarnya bukan tawaran kerja — tapi jebakan. Namanya perdagangan orang. Kabar baiknya: jebakan ini punya tanda-tanda yang bisa kamu kenali. Kalau kamu tahu tandanya, kamu bisa mundur sebelum terlambat."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Apa itu TPPO",
+       "text": "TPPO = Tindak Pidana Perdagangan Orang — saat seseorang 'dijual' atau dieksploitasi dengan tipu daya. Kalau kamu jadi korbannya, kamu BUKAN pelaku — kamu korban, dan negara wajib menolongmu. Nggak usah dihafal singkatannya, yang penting kenali tandanya."
+      },
+      {
+       "type": "heading",
+       "text": "Tanda 1: Paspor ditahan sejak di Indonesia",
+       "anchor": "tanda-bahaya-paspor-ditahan",
+       "media": {
+        "alt": "Tangan seseorang merebut buku paspor dari tangan perempuan — perempuan itu terlihat tidak rela"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kalau calo atau sponsor minta memegang paspormu sebelum berangkat 'biar aman', itu tanda bahaya. Paspor adalah milikmu. Tidak ada alasan yang sah untuk menahannya sejak di kampung."
+      },
+      {
+       "type": "heading",
+       "text": "Tanda 2: Dijanjikan kerja A, ternyata kerja B",
+       "anchor": "tanda-bahaya-janji-beda",
+       "media": {
+        "alt": "Dokumen kontrak kerja di meja, dan di sebelahnya ada coretan tangan yang mengubah keterangan pekerjaan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Misalnya dijanjikan jadi PRT di kota tertentu, tapi di lapangan disuruh kerja lain di tempat lain. Jenis dan lokasi kerjamu harus jelas dan tertulis. (Cara membaca kontrak akan dibahas lengkap di Modul 2.)"
+      },
+      {
+       "type": "heading",
+       "text": "Tanda 3: Ditampung tanpa kejelasan",
+       "anchor": "tanda-bahaya-penampungan",
+       "media": {
+        "alt": "Beberapa perempuan duduk di ruangan sempit dengan jendela tertutup, tampak bingung dan tidak ada aktivitas"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kamu dikumpulkan di penampungan atau rumah singgah tanpa jadwal pasti, dokumen tidak diperlihatkan, dan kamu dilarang menghubungi keluarga."
+      },
+      {
+       "type": "heading",
+       "text": "Tanda 4: Dipindah-tangankan",
+       "anchor": "tanda-bahaya-dipindahtangankan",
+       "media": {
+        "alt": "Dua orang laki-laki bertukar selembar dokumen sambil menunjuk ke arah seorang perempuan yang berdiri di kejauhan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kamu 'diserahkan' dari satu orang ke orang lain, atau nama dan datamu diganti-ganti. Di bandara atau saat transit: kalau kamu diminta menyembunyikan tujuan aslimu ke petugas, itu jebakan."
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Larangan jelas pada majikan di Saudi",
+       "text": "Menahan paspor pekerja itu ILEGAL. Majikan juga dilarang menyewakan jasamu ke orang lain. Jadi kalau ada tanda-tanda di atas, itu bukan hal biasa — itu pelanggaran."
+      },
+      {
+       "type": "heading",
+       "text": "Apa yang harus kamu lakukan",
+       "anchor": "langkah-bila-ada-tanda-bahaya",
+       "media": {
+        "alt": "Seseorang menekan tombol panggilan di HP sambil duduk di tempat terang dan aman"
+       }
+      },
+      {
+       "type": "steps",
+       "items": [
+        "Berhenti dulu. Jangan terus melangkah hanya karena sungkan.",
+        "Jangan menyerahkan paspormu kepada siapa pun.",
+        "Hubungi keluarga dan beri tahu posisimu.",
+        "Hubungi Perantau Global atau KP2MI untuk minta tolong.",
+        "Lebih baik batal berangkat daripada masuk perangkap."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Pelajaran",
+       "text": "Kalau ada yang menahan paspormu sejak di kampung, mengganti janji kerja, atau melarangmu kontak keluarga — itu bukan kesibukan biasa, itu tanda perdagangan orang. Kamu berhak menolak dan minta tolong."
+      }
+     ]
+    },
+    {
+     "lesson_num": 5,
+     "title": "Kuis: Kebal Calo & Awas Perdagangan Orang",
+     "lesson_type": "quiz",
+     "estimated_minutes": 5,
+     "pass_threshold": 70,
+     "questions": [
+      {
+       "id": "q1",
+       "prompt": "Ada yang menawari kamu kerja ke Saudi: berangkat minggu depan pakai visa umroh, gaji besar, tanpa pelatihan. Apa respons paling benar?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Langsung ambil, mumpung cepat dan gajinya besar"
+        },
+        {
+         "key": "b",
+         "label": "Tolak — ini jalur nonprosedural lewat calo, berbahaya"
+        },
+        {
+         "key": "c",
+         "label": "Terima, tapi minta gajinya dinaikkan dulu"
+        }
+       ],
+       "multiple": false
+      },
+      {
+       "id": "q2",
+       "prompt": "Cara paling tepat memastikan sebuah perusahaan penyalur itu asli, bukan calo?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Percaya saja kalau kantornya kelihatan besar dan ramai"
+        },
+        {
+         "key": "b",
+         "label": "Cek nama perusahaannya di SISKOP2MI (siskop2mi.bp2mi.go.id)"
+        },
+        {
+         "key": "c",
+         "label": "Tanya ke teman yang katanya sudah pernah lewat situ"
+        }
+       ],
+       "multiple": false
+      },
+      {
+       "id": "q3",
+       "prompt": "Penyalur minta kamu bayar Rp40 juta sebagai 'biaya berangkat' untuk kerja sebagai PRT. Apa yang benar?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Bayar saja, namanya juga mau kerja ke luar negeri"
+        },
+        {
+         "key": "b",
+         "label": "Curiga calo — biaya penempatan itu ditanggung majikan, bukan kamu"
+        },
+        {
+         "key": "c",
+         "label": "Minta dicicil supaya tidak terlalu berat"
+        }
+       ],
+       "multiple": false
+      },
+      {
+       "id": "q4",
+       "prompt": "Dari pilihan ini, visa mana yang sah untuk bekerja di Arab Saudi?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Visa umroh"
+        },
+        {
+         "key": "b",
+         "label": "Visa turis"
+        },
+        {
+         "key": "c",
+         "label": "Visa kerja"
+        }
+       ],
+       "multiple": false
+      },
+      {
+       "id": "q5",
+       "prompt": "Sponsor minta memegang paspormu sejak kamu masih di Indonesia, katanya 'biar aman'. Sikap paling tepat?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Serahkan saja, supaya tidak hilang"
+        },
+        {
+         "key": "b",
+         "label": "Tolak — paspor milikmu, ini tanda bahaya perdagangan orang"
+        },
+        {
+         "key": "c",
+         "label": "Serahkan, asal dikasih tanda terima"
+        }
+       ],
+       "multiple": false
+      },
+      {
+       "id": "q6",
+       "prompt": "Kamu dijanjikan jadi PRT di Riyadh, tapi di lapangan disuruh kerja lain di kota yang berbeda. Apa yang benar?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Ikuti saja, yang penting tetap dapat gaji"
+        },
+        {
+         "key": "b",
+         "label": "Ini tanda perdagangan orang — hubungi keluarga dan PG/KP2MI"
+        },
+        {
+         "key": "c",
+         "label": "Diam saja supaya tidak dianggap rewel"
+        }
+       ],
+       "multiple": false
+      }
+     ],
+     "answerKeys": [
+      {
+       "qid": "q1",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Janji 'cepat, gaji besar, tanpa pelatihan, pakai visa umroh' itu pola khas calo. Ini jalur nonprosedural yang membuatmu jadi pekerja ilegal dan tanpa perlindungan. Yang benar: tolak.",
+       "rationale": {
+        "a": "Kecepatan bukan tanda tawaran baik — kalau tidak ada pelatihan dan pakai visa umroh, kamu berangkat tanpa perlindungan dan bisa jadi ilegal saat visa habis.",
+        "c": "Naik gaji tidak membuat jalur calo menjadi aman — kamu tetap berangkat pakai visa yang salah dan tidak tercatat negara, sehingga tidak ada yang bisa menolongmu kalau ada masalah."
+       }
+      },
+      {
+       "qid": "q2",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Cara paling pasti adalah cek nama perusahaan di SISKOP2MI. Kalau tidak ada di daftar resmi, jangan lanjut. Kantor mewah atau cerita teman bukan bukti.",
+       "rationale": {
+        "a": "Kantor yang besar dan ramai tidak membuktikan perusahaan itu terdaftar — calo pun bisa punya kantor bagus; satu-satunya bukti resmi adalah ada tidaknya nama mereka di SISKOP2MI.",
+        "c": "Pengalaman teman yang pernah lewat suatu penyalur tidak menjamin penyalur itu masih terdaftar sekarang — daftar resmi di SISKOP2MI adalah satu-satunya cara memastikannya."
+       }
+      },
+      {
+       "qid": "q3",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Biaya penempatan (tiket, visa, medical, paspor, jasa agen) ditanggung majikan, bukan kamu. Diminta bayar puluhan juta untuk yang harusnya gratis adalah lampu merah calo.",
+       "rationale": {
+        "a": "Biaya penempatan memang ada, tapi itu kewajiban majikan — bukan kamu yang harus menanggung; kalau kamu yang diminta bayar, itu melanggar aturan resmi dan tanda calo.",
+        "c": "Minta dicicil tidak menyelesaikan masalahnya — kamu tetap membayar sesuatu yang seharusnya gratis bagimu, dan itu tetap tanda bahaya yang harus ditolak."
+       }
+      },
+      {
+       "qid": "q4",
+       "correct": [
+        "c"
+       ],
+       "weight": 1,
+       "explanation": "Hanya visa kerja yang sah untuk bekerja. Visa umroh atau turis bukan untuk kerja — kalau dipakai kerja, kamu jadi tinggal ilegal saat visa habis.",
+       "rationale": {
+        "a": "Visa umroh hanya berlaku untuk ibadah, bukan untuk bekerja — menggunakannya untuk kerja membuatmu menjadi ilegal dan berisiko ditangkap setelah visa berakhir.",
+        "b": "Visa turis hanya berlaku untuk wisata, bukan untuk bekerja — menggunakannya untuk kerja membuatmu menjadi ilegal dan tidak terlindungi hukum."
+       }
+      },
+      {
+       "qid": "q5",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Paspor adalah milikmu. Tidak ada alasan sah untuk menahannya sejak di Indonesia. Permintaan ini adalah tanda bahaya perdagangan orang — tolak.",
+       "rationale": {
+        "a": "Paspor milikmu dan hanya boleh kamu yang pegang — menyerahkannya ke orang lain, meski alasannya 'supaya tidak hilang', membuatmu tidak bisa bergerak bebas dan itu tanda awal perdagangan orang.",
+        "c": "Tanda terima tidak melindungi kamu — paspormu tetap dipegang orang lain dan kamu kehilangan kendali atas dokumen paling penting yang kamu miliki; ini tetap tanda bahaya."
+       }
+      },
+      {
+       "qid": "q6",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Dijanjikan kerja A ternyata kerja B adalah tanda perdagangan orang. Berhenti, hubungi keluarga, dan minta tolong ke Perantau Global atau KP2MI.",
+       "rationale": {
+        "a": "Mengikuti pekerjaan yang berbeda dari kontrak berarti kamu bekerja di luar ketentuan resmi — kamu tidak dilindungi untuk pekerjaan itu, dan ini adalah tanda perdagangan orang yang harus segera dilaporkan.",
+        "c": "Diam bukan pilihan yang aman — semakin lama kamu diam, semakin sulit situasimu; kamu berhak melapor dan meminta tolong tanpa takut dianggap rewel."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "module_num": 2,
+   "title": "Hak Kerjamu & Isi Kontrak",
+   "summary": "Kamu belajar cara baca kontrak kerja, tahu angka hak istirahat dan liburmu, dan tahu harus lapor ke mana kalau ada yang dilanggar.",
+   "content": {
+    "outcomes": [
+     "Selesai modul ini, kamu bisa menyebut 6 poin yang wajib dicek sebelum tanda tangan kontrak",
+     "Selesai modul ini, kamu bisa menyebut batas jam kerja, istirahat, dan libur yang jadi hakmu",
+     "Selesai modul ini, kamu tahu ke mana harus lapor kalau majikan melanggar — dan kenapa jalur resmi lebih aman dari kabur"
+    ],
+    "est_minutes": 26
+   },
+   "lessons": [
+    {
+     "lesson_num": 6,
+     "title": "Sebelum Tanda Tangan: Cara Membaca Kontrak Kerjamu",
+     "lesson_type": "reading",
+     "estimated_minutes": 8,
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "Bayangkan dua orang. Wati cuma dikasih janji lewat omongan: 'Tenang, gajimu besar, kerjanya enak, nanti diatur di sana.' Wati percaya, tanda tangan kertas yang dia sendiri nggak paham isinya.",
+       "media": {
+        "alt": "Dua perempuan duduk berdampingan: satu memegang lembaran kontrak tertulis, satu lainnya hanya menerima kertas kosong"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Nuri beda. Dia minta lihat kontraknya, dibaca pelan-pelan, ditanya yang nggak jelas, baru tanda tangan sendiri."
+      },
+      {
+       "type": "paragraph",
+       "text": "Setahun kemudian, gaji Wati dipotong-potong dan dia disuruh kerja di rumah lain. Pas mau protes, Wati nggak punya apa-apa buat dipegang — cuma omongan. Nuri punya kontrak hitam-putih. Saat ada masalah, kontrak itu yang bicara untuk dia."
+      },
+      {
+       "type": "paragraph",
+       "text": "Kontrak kerja itu bukan formalitas. Itu janji tertulis yang melindungimu saat kamu jauh dari rumah. Pelajaran ini ngajarin kamu cara membacanya — supaya kamu jadi Nuri, bukan Wati."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Kenalan dulu sama 3 kata (nggak usah dihafal)",
+       "text": "Kafala = sistem sponsor. Artinya status tinggalmu di Saudi nempel ke satu majikan, kayak izin tinggalmu 'dititipkan' ke dia. Musaned = website resmi pemerintah Saudi tempat kontrak PRT dibuat dan dicatat negara. Iqama = KTP-nya pekerja asing di Saudi. Semua ini bakal dijelasin lagi pas muncul — santai aja."
+      },
+      {
+       "type": "heading",
+       "text": "Kontrak resmi lewat Musaned = bukti hitam-putih",
+       "anchor": "kontrak-musaned-bukti",
+       "media": {
+        "alt": "Layar komputer menampilkan dokumen kontrak dengan cap resmi dan tanda tangan, di atas meja kantor"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Musaned itu jalur resmi. Kontrak yang dibuat lewat Musaned tercatat negara Saudi, jadi bukti yang kuat kalau hakmu dilanggar."
+      },
+      {
+       "type": "paragraph",
+       "text": "Janji lisan calo atau kertas kontrak yang nggak lewat Musaned jauh lebih sulit kamu tegakkan kalau ada masalah."
+      },
+      {
+       "type": "paragraph",
+       "text": "Pastikan kamu sudah punya kontrak resmi yang terdaftar di Musaned SEBELUM berangkat. Minta salinanmu sendiri — simpan baik-baik, jangan sampai cuma majikan yang pegang."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Penting biar nggak salah paham",
+       "text": "Secara hukum Saudi, hakmu sebenarnya nggak otomatis hilang cuma gara-gara kontrak nggak tertulis. TAPI dengan kontrak resmi Musaned, hakmu JAUH lebih mudah ditegakkan — ada bukti yang tercatat negara. Jadi tetap wajib dipastikan ada. Jangan mau berangkat cuma modal janji mulut."
+      },
+      {
+       "type": "heading",
+       "text": "6 hal yang WAJIB kamu cek di kontrak",
+       "anchor": "enam-poin-wajib-kontrak",
+       "media": {
+        "alt": "Selembar kontrak kerja dengan enam poin yang ditandai lingkaran merah, dipegang tangan perempuan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Sebelum tanda tangan, baca kontrakmu dan pastikan enam hal ini jelas tertulis. Kalau ada yang kosong atau cuma 'nanti dibahas', itu tanda bahaya."
+      },
+      {
+       "type": "list",
+       "items": [
+        "NOMINAL GAJI tertulis jelas pakai angka — bukan 'nanti diatur di sana'. Berapa per bulan harus hitam di atas putih.",
+        "JENIS PEKERJAAN jelas — kamu PRT, pengasuh, atau apa. Pastikan sesuai yang dijanjikan ke kamu.",
+        "LOKASI KERJA jelas — kamu kerja di rumah siapa, di kota mana. Beda dari yang dijanjikan = tanda bahaya.",
+        "JAM KERJA & HARI LIBUR sesuai aturan (dibahas di pelajaran berikutnya).",
+        "SIAPA MENANGGUNG TIKET PULANG di akhir kontrak — tanyakan dan pastikan tertulis, jangan diasumsikan majikan pasti menanggung.",
+        "KLAUSA BERBAHAYA — waspadai potongan gaji yang nggak jelas atau aturan yang melarangmu menghubungi keluarga."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Tanda bahaya besar",
+       "text": "Kalau kamu dijanjikan jadi PRT di Riyadh, tapi di kontrak (atau di lapangan) ternyata kerja lain di kota berbeda — itu bukan cuma 'salah tulis'. Itu bisa tanda perdagangan orang. Jenis dan lokasi kerja harus sesuai janji."
+      },
+      {
+       "type": "heading",
+       "text": "Tanda tangani SENDIRI, setelah kamu paham",
+       "anchor": "tanda-tangan-sendiri",
+       "media": {
+        "alt": "Tangan perempuan memegang pena di atas dokumen kontrak, dengan ekspresi tenang dan teliti"
+       }
+      },
+      {
+       "type": "steps",
+       "items": [
+        "Minta kontraknya, baca pelan-pelan. Kamu berhak baca dulu.",
+        "Cek enam poin di atas. Tandai yang belum jelas.",
+        "Tanya tim Perantau Global dulu untuk hal yang nggak kamu mengerti — sebelum tanda tangan.",
+        "Kalau sudah paham dan setuju, baru tanda tangani SENDIRI.",
+        "Minta dan simpan salinan kontrakmu."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "text": "JANGAN mau diwakilkan orang lain untuk tanda tangan. JANGAN mau disuruh tanda tangan kertas kosong yang isinya diisi belakangan. Itu sumber masalah."
+      },
+      {
+       "type": "quote",
+       "text": "Kontrak itu bukan formalitas — itu janji tertulis yang bicara untukmu saat ada masalah. Baca, pahami, pastikan lewat Musaned, lalu tanda tangani sendiri."
+      }
+     ]
+    },
+    {
+     "lesson_num": 7,
+     "title": "10 Jam, Tidur Cukup, Libur Seminggu Sekali: Ini Hakmu, Bukan Belas Kasihan",
+     "lesson_type": "reading",
+     "estimated_minutes": 7,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Kenapa kamu perlu tahu angka ini",
+       "anchor": "kenapa-tahu-angka-hak",
+       "media": {
+        "alt": "Jam dinding menunjukkan berbagai waktu dalam sehari, dengan ikon tidur, makan, dan kerja di sekitarnya"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Banyak PRT di Saudi disuruh kerja dari subuh sampai tengah malam, nggak pernah libur, dianggap harus standby 24 jam. Kenapa? Bukan karena memang harus begitu — tapi karena mereka nggak tahu kalau mereka punya hak yang dilindungi aturan resmi."
+      },
+      {
+       "type": "paragraph",
+       "text": "Kamu bukan budak. Saudi punya aturan resmi untuk pekerja rumah tangga (berlaku sejak Oktober 2024) yang mengatur batas kerja, istirahat, dan libur. Ini hakmu. Kalau kamu tahu angkanya, kamu nggak gampang ditindas."
+      },
+      {
+       "type": "heading",
+       "text": "Angka hakmu — ingat yang ini",
+       "anchor": "angka-hak-kerja",
+       "media": {
+        "alt": "Kalender harian dengan blok waktu kerja dan istirahat yang digambarkan dengan warna berbeda"
+       }
+      },
+      {
+       "type": "stat",
+       "value": "10 jam",
+       "label": "Batas maksimal kerja per hari",
+       "sub": "Tidak boleh dipaksa kerja lebih dari ini dalam sehari."
+      },
+      {
+       "type": "stat",
+       "value": "8 jam",
+       "label": "Tidur malam yang utuh",
+       "sub": "Waktu tidurmu tidak boleh dipotong-potong dengan suruhan kerja."
+      },
+      {
+       "type": "stat",
+       "value": "1 hari",
+       "label": "Libur penuh tiap minggu (minimal 24 jam)",
+       "sub": "Libur dengan tetap dibayar."
+      },
+      {
+       "type": "paragraph",
+       "text": "Selain itu: kamu nggak boleh dipaksa kerja lebih dari 5 jam berturut-turut tanpa jeda. Harus ada jeda minimal 30 menit untuk istirahat, sholat, atau makan."
+      },
+      {
+       "type": "quote",
+       "text": "Kamu bukan budak yang standby 24 jam. Kalau dipaksa kerja terus tanpa istirahat dan tanpa libur sama sekali, itu PELANGGARAN — bukan hal normal yang harus diterima."
+      },
+      {
+       "type": "heading",
+       "text": "Yang DITANGGUNG majikan — bukan kebaikan hati",
+       "anchor": "tanggungan-majikan",
+       "media": {
+        "alt": "Rumah sederhana dengan ikon atap (tempat tinggal), mangkuk nasi (makan), dan salib merah (berobat) di tiga sisi"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Ini bukan kebaikan hati majikan. Ini kewajiban mereka menurut aturan:"
+      },
+      {
+       "type": "list",
+       "items": [
+        "Tempat tinggal yang layak — kamu nggak bayar sendiri.",
+        "Makan — disediakan majikan.",
+        "Biaya berobat kalau kamu sakit — ditanggung majikan."
+       ]
+      },
+      {
+       "type": "heading",
+       "text": "Paspormu adalah MILIKMU",
+       "anchor": "paspor-milikmu",
+       "media": {
+        "alt": "Paspor berwarna hijau dipegang erat oleh tangan perempuan, dengan ekspresi percaya diri"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Majikan DILARANG menyita paspor atau iqama-mu. Banyak penindasan dimulai dari paspor ditahan, supaya kamu nggak bisa ke mana-mana dan merasa terjebak."
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Kalau paspormu ditahan",
+       "text": "Menahan paspor pekerja itu ILEGAL di Saudi. Kalau majikan menyita paspormu, kamu boleh menolak — dan itu sudah jadi alasan sah untuk lapor. Jangan cuma diam: hubungi KBRI Riyadh (wilayah tengah & timur) WhatsApp +966 56 917 3990, atau KJRI Jeddah (wilayah barat: Jeddah, Makkah, Madinah, Thaif) WhatsApp +966 50 360 9667, atau Direktorat Pelindungan WNI Kemlu RI +62 812-9007-0027. Kalau nyawamu terancam, telepon darurat 911 (kota besar) atau polisi 999."
+      },
+      {
+       "type": "quote",
+       "text": "Hak istirahat, libur, makan, dan paspormu sendiri itu aturan — bukan minta belas kasihan. Tahu batasnya bikin kamu tidak gampang ditindas."
+      }
+     ]
+    },
+    {
+     "lesson_num": 8,
+     "title": "Masa Percobaan & Kapan Kamu Boleh Pindah Majikan (Lewat Jalur Resmi)",
+     "lesson_type": "reading",
+     "estimated_minutes": 6,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Kamu nggak terjebak selamanya",
+       "anchor": "tidak-terjebak-selamanya",
+       "media": {
+        "alt": "Persimpangan jalan dengan papan petunjuk arah, salah satunya berlabel 'jalur resmi' dan mengarah ke kantor dengan bendera Indonesia"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Pertanyaan yang sering bikin takut: 'Kalau majikanku jahat, aku terjebak selamanya, nggak ya?' Jawabannya: nggak. Ada jalan keluar yang resmi. Tapi jalannya lewat lapor, bukan kabur. Pelajaran ini menjelaskan kapan dan bagaimana — dan ke siapa kamu lapor."
+      },
+      {
+       "type": "heading",
+       "text": "Masa percobaan: maksimal 90 hari",
+       "anchor": "masa-percobaan-90-hari",
+       "media": {
+        "alt": "Kalender dengan 90 hari dilingkari, di samping dokumen kontrak yang terbuka"
+       }
+      },
+      {
+       "type": "stat",
+       "value": "90 hari",
+       "label": "Batas maksimal masa percobaan",
+       "sub": "Harus disepakati TERTULIS di kontrak, bukan otomatis berlaku."
+      },
+      {
+       "type": "paragraph",
+       "text": "Masa percobaan (probation) maksimal 90 hari dan harus tertulis di kontrak — kalau nggak tertulis, ya nggak ada. Selama masa percobaan ini, dua pihak (kamu dan majikan) sama-sama boleh mengakhiri kontrak."
+      },
+      {
+       "type": "heading",
+       "text": "Kapan kamu boleh pindah majikan lewat jalur resmi",
+       "anchor": "alasan-pindah-majikan",
+       "media": {
+        "alt": "Daftar empat poin dengan tanda centang di samping masing-masing, di atas latar belakang warna tenang"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kamu nggak bisa pindah majikan kapan saja sesuka hati. Tapi kalau majikan melanggar, ada alasan-alasan tertentu yang membolehkanmu pindah lewat jalur resmi:"
+      },
+      {
+       "type": "list",
+       "items": [
+        "Gaji telat berbulan-bulan (sekitar 3 bulan) tanpa alasan sah.",
+        "Kamu mengalami kekerasan atau pelecehan dari majikan atau keluarganya.",
+        "Kamu disuruh kerja berbahaya yang mengancam kesehatan atau keselamatanmu.",
+        "Jasamu disewakan atau dipindah ke orang lain tanpa izinmu."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Jujur biar kamu nggak salah harap",
+       "text": "Sebagai PRT, kamu TIDAK bisa pindah majikan kapan saja. Pekerja rumah tangga punya aturan sendiri — beda dari pekerja pabrik atau kantor. Pindah hanya boleh untuk alasan tertentu di atas, dan harus lewat proses resmi."
+      },
+      {
+       "type": "heading",
+       "text": "Lewat proses resmi, BUKAN kabur",
+       "anchor": "proses-resmi-bukan-kabur",
+       "media": {
+        "alt": "Perempuan sedang menelepon dengan tenang, di samping logo bendera Indonesia dan nomor kontak"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Ini yang paling penting. Kalau majikan melanggar, jalannya adalah LAPOR dan minta pindah lewat proses resmi — lewat Musaned dan pelaporan ke pihak berwenang. Bukan kabur diam-diam ke jalanan."
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Kenapa jangan kabur",
+       "text": "Kalau kamu kabur diam-diam, statusmu bisa jadi ilegal dan justru KAMU yang dianggap salah — padahal kamu korban. Lapor resmi menjaga statusmu tetap sah dan posisimu tetap kuat."
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Ke siapa kamu lapor — simpan nomor ini",
+       "text": "Ini kontak yang bisa kamu hubungi langsung kalau majikan melanggar (gaji telat berbulan-bulan, kekerasan, paspor ditahan). KBRI Riyadh (kalau kamu di wilayah tengah & timur Saudi): WhatsApp +966 56 917 3990 atau telepon +966-11-488-2800. KJRI Jeddah (kalau kamu di wilayah barat: Jeddah, Makkah, Madinah, Thaif): hotline/WhatsApp +966 50 360 9667. Dari Indonesia atau lewat keluargamu, hubungi Direktorat Pelindungan WNI Kemlu RI +62 812-9007-0027 atau lapor di peduliwni.kemlu.go.id. Kalau nyawamu dalam bahaya saat itu juga, telepon darurat 911 (kota besar) atau polisi 999. Kamu juga bisa hubungi tim Perantau Global untuk dibantu mengarahkan. Catat nomor-nomor ini sebelum berangkat — jangan tunggu sampai butuh."
+      },
+      {
+       "type": "paragraph",
+       "text": "Kontrak resmi Musaned jadi bukti hitam-putih yang menguatkan posisimu kalau kamu harus pindah resmi atau mengadu. Itu sebabnya kontrak resmi dari pelajaran sebelumnya begitu penting."
+      },
+      {
+       "type": "quote",
+       "text": "Kalau majikan melanggar, jalurnya lapor dan pindah resmi — bukan kabur ke jalanan. Simpan nomor KBRI/KJRI dan Direktorat PWNI Kemlu RI dari awal, supaya kamu tahu harus telepon ke mana."
+      }
+     ]
+    },
+    {
+     "lesson_num": 9,
+     "title": "Kuis: Tahu Hakmu & Paham Kontrak",
+     "lesson_type": "quiz",
+     "estimated_minutes": 5,
+     "pass_threshold": 70,
+     "questions": [
+      {
+       "id": "q1",
+       "prompt": "Sebelum tanda tangan kontrak, poin mana yang WAJIB dipastikan sudah tertulis jelas?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Cukup nama majikan saja, sisanya diatur belakangan di Saudi"
+        },
+        {
+         "key": "b",
+         "label": "Nominal gaji pakai angka, plus jenis dan lokasi pekerjaan yang jelas"
+        },
+        {
+         "key": "c",
+         "label": "Cukup tanggal berangkat, gaji dan kerjaan dibahas nanti"
+        }
+       ]
+      },
+      {
+       "id": "q2",
+       "prompt": "Kamu disuruh kerja terus dari subuh sampai malam, tanpa libur seminggu pun. Ini normal atau bukan?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Normal, namanya juga kerja di rumah orang, harus standby"
+        },
+        {
+         "key": "b",
+         "label": "Pelanggaran — kamu berhak 1 hari libur penuh tiap minggu"
+        },
+        {
+         "key": "c",
+         "label": "Boleh saja asal gaji dinaikkan sedikit"
+        }
+       ]
+      },
+      {
+       "id": "q3",
+       "prompt": "Majikan minta menahan paspormu 'biar aman'. Sikap yang paling benar?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Serahkan saja, kan demi keamanan"
+        },
+        {
+         "key": "b",
+         "label": "Tolak — paspor itu milikmu dan menahannya ilegal"
+        },
+        {
+         "key": "c",
+         "label": "Serahkan dulu, nanti minta lagi kalau mau pulang"
+        }
+       ]
+      },
+      {
+       "id": "q4",
+       "prompt": "Berapa batas maksimal masa percobaan (probation) untuk PRT?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "1 tahun, otomatis berlaku"
+        },
+        {
+         "key": "b",
+         "label": "Maksimal 90 hari, dan harus disepakati tertulis"
+        },
+        {
+         "key": "c",
+         "label": "6 bulan, tanpa perlu ditulis di kontrak"
+        }
+       ]
+      },
+      {
+       "id": "q5",
+       "prompt": "Gajimu sudah telat berbulan-bulan dan kamu pernah dianiaya. Langkah paling benar?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Langsung kabur diam-diam dari rumah majikan"
+        },
+        {
+         "key": "b",
+         "label": "Lapor ke KBRI/KJRI atau PWNI dan minta pindah majikan lewat jalur resmi"
+        },
+        {
+         "key": "c",
+         "label": "Diam saja dan terima nasib sampai kontrak habis"
+        }
+       ]
+      },
+      {
+       "id": "q6",
+       "prompt": "Siapa yang menanggung tempat tinggal, makan, dan biaya berobatmu selama kerja?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Kamu sendiri, dipotong dari gaji"
+        },
+        {
+         "key": "b",
+         "label": "Majikan — itu kewajiban mereka, bukan kebaikan"
+        },
+        {
+         "key": "c",
+         "label": "Dibagi dua antara kamu dan majikan"
+        }
+       ]
+      }
+     ],
+     "answerKeys": [
+      {
+       "qid": "q1",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Sebelum tanda tangan, gaji harus tertulis pakai angka, dan jenis serta lokasi kerja harus jelas. 'Diatur belakangan' atau cuma tanggal berangkat itu tanda bahaya — bisa jadi kamu dijanjikan A tapi disuruh kerja B.",
+       "rationale": {
+        "a": "Kalau cuma nama majikan yang tertulis, gaji dan jenis kerja bisa diubah sesuka mereka nanti — dan kamu nggak punya pegangan apapun untuk protes.",
+        "c": "Tanda tangan kontrak yang gaji dan pekerjaan-nya masih kosong berisiko besar: nanti bisa diisi apa saja tanpa kamu tahu, dan kamu sudah terlanjur setuju di atas kertas."
+       }
+      },
+      {
+       "qid": "q2",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Kamu berhak 1 hari libur penuh tiap minggu (minimal 24 jam) dan istirahat cukup tiap hari. Dipaksa kerja terus tanpa libur itu pelanggaran, bukan hal normal yang harus diterima.",
+       "rationale": {
+        "a": "Kerja rumah tangga bukan berarti kehilangan hak istirahat. Aturan resmi Saudi (berlaku Oktober 2024) justru menetapkan 1 hari libur penuh per minggu — ini bukan belas kasihan, ini hakmu.",
+        "c": "Gaji yang dinaikkan tidak menghapus hak liburmu. Kamu tetap berhak atas 1 hari libur penuh per minggu meski gajinya besar — hak istirahat bukan sesuatu yang bisa 'dibeli' dengan uang tambahan."
+       }
+      },
+      {
+       "qid": "q3",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Paspor adalah milikmu. Majikan menahan paspor itu ILEGAL di Saudi dan sering jadi awal penindasan. Kamu berhak menolak — bahkan kalau sudah ditahan, itu sudah alasan sah untuk lapor ke KBRI/KJRI.",
+       "rationale": {
+        "a": "Menyerahkan paspor dengan alasan 'demi keamanan' justru membuat kamu tidak bisa ke mana-mana — itulah cara penindasan dimulai. Menyita paspor pekerja adalah tindakan ilegal di Saudi.",
+        "c": "Begitu paspor diserahkan, kamu bergantung penuh pada itikad baik majikan untuk mengembalikannya. Menunggu 'sampai mau pulang' bisa berujung tidak dikembalikan sama sekali — dan kamu tidak punya dokumen untuk melapor atau pergi."
+       }
+      },
+      {
+       "qid": "q4",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Masa percobaan PRT maksimal 90 hari dan harus disepakati tertulis di kontrak. Kalau tidak tertulis, berarti tidak ada masa percobaan.",
+       "rationale": {
+        "a": "Masa percobaan 1 tahun tidak sesuai aturan — batasnya 90 hari. Masa percobaan yang terlalu panjang juga berarti lebih lama kamu dalam posisi yang lebih mudah diputus kontraknya tanpa alasan kuat.",
+        "c": "Enam bulan melampaui batas maksimal 90 hari yang ditetapkan aturan. Dan tanpa ditulis di kontrak, masa percobaan tidak berlaku sama sekali — kamu nggak bisa bergantung pada aturan yang nggak tertulis."
+       }
+      },
+      {
+       "qid": "q5",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Gaji telat berbulan-bulan (sekitar 3 bulan) dan kekerasan adalah alasan sah untuk pindah majikan — tapi lewat jalur resmi: lapor ke KBRI Riyadh (WA +966 56 917 3990), KJRI Jeddah (WA +966 50 360 9667), atau PWNI Kemlu (+62 812-9007-0027), bukan kabur. Kabur diam-diam bisa bikin statusmu jadi ilegal dan kamu yang dianggap salah.",
+       "rationale": {
+        "a": "Kabur diam-diam tanpa lapor resmi bisa membuat statusmu jadi ilegal di Saudi — padahal kamu adalah korban. Justru posisimu melemah, dan kamu bisa ditangkap karena dianggap melanggar sistem kafala.",
+        "c": "Diam dan menerima situasi berbahaya bisa memperparah kondisimu. Kekerasan dan gaji yang tidak dibayar adalah pelanggaran nyata — kamu punya hak untuk lapor dan minta perlindungan tanpa menunggu kontrak habis."
+       }
+      },
+      {
+       "qid": "q6",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Tempat tinggal, makan, dan biaya berobat adalah TANGGUNGAN majikan menurut aturan resmi. Itu hakmu, bukan kebaikan hati mereka, dan tidak boleh dipotong dari gajimu.",
+       "rationale": {
+        "a": "Biaya tinggal, makan, dan berobat tidak boleh dipotong dari gajimu. Ini kewajiban majikan menurut aturan — kalau dipotong, itu pelanggaran yang bisa kamu laporkan.",
+        "c": "Tidak ada pembagian dua untuk kebutuhan dasar ini. Seluruh biaya tempat tinggal, makan, dan berobat adalah kewajiban penuh majikan — bukan dibagi antara kamu dan mereka."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "module_num": 3,
+   "title": "Hidup di Rumah Majikan: Adat, Agama & Garis Merah",
+   "summary": "Pelajari adat sehari-hari dan lima batas penting yang bikin hidupmu aman dan dihormati di rumah majikan Saudi.",
+   "content": {
+    "outcomes": [
+     "Selesai modul ini, kamu bisa menyajikan makanan dan minuman dengan cara yang sopan sesuai adat Saudi.",
+     "Selesai modul ini, kamu bisa menyesuaikan diri dengan ritme ibadah dan Ramadan tanpa bingung.",
+     "Selesai modul ini, kamu bisa menyebut dan menghindari lima garis merah yang bisa berujung masalah hukum."
+    ],
+    "est_minutes": 19
+   },
+   "lessons": [
+    {
+     "lesson_num": 10,
+     "title": "Hari Pertama di Rumah Majikan: Pakaian, Tangan Kanan, Cara Bicara & Ritme Ibadah",
+     "lesson_type": "reading",
+     "estimated_minutes": 8,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Coba pikir dulu sebentar",
+       "anchor": "pikir-dulu-wati-nuri",
+       "media": {
+        "alt": "Dua perempuan berseragam PRT berdiri di depan pintu rumah bergaya Arab, salah satu terlihat tenang dan percaya diri, yang lain tampak kebingungan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Bayangkan dua orang sampai di rumah majikan di hari yang sama. Namanya Wati dan Nuri."
+      },
+      {
+       "type": "paragraph",
+       "text": "Wati langsung sibuk kerja. Dia menyajikan teh pakai tangan kiri. Saat azan berkumandang, TV tetap dia setel keras. Hari Minggu dia heran kenapa masih disuruh kerja. Majikan jadi sering kesal, padahal Wati tidak punya niat jahat. Dia cuma tidak tahu adatnya."
+      },
+      {
+       "type": "paragraph",
+       "text": "Nuri belajar dulu beberapa hal kecil. Dia pakai tangan kanan. Saat azan, dia kecilkan suara. Dia tahu hari libur di Saudi itu Jumat, bukan Minggu. Hidupnya jadi jauh lebih tenang, dan majikan menghormatinya."
+      },
+      {
+       "type": "paragraph",
+       "text": "Bedanya bukan pintar atau bodoh. Bedanya cuma satu: Nuri tahu adatnya lebih dulu. Itulah yang akan kamu pelajari di sini. Nggak usah dihafal mati. Baca pelan-pelan saja."
+      },
+      {
+       "type": "heading",
+       "text": "Pakaian: longgar dan menutup",
+       "anchor": "pakaian-longgar-menutup",
+       "media": {
+        "alt": "Perempuan mengenakan jubah panjang longgar berwarna gelap sedang berjalan keluar dari pintu rumah menuju jalan di lingkungan perumahan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Saat keluar rumah, pakai pakaian longgar yang menutup badan. Biasanya majikan memberi kamu abaya untuk dipakai."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Apa itu abaya?",
+       "text": "Abaya adalah jubah longgar, sering warna hitam, yang dipakai perempuan saat keluar rumah di Saudi. Intinya: baju panjang longgar penutup badan."
+      },
+      {
+       "type": "paragraph",
+       "text": "Sejak 2018, abaya sudah tidak lagi wajib secara hukum. Tapi memakainya tetap normal dan paling aman, jadi tidak ada salahnya pakai. Di dalam rumah, biasanya kamu boleh pakai baju kerja biasa yang sopan. Simpan baju ketat atau pendek untuk di kamarmu sendiri saja."
+      },
+      {
+       "type": "heading",
+       "text": "Adab tangan kanan",
+       "anchor": "adab-tangan-kanan",
+       "media": {
+        "alt": "Tangan kanan seorang perempuan menyerahkan cangkir teh kepada tamu yang duduk di kursi ruang tamu"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Ini hal kecil tapi penting. Makan, memberi sesuatu, dan menerima sesuatu — SELALU pakai tangan kanan. Tangan kiri dianggap tidak bersih."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Sajikan makanan dan minuman dengan tangan kanan.",
+        "Terima dan beri barang dengan tangan kanan.",
+        "Kalau kamu kidal (lebih nyaman pakai tangan kiri), latih dari sekarang supaya terbiasa.",
+        "Saat ada tamu, sajikan gahwa dan kurma dengan tangan kanan, mulai dari yang paling dihormati."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Apa itu gahwa?",
+       "text": "Gahwa adalah kopi khas Arab yang disajikan ke tamu, biasanya bersama kurma. Kalau kamu ditawari, jangan menolak. Sip sedikit saja sudah cukup sopan."
+      },
+      {
+       "type": "heading",
+       "text": "Cara bicara: tenang dan sopan",
+       "anchor": "cara-bicara-tenang-sopan",
+       "media": {
+        "alt": "Perempuan berbicara dengan senyum tenang kepada seorang ibu rumah tangga di dapur, keduanya berdiri berhadapan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Jaga nada bicaramu. Tenang dan sopan. Jangan membentak atau marah-marah di depan umum, walau kamu sedang kesal."
+      },
+      {
+       "type": "quote",
+       "text": "Cara bicaramu sering lebih penting daripada isi katanya."
+      },
+      {
+       "type": "paragraph",
+       "text": "Banyak masalah antara PRT dan majikan muncul dari salah paham budaya, bukan dari niat jahat. Kalau kamu bicara dengan tenang, banyak masalah bisa dihindari sejak awal."
+      },
+      {
+       "type": "heading",
+       "text": "Ritme ibadah: hidup berputar mengikuti azan",
+       "anchor": "ritme-ibadah-azan",
+       "media": {
+        "alt": "Menara masjid tinggi di lingkungan perumahan dengan langit sore jingga, terlihat dari jendela rumah"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Di Saudi, ada 5 waktu sholat setiap hari, ditandai azan dari masjid. Saat azan berkumandang, keluarga majikan akan sholat. Hormati momen itu dengan mengecilkan TV atau musik. Kamu juga berhak waktu untuk sholat."
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "text": "Hari libur di Saudi itu JUMAT dan SABTU, bukan Sabtu-Minggu seperti di Indonesia. Hari kerja di sana Minggu sampai Kamis. Jangan bingung kalau hari Minggu kamu tetap kerja — itu memang hari kerja biasa di sana. Hari libur PRT sering jatuh di hari Jumat."
+      },
+      {
+       "type": "heading",
+       "text": "Bulan Ramadan: aturannya lebih ketat",
+       "anchor": "bulan-ramadan-aturan",
+       "media": {
+        "alt": "Dapur dengan lampu redup, terlihat perempuan menyiapkan makanan sendirian di meja dapur pada malam hari"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Selama Ramadan, semua orang dilarang makan, minum, dan merokok di tempat umum pada siang hari — dari Subuh sampai waktu buka puasa. Aturan ini berlaku untuk SEMUA orang, termasuk pekerja asing."
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "text": "Kalau kamu sedang tidak puasa karena haid atau sakit, kamu tetap TIDAK BOLEH makan atau minum di tempat yang bisa dilihat orang lain. Makan atau minum diam-diam saja di kamar atau dapur. Salah sedikit di tempat umum bisa jadi masalah serius."
+      },
+      {
+       "type": "paragraph",
+       "text": "Ramadan juga jadi lebih sibuk. Kamu akan masak untuk sahur dan buka puasa. Siapkan tenagamu, dan istirahat saat ada kesempatan."
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Pelajaran",
+       "text": "Hal-hal kecil ini — tangan kanan, nada lembut, baju menutup, hormati waktu sholat dan Ramadan — yang bikin majikan menghormatimu dan hidupmu aman. Kamu tidak perlu jadi orang lain. Cukup pelajari adatnya pelan-pelan."
+      }
+     ]
+    },
+    {
+     "lesson_num": 11,
+     "title": "Lima Garis Merah yang Wajib Kamu Tahu Biar Aman",
+     "lesson_type": "reading",
+     "estimated_minutes": 7,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Coba pikir dulu sebentar",
+       "anchor": "pikir-dulu-garis-merah",
+       "media": {
+        "alt": "Lima tanda batas berwarna merah berjejer di sepanjang trotoar, dengan latar belakang jalan kota"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Ada lima hal di Saudi yang bukan sekadar 'kurang sopan'. Kalau dilanggar, akibatnya bisa berat sekali — bahkan masalah hukum. Tapi kabar baiknya: semuanya gampang dihindari kalau kamu tahu duluan."
+      },
+      {
+       "type": "paragraph",
+       "text": "Ini bukan untuk menakut-nakuti. Justru sebaliknya. Kalau kamu tahu lima garis merah ini, kamu jadi tenang. Kamu tidak gampang dituduh, dan tidak gampang dibohongi orang yang bilang 'ah, di sini sudah biasa begitu'."
+      },
+      {
+       "type": "heading",
+       "text": "Garis merah 1: Alkohol dan narkoba",
+       "anchor": "garis-merah-alkohol-narkoba",
+       "media": {
+        "alt": "Tanda larangan berbentuk lingkaran merah dengan silang di tengahnya, dipasang di dinding putih"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Alkohol (minuman keras) dan narkoba ILEGAL TOTAL di Saudi. Hukumannya berat sekali."
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "text": "Jangan pernah menyentuh, menyimpan, atau membantu membawa alkohol maupun narkoba — walaupun disuruh orang lain. Kalau ada yang minta tolong 'titip bawa barang', tolak. Itu bisa menyeretmu ke masalah besar yang bukan salahmu."
+      },
+      {
+       "type": "heading",
+       "text": "Garis merah 2: Memfoto orang tanpa izin",
+       "anchor": "garis-merah-foto-tanpa-izin",
+       "media": {
+        "alt": "Tangan memegang ponsel menghadap ke bawah di atas meja, tidak memotret, dengan anak kecil bermain di latar belakang"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Memfoto atau merekam orang tanpa izin adalah pelanggaran hukum di Saudi. Apalagi kalau kiriman itu dikirim ke orang lain atau diposting ke media sosial."
+      },
+      {
+       "type": "paragraph",
+       "text": "Anak majikan mungkin lucu dan kamu sayang padanya, tapi jangan foto atau video anak, perempuan, atau keluarga majikan, lalu kirim atau posting."
+      },
+      {
+       "type": "quote",
+       "text": "Aturan emasnya: jangan foto orang tanpa izin yang jelas."
+      },
+      {
+       "type": "heading",
+       "text": "Garis merah 3: Menghina agama",
+       "anchor": "garis-merah-menghina-agama",
+       "media": {
+        "alt": "Ponsel dengan layar menampilkan kolom komentar kosong, tangan tidak mengetik, berada di atas meja kayu"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Jangan pernah menghina atau bercanda merendahkan agama, Nabi, atau Al-Qur'an — termasuk di media sosial, walaupun maksudnya cuma bercanda. Ini sangat serius di Saudi."
+      },
+      {
+       "type": "heading",
+       "text": "Garis merah 4: Membocorkan rahasia rumah",
+       "anchor": "garis-merah-rahasia-rumah",
+       "media": {
+        "alt": "Perempuan berbisik ke telinga orang lain diblokir tanda silang merah, di sebelahnya tampak pintu rumah yang tertutup"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Apa yang terjadi di dalam rumah majikan, biarkan tetap di dalam rumah. Jangan ceritakan atau posting urusan dalam keluarga majikan — seperti pertengkaran atau rahasia mereka — ke siapa pun."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "text": "Menjaga rahasia keluarga majikan bukan cuma soal sopan-santun. Ini biasanya kewajiban HUKUM yang tertulis di kontrakmu. Jadi jangan ikut campur urusan keluarga, dan jangan jadi penyebar cerita."
+      },
+      {
+       "type": "heading",
+       "text": "Garis merah 5: Batasan dengan laki-laki non-mahram",
+       "anchor": "garis-merah-non-mahram",
+       "media": {
+        "alt": "Perempuan berdiri di ruang terbuka yang terang, mengangguk sopan dari jarak aman kepada pria dewasa di ujung ruangan"
+       }
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Apa itu mahram dan non-mahram?",
+       "text": "Mahram = laki-laki keluarga dekat (ayah, suami, anak, saudara kandung). Non-mahram = laki-laki selain itu, yang harus kamu jaga batasnya. Yang penting paham maksudnya, bukan hafal istilahnya."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Sebagai PRT perempuan, jangan inisiatif salaman atau menyentuh laki-laki dewasa yang bukan keluarga. Cukup angguk sopan.",
+        "Jangan berduaan di ruang tertutup dengan laki-laki non-mahram. Cari posisi yang terbuka dan bisa dilihat orang.",
+        "Banyak laki-laki Saudi memang tidak akan menyalami perempuan bukan keluarganya. Itu normal, bukan karena tidak suka padamu."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "text": "Kalau majikan laki-laki atau siapa pun bertingkah tidak pantas kepadamu, itu BUKAN salahmu. Kamu berhak melapor. Cara melapor dan nomor yang bisa dihubungi ada di modul berikutnya."
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Pelajaran",
+       "text": "Lima garis merah ini melindungimu. Tahu batasnya bukan untuk menakut-nakuti — justru biar kamu tenang, aman, dan tidak gampang dituduh. Hindari kelimanya, dan kamu sudah mengamankan dirimu dari masalah terbesar."
+      }
+     ]
+    },
+    {
+     "lesson_num": 12,
+     "title": "Kuis: Tahu Adat, Aman di Rumah Orang",
+     "lesson_type": "quiz",
+     "estimated_minutes": 4,
+     "pass_threshold": 70,
+     "questions": [
+      {
+       "id": "q1",
+       "prompt": "Kamu menyajikan teh ke tamu majikan. Pakai tangan yang mana?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Tangan kiri"
+        },
+        {
+         "key": "b",
+         "label": "Tangan kanan"
+        },
+        {
+         "key": "c",
+         "label": "Pakai dua tangan biar cepat"
+        }
+       ]
+      },
+      {
+       "id": "q2",
+       "prompt": "Saat Ramadan kamu sedang haid, jadi tidak puasa, dan kamu haus di siang hari. Apa yang paling benar?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Minum di ruang tamu, kan ada alasan tidak puasa"
+        },
+        {
+         "key": "b",
+         "label": "Minum diam-diam di kamar atau dapur, jangan di tempat yang terlihat"
+        },
+        {
+         "key": "c",
+         "label": "Tahan saja sampai buka, tidak boleh minum sama sekali"
+        }
+       ]
+      },
+      {
+       "id": "q3",
+       "prompt": "Anak majikan lucu sekali. Kamu ingin kirim videonya ke temanmu. Apa yang paling tepat?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Kirim saja, kan niatnya baik karena sayang"
+        },
+        {
+         "key": "b",
+         "label": "Jangan kirim atau posting. Memfoto orang tanpa izin bisa jadi pelanggaran hukum"
+        },
+        {
+         "key": "c",
+         "label": "Boleh, asal wajahnya tidak terlalu jelas"
+        }
+       ]
+      },
+      {
+       "id": "q4",
+       "prompt": "Teman sesama PMI bertanya soal pertengkaran di keluarga majikanmu. Apa yang benar?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Ceritakan, biar bisa minta saran"
+        },
+        {
+         "key": "b",
+         "label": "Jangan diceritakan. Menjaga rahasia rumah majikan biasanya kewajiban hukum di kontrakmu"
+        },
+        {
+         "key": "c",
+         "label": "Ceritakan sedikit saja, yang penting tidak semuanya"
+        }
+       ]
+      },
+      {
+       "id": "q5",
+       "prompt": "Tamu laki-laki dewasa yang bukan keluarga majikan mengulurkan tangan untuk salaman. Sikap paling tepat?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Salami dengan erat biar dianggap ramah"
+        },
+        {
+         "key": "b",
+         "label": "Cukup angguk sopan, tidak perlu salaman"
+        },
+        {
+         "key": "c",
+         "label": "Pura-pura tidak lihat dan langsung pergi"
+        }
+       ]
+      }
+     ],
+     "answerKeys": [
+      {
+       "qid": "q1",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Selalu pakai tangan kanan untuk memberi, menerima, dan menyajikan. Tangan kiri dianggap tidak bersih, jadi memakainya untuk menyajikan teh bisa membuat tamu tersinggung.",
+       "rationale": {
+        "a": "Tangan kiri dianggap tidak bersih dalam adat Saudi, dan menyajikan sesuatu dengan tangan kiri bisa menyinggung tamu majikan tanpa kamu sadari — ini bisa membuatmu dinilai tidak sopan.",
+        "c": "Dua tangan terlihat sibuk tapi tidak membantu jika tangan kiri ikut pegang cangkir. Lebih aman fokus ke tangan kanan saja agar tidak ada salah paham."
+       }
+      },
+      {
+       "qid": "q2",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Saat Ramadan, makan dan minum dilarang di tempat umum pada siang hari, walau kamu sedang tidak puasa. Kamu boleh minum, tapi diam-diam di kamar atau dapur, jangan di tempat yang terlihat orang.",
+       "rationale": {
+        "a": "Walaupun punya alasan tidak puasa, minum di ruang tamu saat Ramadan tetap bisa jadi masalah serius karena aturannya berlaku untuk semua orang di tempat yang bisa dilihat — niatmu baik tapi risikonya nyata.",
+        "c": "Kamu boleh minum saat tidak puasa karena haid atau sakit, tapi harus di tempat tertutup seperti kamar atau dapur — menahan total tidak perlu dan justru menyulitkan kesehatanmu."
+       }
+      },
+      {
+       "qid": "q3",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Memfoto atau merekam orang tanpa izin adalah pelanggaran hukum di Saudi, apalagi kalau dikirim atau diposting. Walau niatnya sayang, jangan foto anak atau keluarga majikan lalu menyebarkannya.",
+       "rationale": {
+        "a": "Niat yang baik tidak melindungimu dari masalah hukum — memfoto dan mengirim gambar anak atau anggota keluarga majikan tanpa izin tetap dianggap pelanggaran di Saudi.",
+        "c": "Memburamkan atau menyamarkan wajah tidak mengubah statusnya sebagai rekaman tanpa izin — risiko hukumnya tetap sama, jadi lebih aman tidak merekam sama sekali."
+       }
+      },
+      {
+       "qid": "q4",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Urusan dalam rumah majikan harus dijaga rahasianya. Ini biasanya kewajiban hukum yang tertulis di kontrakmu, jadi jangan ceritakan ke siapa pun, sedikit pun.",
+       "rationale": {
+        "a": "Menceritakan masalah keluarga majikan untuk minta saran terlihat wajar, tapi ini bisa melanggar kewajiban hukum di kontrakmu dan merugikan kepercayaan majikan — ada cara lain mencari dukungan tanpa membocorkan rahasia rumah.",
+        "c": "Cerita 'sedikit saja' tetap sudah termasuk membocorkan rahasia rumah majikan — tidak ada batas aman, dan kontrakmu biasanya melarang semuanya, bukan sebagiannya saja."
+       }
+      },
+      {
+       "qid": "q5",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Sebagai PRT perempuan, jangan menyentuh laki-laki dewasa yang bukan keluarga. Cukup angguk sopan. Banyak laki-laki Saudi memang tidak menyalami perempuan bukan keluarga, jadi ini hal yang wajar.",
+       "rationale": {
+        "a": "Menyalami laki-laki non-mahram bisa dianggap melanggar batas adat dan agama di Saudi — meski niatnya ramah, ini justru bisa menciptakan situasi yang tidak nyaman atau bermasalah bagimu.",
+        "c": "Pura-pura tidak lihat terkesan kasar dan tidak sopan — cukup angguk sopan saja, itu sudah cukup menunjukkan rasa hormat tanpa harus salaman atau menghindar sepenuhnya."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "module_num": 4,
+   "title": "Bahasa Arab untuk Kerja & Darurat",
+   "summary": "Hafalkan kata-kata Arab yang paling kamu butuhkan setiap hari — dari perintah kerja biasa sampai kata penyelamat saat darurat.",
+   "content": {
+    "outcomes": [
+     "Selesai modul ini, kamu bisa memahami perintah rumah yang paling sering diucapkan majikan",
+     "Selesai modul ini, kamu bisa minta izin istirahat, ke toilet, dan telepon keluarga dengan sopan pakai bahasa Arab",
+     "Selesai modul ini, kamu bisa mengucapkan enam kata darurat dan tahu nomor yang harus ditekan saat nyawa terancam"
+    ],
+    "est_minutes": 18
+   },
+   "lessons": [
+    {
+     "lesson_num": 13,
+     "title": "Frasa Inti Sehari-hari: Sapa, Pahami Perintah & Minta Izin",
+     "lesson_type": "reading",
+     "estimated_minutes": 8,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Coba pikir dulu sebentar",
+       "anchor": "coba-pikir-dulu-sebentar",
+       "media": {
+        "alt": "Seorang perempuan baru tiba di depan rumah besar, berdiri di pintu sambil menggendong tas koper, ekspresi sedikit bingung saat mendengar seseorang berbicara di dalam"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Bayangkan kamu baru sampai di rumah majikan. Ibu majikan ngomong sesuatu pakai bahasa Arab. Kamu nggak ngerti satu kata pun. Dia ulangi, makin cepat, mukanya mulai kesal. Kamu cuma bisa mengangguk sambil bingung."
+      },
+      {
+       "type": "paragraph",
+       "text": "Sekarang bayangkan hal yang sama, tapi kamu hafal segelintir kata. Begitu dia bilang satu kata kunci, kamu langsung tahu harus ngapain. Dia tenang, kamu tenang. Beda jauh, kan?"
+      },
+      {
+       "type": "paragraph",
+       "text": "Itulah gunanya pelajaran ini. Kamu nggak perlu jago bahasa Arab. Kamu cuma butuh segelintir kata yang dipakai tiap hari. Dengan itu saja, minggu pertamamu sudah jauh lebih aman."
+      },
+      {
+       "type": "heading",
+       "text": "Mulai dari menyapa: bikin kamu dinilai sopan hari pertama",
+       "anchor": "mulai-dari-menyapa",
+       "media": {
+        "alt": "Seorang perempuan tersenyum dan mengangguk hormat saat bertemu dengan ibu majikan di ruang tamu, keduanya saling memandang dengan sopan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Sopan santun di rumah majikan dimulai dari mulutmu. Salam dan ucapan terima kasih bikin majikan menilai kamu orang baik sejak hari pertama. Hafal yang ini dulu."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Assalamu'alaikum = salam, diucapkan saat masuk atau ketemu majikan",
+        "Syukron = terima kasih",
+        "Afwan = maaf, atau sama-sama",
+        "Min fadhlak (kalau bicara ke Bapak majikan) / Min fadhlik (kalau ke Ibu majikan) = tolong / permisi",
+        "Na'am = ya",
+        "Laa = tidak",
+        "Mafi musykilah = tidak apa-apa / tidak masalah"
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Kata sopan yang kecil tapi kuat",
+       "text": "Pasangkan 'min fadhlak / min fadhlik' di belakang permintaanmu, dan kamu langsung terdengar hormat. Bedanya 'min fadhlak' dan 'min fadhlik' cuma huruf terakhir: -ak untuk laki-laki, -ik untuk perempuan. Salah dikit nggak apa-apa, yang penting kamu pakai."
+      },
+      {
+       "type": "heading",
+       "text": "Perintah rumah yang paling sering kamu dengar",
+       "anchor": "perintah-rumah-paling-sering",
+       "media": {
+        "alt": "Ilustrasi beberapa tugas rumah tangga berdampingan: tangan mengepel lantai, tangan mencuci piring, panci di atas kompor, dan seorang perempuan melangkah menghampiri seseorang yang memanggil"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Majikan akan menyuruhmu pakai kata-kata pendek ini, berkali-kali tiap hari. Hafal ini saja dulu, kamu sudah bisa langsung tahu harus apa tanpa nunggu dia kesal mengulang."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Nadzdzif = bersihkan",
+        "Ighsil = cuci",
+        "Itbukh = masak",
+        "Ta'aal (ke Bapak) / Ta'aali (ke Ibu) = ke sini / datang",
+        "Istanna = tunggu",
+        "Khalas = selesai / cukup / stop",
+        "Yalla = ayo / cepat",
+        "Shway shway = pelan-pelan / sedikit-sedikit"
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Arti 'khalas'",
+       "text": "'Khalas' artinya 'sudah, cukup, berhenti'. Kalau majikan bilang khalas, berarti tugasmu sudah dianggap selesai atau diminta berhenti. Ini kata penting biar kamu tahu kapan boleh berhenti. Nggak usah dihafal mati-matian — sering banget kedengeran, nanti otomatis nempel."
+      },
+      {
+       "type": "heading",
+       "text": "Nama benda kunci, biar perintah jadi jelas",
+       "anchor": "nama-benda-kunci",
+       "media": {
+        "alt": "Tiga gambar berdampingan: dapur dengan kompor, pintu kamar mandi, dan segelas air putih di meja"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Perintah jadi gampang kalau kamu tahu nama bendanya. Cukup tiga ini dulu."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Matbakh = dapur",
+        "Hammam = kamar mandi / toilet",
+        "Maa' = air"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "Gabungkan saja: 'Nadzdzif al-hammam' = bersihkan kamar mandi. 'Jiib maa'' = ambilkan air. Lihat? Dua kata yang kamu sudah hafal, langsung jadi perintah yang kamu pahami."
+      },
+      {
+       "type": "heading",
+       "text": "Kata ajaib buat minta izin: 'Mumkin...?'",
+       "anchor": "kata-minta-izin-mumkin",
+       "media": {
+        "alt": "Seorang perempuan mengangkat tangan dengan sopan dan ekspresi bertanya kepada ibu majikan yang berdiri di dekatnya"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Banyak PMI baru sungkan minta makan, istirahat, atau ke toilet. Padahal itu hakmu. Ada satu kata sopan yang bisa dipakai untuk minta apa saja: 'Mumkin...?' yang artinya 'Boleh...?'."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Mumkin astariih? = Boleh saya istirahat?",
+        "Mumkin hammam? = Boleh saya ke toilet?",
+        "Mumkin attasil bi ahli? = Boleh saya telepon keluarga?"
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Minta izin itu bukan merepotkan",
+       "text": "Istirahat, ke toilet, dan kabar ke keluarga adalah hak dasarmu. Minta dengan sopan pakai 'Mumkin...?' bukan berarti kamu merepotkan — itu cara yang benar dan hormat. Berani minta dengan baik jauh lebih sehat daripada menahan-nahan sampai sakit."
+      },
+      {
+       "type": "heading",
+       "text": "Jaring pengaman: kalau kamu nggak paham, BILANG",
+       "anchor": "jaring-pengaman-bilang-tidak-paham",
+       "media": {
+        "alt": "Seorang perempuan menggelengkan kepala dengan pelan dan mengangkat tangan terbuka ke depan sebagai tanda tidak paham, ekspresi jujur tapi tetap sopan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kamu tidak akan langsung paham semua. Itu normal. Yang berbahaya bukan tidak paham — yang berbahaya adalah pura-pura paham lalu salah kerja. Dua kalimat ini menyelamatkanmu dari banyak masalah."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Maa afham = saya tidak mengerti",
+        "Marrah tsaniyah? = sekali lagi? (minta diulang)"
+       ]
+      },
+      {
+       "type": "paragraph",
+       "text": "Biar terdengar sopan, tambahkan 'min fadhlak / min fadhlik' di belakangnya. Jujur tidak paham itu tanda kamu hati-hati, bukan tanda bodoh."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Kenapa bahasanya terdengar beda dari yang di pengajian",
+       "text": "Yang kamu dengar di rumah majikan adalah bahasa Arab sehari-hari Saudi — namanya Ammiyah. Ini beda dari bahasa Arab Al-Qur'an yang diajarkan di pengajian. Jadi jangan kaget kalau kata-katanya terdengar lebih pendek dan beda. Contohnya huruf 'qaf' sering dibaca 'g' (jadi 'wagaf', bukan 'waqaf'). Nggak usah bingung — kamu memang lagi belajar versi rumahan."
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Pelajaran",
+       "text": "Pelajaran: hafal sapaan + segelintir perintah rumah ini dulu, plus 'Mumkin...?' dan 'Maa afham'. Itu sudah cukup buat lewatin minggu pertama dengan tenang."
+      }
+     ]
+    },
+    {
+     "lesson_num": 14,
+     "title": "Kartu Frasa Darurat: Hafal Mati & Bawa Cetakannya",
+     "lesson_type": "reading",
+     "estimated_minutes": 6,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Ada kata yang harus keluar sendiri, tanpa mikir",
+       "anchor": "kata-harus-keluar-sendiri",
+       "media": {
+        "alt": "Tangan memegang kartu kecil berlaminating yang ada tulisan daftar kata di dalamnya, kartu disembunyikan di dalam lipatan pakaian"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Coba pikir sebentar. Saat kamu sakit mendadak, kecelakaan, atau ada bahaya — kamu tidak punya waktu untuk membuka catatan atau menerjemahkan kata. Dalam keadaan panik, otak susah mengingat. Kata yang menyelamatkanmu harus sudah kamu hafal duluan, sampai keluar sendiri dari mulut."
+      },
+      {
+       "type": "paragraph",
+       "text": "Tenang. Ini bukan untuk menakut-nakutimu. Anggap ini seperti pelampung di kapal: dipasang bukan karena pasti tenggelam, tapi biar aman kalau-kalau perlu. Semoga tidak pernah kamu pakai. Tapi kalau perlu, ini bisa menyelamatkan nyawamu."
+      },
+      {
+       "type": "heading",
+       "text": "Enam kata penyelamat — hafal mati",
+       "anchor": "enam-kata-penyelamat",
+       "media": {
+        "alt": "Enam kartu kecil berjejer di meja, masing-masing berisi satu kata Arab dan artinya dalam bahasa Indonesia, dengan warna berbeda untuk tiap kartu"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Cuma enam. Bukan banyak. Tapi keenamnya harus benar-benar nempel sebelum kamu berangkat, bukan dipelajari setelah kejadian."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Sa'idni! = Tolong saya!",
+        "Ana mariidhah = Saya sakit (kalau kamu perempuan) / Ana mariidh (kalau laki-laki)",
+        "Ureed thabiib = Saya butuh dokter",
+        "Asy-syurthah! = Polisi!",
+        "Laa! = Tidak!",
+        "Khalas, wagaf! = Stop, berhenti!"
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "'Laa' dan 'wagaf' itu hakmu",
+       "text": "'Laa' (tidak) dan 'wagaf / khalas' (berhenti) wajib bisa kamu ucapkan dengan tegas. Ini untuk menolak hal yang kamu tidak mau. Mengucapkan 'tidak' dengan tegas bukan tidak sopan — itu hakmu menjaga diri. Nggak usah dihafal sambil tegang; ucapkan beberapa kali sampai terasa biasa di mulut."
+      },
+      {
+       "type": "heading",
+       "text": "Nomor darurat Saudi: 911 dulu kalau nyawa terancam",
+       "anchor": "nomor-darurat-saudi",
+       "media": {
+        "alt": "Tangan menekan angka 9-1-1 di layar ponsel, latar belakang gelap menunjukkan situasi darurat malam hari"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Selain kata, hafal juga nomornya. Di kota-kota besar tempat kebanyakan PMI ditempatkan, satu nomor sudah cukup."
+      },
+      {
+       "type": "stat",
+       "value": "911",
+       "label": "Nomor darurat terpadu",
+       "sub": "Berlaku di kota besar: Riyadh, Jeddah, Makkah, Madinah, dan Provinsi Timur. Satu nomor untuk polisi, ambulans, dan pemadam."
+      },
+      {
+       "type": "paragraph",
+       "text": "Kalau kamu berada di luar kota-kota besar itu, nomornya dipisah. Hafal keduanya, jangan cuma satu."
+      },
+      {
+       "type": "list",
+       "items": [
+        "999 = Polisi",
+        "997 = Ambulans (kalau sakit / kecelakaan)",
+        "998 = Pemadam kebakaran"
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Kalau nyawa terancam SEKARANG",
+       "text": "Kalau kamu dipukul, dikurung, atau ada bahaya yang mengancam nyawamu saat ini juga — telepon 911 dulu, jangan menunggu. Keselamatanmu nomor satu. Urusan lapor ke KBRI/KJRI dan lain-lain bisa menyusul setelah kamu aman."
+      },
+      {
+       "type": "heading",
+       "text": "Tulis di kartu cetak, jangan cuma di HP",
+       "anchor": "tulis-di-kartu-cetak",
+       "media": {
+        "alt": "Tangan menulis daftar kata di secarik kertas kecil tebal menggunakan bolpoin, di sebelahnya ada ponsel yang layarnya mati"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Ini penting. HP bisa diambil, rusak, atau mati baterai justru saat kamu butuh. Tulis enam kata penyelamat + nomor 911 ini di KARTU CETAK kecil yang bisa kamu simpan dan sembunyikan. Bawa kartu ini bareng Kartu SOS dari modul berikutnya."
+      },
+      {
+       "type": "steps",
+       "items": [
+        "Tulis enam kata penyelamat + nomor darurat di kertas kecil yang kuat.",
+        "Simpan di tempat tersembunyi yang selalu bisa kamu jangkau — bukan di HP saja.",
+        "Hafalkan keenamnya sampai keluar sendiri, ucapkan keras-keras beberapa kali sebelum berangkat.",
+        "Ulangi sesekali selama di Saudi supaya tidak lupa."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Pelajaran",
+       "text": "Pelajaran: enam kata + nomor 911 ini, hafal sampai keluar sendiri, dan bawa cetakannya. Semoga tidak pernah kamu pakai — tapi kalau perlu, ini bisa menyelamatkan nyawamu."
+      }
+     ]
+    },
+    {
+     "lesson_num": 15,
+     "title": "Kuis: Nyambung & Siap Darurat",
+     "lesson_type": "quiz",
+     "estimated_minutes": 4,
+     "pass_threshold": 70,
+     "questions": [
+      {
+       "id": "q1",
+       "prompt": "Majikan menunjuk kamar mandi dan bilang 'nadzdzif al-hammam'. Apa yang dia minta?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Bersihkan kamar mandi"
+        },
+        {
+         "key": "b",
+         "label": "Ambilkan air ke kamar mandi"
+        },
+        {
+         "key": "c",
+         "label": "Tutup pintu kamar mandi"
+        }
+       ]
+      },
+      {
+       "id": "q2",
+       "prompt": "Kamu ingin telepon keluarga di kampung. Kalimat paling sopan untuk minta izin adalah:",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Langsung ambil HP dan telepon tanpa bilang apa-apa"
+        },
+        {
+         "key": "b",
+         "label": "Mumkin attasil bi ahli? (Boleh saya telepon keluarga?)"
+        },
+        {
+         "key": "c",
+         "label": "Yalla, yalla! (Ayo, cepat!)"
+        }
+       ]
+      },
+      {
+       "id": "q3",
+       "prompt": "Majikan bicara cepat pakai bahasa Arab dan kamu sama sekali tidak paham. Apa yang paling benar kamu lakukan?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Mengangguk dan pura-pura paham biar tidak dimarahi"
+        },
+        {
+         "key": "b",
+         "label": "Diam saja dan tebak-tebak sendiri apa yang harus dikerjakan"
+        },
+        {
+         "key": "c",
+         "label": "Bilang 'Maa afham' (saya tidak mengerti) atau 'Marrah tsaniyah?' (sekali lagi?)"
+        }
+       ]
+      },
+      {
+       "id": "q4",
+       "prompt": "Kamu (seorang perempuan) merasa sakit dan butuh dokter. Kata yang tepat untuk diucapkan adalah:",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Ana mariidhah, ureed thabiib (Saya sakit, saya butuh dokter)"
+        },
+        {
+         "key": "b",
+         "label": "Ana ja'aanah (Saya lapar)"
+        },
+        {
+         "key": "c",
+         "label": "Mafi musykilah (Tidak apa-apa)"
+        }
+       ]
+      },
+      {
+       "id": "q5",
+       "prompt": "Ada bahaya yang mengancam nyawamu sekarang juga dan kamu sedang berada di Riyadh. Nomor apa yang kamu telepon?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Nomor calo yang dulu memberangkatkan kamu"
+        },
+        {
+         "key": "b",
+         "label": "911"
+        },
+        {
+         "key": "c",
+         "label": "Tidak usah telepon siapa-siapa, tunggu sampai pagi"
+        }
+       ]
+      },
+      {
+       "id": "q6",
+       "prompt": "Tentang enam kata darurat (Sa'idni, Ana mariidhah, Ureed thabiib, Asy-syurthah, Laa, Khalas-wagaf), kapan kamu harus menghafalnya?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Sebelum berangkat, sampai keluar sendiri tanpa mikir, dan ditulis di kartu cetak"
+        },
+        {
+         "key": "b",
+         "label": "Nanti saja kalau sudah benar-benar ada masalah di Saudi"
+        },
+        {
+         "key": "c",
+         "label": "Cukup disimpan di HP, tidak perlu dihafal"
+        }
+       ]
+      }
+     ],
+     "answerKeys": [
+      {
+       "qid": "q1",
+       "correct": [
+        "a"
+       ],
+       "weight": 1,
+       "explanation": "'Nadzdzif' artinya bersihkan dan 'hammam' artinya kamar mandi. Jadi 'nadzdzif al-hammam' = bersihkan kamar mandi. Hafal dua kata ini saja, perintahnya langsung jelas.",
+       "rationale": {
+        "b": "Kata 'ighsil' yang artinya cuci, dan 'maa'' yang artinya air — keduanya berbeda dari 'nadzdzif' (bersihkan) dan 'hammam' (kamar mandi). Kalau salah menerjemahkan perintah, kamu bisa mengerjakan hal yang bukan diminta majikan.",
+        "c": "Tidak ada kata dalam kalimat itu yang berarti 'tutup' atau 'pintu'. Menebak-nebak perintah tanpa yakin bisa berujung salah kerja dan membuat majikan frustrasi."
+       }
+      },
+      {
+       "qid": "q2",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "'Mumkin...?' artinya 'Boleh...?' — kata sopan untuk minta izin apa saja. Menelepon keluarga itu hakmu, dan meminta izin dengan sopan adalah cara yang benar dan hormat.",
+       "rationale": {
+        "a": "Mengambil HP dan menelepon tanpa izin bisa dianggap tidak sopan atau tidak menghormati aturan rumah majikan. Ini bisa merusak kepercayaan yang baru kamu bangun, padahal menelepon keluarga adalah hakmu.",
+        "c": "'Yalla, yalla' artinya 'ayo, cepat' — ini bukan kalimat permintaan izin, dan bahkan terdengar seperti kamu yang menyuruh majikan. Mungkin akan terasa janggal dan membingungkan bagi mereka."
+       }
+      },
+      {
+       "qid": "q3",
+       "correct": [
+        "c"
+       ],
+       "weight": 1,
+       "explanation": "Pura-pura paham lalu salah kerja jauh lebih berbahaya daripada jujur bilang tidak mengerti. 'Maa afham' atau 'Marrah tsaniyah?' menyelamatkanmu dari kesalahan dan menunjukkan kamu hati-hati.",
+       "rationale": {
+        "a": "Mengangguk tanpa benar-benar paham berisiko membuat kamu mengerjakan tugas yang salah. Majikan akan lebih kesal ketika hasilnya meleset daripada saat kamu jujur meminta diulang.",
+        "b": "Menebak-nebak sendiri tanpa dasar bisa berujung pada kesalahan yang lebih besar — buang-buang waktu, tenaga, bahkan bisa merusak sesuatu. Lebih aman minta diulang dengan sopan."
+       }
+      },
+      {
+       "qid": "q4",
+       "correct": [
+        "a"
+       ],
+       "weight": 1,
+       "explanation": "'Ana mariidhah' = saya sakit (untuk perempuan), dan 'Ureed thabiib' = saya butuh dokter. Ini dua dari enam kata penyelamat yang wajib kamu hafal mati sebelum berangkat.",
+       "rationale": {
+        "b": "'Ana ja'aanah' artinya saya lapar — bukan sakit. Kalau kamu sedang butuh pertolongan medis tapi yang keluar dari mulutmu adalah kata lapar, kamu tidak akan mendapat bantuan yang kamu butuhkan.",
+        "c": "'Mafi musykilah' artinya tidak apa-apa. Mengatakannya saat kamu sebenarnya sakit dan butuh dokter bisa membuat orang di sekitarmu mengira kamu baik-baik saja, sehingga tidak ada yang membantumu."
+       }
+      },
+      {
+       "qid": "q5",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "911 adalah nomor darurat terpadu di kota besar seperti Riyadh, Jeddah, Makkah, dan Madinah. Kalau nyawa terancam sekarang, telepon 911 dulu — jangan menunggu, dan jangan mengandalkan calo.",
+       "rationale": {
+        "a": "Calo bukan petugas darurat dan tidak punya wewenang mengirim polisi atau ambulans. Dalam situasi nyawa terancam, setiap detik berharga — hubungi nomor darurat resmi, bukan pihak yang tidak bisa langsung bertindak.",
+        "c": "Menunggu sampai pagi saat nyawa terancam bisa berakibat fatal. Nomor 911 tersedia 24 jam justru karena keadaan darurat tidak mengenal waktu."
+       }
+      },
+      {
+       "qid": "q6",
+       "correct": [
+        "a"
+       ],
+       "weight": 1,
+       "explanation": "Saat darurat kamu tidak punya waktu untuk membuka catatan, dan HP bisa diambil. Karena itu kata darurat harus dihafal sampai keluar sendiri SEBELUM berangkat, dan ditulis di kartu cetak yang disembunyikan.",
+       "rationale": {
+        "b": "Saat sudah ada masalah di Saudi, kamu mungkin dalam kondisi panik, takut, atau terburu-buru. Otak sulit menyerap hal baru dalam keadaan tertekan — itulah mengapa hafal sebelum berangkat jauh lebih aman.",
+        "c": "HP bisa diambil, rusak, atau mati baterai tepat saat kamu paling butuh. Kalau kata-kata ini hanya tersimpan di HP dan tidak dihafal, kamu kehilangan satu-satunya jaring pengamanmu."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "module_num": 5,
+   "title": "Sehat & Tahu Cara Lapor: Persiapan Sebelum Berangkat + SOS di Saudi",
+   "summary": "Kamu belajar cara siapkan badan sebelum berangkat, simpan nomor darurat, dan langkah yang benar saat ada masalah di Saudi.",
+   "content": {
+    "outcomes": [
+     "Selesai modul ini, kamu bisa menyebut tiga hal kesehatan yang wajib diurus sebelum berangkat ke Saudi",
+     "Selesai modul ini, kamu bisa menulis Kartu SOS dengan nomor resmi yang tepat dan tahu rencana cadangan kalau HP disita",
+     "Selesai modul ini, kamu bisa membedakan kapan harus lapor dulu dan kapan harus langsung selamatkan diri"
+    ],
+    "est_minutes": 32
+   },
+   "lessons": [
+    {
+     "lesson_num": 16,
+     "title": "Siapkan Badanmu Dulu: Vaksin, Obat Rutin & Beresin Gigi Sebelum Berangkat",
+     "lesson_type": "reading",
+     "estimated_minutes": 6,
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "Bayangin kamu lagi di rumah majikan, jauh dari keluarga. Tiba-tiba gigimu sakit berdenyut sampai nggak bisa tidur. Mau ke dokter, tapi harus minta izin majikan dulu, dan belum tentu langsung dibawa. Sakitnya kamu tahan berhari-hari.",
+       "media": {
+        "alt": "Seseorang memegang pipi karena sakit gigi sambil duduk sendirian di sudut ruangan yang sepi"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Sekarang bandingkan dengan kalau gigi itu kamu obati di kampung, sebelum berangkat. Selesai, beres, nggak jadi beban di rantau. Jauh lebih enak, kan?"
+      },
+      {
+       "type": "paragraph",
+       "text": "Itulah inti pelajaran ini. Badan yang sehat sebelum berangkat itu modal kerjamu. Apa pun yang bisa dibereskan sekarang, beresin dulu — selagi gampang dan murah."
+      },
+      {
+       "type": "heading",
+       "text": "Kenapa harus disiapkan dari sekarang",
+       "anchor": "kenapa-siapkan-sekarang",
+       "media": {
+        "alt": "Seseorang sedang duduk di klinik dokter di kampung, dokter menulis resep"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Di Saudi, majikan memang wajib menanggung biaya berobatmu. Tapi kamu tetap harus minta dulu, dan kadang tidak langsung dibawa."
+      },
+      {
+       "type": "paragraph",
+       "text": "Jadi prinsipnya gampang: apa pun yang bisa diurus selagi di Indonesia, urus sekarang. Beres dari kampung, hati tenang di rantau."
+      },
+      {
+       "type": "heading",
+       "text": "Tiga hal yang wajib kamu urus sebelum berangkat",
+       "anchor": "tiga-hal-wajib",
+       "media": {
+        "alt": "Tiga benda di atas meja: kartu vaksin, kotak obat berlabel, dan kacamata cadangan"
+       }
+      },
+      {
+       "type": "steps",
+       "items": [
+        "Vaksin. Saudi punya syarat vaksin tertentu untuk pendatang. Jangan mengira-ngira sendiri — tanya vaksin apa yang kamu perlukan ke klinik medical resmi (Wafid) atau tim PG. Lalu simpan baik-baik buku atau kartu vaksinmu.",
+        "Obat rutin. Kalau kamu punya penyakit yang harus minum obat tiap hari — misalnya darah tinggi atau asma — bawa stok obat secukupnya. Minta juga SURAT DOKTER (sebaiknya ada terjemahannya) supaya tidak masalah di imigrasi dan majikan tahu kebutuhanmu.",
+        "Gigi dan mata. Periksakan dan obati gigi-matamu SEKARANG selagi gampang. Kalau kamu pakai kacamata, bawa cadangan."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Saran praktis",
+       "text": "Buat daftar kecil di kertas: gigi sudah dicek, obat rutin sudah dibawa, surat dokter sudah ada, vaksin sudah lengkap. Coret satu per satu. Kalau semua sudah tercoret, badanmu siap."
+      },
+      {
+       "type": "heading",
+       "text": "Ini beda dengan medical Wafid",
+       "anchor": "beda-medical-wafid",
+       "media": {
+        "alt": "Klinik bertanda resmi dengan logo Wafid, petugas memeriksa dokumen peserta"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Ingat medical yang kamu jalani di jalur resmi (dibahas di Modul 1)? Itu namanya medical Wafid — dulu disebut GAMCA. Tesnya menyaring penyakit menular seperti TBC dan hepatitis."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Glosarium: Wafid",
+       "text": "Wafid (portal resminya wafid.com) adalah standar pemeriksaan kesehatan untuk pekerja yang mau ke negara Teluk termasuk Saudi. Dulu namanya GAMCA. Nggak usah dihafal — yang penting medical ini bagian dari jalur resmi, dan kamu mengurusnya lewat tim PG, bukan lewat website-website calo."
+      },
+      {
+       "type": "paragraph",
+       "text": "Medical Wafid memastikan kamu tidak membawa penyakit menular. Persiapan vaksin, obat, dan gigi-mata di pelajaran ini melengkapinya — supaya badanmu benar-benar siap kerja, bukan cuma lolos saringan."
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "text": "Pelajaran: badan yang sehat sebelum berangkat itu modal kerja. Urus vaksin, bawa obat rutin + surat dokter, dan beresin gigi-mata sekarang — selagi gampang."
+      }
+     ]
+    },
+    {
+     "lesson_num": 17,
+     "title": "Kartu SOS: Simpan & Cetak Nomor Penting + Rencana Cadangan Kalau HP Disita",
+     "lesson_type": "reading",
+     "estimated_minutes": 7,
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "Wati nyimpan semua nomor penting di HP-nya. Nomor keluarga, nomor agen, semuanya di HP. Suatu hari HP-nya diambil majikan. Sekarang Wati tidak punya satu nomor pun yang bisa dia hubungi. Dia merasa benar-benar sendirian.",
+       "media": {
+        "alt": "Dua gambar berdampingan: satu HP di atas meja kosong tanpa pemilik, satu kartu kecil berisi tulisan nomor penting"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Nuri beda. Selain di HP, dia menulis nomor-nomor penting di selembar kartu kecil yang dia sembunyikan. Dia juga hafal satu nomor keluarganya di luar kepala. Waktu HP-nya bermasalah, Nuri tetap punya jalan minta tolong."
+      },
+      {
+       "type": "paragraph",
+       "text": "Pelajaran ini bikin kamu jadi seperti Nuri. Kita buat Kartu SOS — satu kartu cetak berisi nomor penting yang kamu bawa dan simpan, bukan cuma di HP."
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Kenapa nggak cukup di HP",
+       "text": "HP bisa disita. Kalau semua nomormu cuma di HP dan HP-nya diambil, kamu kehilangan semua jalan minta tolong. Kartu cetak yang disembunyikan adalah cadanganmu."
+      },
+      {
+       "type": "heading",
+       "text": "Isi Kartu SOS: nomor jalur Indonesia",
+       "anchor": "kartu-sos-indonesia",
+       "media": {
+        "alt": "Kartu kecil bertuliskan nomor-nomor penting dengan judul KARTU SOS, disimpan di dalam saku baju"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Tulis nomor-nomor di bawah ini di kartu kecil. Sembunyikan kartunya di tempat aman. Bawa bareng Kartu Frasa Darurat dari Modul 4. Mulai dari jalur Indonesia — ini yang kamu utamakan dulu."
+      },
+      {
+       "type": "list",
+       "items": [
+        "KBRI Riyadh (untuk wilayah tengah & timur Saudi). Telepon: +966-11-488-2800. WhatsApp hotline: +966 56 917 3990. Email: riyadh.kbri@kemlu.go.id.",
+        "KJRI Jeddah (untuk wilayah barat: Jeddah, Makkah, Madinah, Thaif). Hotline/WhatsApp: +966 50 360 9667. Email: jeddah.kjri@kemlu.go.id.",
+        "Direktorat Pelindungan WNI Kemlu RI: +62 812-9007-0027.",
+        "Lapor diri online di peduliwni.kemlu.go.id."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Pilih sesuai kotamu",
+       "text": "Kalau kamu kerja di Jeddah, Makkah, Madinah, atau Thaif (wilayah barat), hubungi KJRI Jeddah. Kalau di Riyadh atau wilayah tengah-timur, hubungi KBRI Riyadh. KBRI dan KJRI menolong WNI GRATIS — jangan malu lapor."
+      },
+      {
+       "type": "heading",
+       "text": "Nomor jalur Saudi",
+       "anchor": "kartu-sos-saudi",
+       "media": {
+        "alt": "Layar telepon menampilkan nomor 19911 dan 911 dengan bendera Saudi di samping"
+       }
+      },
+      {
+       "type": "list",
+       "items": [
+        "19911 = hotline pengaduan resmi Kementerian Tenaga Kerja Saudi (HRSD). Melayani pekerja domestik, termasuk korban kekerasan (layanan Bahasa Indonesia belum tentu ada).",
+        "911 = nomor darurat terpadu untuk bahaya fisik mendesak di kota besar (Riyadh, Jeddah, Makkah, Madinah)."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Catatan jujur soal 19911",
+       "text": "Layanan Bahasa Indonesia di 19911 belum tentu ada. Jadi untuk urusan WNI, tetap utamakan jalur RI dulu — KBRI Riyadh atau KJRI Jeddah."
+      },
+      {
+       "type": "heading",
+       "text": "Nomor bisa berubah — ini cara amannya",
+       "anchor": "verifikasi-nomor",
+       "media": {
+        "alt": "Seseorang mencocokkan nomor di kartu kertas dengan halaman website resmi kemlu.go.id di layar HP"
+       }
+      },
+      {
+       "type": "steps",
+       "items": [
+        "Sebelum berangkat, salin nomor-nomor ini ke Kartu SOS-mu.",
+        "Cek ulang nomor terbaru ke tim PG atau situs resmi (kemlu.go.id, kp2mi.go.id) — nomor hotline bisa berubah sewaktu-waktu.",
+        "Begitu sampai di Saudi, lapor diri di peduliwni.kemlu.go.id supaya negara tahu posisimu."
+       ]
+      },
+      {
+       "type": "heading",
+       "text": "Rencana cadangan kalau HP disita",
+       "anchor": "rencana-cadangan-hp",
+       "media": {
+        "alt": "Seseorang menghafal nomor dari kartu kecil, lalu menitipkan kartu tersebut ke teman di sebelahnya"
+       }
+      },
+      {
+       "type": "list",
+       "items": [
+        "HAFAL minimal 1 nomor keluarga di luar kepala — jangan cuma simpan di HP.",
+        "Titipkan kontakmu ke 1-2 PMI lain atau tetangga yang kamu percaya.",
+        "Sepakati jadwal kabar rutin dengan keluarga (misalnya tiap minggu). Kalau kamu tiba-tiba hilang kontak, keluarga bisa lapor ke KP2MI atas namamu.",
+        "Foto atau scan paspor, visa, kontrak, dan iqama-mu. Kirim salinannya ke email sendiri atau ke keluarga SEBELUM berangkat."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "text": "Pelajaran: bikin Kartu SOS, hafal satu nomor keluarga, dan titip kontakmu ke orang dipercaya. Kalau HP-mu diambil, kamu tetap punya jalan minta tolong. Kamu tidak sendirian di sana."
+      }
+     ]
+    },
+    {
+     "lesson_num": 18,
+     "title": "Gaji Ditahan, Paspor Disita, atau Disakiti? Lapor Dulu — Jangan Kabur",
+     "lesson_type": "reading",
+     "estimated_minutes": 7,
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "Misalnya gaji kamu sudah tiga bulan tidak dibayar. Hatimu panas, kamu mau kabur dari rumah majikan, cari jalan sendiri. Rasanya itu jalan keluar paling cepat.",
+       "media": {
+        "alt": "Seseorang berdiri di depan pintu rumah majikan dengan ekspresi bingung, tidak tahu harus ke mana"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Tapi tunggu dulu. Kabur diam-diam justru bisa bikin KAMU yang dianggap salah secara hukum. Ada cara yang lebih aman dan tetap melindungimu. Pelajaran ini mengajari kamu kapan harus lapor, kapan harus menyelamatkan diri, dan bagaimana caranya."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Glosarium: Huroob",
+       "text": "Huroob = istilah Saudi untuk pekerja yang dilaporkan majikan 'kabur/melarikan diri'. Akibatnya status kamu jadi ilegal dan susah dilindungi. Nggak usah dihafal — yang penting kamu tahu kabur diam-diam itu berisiko, dan ada jalan resmi yang lebih aman."
+      },
+      {
+       "type": "heading",
+       "text": "Bedakan dua keadaan ini",
+       "anchor": "bedakan-dua-keadaan",
+       "media": {
+        "alt": "Dua tanda panah berbeda arah: satu bertuliskan 'bahaya sekarang', satu bertuliskan 'masalah kontrak'"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Langkahmu beda tergantung seberapa mendesak masalahnya. Ada dua keadaan."
+      },
+      {
+       "type": "heading",
+       "text": "Keadaan 1 — nyawamu terancam SEKARANG",
+       "anchor": "keadaan-darurat-nyawa",
+       "media": {
+        "alt": "Seseorang berlari menuju pintu dengan latar belakang ruangan berbahaya, tangan menuju tombol telepon darurat"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kalau kamu dipukul, dikurung, atau akan dilukai sekarang juga — ini darurat fisik. Jangan menunggu."
+      },
+      {
+       "type": "stat",
+       "value": "911",
+       "label": "Nomor darurat terpadu di kota besar",
+       "sub": "Riyadh, Jeddah, Makkah, Madinah — untuk ancaman nyawa SEKARANG"
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Untuk ancaman nyawa",
+       "text": "Selamatkan diri ke tempat aman dan hubungi 911 dulu. Kekerasan dan ancaman nyawa BUKAN salahmu, dan bukan hal yang harus kamu tahan demi 'menyelesaikan kontrak'."
+      },
+      {
+       "type": "heading",
+       "text": "Keadaan 2 — masalah kontrak yang belum mengancam nyawa",
+       "anchor": "keadaan-masalah-kontrak",
+       "media": {
+        "alt": "Seseorang duduk tenang sambil menulis pesan ke kontak KBRI di HP, selembar kontrak kerja ada di mejanya"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kalau masalahnya gaji ditahan, paspor disita, atau perlakuan tidak adil — tapi nyawamu belum terancam — JANGAN langsung kabur ke jalanan. Lapor dulu lewat jalur resmi."
+      },
+      {
+       "type": "steps",
+       "items": [
+        "Hubungi KBRI Riyadh atau KJRI Jeddah (sesuai kotamu) DULU. Boleh juga 19911 (hotline ketenagakerjaan Saudi — tapi layanan Bahasa Indonesia belum tentu ada, jadi utamakan KBRI/KJRI), atau agen resmi PG.",
+        "Sampaikan masalahmu dengan jelas — gaji telat berapa bulan, paspor ditahan, dan sebagainya.",
+        "Minta perlindungan resmi dan, kalau memang berhak, minta proses pindah majikan lewat jalur resmi."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Kenapa lapor lebih aman",
+       "text": "Kabur diam-diam bisa bikin kamu dicap huroob dan dianggap salah secara hukum — justru susah dilindungi. Lapor resmi menjaga statusmu tetap legal, jadi negara dan perwakilan RI bisa membelamu."
+      },
+      {
+       "type": "quote",
+       "text": "Pesannya bukan 'tahan saja apa pun yang terjadi'. Pesannya: lapor dulu lewat jalur resmi — kecuali nyawamu terancam sekarang, baru selamatkan diri lebih dulu."
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "text": "Pelajaran: untuk ancaman nyawa, 911 dan selamatkan diri. Untuk masalah lain, lapor resmi dulu — jangan kabur diam-diam, supaya kamu tetap dilindungi, bukan jadi yang disalahkan."
+      }
+     ]
+    },
+    {
+     "lesson_num": 19,
+     "title": "Bertahan Bulan Pertama: Panas Gurun yang Menipu & Rindu Kampung yang Berat",
+     "lesson_type": "reading",
+     "estimated_minutes": 7,
+     "blocks": [
+      {
+       "type": "paragraph",
+       "text": "Bulan pertama di Saudi sering jadi yang paling berat. Badanmu menyesuaikan diri dengan panas yang asing. Hatimu menahan rindu kampung. Dua-duanya wajar, dan dua-duanya bisa kamu lewati. Pelajaran ini menyiapkanmu untuk keduanya.",
+       "media": {
+        "alt": "Seseorang berdiri di jalan di bawah matahari terik dengan bayangan pendek, wajahnya tampak kelelahan tapi tetap berdiri"
+       }
+      },
+      {
+       "type": "heading",
+       "text": "Panas gurun yang menipu",
+       "anchor": "panas-gurun",
+       "media": {
+        "alt": "Termometer menunjukkan angka tinggi di luar ruangan di bawah sinar matahari, jalan tampak kosong dan gersang"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Panas di Saudi bisa sampai 45-50 derajat dan sangat kering. Karena kering, keringatmu cepat menguap. Kamu bisa merasa 'ah, nggak terlalu keringatan' — padahal tubuhmu sudah kekurangan cairan parah. Itulah kenapa panas gurun menipu."
+      },
+      {
+       "type": "stat",
+       "value": "45-50°C",
+       "label": "Panas gurun Saudi",
+       "sub": "Kering dan menipu — jangan tunggu haus baru minum"
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Aturan air",
+       "text": "Jangan tunggu haus baru minum. Minum sedikit-sedikit terus sepanjang hari. Hindari kegiatan berat di luar antara jam 12 sampai 3 siang — ini jam paling berbahaya. Pakai baju longgar warna terang."
+      },
+      {
+       "type": "heading",
+       "text": "Tanda BAHAYA heat stroke (serangan panas)",
+       "anchor": "tanda-bahaya-heat-stroke",
+       "media": {
+        "alt": "Seseorang yang tampak pusing dan limbung di bawah terik matahari, tangan di kepala"
+       }
+      },
+      {
+       "type": "list",
+       "items": [
+        "Kulit malah BERHENTI berkeringat padahal panas",
+        "Pusing dan mual",
+        "Bingung atau bicara ngawur",
+        "Rasa mau pingsan"
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "warn",
+       "title": "Ini DARURAT, bukan capek biasa",
+       "text": "Kalau muncul tanda-tanda di atas, itu serangan panas — bisa mengancam nyawa. 30 menit pertama menentukan."
+      },
+      {
+       "type": "heading",
+       "text": "Pertolongan pertama heat stroke",
+       "anchor": "pertolongan-pertama-heat-stroke",
+       "media": {
+        "alt": "Seseorang dibaringkan di tempat teduh, orang lain mengompres lehernya dengan kain basah"
+       }
+      },
+      {
+       "type": "steps",
+       "items": [
+        "Pindahkan orangnya ke tempat sejuk dan teduh.",
+        "Kompres air dingin di leher, ketiak, dan selangkangan.",
+        "Kalau masih sadar, beri minum air atau oralit pelan-pelan.",
+        "Cari bantuan medis segera. Kalau parah, hubungi 911."
+       ]
+      },
+      {
+       "type": "heading",
+       "text": "Rindu kampung yang berat",
+       "anchor": "rindu-kampung",
+       "media": {
+        "alt": "Seseorang duduk di kamar kecil sambil menatap foto keluarga di layar HP, wajah tampak rindu"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Di minggu-minggu pertama, banyak perantau merasa sedih berat, kesepian, dan ingin pulang. Ada istilahnya: gegar budaya — perasaan kaget dan tertekan karena semuanya serba baru dan asing."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Glosarium: gegar budaya",
+       "text": "Gegar budaya = rasa kaget dan tertekan karena hidup di tempat baru yang serba beda. Hampir semua perantau mengalaminya. Nggak usah dihafal — yang penting kamu tahu ini NORMAL."
+      },
+      {
+       "type": "quote",
+       "text": "Rindu kampung dan gegar budaya itu normal. Dialami hampir semua perantau, paling kuat di bulan pertama, dan biasanya MEREDA. Kamu tidak gila dan tidak lemah."
+      },
+      {
+       "type": "heading",
+       "text": "Cara sederhana menjaga hati",
+       "anchor": "cara-jaga-hati",
+       "media": {
+        "alt": "Seseorang sedang video call dengan keluarga sambil tersenyum, gelas air minum ada di sampingnya"
+       }
+      },
+      {
+       "type": "list",
+       "items": [
+        "Tidur cukup tiap malam",
+        "Gerakkan badan walau cuma jalan kaki atau peregangan",
+        "Makan teratur",
+        "Video call keluarga secara rutin",
+        "Jangan pendam masalah sendirian — cerita ke orang yang kamu percaya",
+        "Kalau rasa berat berlarut-larut, cerita ke orang dipercaya dan lapor ke tim PG"
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "text": "Pelajaran: bulan pertama paling berat — badan menyesuaikan panas, hati menahan rindu. Itu wajar dan biasanya membaik. Banyak minum, jaga badan, jangan pendam sendiri."
+      }
+     ]
+    },
+    {
+     "lesson_num": 20,
+     "title": "Kuis: Sehat, Tahan Banting & Tahu Harus Lapor ke Mana",
+     "lesson_type": "quiz",
+     "estimated_minutes": 5,
+     "pass_threshold": 70,
+     "questions": [
+      {
+       "id": "q1",
+       "prompt": "Kamu punya gigi berlubang yang kadang sakit. Sebentar lagi kamu berangkat ke Saudi. Apa yang paling tepat kamu lakukan?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Biarkan saja, nanti berobat di Saudi karena ditanggung majikan"
+        },
+        {
+         "key": "b",
+         "label": "Obati gigi itu SEKARANG, sebelum berangkat, selagi gampang dan murah"
+        },
+        {
+         "key": "c",
+         "label": "Minum obat pereda nyeri seadanya dan bawa secukupnya ke Saudi"
+        }
+       ]
+      },
+      {
+       "id": "q2",
+       "prompt": "Apa cara paling aman menyimpan nomor-nomor penting (keluarga, KBRI/KJRI, agen PG)?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Simpan semua di HP saja, biar praktis dan tidak hilang"
+        },
+        {
+         "key": "b",
+         "label": "Tulis di Kartu SOS cetak yang disembunyikan, DAN hafal minimal 1 nomor keluarga di luar kepala"
+        },
+        {
+         "key": "c",
+         "label": "Hafal semua nomor di kepala, tidak perlu ditulis di mana-mana"
+        }
+       ]
+      },
+      {
+       "id": "q3",
+       "prompt": "Majikanmu tidak membayar gaji selama 3 bulan, tapi belum pernah menyakitimu. Langkah paling benar adalah...",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Langsung kabur diam-diam dari rumah majikan dan cari kerja sendiri"
+        },
+        {
+         "key": "b",
+         "label": "Lapor resmi ke KBRI/KJRI dulu (boleh juga 19911 atau agen PG), lalu minta perlindungan & pindah resmi"
+        },
+        {
+         "key": "c",
+         "label": "Diam saja dan terus bekerja sampai kontrak selesai"
+        }
+       ]
+      },
+      {
+       "id": "q4",
+       "prompt": "Kamu sedang dipukul dan dikurung oleh majikan SAAT INI juga. Apa yang benar?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Tunggu sampai besok dan lapor ke agen PG lewat pesan"
+        },
+        {
+         "key": "b",
+         "label": "Tahan dulu karena lapor saat darurat bisa bikin kamu dicap kabur"
+        },
+        {
+         "key": "c",
+         "label": "Selamatkan diri ke tempat aman dan hubungi 911 — jangan menunggu"
+        }
+       ]
+      },
+      {
+       "id": "q5",
+       "prompt": "Tanda mana yang menunjukkan serangan panas (heat stroke) yang darurat?",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Banyak keringat dan badan terasa segar setelah minum"
+        },
+        {
+         "key": "b",
+         "label": "Kulit malah BERHENTI berkeringat padahal panas, bingung, dan mau pingsan"
+        },
+        {
+         "key": "c",
+         "label": "Sedikit haus dan ingin duduk sebentar"
+        }
+       ]
+      },
+      {
+       "id": "q6",
+       "prompt": "Di bulan pertama kamu merasa sedih berat dan ingin pulang. Sikap paling tepat adalah...",
+       "multiple": false,
+       "options": [
+        {
+         "key": "a",
+         "label": "Anggap diri sendiri lemah dan pendam sendirian biar tidak merepotkan"
+        },
+        {
+         "key": "b",
+         "label": "Sadari ini normal dan biasanya mereda; jaga tidur & makan, cerita ke orang dipercaya, jangan pendam"
+        },
+        {
+         "key": "c",
+         "label": "Langsung minta pulang karena tidak akan pernah betah"
+        }
+       ]
+      }
+     ],
+     "answerKeys": [
+      {
+       "qid": "q1",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Begitu di Saudi, kamu tetap harus minta izin majikan dulu untuk berobat dan kadang tidak langsung dibawa. Masalah gigi yang bisa kamu bereskan sekarang, beresin dulu selagi di Indonesia — supaya tidak jadi siksaan di rantau.",
+       "rationale": {
+        "a": "Meski majikan wajib menanggung biaya berobat, kamu harus minta izin dulu dan belum tentu langsung dibawa — gigi yang sudah sakit bisa makin parah dan menyiksamu berhari-hari jauh dari keluarga.",
+        "c": "Obat pereda nyeri hanya menahan rasa sakit sementara, bukan mengobati akar masalahnya. Gigi yang berlubang bisa infeksi dan makin berbahaya kalau tidak dicabut atau ditambal sebelum berangkat."
+       }
+      },
+      {
+       "qid": "q2",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "HP bisa disita. Maka tulis nomor penting di Kartu SOS cetak yang disembunyikan, dan hafal minimal satu nomor keluarga di kepala. Kalau HP-mu diambil, kamu tetap punya jalan minta tolong.",
+       "rationale": {
+        "a": "HP bisa disita majikan kapan saja — kalau semua nomor hanya ada di HP dan HP-nya diambil, kamu kehilangan semua jalan untuk minta tolong atau menghubungi keluarga.",
+        "c": "Menghafal banyak nomor sekaligus sangat sulit, dan mudah lupa saat panik atau stres. Kartu SOS cetak adalah cadangan yang bisa kamu pegang dan lihat kapan pun."
+       }
+      },
+      {
+       "qid": "q3",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Gaji telat sekitar 3 bulan adalah dasar sah untuk minta pindah majikan lewat jalur resmi. Tapi jalannya lapor — utamakan KBRI/KJRI (boleh juga 19911 atau agen PG) — BUKAN kabur diam-diam, supaya statusmu tetap legal dan tidak dicap huroob.",
+       "rationale": {
+        "a": "Kabur diam-diam bisa bikin kamu dicap huroob oleh majikan — statusmu jadi ilegal di Saudi dan justru susah dilindungi. Kamu bisa dianggap yang bersalah, padahal kamulah yang dirugikan.",
+        "c": "Diam terus tanpa melapor berarti masalah tidak pernah diselesaikan dan gajimu yang tertahan tidak akan pernah kamu dapatkan. Kamu berhak atas gajimu — laporkan lewat jalur resmi."
+       }
+      },
+      {
+       "qid": "q4",
+       "correct": [
+        "c"
+       ],
+       "weight": 1,
+       "explanation": "Kalau nyawa terancam sekarang, itu darurat fisik. Selamatkan diri ke tempat aman dan hubungi 911 — jangan menunggu. Kekerasan bukan salahmu dan bukan hal yang harus ditahan.",
+       "rationale": {
+        "a": "Menunggu sampai besok saat nyawa sedang terancam bisa berakibat fatal. Ancaman fisik yang nyata adalah darurat — selamatkan diri dulu, lapor bisa dilakukan setelah kamu aman.",
+        "b": "Ini keliru. Menyelamatkan diri dari kekerasan bukan 'kabur' dalam arti huroob. Keselamatanmu adalah yang utama — tidak ada kontrak yang harus kamu selesaikan dengan mempertaruhkan nyawa."
+       }
+      },
+      {
+       "qid": "q5",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Tanda bahaya heat stroke justru kulit berhenti berkeringat padahal panas, ditambah bingung dan mau pingsan. Ini darurat, bukan capek biasa — pindahkan ke tempat sejuk, kompres dingin, dan cari bantuan medis.",
+       "rationale": {
+        "a": "Banyak keringat sambil tetap merasa segar adalah tanda tubuh masih bisa mengatur suhu dengan baik — ini bukan heat stroke. Heat stroke justru ditandai keringat yang berhenti, yang artinya tubuh sudah tidak bisa mendinginkan diri.",
+        "c": "Sedikit haus dan ingin istirahat adalah tanda dehidrasi ringan yang bisa diatasi dengan minum air. Ini berbeda jauh dengan heat stroke yang merupakan kondisi darurat mengancam nyawa."
+       }
+      },
+      {
+       "qid": "q6",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Gegar budaya dan rindu kampung itu normal, dialami hampir semua perantau, paling kuat di bulan pertama, dan biasanya mereda. Jaga tidur dan makan, cerita ke orang dipercaya, jangan dipendam sendiri.",
+       "rationale": {
+        "a": "Merasa sedih dan rindu kampung bukan tanda kelemahan — ini pengalaman yang hampir semua perantau rasakan. Memendamnya sendirian justru bisa membuat rasa berat itu makin lama, bukan makin cepat mereda.",
+        "c": "Perasaan berat di bulan pertama biasanya membaik seiring waktu saat kamu mulai terbiasa. Memutuskan langsung pulang di tengah perasaan itu bisa jadi keputusan yang kamu sesali setelah kondisi membaik — coba cerita dulu ke orang dipercaya."
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "module_num": 6,
+   "title": "Psikotes DayaLima, Peran Penyalur & Sertifikat Paspormu",
+   "summary": "Pelajari kenapa ada psikotes, apa yang dilakukan penyalur resmi selama kamu bekerja, dan alur mendapat Sertifikat Paspor Perantau Global.",
+   "content": {
+    "outcomes": [
+     "Selesai modul ini, kamu bisa menjelaskan kenapa psikotes ada dan cara menghadapinya dengan tenang",
+     "Selesai modul ini, kamu bisa menyebutkan 3 tanggung jawab penyalur resmi selama kamu bekerja di Saudi",
+     "Selesai modul ini, kamu bisa menjelaskan alur mendapat Sertifikat Paspor Perantau Global dan bedanya dari biaya berangkat"
+    ],
+    "est_minutes": 23
+   },
+   "lessons": [
+    {
+     "lesson_num": 21,
+     "title": "Psikotes DayaLima: Kenapa Ada & Cara Menghadapinya dengan Tenang",
+     "lesson_type": "reading",
+     "estimated_minutes": 7,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Coba pikir dulu sebentar",
+       "anchor": "coba-pikir-dulu",
+       "media": {
+        "alt": "Seorang perempuan muda duduk di teras rumah kayu di pedesaan, menatap ke depan dengan ekspresi tenang dan sedikit berpikir, langit sore di belakangnya"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kamu dengar kata 'psikotes' lalu langsung deg-degan. Wajar. Banyak orang mengira ini ujian yang bisa bikin kamu gagal berangkat."
+      },
+      {
+       "type": "paragraph",
+       "text": "Tapi coba pikir dulu. Kamu akan tinggal jauh dari rumah, di negeri yang bahasanya beda, bekerja di rumah orang yang belum kamu kenal. Apa nggak lebih baik kalau ada yang memastikan dulu hatimu cukup kuat untuk itu?"
+      },
+      {
+       "type": "paragraph",
+       "text": "Itulah psikotes. Bukan jebakan. Justru pelindung."
+      },
+      {
+       "type": "heading",
+       "text": "Psikotes DayaLima itu apa",
+       "anchor": "psikotes-dayalima",
+       "media": {
+        "alt": "Lembar formulir asesmen sederhana di atas meja kayu, dengan pensil di sampingnya, tanpa tulisan yang terbaca"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Psikotes DayaLima adalah asesmen profesional dari DayaLima untuk menilai kesiapan mentalmu — bukan jebakan, dan bukan ujian yang menentukan boleh-tidaknya kamu berangkat."
+      },
+      {
+       "type": "paragraph",
+       "text": "Tujuannya: menilai kestabilan emosi, daya adaptasi, dan ketahananmu menghadapi tekanan kerja. Singkatnya — memastikan kamu siap secara mental sebelum berangkat."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Psikotes itu apa, sih?",
+       "text": "Psikotes = tes untuk mengenali sifat, cara berpikir, dan ketahanan mentalmu. Bukan tes pintar-bodoh. Yang penting kamu tahu: ini dibuat untuk MELINDUNGI kamu, bukan menjegalmu."
+      },
+      {
+       "type": "heading",
+       "text": "Di bagian kepribadian, tidak ada jawaban benar atau salah",
+       "anchor": "kepribadian-tidak-ada-salah",
+       "media": {
+        "alt": "Dua jalan setapak di ladang yang keduanya sama-sama terlihat baik — satu menuju pohon, satu menuju sawah — tanpa tanda mana yang 'benar'"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Ini yang paling sering bikin orang salah paham. Sebagian besar psikotes adalah soal kepribadian — menanyakan kamu orang yang seperti apa."
+      },
+      {
+       "type": "paragraph",
+       "text": "Di bagian itu tidak ada jawaban yang 'bagus' atau 'jelek'. Yang dinilai bukan benar-salahnya, tapi apakah kamu menjawab apa adanya."
+      },
+      {
+       "type": "quote",
+       "text": "Satu-satunya jawaban salah adalah jawaban yang bukan diri kamu."
+      },
+      {
+       "type": "paragraph",
+       "text": "Jadi tidak perlu mengarang jawaban biar kelihatan hebat. Cukup jujur, jadi diri sendiri. Itu sudah benar."
+      },
+      {
+       "type": "heading",
+       "text": "Cara menghadapinya — kamu tidak sendirian",
+       "anchor": "cara-menghadapi-psikotes",
+       "media": {
+        "alt": "Seorang perempuan menggenggam HP di tangan, duduk di sudut ruangan yang tenang, dengan seorang pendamping duduk di sampingnya siap membantu"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Psikotes DayaLima dikerjakan secara online dan terdiri dari beberapa bagian. DayaLima yang menyiapkan tesnya."
+      },
+      {
+       "type": "paragraph",
+       "text": "Yang perlu kamu ingat: tim Perantau Global akan memandu cara masuk dan menemanimu. Kalau ada yang bingung, tinggal tanya pendamping PG. Kamu tidak dilepas sendirian."
+      },
+      {
+       "type": "steps",
+       "items": [
+        "Pilih waktu dan tempat yang paling tenang yang kamu bisa — supaya bisa fokus tanpa terganggu.",
+        "Pastikan ada sinyal yang cukup. Kalau HP-mu pinjaman atau sinyal di rumah lemah, bilang ke tim PG — mereka bantu atur supaya kamu tetap bisa mengerjakan.",
+        "Kerjakan pelan-pelan, satu bagian demi satu bagian. Boleh istirahat sebentar kalau mulai lelah.",
+        "Untuk soal hitungan atau logika: baca soalnya pelan-pelan dulu, tidak perlu buru-buru.",
+        "Untuk soal kepribadian: jawab apa adanya sesuai dirimu, jangan kelamaan menimbang."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "text": "Bingung soal cara masuk platform atau hal teknis lain? Itu bukan urusan yang harus kamu pusingkan sendiri. Tim PG yang akan menjelaskan dan mendampingi. Jadi tidak perlu cemas dari sekarang."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Ingat ini",
+       "text": "Psikotes ada untuk memastikan kamu siap, bukan menjegalmu. Jawab jujur jadi diri sendiri, dan tim PG akan menemani. Itu sudah cukup."
+      }
+     ]
+    },
+    {
+     "lesson_num": 22,
+     "title": "Penyalur Resmi Tidak Lepas Tangan: Apa Tanggung Jawab PG Selama Kamu Bekerja",
+     "lesson_type": "reading",
+     "estimated_minutes": 6,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Coba pikir dulu sebentar",
+       "anchor": "penyalur-coba-pikir",
+       "media": {
+        "alt": "Seseorang melambaikan tangan perpisahan di bandara, sementara di kejauhan tampak pesawat — menggambarkan momen keberangkatan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Setelah kamu naik pesawat dan sampai di Saudi, kira-kira orang yang memberangkatkanmu masih peduli nasibmu atau tidak?"
+      },
+      {
+       "type": "paragraph",
+       "text": "Di sinilah beda paling besar antara calo dan penyalur resmi."
+      },
+      {
+       "type": "heading",
+       "text": "Calo hilang. Penyalur resmi tetap bertanggung jawab.",
+       "anchor": "calo-vs-penyalur-resmi",
+       "media": {
+        "alt": "Dua jalan: satu berakhir di tembok buntu (calo), satu terus terhubung dengan jembatan yang kokoh (penyalur resmi) — ilustrasi abstrak tanpa tulisan"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Calo cuma butuh kamu sampai dia dibayar. Begitu kamu berangkat, dia menghilang. Kalau kamu kena masalah di sana, tidak ada yang bisa kamu hubungi."
+      },
+      {
+       "type": "paragraph",
+       "text": "Penyalur resmi — P3MI berizin seperti Perantau Global — berbeda. Mereka TETAP bertanggung jawab selama kamu bekerja. Ini kewajiban, bukan kebaikan hati."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "P3MI itu apa?",
+       "text": "P3MI = Perusahaan Penempatan Pekerja Migran Indonesia. Sederhananya: perusahaan resmi berizin yang menyalurkan kamu kerja ke luar negeri secara sah. Perantau Global adalah salah satunya. Nggak perlu dihafal singkatannya."
+      },
+      {
+       "type": "heading",
+       "text": "3 tanggung jawab penyalur resmi selama kamu bekerja",
+       "anchor": "tanggung-jawab-penyalur",
+       "media": {
+        "alt": "Tiga ikon sederhana berderet: mata (memantau), perisai (jaminan), dan telepon (koordinasi bantuan)"
+       }
+      },
+      {
+       "type": "list",
+       "items": [
+        "MEMANTAU & MENDAMPINGI — penyalur resmi punya kewajiban memantau keadaanmu selama penempatan, dan jadi jalur bantuan kalau ada masalah.",
+        "JAMINAN SOSIAL / ASURANSI PMI — sebagai PMI resmi, kamu didaftarkan ke jaminan sosial (BPJS Ketenagakerjaan) untuk masa penempatan — perlindungan kalau terjadi hal-hal seperti kecelakaan kerja. Cakupan persisnya bisa kamu tanyakan ke tim PG.",
+        "KOORDINASI DENGAN JALUR RESMI — kalau ada kasus, penyalur resmi berkoordinasi dengan KBRI/KJRI dan KP2MI. Jadi pintu pertolonganmu lebih dari satu."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "text": "Simpan kontak PIC atau agen resmi PG di Kartu SOS-mu (yang sudah kamu siapkan di Modul 5). Jangan ragu menghubungi mereka kalau ada apa-apa — memang untuk itulah mereka ada."
+      },
+      {
+       "type": "heading",
+       "text": "Soal jaminan sosial — tanyakan, jangan sungkan",
+       "anchor": "jaminan-sosial-tanya",
+       "media": {
+        "alt": "Perempuan muda sedang bicara dengan seorang petugas di meja kantor, ekspresi keduanya ramah dan terbuka"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Kamu berhak tahu apa saja yang ditanggung dan bagaimana cara klaimnya kalau dibutuhkan. Tanyakan ke tim PG soal cakupan jaminan sosialmu. Itu hakmu untuk bertanya."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Kenapa jalur resmi lebih aman",
+       "text": "Justru karena penyalur resmi TERIKAT tanggung jawab inilah jalur resmi melindungimu. Tanggung jawab yang melekat itu = perlindunganmu."
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "title": "Ingat ini",
+       "text": "Penyalur resmi tidak lepas tangan setelah kamu berangkat — ada monitoring, ada jaminan sosial, ada jalur bantuan. Itulah kenapa jalur resmi melindungimu, bukan cuma memberangkatkanmu."
+      }
+     ]
+    },
+    {
+     "lesson_num": 23,
+     "title": "Setelah Ini, Kamu Tinggal Selangkah dari Sertifikat Paspormu",
+     "lesson_type": "reading",
+     "estimated_minutes": 6,
+     "blocks": [
+      {
+       "type": "heading",
+       "text": "Kamu sudah jauh, lho",
+       "anchor": "kamu-sudah-jauh",
+       "media": {
+        "alt": "Jejak kaki di jalan tanah panjang yang hampir sampai di gerbang desa — menggambarkan perjalanan yang hampir selesai"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Coba lihat ke belakang sebentar. Kamu sudah tahu cara membedakan jalur resmi dari calo, tahu hakmu di tempat kerja, paham adat dan garis merah di Saudi, hafal frasa darurat, dan tahu harus lapor ke mana kalau ada masalah."
+      },
+      {
+       "type": "paragraph",
+       "text": "Itu bekal yang besar. Sekarang tinggal selangkah lagi."
+      },
+      {
+       "type": "heading",
+       "text": "3 langkah menuju Sertifikat Paspormu",
+       "anchor": "alur-sertifikat-paspor",
+       "media": {
+        "alt": "Tiga kotak berurutan dihubungkan panah: buku (kursus), lembar formulir (psikotes), dan amplop tertutup bersegel (sertifikat)"
+       }
+      },
+      {
+       "type": "steps",
+       "items": [
+        "Selesaikan kursus 'Siap Kerja Arab Saudi' ini sampai tuntas.",
+        "Kerjakan PSIKOTES DayaLima — online, dipandu tim PG (caranya sudah kamu pelajari di Pelajaran 21).",
+        "Selesai dua-duanya → kamu dapat SERTIFIKAT PASPOR PERANTAU GLOBAL - ARAB SAUDI."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "text": "Sertifikat ini bukan penghalang. Ini bekal yang MEMPERKUAT kesiapanmu — bukti hitam-putih bahwa kamu sudah disiapkan, bukan berangkat asal-asalan."
+      },
+      {
+       "type": "heading",
+       "text": "Paspor PG itu beda dari biaya berangkat",
+       "anchor": "paspor-pg-vs-biaya-berangkat",
+       "media": {
+        "alt": "Dua tumpukan berbeda di atas meja: satu tumpukan dokumen perjalanan resmi (kiri), satu buku kursus dan sertifikat (kanan) — keduanya terpisah jelas"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Ini penting supaya kamu tidak salah paham."
+      },
+      {
+       "type": "list",
+       "items": [
+        "BIAYA PENEMPATAN RESMI (tiket, visa, medical, paspor, jasa agen) untuk kerja domestik jalur resmi = GRATIS bagi PMI. Itu ditanggung majikan, bukan kamu. Kalau ada yang menagih puluhan juta untuk ini, itu tanda calo.",
+        "PASPOR PERANTAU GLOBAL = bekal pelatihan dan sertifikasi MANDIRI yang berbayar dan TERPISAH. Ini pilihan untuk menyiapkan diri — bukan biaya berangkat."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "info",
+       "text": "Memilih Paspor PG tidak melanggar aturan gratis-berangkat (zero cost). Yang dilarang adalah ditagih untuk yang seharusnya gratis. Paspor PG adalah hal terpisah: bekal yang kamu pilih untuk membuat dirimu lebih siap."
+      },
+      {
+       "type": "heading",
+       "text": "Satu pesan terakhir yang menyatukan semuanya",
+       "anchor": "pesan-terakhir",
+       "media": {
+        "alt": "Tangan memegang selembar kertas dengan checklist tiga poin yang sudah dicentang — menggambarkan persiapan yang lengkap"
+       }
+      },
+      {
+       "type": "paragraph",
+       "text": "Semua bekal di kursus ini cuma berarti kalau kamu berangkat lewat JALUR RESMI — bukan calo."
+      },
+      {
+       "type": "list",
+       "items": [
+        "Cek izin penyalurmu di SISKOP2MI (siskop2mi.bp2mi.go.id). Perantau Global / PT Daya Talenta Global bisa kamu cek di sana.",
+        "Pastikan ada kontrak resmi lewat Musaned dan visamu adalah VISA KERJA.",
+        "Ingat: penyalur resmi bertanggung jawab selama kamu bekerja — kamu tidak sendirian."
+       ]
+      },
+      {
+       "type": "callout",
+       "variant": "tip",
+       "title": "Ingat ini",
+       "text": "Kamu tinggal selangkah lagi — tuntaskan psikotes, dapat sertifikatmu. Ingat: untuk kerja domestik jalur resmi, biaya penempatan ditanggung majikan dan gratis bagi PMI; Paspor PG adalah bekal terpisah yang kamu pilih untuk menyiapkan diri. Kalau ada yang belum jelas soal jalur berangkatmu, konsultasi gratis dulu dengan tim Perantau Global."
+      }
+     ]
+    },
+    {
+     "lesson_num": 24,
+     "title": "Kuis: Siap Psikotes & Paham Alur Paspor",
+     "lesson_type": "quiz",
+     "estimated_minutes": 4,
+     "pass_threshold": 70,
+     "questions": [
+      {
+       "id": "q1",
+       "prompt": "Di tes kepribadian, kamu bingung: jawab yang 'kelihatan bagus' atau yang sesuai dirimu sendiri? Mana yang paling tepat?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Jawab yang kelihatan paling bagus biar nilainya tinggi"
+        },
+        {
+         "key": "b",
+         "label": "Jawab jujur sesuai dirimu sendiri — di bagian kepribadian tidak ada benar atau salah"
+        },
+        {
+         "key": "c",
+         "label": "Minta orang lain yang lebih pintar mengisikannya"
+        }
+       ],
+       "multiple": false
+      },
+      {
+       "id": "q2",
+       "prompt": "HP yang kamu pakai pinjaman dan sinyal di rumah lemah. Apa cara paling tepat menghadapi psikotes DayaLima?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Minta orang lain mengerjakan psikotesnya untukmu"
+        },
+        {
+         "key": "b",
+         "label": "Bilang ke tim PG soal HP dan sinyal; kerjakan sendiri di tempat dan waktu paling tenang yang kamu bisa, dengan pendampingan PG"
+        },
+        {
+         "key": "c",
+         "label": "Batalkan saja, karena tanpa HP bagus kamu pasti gagal"
+        }
+       ],
+       "multiple": false
+      },
+      {
+       "id": "q3",
+       "prompt": "Apa yang dilakukan penyalur resmi (P3MI seperti Perantau Global) SELAMA kamu bekerja di Saudi?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Menghilang setelah kamu berangkat, sama seperti calo"
+        },
+        {
+         "key": "b",
+         "label": "Memantau keadaanmu dan menjadi jalur bantuan kalau ada masalah"
+        },
+        {
+         "key": "c",
+         "label": "Mengambil alih gajimu supaya kamu tidak repot"
+        }
+       ],
+       "multiple": false
+      },
+      {
+       "id": "q4",
+       "prompt": "Setelah kamu selesai kursus ini DAN selesai mengerjakan psikotes DayaLima, kamu mendapat apa?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Visa kerja langsung jadi"
+        },
+        {
+         "key": "b",
+         "label": "Sertifikat Paspor Perantau Global - Arab Saudi"
+        },
+        {
+         "key": "c",
+         "label": "Tiket pesawat gratis ke Saudi"
+        }
+       ],
+       "multiple": false
+      },
+      {
+       "id": "q5",
+       "prompt": "Apakah biaya Paspor PG itu sama dengan biaya penempatan resmi untuk berangkat kerja?",
+       "options": [
+        {
+         "key": "a",
+         "label": "Sama — Paspor PG itu biaya wajib supaya bisa berangkat"
+        },
+        {
+         "key": "b",
+         "label": "Beda — Paspor PG adalah bekal mandiri berbayar yang terpisah; biaya penempatan resmi gratis bagi PMI (ditanggung majikan)"
+        },
+        {
+         "key": "c",
+         "label": "Tidak ada yang gratis, semuanya harus kamu bayar sendiri"
+        }
+       ],
+       "multiple": false
+      }
+     ],
+     "answerKeys": [
+      {
+       "qid": "q1",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Di bagian kepribadian tidak ada jawaban benar atau salah. Satu-satunya jawaban salah adalah yang bukan dirimu. Jadi cukup jujur jadi diri sendiri — itu sudah benar, dan tidak bisa diwakilkan orang lain.",
+       "rationale": {
+        "a": "Mengarang jawaban biar kelihatan bagus justru bisa membuat hasilnya tidak menggambarkan dirimu yang sebenarnya — dan itu yang bisa merugikanmu. Baca lagi bagian 'Di bagian kepribadian, tidak ada jawaban benar atau salah'.",
+        "c": "Psikotes harus kamu kerjakan sendiri — tidak bisa diwakilkan, karena yang dinilai adalah dirimu, bukan orang lain. Kalau ada yang membingungkan secara teknis, tim PG siap membantu, tapi jawabannya tetap darimu."
+       }
+      },
+      {
+       "qid": "q2",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Psikotes harus kamu kerjakan sendiri, tidak boleh diwakilkan. Kalau HP pinjaman atau sinyal lemah, itu bukan halangan yang harus kamu tanggung sendirian — bilang ke tim PG, mereka bantu atur. Pilih waktu dan tempat paling tenang yang kamu bisa.",
+       "rationale": {
+        "a": "Meminta orang lain mengerjakan psikotes untukmu tidak diperbolehkan — yang dinilai adalah kamu, bukan orang lain. Hasilnya juga tidak akan mencerminkan kesiapanmu yang sesungguhnya. Baca lagi langkah-langkah menghadapi psikotes di Pelajaran 21.",
+        "c": "HP pinjaman atau sinyal lemah bukan alasan untuk menyerah — tim PG memang ada untuk membantu mengatasi hambatan teknis seperti ini. Jangan batalkan sebelum bicara ke tim PG dulu."
+       }
+      },
+      {
+       "qid": "q3",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Bedanya calo dan penyalur resmi: calo menghilang setelah dibayar, tapi penyalur resmi tetap bertanggung jawab — memantau keadaanmu dan menjadi jalur bantuan. Itu kewajiban mereka, bukan kebaikan hati. Mereka tidak mengambil alih gajimu.",
+       "rationale": {
+        "a": "Kalau penyalur resmimu menghilang setelah kamu berangkat, itu tanda-tanda calo — bukan penyalur resmi. Penyalur resmi berizin punya kewajiban hukum untuk tetap memantaumu. Baca lagi Pelajaran 22.",
+        "c": "Mengambil alih gajimu bukan tanggung jawab penyalur resmi — itu justru tanda-tanda penyalahgunaan yang berbahaya. Gajimu tetap menjadi hakmu dan dibayarkan sesuai kontrak."
+       }
+      },
+      {
+       "qid": "q4",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Alurnya: selesai kursus ini, lalu kerjakan psikotes DayaLima (dipandu PG), dan setelah dua-duanya selesai kamu dapat Sertifikat Paspor Perantau Global - Arab Saudi. Sertifikat ini bekal yang memperkuat kesiapanmu.",
+       "rationale": {
+        "a": "Menyelesaikan kursus dan psikotes tidak otomatis menghasilkan visa kerja — visa adalah bagian dari proses penempatan resmi yang terpisah. Kalau ada yang menjanjikan visa instan setelah kursus, itu perlu diwaspadai.",
+        "c": "Tiket pesawat adalah bagian dari biaya penempatan resmi yang ditanggung majikan — bukan hadiah dari kursus ini. Yang kamu dapat dari menyelesaikan kursus dan psikotes adalah sertifikat sebagai bekal kesiapan."
+       }
+      },
+      {
+       "qid": "q5",
+       "correct": [
+        "b"
+       ],
+       "weight": 1,
+       "explanation": "Keduanya berbeda. Biaya penempatan resmi (tiket, visa, medical) untuk kerja domestik jalur resmi GRATIS bagi PMI — ditanggung majikan; kalau ditagih, curigai calo. Paspor PG adalah bekal pelatihan/sertifikasi mandiri yang berbayar dan terpisah — pilihan untuk menyiapkan diri, bukan biaya berangkat.",
+       "rationale": {
+        "a": "Paspor PG bukan biaya wajib untuk bisa berangkat — ini bekal mandiri yang kamu pilih untuk memperkuat persiapan. Biaya penempatan resmi (tiket, visa, medical) seharusnya GRATIS bagi PMI dan ditanggung majikan. Kalau ada yang menyamakan keduanya, tanyakan lebih lanjut ke tim PG.",
+        "c": "Biaya penempatan resmi untuk kerja domestik jalur resmi seharusnya GRATIS bagi PMI — ditanggung oleh majikan, bukan oleh kamu. Kalau ada yang menagih puluhan juta untuk ini, itu tanda calo. Baca lagi bagian 'Paspor PG itu beda dari biaya berangkat' di Pelajaran 23."
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

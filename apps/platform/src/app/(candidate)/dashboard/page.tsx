@@ -17,6 +17,8 @@ import {
 } from "@/components/pg/candidate/BerandaShared";
 import { JourneyHero } from "@/components/pg/candidate/JourneyHero";
 import { PasporInviteCard } from "@/components/pg/candidate/PasporInviteCard";
+import { AkademiResumeCard } from "@/components/pg/candidate/AkademiResumeCard";
+import { getActiveAcademyResume, type AcademyResume } from "@/lib/academy-db";
 import { TaskCard } from "@/components/pg/candidate/TaskCard";
 import { CountryBigTile } from "@/components/pg/candidate/CountryBigTile";
 import { ProgressNudge } from "@/components/pg/candidate/ProgressNudge";
@@ -58,7 +60,7 @@ export default async function DashboardPage() {
 
   // Parallel: dashboard data + active positions (for S1 counts + S2 explore
   // cards) + open job_orders (for status) + candidate meta.
-  const [dashboard, positionsResult, jobOrdersResult, candidateMeta] =
+  const [dashboard, positionsResult, jobOrdersResult, candidateMeta, academyResume] =
     await Promise.all([
       getDashboardData(candidateId, supabase),
       supabase
@@ -75,6 +77,7 @@ export default async function DashboardPage() {
         .select("created_at")
         .eq("id", candidateId)
         .single(),
+      getActiveAcademyResume(candidateId),
     ]);
 
   const lamaranSorted = sortLamaranByUrgency(dashboard.lamaran);
@@ -152,6 +155,7 @@ export default async function DashboardPage() {
             primary={primary}
             exploreCards={exploreCards}
             lamaranCount={dashboard.lamaran.length}
+            academyResume={academyResume}
           />
         )}
         {state === "S3" && primary && (
@@ -160,6 +164,7 @@ export default async function DashboardPage() {
             memberId={memberId}
             primary={primary}
             lamaranCount={dashboard.lamaran.length}
+            academyResume={academyResume}
           />
         )}
         {state === "hasil-diterima" && primary && (
@@ -286,12 +291,14 @@ function BerandaS2({
   primary,
   exploreCards,
   lamaranCount,
+  academyResume,
 }: {
   greeting: string;
   memberId?: string;
   primary: LamaranJourney;
   exploreCards: ExploreCardData[];
   lamaranCount: number;
+  academyResume: AcademyResume | null;
 }) {
   const countryLabel = countryLabelFromDb(primary.country, primary.country);
   return (
@@ -349,13 +356,17 @@ function BerandaS2({
         </div>
       </div>
 
-      {/* Sambil nunggu — Paspor secondary */}
+      {/* Sambil nunggu — resume active course, else invite to start */}
       <div className="px-5 pt-5">
         <SectionHead
           title="Sambil nunggu"
-          sub={`Lanjut persiapan ${countryLabel}`}
+          sub={academyResume ? "Lanjutkan belajar" : `Lanjut persiapan ${countryLabel}`}
         />
-        <PasporInviteCard variant="default" countryLabel={countryLabel} />
+        {academyResume ? (
+          <AkademiResumeCard data={academyResume} />
+        ) : (
+          <PasporInviteCard variant="default" countryLabel={countryLabel} />
+        )}
       </div>
 
       {/* Eksplor lain */}
@@ -392,11 +403,13 @@ function BerandaS3({
   memberId,
   primary,
   lamaranCount,
+  academyResume,
 }: {
   greeting: string;
   memberId?: string;
   primary: LamaranJourney;
   lamaranCount: number;
+  academyResume: AcademyResume | null;
 }) {
   const countryLabel = countryLabelFromDb(primary.country, primary.country);
   return (
@@ -425,13 +438,21 @@ function BerandaS3({
 
       <AllApplicationsLink count={lamaranCount} />
 
-      {/* Paspor jadi primer */}
+      {/* Paspor jadi primer — resume active course, else invite to start */}
       <div className="px-5 pt-5">
         <SectionHead
           title="Manfaatkan waktu nunggu"
-          sub={`Mulai belajar untuk ${countryLabel} — sertifikat di akhir`}
+          sub={
+            academyResume
+              ? "Lanjutkan belajar — sertifikat di akhir"
+              : `Mulai belajar untuk ${countryLabel} — sertifikat di akhir`
+          }
         />
-        <PasporInviteCard variant="primary" countryLabel={countryLabel} />
+        {academyResume ? (
+          <AkademiResumeCard data={academyResume} />
+        ) : (
+          <PasporInviteCard variant="primary" countryLabel={countryLabel} />
+        )}
       </div>
 
       {/* Pendamping */}

@@ -35,3 +35,6 @@ coverage/
 
 # claude code local state
 .claude/
+
+# Akademi rework scratch/intermediates
+docs/akademi-perantau/_*
