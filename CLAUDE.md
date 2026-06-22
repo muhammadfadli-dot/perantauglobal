@@ -34,7 +34,7 @@ perantauglobal/ (monorepo root, pnpm + Turborepo)
 | Supabase | `perantauglobal` project (`jeadtvxgxmqnsqwxjmhj`) di Dayalima Group Pro org |
 | Region | ap-southeast-1 (Singapore) |
 | Framework | Next.js 16 + React 19 + TypeScript + Tailwind CSS 4 |
-| Email | Resend/Postmark via Supabase Auth SMTP |
+| Email | **Resend** (domain `perantauglobal.com` verified, from `noreply@perantauglobal.com`). Auth mail → Supabase Auth SMTP. App transactional mail → `apps/web/src/lib/email.ts` (`sendEmail` + `buildEventThankYouEmail`; confirmation shows Join button when `events.join_url` set). Bulk reminder/announcement blasts → Resend Broadcasts; full how-to in the global **`/email-blast`** skill (recipient list from `event_registrations`, audience, design, send/schedule, open-rate tracking). |
 
 ## Commands
 
