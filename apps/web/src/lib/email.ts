@@ -64,13 +64,30 @@ export function buildEventThankYouEmail(args: {
   eventTitle: string;
   whenLabel: string; // e.g. "Senin, 23 Juni 2026 · 10:00 WIB"
   platform: string; // e.g. "Zoom"
+  joinUrl?: string | null; // when set, the confirmation includes the join button directly
 }): { subject: string; html: string } {
   const name = esc(args.firstName.split(" ")[0] || args.firstName);
   const title = esc(args.eventTitle);
   const when = esc(args.whenLabel);
   const platform = esc(args.platform);
+  const joinUrl = args.joinUrl ? esc(args.joinUrl) : "";
 
   const subject = `Kamu terdaftar! ${args.eventTitle}`;
+
+  // When the join link is already available (e.g. registrations close to the
+  // event), give attendees the button straight away instead of promising it H-1.
+  const joinBlock = joinUrl
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px 0;background:#ECFDF3;border:1px solid #A6E9C5;border-radius:12px">
+              <tr><td style="padding:18px 20px;text-align:center">
+                <p style="margin:0 0 12px 0;font-size:14px;line-height:1.6;color:#065F46"><strong>Link Zoom kamu sudah siap.</strong> Simpan email ini, ya — tinggal klik tombol di bawah pas acara mulai.</p>
+                <a href="${joinUrl}" style="display:inline-block;background:#D1283C;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;padding:13px 34px;border-radius:10px">Join ${platform} →</a>
+              </td></tr>
+            </table>`
+    : `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px 0;background:#FFF7E6;border:1px solid #F5D9A8;border-radius:12px">
+              <tr><td style="padding:16px 20px">
+                <p style="margin:0;font-size:14px;line-height:1.6;color:#7A4E00"><strong>Link Zoom-nya akan kami kirim H-1</strong> sebelum acara, ke email dan WhatsApp kamu. Pastikan nomor WhatsApp kamu aktif, ya.</p>
+              </td></tr>
+            </table>`;
 
   const html = `<!DOCTYPE html>
 <html lang="id">
@@ -103,11 +120,7 @@ export function buildEventThankYouEmail(args: {
               </td></tr>
             </table>
 
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px 0;background:#FFF7E6;border:1px solid #F5D9A8;border-radius:12px">
-              <tr><td style="padding:16px 20px">
-                <p style="margin:0;font-size:14px;line-height:1.6;color:#7A4E00"><strong>Link Zoom-nya akan kami kirim H-1</strong> sebelum acara, ke email dan WhatsApp kamu. Pastikan nomor WhatsApp kamu aktif, ya.</p>
-              </td></tr>
-            </table>
+            ${joinBlock}
 
             <p style="margin:0 0 6px 0;font-size:14px;line-height:1.6;color:#3A3A3A">Yang kamu dapat di sesi ini:</p>
             <p style="margin:0 0 24px 0;font-size:14px;line-height:1.8;color:#3A3A3A">📘 E-book "Paspor Gaji"<br/>🧭 Live "Cek Level Perantau"<br/>📜 E-Certificate kehadiran</p>

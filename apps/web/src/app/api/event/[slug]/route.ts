@@ -224,6 +224,7 @@ export async function POST(
             eventTitle: event.title,
             whenLabel,
             platform: event.platform || "Zoom",
+            joinUrl: event.join_url ?? null,
           });
           await sendEmail({ to: email, subject, html });
         } catch (err) {
