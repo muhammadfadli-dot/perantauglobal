@@ -27,11 +27,19 @@ interface Snapshot {
   recent: Row[];
 }
 
-const PERSONA_ACCENT: Record<Persona, string> = {
-  siap: "#10b981", // emerald
-  penjajak: "#f59e0b", // amber
-  pemimpi: "#38bdf8", // sky
+// Happy + on-brand: Pemimpi = campus blue, Penjajak = gold, Siap = emerald.
+const ACCENT: Record<Persona, string> = {
+  pemimpi: "#1d5fd8",
+  penjajak: "#e0a72b",
+  siap: "#10b981",
 };
+const SOFT: Record<Persona, string> = {
+  pemimpi: "#e9f1ff",
+  penjajak: "#fdf4e0",
+  siap: "#e6f9f0",
+};
+const PG_RED = "#d7262f";
+const INK = "#1a1a1a";
 
 const EMPTY: Snapshot = {
   total: 0,
@@ -39,6 +47,8 @@ const EMPTY: Snapshot = {
   sector: { hospitality: 0, healthcare: 0, unsure: 0 },
   recent: [],
 };
+
+const CARD_SHADOW = "0 6px 24px rgba(20,20,20,0.07)";
 
 export function LiveDashboard({
   url,
@@ -79,7 +89,7 @@ export function LiveDashboard({
         total: rows.length,
         persona: { pemimpi: 0, penjajak: 0, siap: 0 },
         sector: { hospitality: 0, healthcare: 0, unsure: 0 },
-        recent: rows.slice(0, 14),
+        recent: rows.slice(0, 16),
       };
       for (const r of rows) {
         if (r.persona in next.persona) next.persona[r.persona] += 1;
@@ -128,7 +138,7 @@ export function LiveDashboard({
 
   if (!configured) {
     return (
-      <main className="grid min-h-screen place-items-center" style={{ background: "#0f0f0f", color: "#fff" }}>
+      <main className="grid min-h-screen place-items-center" style={{ background: "#f6efe0", color: INK }}>
         <p className="px-6 text-center text-lg opacity-80">
           Dashboard belum terkonfigurasi (env Supabase tidak ditemukan).
         </p>
@@ -137,52 +147,69 @@ export function LiveDashboard({
   }
 
   return (
-    <main className="min-h-screen w-full" style={{ background: "#0f0f0f", color: "#f6efe0" }}>
-      <div className="mx-auto max-w-6xl px-6 py-8 md:px-10 md:py-10">
+    <main
+      className="min-h-screen w-full"
+      style={{ background: "linear-gradient(180deg,#ffffff 0%,#fbf5e9 100%)", color: INK }}
+    >
+      <div className="mx-auto max-w-6xl px-6 py-8 md:px-10 md:py-12">
         {/* header */}
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em]" style={{ color: "#d7262f" }}>
-              Work. Travel. Repeat. · Live
+            <p className="font-mono text-xs font-bold uppercase tracking-[0.18em]" style={{ color: PG_RED }}>
+              Work · Travel · Repeat — Live
             </p>
-            <h1 className="mt-1 text-3xl font-extrabold md:text-5xl">Analisa Kesiapan Merantau</h1>
+            <h1 className="mt-2 text-3xl font-extrabold tracking-tight md:text-5xl" style={{ color: INK }}>
+              Analisa Kesiapan Merantau
+            </h1>
           </div>
-          <div className="text-right">
-            <div className="text-5xl font-extrabold leading-none md:text-7xl">{snap.total}</div>
-            <div className="mt-1 flex items-center justify-end gap-2 text-xs uppercase tracking-widest opacity-70">
+          <div
+            className="rounded-3xl px-6 py-3 text-right"
+            style={{ background: "#fff", boxShadow: CARD_SHADOW }}
+          >
+            <div className="text-5xl font-extrabold leading-none md:text-6xl" style={{ color: PG_RED }}>
+              {snap.total}
+            </div>
+            <div className="mt-1 flex items-center justify-end gap-2 text-xs font-semibold uppercase tracking-widest" style={{ color: "#8a8a8a" }}>
               <span
                 className="inline-block h-2 w-2 rounded-full"
-                style={{ background: live ? "#10b981" : "#9ca3af" }}
+                style={{ background: live ? "#10b981" : "#c9c9c9" }}
               />
-              {live ? "live" : "menyambung"} · total peserta
+              {live ? "live" : "menyambung"} · peserta
             </div>
           </div>
         </div>
 
         {/* persona columns */}
-        <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3">
+        <div className="mt-9 grid grid-cols-1 gap-5 md:grid-cols-3">
           {PERSONAS.map((p) => {
             const count = snap.persona[p];
             const pct = snap.total ? Math.round((count / snap.total) * 100) : 0;
-            const accent = PERSONA_ACCENT[p];
+            const accent = ACCENT[p];
             return (
               <div
                 key={p}
-                className="rounded-2xl border p-6"
-                style={{ borderColor: "#262626", background: "#161616" }}
+                className="overflow-hidden rounded-3xl"
+                style={{ background: "#fff", boxShadow: CARD_SHADOW }}
               >
-                <div className="flex items-baseline justify-between">
-                  <span className="text-lg font-bold" style={{ color: accent }}>
-                    {PERSONA_META[p].label}
-                  </span>
-                  <span className="text-sm opacity-60">{pct}%</span>
-                </div>
-                <div className="mt-2 text-6xl font-extrabold md:text-7xl">{count}</div>
-                <div className="mt-4 h-2 w-full overflow-hidden rounded-full" style={{ background: "#2a2a2a" }}>
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{ width: `${(count / maxPersona) * 100}%`, background: accent }}
-                  />
+                <div style={{ height: 6, background: accent }} />
+                <div className="p-6">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-lg font-extrabold" style={{ color: accent }}>
+                      {PERSONA_META[p].label}
+                    </span>
+                    <span className="text-sm font-semibold" style={{ color: "#9a9a9a" }}>
+                      {pct}%
+                    </span>
+                  </div>
+                  <div className="mt-1 text-6xl font-extrabold md:text-7xl" style={{ color: INK }}>
+                    {count}
+                  </div>
+                  <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full" style={{ background: SOFT[p] }}>
+                    <div
+                      className="h-full rounded-full transition-all duration-500"
+                      style={{ width: `${(count / maxPersona) * 100}%`, background: accent }}
+                    />
+                  </div>
                 </div>
               </div>
             );
@@ -190,25 +217,28 @@ export function LiveDashboard({
         </div>
 
         {/* sectors + recent */}
-        <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div className="rounded-2xl border p-6" style={{ borderColor: "#262626", background: "#161616" }}>
-            <p className="text-xs font-bold uppercase tracking-widest opacity-60">Sektor yang diminati</p>
+        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
+          <div className="rounded-3xl p-6" style={{ background: "#fff", boxShadow: CARD_SHADOW }}>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#9a9a9a" }}>
+              Sektor yang diminati
+            </p>
             <div className="mt-4 space-y-3">
-              {SECTORS.map((s) => {
+              {SECTORS.map((s, i) => {
                 const count = snap.sector[s];
                 const pct = snap.total ? Math.round((count / snap.total) * 100) : 0;
+                const barColor = [PG_RED, "#1d5fd8", "#e0a72b"][i];
                 return (
                   <div key={s}>
-                    <div className="flex items-center justify-between text-sm">
-                      <span>{SECTOR_META[s].label}</span>
-                      <span className="opacity-60">
+                    <div className="flex items-center justify-between text-sm font-medium">
+                      <span style={{ color: INK }}>{SECTOR_META[s].label}</span>
+                      <span style={{ color: "#9a9a9a" }}>
                         {count} · {pct}%
                       </span>
                     </div>
-                    <div className="mt-1 h-2 w-full overflow-hidden rounded-full" style={{ background: "#2a2a2a" }}>
+                    <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full" style={{ background: "#f1ece1" }}>
                       <div
                         className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%`, background: "#d7262f" }}
+                        style={{ width: `${pct}%`, background: barColor }}
                       />
                     </div>
                   </div>
@@ -217,17 +247,21 @@ export function LiveDashboard({
             </div>
           </div>
 
-          <div className="rounded-2xl border p-6" style={{ borderColor: "#262626", background: "#161616" }}>
-            <p className="text-xs font-bold uppercase tracking-widest opacity-60">Baru gabung</p>
+          <div className="rounded-3xl p-6" style={{ background: "#fff", boxShadow: CARD_SHADOW }}>
+            <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#9a9a9a" }}>
+              Baru gabung
+            </p>
             <div className="mt-4 flex flex-wrap gap-2">
               {snap.recent.length === 0 && (
-                <span className="text-sm opacity-50">Menunggu peserta pertama...</span>
+                <span className="text-sm" style={{ color: "#b0b0b0" }}>
+                  Menunggu peserta pertama...
+                </span>
               )}
               {snap.recent.map((r) => (
                 <span
                   key={r.id}
-                  className="rounded-full px-3 py-1.5 text-sm font-medium"
-                  style={{ background: "#222", color: PERSONA_ACCENT[r.persona] }}
+                  className="rounded-full px-3 py-1.5 text-sm font-semibold"
+                  style={{ background: SOFT[r.persona], color: ACCENT[r.persona] }}
                 >
                   {r.name}
                 </span>
@@ -237,9 +271,16 @@ export function LiveDashboard({
         </div>
 
         {/* join prompt */}
-        <div className="mt-10 text-center">
-          <p className="text-sm uppercase tracking-widest opacity-60">Ikut analisa sekarang</p>
-          <p className="mt-1 text-2xl font-extrabold md:text-3xl">perantauglobal.com/cek-kesiapan</p>
+        <div
+          className="mt-8 rounded-3xl px-6 py-6 text-center"
+          style={{ background: "#fff", boxShadow: CARD_SHADOW }}
+        >
+          <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "#9a9a9a" }}>
+            Ikut analisa sekarang
+          </p>
+          <p className="mt-1 text-2xl font-extrabold md:text-3xl" style={{ color: PG_RED }}>
+            perantauglobal.com/cek-kesiapan
+          </p>
         </div>
       </div>
     </main>
