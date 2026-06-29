@@ -1,7 +1,7 @@
 import type { PositionCountry } from "./positions";
 
 export type CountryMeta = {
-  key: "saudi" | "jepang" | "taiwan" | "indonesia" | "europe" | "mexico";
+  key: "saudi" | "jepang" | "taiwan" | "indonesia" | "europe" | "mexico" | "bulgaria" | "kuwait";
   name: PositionCountry;
   short: string;
   flag: string;
@@ -94,9 +94,35 @@ export const COUNTRY_META: Record<CountryMeta["key"], CountryMeta> = {
     imgFilter: "saturate(1.08) brightness(0.93) sepia(0.08)",
     tint: "#9c5a2a",
   },
+  bulgaria: {
+    key: "bulgaria",
+    name: "Bulgaria",
+    short: "Bulgaria",
+    flag: "🇧🇬",
+    currency: "Euro (€)",
+    contract: "Kontrak 8 bulan",
+    img: "/images/countries/bulgaria.jpg",
+    tagline:
+      "Posisi teknisi HVAC (AC) di Bulgaria untuk tenaga terampil. Instalasi dan maintenance unit, gaji euro, kontrak resmi lewat jalur yang benar.",
+    imgFilter: "saturate(0.98) brightness(0.94)",
+    tint: "#5a6b8c",
+  },
+  kuwait: {
+    key: "kuwait",
+    name: "Kuwait",
+    short: "Kuwait",
+    flag: "🇰🇼",
+    currency: "KWD dinar",
+    contract: "Kontrak 2 tahun",
+    img: "/images/countries/kuwait.jpg",
+    tagline:
+      "Posisi hospitality di Kuwait. Gaji dinar, makan dan akomodasi ditanggung, buat tenaga yang siap kerja di kawasan Teluk.",
+    imgFilter: "saturate(1.05) brightness(0.96) sepia(0.12)",
+    tint: "#b0843f",
+  },
 };
 
-export const COUNTRY_KEYS: CountryMeta["key"][] = ["saudi", "jepang", "taiwan", "europe", "mexico", "indonesia"];
+export const COUNTRY_KEYS: CountryMeta["key"][] = ["saudi", "jepang", "taiwan", "europe", "mexico", "bulgaria", "kuwait", "indonesia"];
 
 export function countryKeyFromName(name: PositionCountry): CountryMeta["key"] {
   switch (name) {
@@ -106,6 +132,8 @@ export function countryKeyFromName(name: PositionCountry): CountryMeta["key"] {
     case "Indonesia": return "indonesia";
     case "Eropa Timur": return "europe";
     case "Meksiko": return "mexico";
+    case "Bulgaria": return "bulgaria";
+    case "Kuwait": return "kuwait";
   }
 }
 
@@ -133,6 +161,9 @@ const CITY_BY_SLUG: Record<string, string> = {
   "head-driller": "Balkan",
   "assistant-driller": "Balkan",
   "welder-heavy-steel-plate-fabrication": "Monterrey",
+  "hvac": "Sofia",
+  "hvac-helper": "Sofia",
+  "barista-kuwait": "Kuwait City",
 };
 
 const FALLBACK_CITY: Record<CountryMeta["key"], string> = {
@@ -142,6 +173,8 @@ const FALLBACK_CITY: Record<CountryMeta["key"], string> = {
   indonesia: "Jakarta",
   europe: "Balkan",
   mexico: "Monterrey",
+  bulgaria: "Sofia",
+  kuwait: "Kuwait City",
 };
 
 export function cityForSlug(slug: string, countryKey: CountryMeta["key"]): string {

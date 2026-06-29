@@ -9,7 +9,7 @@
 
 import type { IconName } from "@/components/pg/Icon";
 
-export type PositionCountry = "Saudi Arabia" | "Jepang" | "Taiwan" | "Indonesia" | "Eropa Timur" | "Meksiko";
+export type PositionCountry = "Saudi Arabia" | "Jepang" | "Taiwan" | "Indonesia" | "Eropa Timur" | "Meksiko" | "Bulgaria" | "Kuwait";
 
 export type PositionStatus = "open" | "queue";
 
