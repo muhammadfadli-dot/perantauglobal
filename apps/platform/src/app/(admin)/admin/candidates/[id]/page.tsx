@@ -8,6 +8,7 @@ import { getApplicationCompleteness } from "@/lib/applicationCompleteness";
 import type { ReadinessResultV3 } from "@/components/admin/ApplicationCard";
 import CvAssessmentCard, { type CvAssessment } from "@/components/admin/CvAssessmentCard";
 import DocViewButton from "./DocViewButton";
+import ReGradeCvButton from "./ReGradeCvButton";
 
 export const dynamic = "force-dynamic";
 
@@ -202,6 +203,7 @@ export default async function CandidateDetailPage({
   }
 
   const docs = (documents ?? []) as Document[];
+  const hasCv = docs.some((d) => d.doc_type === "cv");
   const openJobOrders = (openJOs ?? []) as OpenJobOrder[];
   const jobOrdersByPosition = new Map<string, OpenJobOrder[]>();
   for (const jo of openJobOrders) {
@@ -538,7 +540,10 @@ export default async function CandidateDetailPage({
             )}
           </div>
 
-          <CvAssessmentCard a={cvAssessment as CvAssessment | null} />
+          <CvAssessmentCard
+            a={cvAssessment as CvAssessment | null}
+            action={hasCv ? <ReGradeCvButton candidateId={id} /> : null}
+          />
         </div>
 
         {/* RIGHT — applications + activity */}

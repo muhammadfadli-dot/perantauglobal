@@ -1,9 +1,13 @@
 // grade-cv — AI CV grader (extraction + fit scoring).
 //
-// Modes (POST JSON): { document_id } extract one CV (+ auto-fit candidate's
-// non-terminal apps); { backfill, limit } extract N; { application_id } fit one
-// (privileged OR own application); { fit_backfill, limit } fit N.
+// Modes (POST JSON): { document_id } extract one CV + the candidate's credential
+// docs (+ auto-fit non-terminal apps); { backfill, limit } extract N;
+// { application_id } fit one (privileged OR own application); { fit_backfill, limit } fit N.
 // Auth (verify_jwt=true): service_role/admin = anything; candidate = own CV / own fit.
+//
+// Extraction reads the CV PLUS uploaded credential documents (sertifikat, ijazah,
+// SIM, dst) so the parsed result reflects real evidence. Fit is grounded in the
+// position's actual requirements (positions.content), not just the form fields.
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import {
@@ -17,7 +21,17 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const GATEWAY_KEY = Deno.env.get("AI_GATEWAY_API_KEY") ?? "";
 
-const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
+// CORS — required so browser-side `supabase.functions.invoke('grade-cv')`
+// (e.g. auto-grade on CV upload) survives the preflight. Without an OPTIONS
+// responder + ACAO header the preflight 405s and the POST is silently blocked.
+const CORS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+};
+
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", ...CORS } });
 
 function roleFromJwt(req: Request): string | null {
   const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
@@ -46,6 +60,57 @@ async function callGateway(model: string, content: any, schema: unknown) {
   return { res, payload };
 }
 
+// ── Credential documents (merged into extraction + surfaced in fit) ───────
+
+// Credential doc types that carry hireability signal. KTP / passport / photos
+// / medical are identity/logistics, not skills — excluded.
+const CRED_DOC_TYPES = [
+  "certificate", "str_certificate", "language_certificate",
+  "professional_certificate", "education_certificate", "work_certificate",
+  "driving_license",
+];
+const MAX_CRED_DOCS = 6; // bound latency/cost per extraction
+
+const DOC_TYPE_LABEL: Record<string, string> = {
+  cv: "CV",
+  certificate: "Sertifikat",
+  str_certificate: "STR (Surat Tanda Registrasi)",
+  language_certificate: "Sertifikat Bahasa",
+  professional_certificate: "Sertifikat Profesi",
+  education_certificate: "Ijazah / Sertifikat Pendidikan",
+  work_certificate: "Surat Pengalaman Kerja",
+  driving_license: "SIM",
+};
+function docLabel(t: string): string { return DOC_TYPE_LABEL[t] ?? t; }
+
+// deno-lint-ignore no-explicit-any
+function metaSummary(meta: any): string {
+  if (!meta || typeof meta !== "object") return "";
+  const keys = ["cert_name", "language", "system", "level", "class", "issuer", "employer", "role", "status", "graduation_year", "school"];
+  const parts: string[] = [];
+  for (const k of keys) { const v = meta[k]; if (v !== undefined && v !== null && v !== "") parts.push(String(v)); }
+  return parts.length ? ` — ${parts.join(" · ")}` : "";
+}
+
+type CredDoc = { file_path: string; mime_type: string | null; doc_type: string; metadata: unknown };
+
+async function candidateCredDocs(candidateId: string): Promise<CredDoc[]> {
+  const { data } = await svc.from("candidate_documents")
+    .select("file_path, mime_type, doc_type, metadata")
+    .eq("candidate_id", candidateId)
+    .in("doc_type", CRED_DOC_TYPES)
+    .order("uploaded_at", { ascending: true })
+    .limit(MAX_CRED_DOCS);
+  return (data ?? []) as CredDoc[];
+}
+
+async function downloadDataUrl(filePath: string, mime: string | null): Promise<string | null> {
+  const dl = await svc.storage.from("candidate-documents").download(filePath);
+  if (dl.error || !dl.data) return null;
+  const bytes = new Uint8Array(await dl.data.arrayBuffer());
+  return `data:${mime || "application/pdf"};base64,${toBase64(bytes)}`;
+}
+
 type DocRow = { id: string; candidate_id: string; file_path: string; mime_type: string | null };
 
 async function persistDocError(doc: DocRow, status: string, error: string) {
@@ -54,15 +119,28 @@ async function persistDocError(doc: DocRow, status: string, error: string) {
 }
 
 async function gradeOne(doc: DocRow): Promise<{ ok: boolean; status: string; error?: string }> {
-  const dl = await svc.storage.from("candidate-documents").download(doc.file_path);
-  if (dl.error || !dl.data) return await persistDocError(doc, "unreadable", `download: ${dl.error?.message ?? "no data"}`);
-  const bytes = new Uint8Array(await dl.data.arrayBuffer());
-  const mime = doc.mime_type || "application/pdf";
-  const dataUrl = `data:${mime};base64,${toBase64(bytes)}`;
+  const cvUrl = await downloadDataUrl(doc.file_path, doc.mime_type);
+  if (!cvUrl) return await persistDocError(doc, "unreadable", "download: CV file not readable");
+
+  // Build a multi-document message: CV first, then credential docs (labelled).
+  // deno-lint-ignore no-explicit-any
+  const content: any[] = [
+    { type: "text", text: EXTRACTION_PROMPT },
+    { type: "text", text: "=== DOKUMEN 1: CV utama ===" },
+    { type: "image_url", image_url: { url: cvUrl } },
+  ];
+  let docN = 1;
+  for (const c of await candidateCredDocs(doc.candidate_id)) {
+    const url = await downloadDataUrl(c.file_path, c.mime_type);
+    if (!url) continue;
+    docN++;
+    content.push({ type: "text", text: `=== DOKUMEN ${docN}: ${docLabel(c.doc_type)}${metaSummary(c.metadata)} ===` });
+    content.push({ type: "image_url", image_url: { url } });
+  }
 
   let res: Response, payload: Record<string, unknown> | null;
   try {
-    ({ res, payload } = await callGateway(EXTRACT_MODEL, [{ type: "text", text: EXTRACTION_PROMPT }, { type: "image_url", image_url: { url: dataUrl } }], EXTRACTION_JSON_SCHEMA));
+    ({ res, payload } = await callGateway(EXTRACT_MODEL, content, EXTRACTION_JSON_SCHEMA));
   } catch (e) { return await persistDocError(doc, "error", `gateway fetch: ${String(e).slice(0, 200)}`); }
 
   // deno-lint-ignore no-explicit-any
@@ -81,6 +159,7 @@ async function gradeOne(doc: DocRow): Promise<{ ok: boolean; status: string; err
   const derived = {
     umur: computeUmur((parsed.tanggal_lahir as string | null) ?? null, now),
     total_pengalaman_tahun: computeTotalPengalaman((parsed.pengalaman as Array<{ mulai: string | null; selesai: string | null }>) ?? [], now),
+    dokumen_pendukung_dibaca: docN - 1,
     computed_at: now.toISOString(),
   };
   // deno-lint-ignore no-explicit-any
@@ -103,6 +182,40 @@ async function positionFields(slug: string): Promise<FieldRow[]> {
   const rows = (data ?? []) as FieldRow[];
   fieldsCache.set(slug, rows);
   return rows;
+}
+
+// Format the REAL position requirements (positions.content) for grounding the
+// fit score — this is far richer than the application form screeners.
+// deno-lint-ignore no-explicit-any
+function formatPositionContent(content: any): string {
+  if (!content || typeof content !== "object") return "";
+  const parts: string[] = [];
+  const bullets = (arr: unknown): string =>
+    Array.isArray(arr) ? arr.filter((s) => typeof s === "string" && s.trim()).map((s) => `- ${s}`).join("\n") : "";
+  const pairs = (arr: unknown): string =>
+    Array.isArray(arr)
+      ? (arr as Array<{ label?: unknown; value?: unknown }>)
+          .filter((d) => d && typeof d.label === "string" && typeof d.value === "string")
+          .map((d) => `- ${String(d.label)}: ${String(d.value)}`).join("\n")
+      : "";
+  const qual = bullets(content.qualifications);
+  if (qual) parts.push(`Kualifikasi dibutuhkan:\n${qual}`);
+  const job = bullets(content.jobDescription);
+  if (job) parts.push(`Deskripsi pekerjaan:\n${job}`);
+  const det = pairs(content.details);
+  if (det) parts.push(`Detail posisi:\n${det}`);
+  const ben = pairs(content.benefits);
+  if (ben) parts.push(`Benefit:\n${ben}`);
+  return parts.join("\n\n");
+}
+
+const posContextCache = new Map<string, string>();
+async function positionContextText(slug: string): Promise<string> {
+  if (posContextCache.has(slug)) return posContextCache.get(slug)!;
+  const { data } = await svc.from("positions").select("content").eq("slug", slug).maybeSingle();
+  const text = formatPositionContent((data as { content?: unknown } | null)?.content);
+  posContextCache.set(slug, text);
+  return text;
 }
 
 function optionLabel(field: FieldRow, val: string): string {
@@ -137,8 +250,12 @@ async function scoreFit(app: AppRow): Promise<{ ok: boolean; status: string; err
     : "(tidak ada syarat terstruktur)";
   const answers = app.answers ?? {};
   const answersText = fields.filter((f) => answers[f.field_key] !== undefined && answers[f.field_key] !== "" && answers[f.field_key] !== null).map((f) => `- ${f.field_label}: ${renderAnswer(f, answers[f.field_key])}`).join("\n");
+
+  const credDocs = await candidateCredDocs(app.candidate_id);
+  const docsText = credDocs.map((c) => `- ${docLabel(c.doc_type)}${metaSummary(c.metadata)}`).join("\n");
+
   const cvJson = JSON.stringify(asmt.parsed);
-  const prompt = buildFitPrompt(await positionName(app.position_slug), fieldsText, answersText, cvJson);
+  const prompt = buildFitPrompt(await positionName(app.position_slug), await positionContextText(app.position_slug), fieldsText, answersText, docsText, cvJson);
 
   let res: Response, payload: Record<string, unknown> | null;
   try { ({ res, payload } = await callGateway(FIT_MODEL, [{ type: "text", text: prompt }], FIT_JSON_SCHEMA)); } catch (e) { return await persistFitError(app, "error", `gateway fetch: ${String(e).slice(0, 200)}`); }
@@ -148,16 +265,21 @@ async function scoreFit(app: AppRow): Promise<{ ok: boolean; status: string; err
   // deno-lint-ignore no-explicit-any
   if (!res.ok || !choice) return await persistFitError(app, "error", `gateway: ${String((payload as any)?.error?.message ?? `http ${res.status}`).slice(0, 200)}`);
 
-  let out: { fit_score?: number; alasan?: string; yang_kurang?: string[]; verification?: Array<{ verdict: string }> };
+  let out: {
+    fit_score?: number; alasan?: string; yang_kurang?: string[];
+    requirement_checks?: Array<{ syarat: string; status: string; bukti: string | null }>;
+    verification?: Array<{ verdict: string }>;
+  };
   try { out = JSON.parse(choice); } catch { return await persistFitError(app, "error", "model output not valid JSON"); }
 
   const fitScore = typeof out.fit_score === "number" ? Math.max(0, Math.min(100, Math.round(out.fit_score))) : null;
+  const requirementChecks = Array.isArray(out.requirement_checks) ? out.requirement_checks : [];
   const verification = Array.isArray(out.verification) ? out.verification : [];
   const hasFlags = verification.some((v) => v.verdict === "contradicted");
   // deno-lint-ignore no-explicit-any
   const usage = (payload as any)?.usage ?? {};
 
-  const { error } = await svc.from("application_cv_fit").upsert({ application_id: app.id, assessment_id: asmt.id, position_slug: app.position_slug, fit_score: fitScore, reasons: { alasan: out.alasan ?? "", yang_kurang: out.yang_kurang ?? [] }, verification, has_flags: hasFlags, status: "ok", model: FIT_MODEL, prompt_version: FIT_PROMPT_VERSION, cost_usd: usage.cost ?? null, updated_at: new Date().toISOString() }, { onConflict: "application_id" });
+  const { error } = await svc.from("application_cv_fit").upsert({ application_id: app.id, assessment_id: asmt.id, position_slug: app.position_slug, fit_score: fitScore, reasons: { alasan: out.alasan ?? "", yang_kurang: out.yang_kurang ?? [], requirement_checks: requirementChecks }, verification, has_flags: hasFlags, status: "ok", model: FIT_MODEL, prompt_version: FIT_PROMPT_VERSION, cost_usd: usage.cost ?? null, updated_at: new Date().toISOString() }, { onConflict: "application_id" });
   if (error) return { ok: false, status: "error", error: `db upsert: ${error.message}` };
   return { ok: true, status: "ok" };
 }
@@ -176,6 +298,7 @@ async function runPool<T>(items: T[], size: number, fn: (item: T) => Promise<unk
 }
 
 Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "POST only" }, 405);
   if (!GATEWAY_KEY) return json({ error: "AI_GATEWAY_API_KEY not set" }, 500);
 

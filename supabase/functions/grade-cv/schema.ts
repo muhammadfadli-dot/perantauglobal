@@ -1,20 +1,28 @@
 // CV grader schemas + prompts + code-side helpers (extraction & fit scoring).
 //
-// EXTRACTION (Batch 1): read a CV document -> structured JSON + completeness.
-// FIT (Batch 2): score a parsed CV against ONE position's requirements, and
-// cross-check the candidate's self-reported qualifying answers vs the CV.
+// EXTRACTION (Batch 1): read a candidate's CV **plus any uploaded credential
+// documents** (sertifikat, ijazah, surat pengalaman, SIM, sertifikat bahasa)
+// -> one merged structured JSON + completeness. Feeding the certificates in
+// alongside the CV means the parsed `sertifikat`/`bahasa`/`pendidikan` reflect
+// real uploaded evidence, not just what the CV text happened to mention.
 //
-// Decision (2026-06-10): fit_score reflects CV-vs-position match ONLY. A
+// FIT (Batch 2): score the parsed CV against ONE position's REAL requirements.
+// Grounding = positions.content (jobDescription + qualifications + details +
+// benefits), NOT just the application form screeners. Produces a per-requirement
+// checklist (`requirement_checks`) so admins see exactly which qualifications
+// are met, partial, or missing — and on what evidence.
+//
+// Decision (2026-06-10, kept): fit_score reflects CV-vs-position match ONLY. A
 // CV/answer contradiction is reported in `verification` (verdict=contradicted)
 // and flagged for admin, but NEVER lowers the score (the CV may be outdated).
 //
 // JSON schemas mirror packages/db/schemas/cv/index.ts. Bump versions on change.
 
-export const CV_SCHEMA_VERSION = 1;
-export const PROMPT_VERSION = "extract-v1";
+export const CV_SCHEMA_VERSION = 2;
+export const PROMPT_VERSION = "extract-v2";
 export const EXTRACT_MODEL = "google/gemini-2.5-flash-lite";
 
-export const FIT_PROMPT_VERSION = "fit-v1";
+export const FIT_PROMPT_VERSION = "fit-v2";
 export const FIT_MODEL = "google/gemini-2.5-flash";
 
 const nullableStr = { type: ["string", "null"] };
@@ -42,7 +50,9 @@ export const EXTRACTION_JSON_SCHEMA = {
       ringkasan: nullableStr,
       pengalaman: { type: "array", items: { type: "object", additionalProperties: false, required: ["posisi", "perusahaan", "lokasi", "mulai", "selesai", "deskripsi"], properties: { posisi: { type: "string" }, perusahaan: nullableStr, lokasi: nullableStr, mulai: nullableStr, selesai: nullableStr, deskripsi: { type: "array", items: { type: "string" } } } } },
       pendidikan: { type: "array", items: { type: "object", additionalProperties: false, required: ["sekolah", "jenjang", "jurusan", "tahun_lulus"], properties: { sekolah: { type: "string" }, jenjang: nullableStr, jurusan: nullableStr, tahun_lulus: nullableStr } } },
-      sertifikat: { type: "array", items: { type: "object", additionalProperties: false, required: ["nama", "penerbit", "tahun"], properties: { nama: { type: "string" }, penerbit: nullableStr, tahun: nullableStr } } },
+      // `sumber`: "cv" when only seen in the CV text, "dokumen" when backed by a
+      // separately uploaded certificate file. Lets admins trust verified certs.
+      sertifikat: { type: "array", items: { type: "object", additionalProperties: false, required: ["nama", "penerbit", "tahun", "sumber"], properties: { nama: { type: "string" }, penerbit: nullableStr, tahun: nullableStr, sumber: { type: "string", enum: ["cv", "dokumen"] } } } },
       keahlian: { type: "array", items: { type: "string" } },
       bahasa: { type: "array", items: { type: "object", additionalProperties: false, required: ["bahasa", "level"], properties: { bahasa: { type: "string" }, level: nullableStr } } },
       kualitas: { type: "object", additionalProperties: false, required: ["skor_kelengkapan", "kekurangan"], properties: { skor_kelengkapan: { type: "integer", minimum: 0, maximum: 100 }, kekurangan: { type: "array", items: { type: "string" } } } },
@@ -51,12 +61,16 @@ export const EXTRACTION_JSON_SCHEMA = {
 } as const;
 
 export const EXTRACTION_PROMPT =
-  `Kamu asisten rekrutmen PMI (pekerja migran Indonesia). Baca dokumen CV pelamar ini ` +
-  `(gambar atau PDF) dan ekstrak isinya ke struktur data seakurat mungkin.\n\n` +
+  `Kamu asisten rekrutmen PMI (pekerja migran Indonesia). Kamu diberi SATU ATAU BEBERAPA ` +
+  `dokumen milik SATU pelamar: dokumen pertama adalah CV utama, dokumen berikutnya (kalau ada) ` +
+  `adalah sertifikat/ijazah/surat pengalaman/SIM/sertifikat bahasa pendukung. Setiap dokumen ` +
+  `diberi label "=== DOKUMEN n: <jenis> ===". Ekstrak dan GABUNGKAN semuanya ke satu struktur data.\n\n` +
   `Aturan:\n` +
-  `- Salin apa adanya dari CV. Jangan mengarang data yang tidak ada — pakai null kalau tidak tertera.\n` +
-  `- tanggal_lahir, mulai, selesai: tulis PERSIS seperti di CV (mis. "14 Agustus 1996", "Maret 2020", "sekarang"). Jangan hitung umur.\n` +
-  `- kualitas.skor_kelengkapan (0-100): seberapa lengkap & jelas CV ini sebagai dokumen lamaran kerja luar negeri.\n` +
+  `- Salin apa adanya dari dokumen. Jangan mengarang data yang tidak ada — pakai null kalau tidak tertera.\n` +
+  `- Gabungkan info dari semua dokumen. Sertifikat/ijazah/SIM dari dokumen pendukung WAJIB masuk ke "sertifikat" (atau "pendidikan"/"bahasa" kalau lebih sesuai), jangan dilewat.\n` +
+  `- sertifikat.sumber: isi "dokumen" kalau sertifikat itu berasal dari file dokumen terpisah yang diupload (bukan cuma disebut di teks CV); isi "cv" kalau cuma tertulis di CV.\n` +
+  `- tanggal_lahir, mulai, selesai: tulis PERSIS seperti di dokumen (mis. "14 Agustus 1996", "Maret 2020", "sekarang"). Jangan hitung umur.\n` +
+  `- kualitas.skor_kelengkapan (0-100): seberapa lengkap & jelas berkas pelamar ini (CV + dokumen) sebagai lamaran kerja luar negeri.\n` +
   `- kualitas.kekurangan: daftar singkat hal yang kurang/ambigu.\n` +
   `Jawab dalam Bahasa Indonesia.`;
 
@@ -68,11 +82,26 @@ export const FIT_JSON_SCHEMA = {
   schema: {
     type: "object",
     additionalProperties: false,
-    required: ["fit_score", "alasan", "yang_kurang", "verification"],
+    required: ["fit_score", "alasan", "yang_kurang", "requirement_checks", "verification"],
     properties: {
       fit_score: { type: "integer", minimum: 0, maximum: 100 },
       alasan: { type: "string" },
       yang_kurang: { type: "array", items: { type: "string" } },
+      // Per-requirement coverage — one entry per qualification of the position.
+      // This is the transparent "variabel yang sudah cocok" breakdown.
+      requirement_checks: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: ["syarat", "status", "bukti"],
+          properties: {
+            syarat: { type: "string" },
+            status: { type: "string", enum: ["terpenuhi", "sebagian", "belum", "tidak_diketahui"] },
+            bukti: nullableStr,
+          },
+        },
+      },
       verification: {
         type: "array",
         items: {
@@ -95,24 +124,31 @@ export const FIT_JSON_SCHEMA = {
 /** Build the fit-scoring prompt. All inputs are pre-rendered strings/JSON. */
 export function buildFitPrompt(
   positionName: string,
+  positionContext: string,
   fieldsText: string,
   answersText: string,
+  docsText: string,
   cvJson: string,
 ): string {
   return (
-    `Kamu asisten rekrutmen PMI. Nilai SEBERAPA COCOK CV kandidat ini untuk posisi "${positionName}".\n\n` +
-    `=== SYARAT & PERTANYAAN POSISI ===\n${fieldsText}\n\n` +
+    `Kamu asisten rekrutmen PMI. Nilai SEBERAPA COCOK berkas kandidat ini untuk posisi "${positionName}", ` +
+    `berdasarkan REQUIREMENT ASLI posisi di bawah.\n\n` +
+    `=== DESKRIPSI & KUALIFIKASI POSISI (acuan utama penilaian) ===\n${positionContext || "(deskripsi posisi belum diisi)"}\n\n` +
+    `=== PERTANYAAN FORM SAAT MELAMAR ===\n${fieldsText}\n\n` +
     `=== JAWABAN KANDIDAT (klaim sendiri saat melamar) ===\n${answersText || "(tidak ada jawaban)"}\n\n` +
-    `=== CV KANDIDAT (hasil ekstraksi) ===\n${cvJson}\n\n` +
+    `=== DOKUMEN PENDUKUNG YANG DIUPLOAD KANDIDAT ===\n${docsText || "(tidak ada dokumen pendukung selain CV)"}\n\n` +
+    `=== CV KANDIDAT (hasil ekstraksi, sudah termasuk isi dokumen pendukung) ===\n${cvJson}\n\n` +
     `Tugas:\n` +
-    `1. fit_score (0-100): seberapa cocok CV (pengalaman, keahlian, sertifikat, pendidikan) dengan syarat posisi. Fokus ke BUKTI di CV, bukan ke janji.\n` +
+    `1. fit_score (0-100): seberapa cocok bukti kandidat (pengalaman, keahlian, sertifikat, pendidikan, dokumen) dengan KUALIFIKASI posisi di atas. Fokus ke BUKTI, bukan janji. Posisi yang minim deskripsi: nilai dari relevansi peran & pengalaman.\n` +
     `2. alasan: 1-2 kalimat kenapa skornya segitu.\n` +
-    `3. yang_kurang: daftar singkat syarat penting yang belum terlihat di CV.\n` +
-    `4. verification: untuk SETIAP jawaban kandidat yang bisa dicek dari CV, bandingkan klaim vs isi CV:\n` +
-    `   - confirmed = CV mendukung klaim\n` +
-    `   - unconfirmed = CV tidak menyebut apa pun soal itu (netral)\n` +
-    `   - contradicted = CV jelas-jelas bertentangan dengan klaim\n` +
-    `   PENTING: verification HANYA untuk pelaporan ke admin. JANGAN turunkan fit_score karena kontradiksi — CV bisa saja versi lama.\n` +
+    `3. yang_kurang: daftar singkat kualifikasi penting yang belum terlihat dari bukti.\n` +
+    `4. requirement_checks: untuk SETIAP butir kualifikasi posisi (dan syarat penting di deskripsi), tentukan:\n` +
+    `   - syarat: tulis ulang singkat butir kualifikasinya.\n` +
+    `   - status: "terpenuhi" (bukti jelas), "sebagian" (mendekati/kurang kuat), "belum" (jelas tidak ada/tidak memenuhi), "tidak_diketahui" (tidak bisa dinilai dari berkas).\n` +
+    `   - bukti: kutipan/ringkasan bukti dari CV/dokumen (atau null kalau tidak ada).\n` +
+    `5. verification: untuk SETIAP jawaban kandidat yang bisa dicek dari CV/dokumen, bandingkan klaim vs bukti:\n` +
+    `   - confirmed = bukti mendukung klaim; unconfirmed = bukti diam soal itu; contradicted = bukti jelas bertentangan.\n` +
+    `   PENTING: verification & requirement_checks HANYA untuk laporan ke admin. JANGAN turunkan fit_score gara-gara kontradiksi — CV bisa versi lama.\n` +
     `Jawab dalam Bahasa Indonesia, ringkas.`
   );
 }

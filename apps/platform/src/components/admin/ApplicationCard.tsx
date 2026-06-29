@@ -99,9 +99,18 @@ export interface ApplicationCardProps {
 }
 
 /** Per-application CV-to-position fit (application_cv_fit, migration 0071). */
+export type RequirementCheck = {
+  syarat: string;
+  status: "terpenuhi" | "sebagian" | "belum" | "tidak_diketahui";
+  bukti: string | null;
+};
 export type CvFit = {
   fit_score: number | null;
-  reasons: { alasan?: string; yang_kurang?: string[] } | null;
+  reasons: {
+    alasan?: string;
+    yang_kurang?: string[];
+    requirement_checks?: RequirementCheck[];
+  } | null;
   verification: Array<{
     field_label: string;
     claim: string;
@@ -383,6 +392,44 @@ function CvFitBadge({ fit }: { fit?: CvFit | null }) {
   );
 }
 
+const REQ_STATUS: Record<
+  RequirementCheck["status"],
+  { label: string; fg: string; bg: string }
+> = {
+  terpenuhi: { label: "Terpenuhi", fg: "var(--pg-ok-soft-fg)", bg: "var(--pg-ok-soft-bg)" },
+  sebagian: { label: "Sebagian", fg: "var(--pg-warn-soft-fg)", bg: "var(--pg-warn-soft-bg)" },
+  belum: { label: "Belum", fg: "var(--pg-err)", bg: "var(--pg-err-bg)" },
+  tidak_diketahui: { label: "Tak tercek", fg: "var(--pg-ink-500)", bg: "var(--pg-ink-50)" },
+};
+
+/** Per-requirement coverage checklist — "variabel yang sudah cocok" (v2). */
+function RequirementChecks({ checks }: { checks: RequirementCheck[] }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="text-[10px] font-bold tracking-[0.08em] uppercase text-pg-ink-500">
+        Syarat posisi
+      </div>
+      {checks.slice(0, 12).map((rc, i) => {
+        const s = REQ_STATUS[rc.status] ?? REQ_STATUS.tidak_diketahui;
+        return (
+          <div key={i} className="flex items-start gap-2">
+            <span
+              className="text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0 mt-px"
+              style={{ background: s.bg, color: s.fg }}
+            >
+              {s.label}
+            </span>
+            <div className="text-[11px] leading-snug text-pg-ink-700 min-w-0">
+              <span className="font-semibold">{rc.syarat}</span>
+              {rc.bukti && <span className="text-pg-ink-500"> — {rc.bukti}</span>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function CvFitPanel({ fit }: { fit?: CvFit | null }) {
   if (!fit) return null;
 
@@ -407,6 +454,7 @@ function CvFitPanel({ fit }: { fit?: CvFit | null }) {
   const c = fitColor(fit.fit_score);
   const alasan = fit.reasons?.alasan;
   const kurang = fit.reasons?.yang_kurang ?? [];
+  const checks = fit.reasons?.requirement_checks ?? [];
   const flags = (fit.verification ?? []).filter((v) => v.verdict === "contradicted");
 
   return (
@@ -423,8 +471,9 @@ function CvFitPanel({ fit }: { fit?: CvFit | null }) {
           {fit.fit_score ?? "—"}%
         </span>
       </div>
-      <div className="px-3 py-2.5 flex flex-col gap-2">
+      <div className="px-3 py-2.5 flex flex-col gap-2.5">
         {alasan && <p className="text-[12px] leading-[1.5] text-pg-ink-700">{alasan}</p>}
+        {checks.length > 0 && <RequirementChecks checks={checks} />}
         {kurang.length > 0 && (
           <div className="flex flex-col gap-1">
             {kurang.slice(0, 4).map((k, i) => (

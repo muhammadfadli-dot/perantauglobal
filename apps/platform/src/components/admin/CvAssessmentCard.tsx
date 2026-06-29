@@ -18,7 +18,7 @@ type Experience = {
   selesai: string | null;
   deskripsi?: string[];
 };
-type Certificate = { nama: string; penerbit: string | null; tahun: string | null };
+type Certificate = { nama: string; penerbit: string | null; tahun: string | null; sumber?: "cv" | "dokumen" };
 type Language = { bahasa: string; level: string | null };
 
 type Parsed = {
@@ -53,16 +53,23 @@ function scoreColor(score: number | null): string {
   return "var(--pg-err)";
 }
 
-export default function CvAssessmentCard({ a }: { a: CvAssessment | null }) {
+export default function CvAssessmentCard({
+  a,
+  action,
+}: {
+  a: CvAssessment | null;
+  action?: React.ReactNode;
+}) {
   // No CV graded yet.
   if (!a) {
     return (
       <Shell>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <Eyebrow>Penilaian CV (AI)</Eyebrow>
+          {action}
         </div>
         <div className="text-[12px] text-pg-ink-tertiary py-1.5 italic">
-          CV belum dinilai. Akan otomatis dibaca saat kandidat upload CV.
+          CV belum dinilai. CV yang diupload otomatis dinilai; atau klik “grade ulang”.
         </div>
       </Shell>
     );
@@ -78,7 +85,10 @@ export default function CvAssessmentCard({ a }: { a: CvAssessment | null }) {
         : "Gagal memproses CV";
     return (
       <Shell>
-        <Eyebrow>Penilaian CV (AI)</Eyebrow>
+        <div className="flex items-center justify-between gap-2">
+          <Eyebrow>Penilaian CV (AI)</Eyebrow>
+          {action}
+        </div>
         <div className="flex items-start gap-2 text-[12px] py-1" style={{ color: "var(--pg-warn-soft-fg)" }}>
           <Icon name="warn" size={13} className="mt-0.5 shrink-0" />
           <span>{label}. Buka file CV manual untuk review.</span>
@@ -95,14 +105,16 @@ export default function CvAssessmentCard({ a }: { a: CvAssessment | null }) {
 
   return (
     <Shell>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2">
         <Eyebrow>Penilaian CV (AI)</Eyebrow>
-        <span
-          className="text-[10px] font-semibold tracking-[0.06em] uppercase"
-          style={{ color: "var(--pg-ink-quaternary)", fontFamily: "var(--font-mono)" }}
-        >
-          otomatis
-        </span>
+        {action ?? (
+          <span
+            className="text-[10px] font-semibold tracking-[0.06em] uppercase"
+            style={{ color: "var(--pg-ink-quaternary)", fontFamily: "var(--font-mono)" }}
+          >
+            otomatis
+          </span>
+        )}
       </div>
 
       {/* Score + derived facts */}
@@ -191,10 +203,21 @@ export default function CvAssessmentCard({ a }: { a: CvAssessment | null }) {
           {(p.sertifikat?.length ?? 0) > 0 && (
             <Section title="Sertifikat">
               {p.sertifikat!.map((c, i) => (
-                <div key={i} className="text-[12px] text-pg-ink-secondary leading-tight">
-                  {c.nama}
-                  {(c.penerbit || c.tahun) && (
-                    <span className="text-pg-ink-tertiary"> — {[c.penerbit, c.tahun].filter(Boolean).join(", ")}</span>
+                <div key={i} className="text-[12px] text-pg-ink-secondary leading-tight flex items-start gap-1.5">
+                  <span className="min-w-0">
+                    {c.nama}
+                    {(c.penerbit || c.tahun) && (
+                      <span className="text-pg-ink-tertiary"> — {[c.penerbit, c.tahun].filter(Boolean).join(", ")}</span>
+                    )}
+                  </span>
+                  {c.sumber === "dokumen" && (
+                    <span
+                      className="text-[8px] font-bold px-1 py-0.5 rounded shrink-0 uppercase tracking-wide"
+                      style={{ background: "var(--pg-ok-soft-bg)", color: "var(--pg-ok-soft-fg)" }}
+                      title="Didukung dokumen yang diupload"
+                    >
+                      dok
+                    </span>
                   )}
                 </div>
               ))}

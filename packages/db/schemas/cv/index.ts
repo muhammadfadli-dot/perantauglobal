@@ -17,7 +17,7 @@
 
 import { z } from "zod";
 
-export const CV_SCHEMA_VERSION = 1;
+export const CV_SCHEMA_VERSION = 2;
 
 export const cvExperienceSchema = z.object({
   posisi: z.string(),
@@ -39,6 +39,9 @@ export const cvCertificateSchema = z.object({
   nama: z.string(),
   penerbit: z.string().nullable(),
   tahun: z.string().nullable(),
+  // "cv" = only mentioned in the CV text; "dokumen" = backed by a separately
+  // uploaded certificate file (v2 — grader now reads CV + credential docs).
+  sumber: z.enum(["cv", "dokumen"]).default("cv"),
 });
 
 export const cvLanguageSchema = z.object({
@@ -79,10 +82,26 @@ export const cvDerivedSchema = z.object({
   computed_at: z.string(), // ISO timestamp
 });
 
+/**
+ * Per-requirement coverage (application_cv_fit.reasons.requirement_checks, v2).
+ * One entry per position qualification — the transparent "variabel yang cocok"
+ * breakdown. `status`:
+ *   - terpenuhi       bukti jelas memenuhi
+ *   - sebagian        mendekati / kurang kuat
+ *   - belum           jelas tidak memenuhi / tidak ada
+ *   - tidak_diketahui tidak bisa dinilai dari berkas
+ */
+export const cvRequirementCheckSchema = z.object({
+  syarat: z.string(),
+  status: z.enum(["terpenuhi", "sebagian", "belum", "tidak_diketahui"]),
+  bukti: z.string().nullable(),
+});
+
 /** Per-position fit reasoning (application_cv_fit.reasons). */
 export const cvFitReasonsSchema = z.object({
   alasan: z.string(),
   yang_kurang: z.array(z.string()).default([]),
+  requirement_checks: z.array(cvRequirementCheckSchema).default([]),
 });
 
 /**
@@ -104,4 +123,5 @@ export type ParsedCv = z.infer<typeof parsedCvSchema>;
 export type CvQuality = z.infer<typeof cvQualitySchema>;
 export type CvDerived = z.infer<typeof cvDerivedSchema>;
 export type CvFitReasons = z.infer<typeof cvFitReasonsSchema>;
+export type CvRequirementCheck = z.infer<typeof cvRequirementCheckSchema>;
 export type CvVerificationItem = z.infer<typeof cvVerificationItemSchema>;
