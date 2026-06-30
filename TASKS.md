@@ -24,12 +24,17 @@ Audited the CV grader, found both organic grading paths broken, rebuilt the engi
 
 **Follow-up same session — "Belum dinilai" on graded CVs (PR #183, RESOLVED):** admin Fit CV column showed "Belum dinilai" for 83 apps whose CV was actually graded. NOT a UI bug — FitCell + engine correct. Root cause: the re-grade script's Phase 2 fetched apps with a single `limit=5000` request, but **PostgREST caps responses at ~1000 rows** → silently processed only 1000 of 1173 non-terminal apps → ~173 (incl 83 graded-CV) never re-fit → no `application_cv_fit` row → honest-but-confusing "Belum dinilai". Fix: Phase 2 now paginates (offset) + embeds `application_cv_fit(status)` to fit ONLY apps without an ok fit (no score re-shift). Panji re-ran → `belum_dinilai_but_cv_graded` 83→**0**; 374 apps now scored; 5 remaining "Belum dinilai" = genuinely un-graded/corrupt CVs (correct). **Gotcha: any bulk PostgREST fetch silently caps at 1000 — always paginate.**
 
-**Open / next:**
-1. **Test-data cleanup — DONE** (cleaned same session: 3 smoke-test candidates + fake zalfa commission event + auth users + pending subs deleted; DB clean, verified 0 left).
-2. **Cert upload UI gap:** multi-doc engine ready but no candidate UI to upload standalone cert doc-types (only KTP/Paspor/Foto/CV in `/profile/dokumen`). Decide if worth adding slots.
-3. **Orphan recovery: moot** — only ~2 of ~133 orphan files survive (rest purged >48h). Fix prevents future loss.
-4. **grade-cv backfill `error`-requeue:** the 4 corrupt CVs retry every round (status='error' = pending). Harmless; could add permanent-skip guard for "no pages".
-5. Optional: re-extract the 227 v1-extracted CVs to v2 (only matters if they later get cert docs; low value now — their fit is already v2).
+**Finishing pass (2026-06-30 late) — all non-urgent items cleared:**
+- **Cert upload UI — DONE + validated (PR #186):** `/profile/dokumen` "Dokumen pendukung" section (`SupportingDocsUploader`, 6 optional cred rows) + `DocumentUploadModal` re-grades the CV on credential upload (centralized → covers lengkapi flow too). E2E test: JLPT cert upload → merged into `parsed.sertifikat` as `sumber:dokumen` (issuer "Japan Foundation & JEES"), `dokumen_pendukung_dibaca=2`. Engine multi-doc loop now fully fed.
+- **Corrupt-CV requeue — DONE:** the 2 "no pages" CVs (status='error', re-queued forever by backfill) reclassified to `unreadable` → 0 `error` left, backfill won't retry. (2 others already `unreadable` "Object not found".)
+- **Memory/learning:** added `reference_postgrest_1000_row_cap` (always paginate bulk reads). `project_cv_grader` + `project_signup_trigger_regression` current.
+- **Test-data cleanup — DONE:** all smoke-test candidates (incl +ff3) + auth users + pending subs + fake zalfa commission deleted; DB verified 0 left.
+
+**Open / next (low-value, deferred):**
+1. **Orphan recovery: moot** — only ~2 of ~133 orphan files survive (rest purged >48h). The 0087 fix prevents future loss.
+2. **FitCell corrupt-CV label (micro):** a corrupt/unreadable CV shows "Belum dinilai" (fit='skipped') not "Gagal" — distinguishing needs the list RPC to surface `cv_assessments.status` (migration). ~4 candidates; marginal.
+3. Optional: re-extract the 227 v1-extracted CVs to v2 (only matters if they later get cert docs; low value — their fit is already v2).
+4. **Engine micro:** grade-cv could classify gateway "document has no pages" as `unreadable` (not `error`) so future corrupt CVs don't re-queue (the current 4 are already handled by the data reclassify).
 
 
 ## 2026-06-22 — Akademi "passport" learning redesign + payment scaffolding ✅ SHIPPED
