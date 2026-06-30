@@ -63,25 +63,41 @@ async function phaseExtract() {
 }
 
 async function phaseFit() {
-  console.log("\n=== Phase 2: re-fit all non-terminal applications (v2) ===");
-  const r = await fetch(
-    `${REST}/applications?pipeline_stage=not.in.(rejected,exit)&select=id&limit=5000`,
-    { headers: H }
-  );
-  const apps = await r.json().catch(() => []);
-  if (!Array.isArray(apps)) { console.error("  failed to list apps:", apps); return; }
-  console.log(`  ${apps.length} non-terminal apps to (re)fit`);
+  console.log("\n=== Phase 2: fit applications that still need it (v2) ===");
+  // PAGINATE: PostgREST caps each response at ~1000 rows. The old single
+  // `limit=5000` fetch silently returned only the first 1000 of 1173 apps, so
+  // ~173 (incl graded-CV ones) were never re-fit and stayed "Belum dinilai".
+  // Embed the fit status so we only (re)fit apps WITHOUT an ok fit — this also
+  // avoids re-shifting the scores of apps already fitted (LLM run-to-run drift).
+  const all = [];
+  const PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    const r = await fetch(
+      `${REST}/applications?pipeline_stage=not.in.(rejected,exit)&select=id,application_cv_fit(status)&order=created_at.asc&offset=${from}&limit=${PAGE}`,
+      { headers: H }
+    );
+    const page = await r.json().catch(() => []);
+    if (!Array.isArray(page) || page.length === 0) break;
+    all.push(...page);
+    if (page.length < PAGE) break;
+  }
+  const pending = all.filter((a) => {
+    const f = a.application_cv_fit;
+    const arr = Array.isArray(f) ? f : f ? [f] : [];
+    return !(arr.length && arr[0].status === "ok");
+  });
+  console.log(`  ${all.length} non-terminal apps; ${pending.length} need a fit`);
   let done = 0, ok = 0, skipped = 0, failed = 0;
   const CONC = 3;
-  for (let i = 0; i < apps.length; i += CONC) {
+  for (let i = 0; i < pending.length; i += CONC) {
     await Promise.all(
-      apps.slice(i, i + CONC).map(async (a) => {
+      pending.slice(i, i + CONC).map(async (a) => {
         const { status, json } = await callFn({ application_id: a.id });
         done++;
         if (status === 200 && json?.ok) (json.status === "skipped" ? skipped++ : ok++);
         else failed++;
-        if (done % 25 === 0 || done === apps.length)
-          console.log(`  ${done}/${apps.length}  (fit=${ok} skip=${skipped} fail=${failed})`);
+        if (done % 25 === 0 || done === pending.length)
+          console.log(`  ${done}/${pending.length}  (fit=${ok} skip=${skipped} fail=${failed})`);
       })
     );
   }
