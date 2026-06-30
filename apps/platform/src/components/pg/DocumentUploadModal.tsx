@@ -13,6 +13,15 @@ import {
 const ACCEPT = "image/jpeg,image/png,image/heic,image/heif,image/webp,application/pdf";
 const MAX_BYTES = 5 * 1024 * 1024; // 5MB
 
+// Credential doc types the CV grader merges into a candidate's CV extraction.
+// Uploading one should re-grade the existing CV so the new evidence is picked up
+// (keep in sync with CRED_DOC_TYPES in supabase/functions/grade-cv/index.ts).
+const REGRADE_ON_UPLOAD = new Set([
+  "certificate", "str_certificate", "language_certificate",
+  "professional_certificate", "education_certificate", "work_certificate",
+  "driving_license",
+]);
+
 export type DocumentUploadModalProps = {
   open: boolean;
   onClose: () => void;
@@ -170,12 +179,26 @@ function SheetBody({
         .single();
       if (insertErr) throw insertErr;
 
-      // Kick off AI grading for CVs — extraction + per-position fit. Fire and
-      // forget so the upload stays instant; results land asynchronously.
-      if (docType === "cv" && (inserted as { id?: string } | null)?.id) {
-        void sb.functions
-          .invoke("grade-cv", { body: { document_id: (inserted as { id: string }).id } })
-          .catch(() => {});
+      // Kick off AI grading. Fire-and-forget so the upload stays instant.
+      //   CV upload          → grade this CV (+ auto-fit the candidate's apps).
+      //   credential upload  → re-grade the candidate's existing CV so the new
+      //                        doc (cert/STR/ijazah/SIM/…) merges into extraction.
+      const insertedId = (inserted as { id?: string } | null)?.id;
+      if (insertedId && docType === "cv") {
+        void sb.functions.invoke("grade-cv", { body: { document_id: insertedId } }).catch(() => {});
+      } else if (insertedId && REGRADE_ON_UPLOAD.has(docType)) {
+        void (async () => {
+          const { data: cv } = await sb
+            .from("candidate_documents")
+            .select("id")
+            .eq("candidate_id", candidateId)
+            .eq("doc_type", "cv")
+            .order("uploaded_at", { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          const cvId = (cv as { id?: string } | null)?.id;
+          if (cvId) await sb.functions.invoke("grade-cv", { body: { document_id: cvId } });
+        })().catch(() => {});
       }
 
       onUploaded?.();

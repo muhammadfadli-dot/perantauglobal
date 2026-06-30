@@ -2,6 +2,7 @@ import { createServerClient, requireCandidate } from "@/lib/supabase-server";
 import { TopBarApp, BottomNav } from "@/components/pg/AppChrome";
 import { Icon } from "@/components/pg/Icon";
 import DocUploader, { type DocItem } from "../DocUploader";
+import SupportingDocsUploader from "../SupportingDocsUploader";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,16 @@ export default async function DokumenPage() {
     return { type: t, status: "pending", file_path: latest.file_path };
   });
 
+  // Optional supporting credentials (feed the CV grader's multi-doc extraction).
+  const CRED_DOC_TYPES = [
+    "language_certificate", "professional_certificate", "education_certificate",
+    "work_certificate", "str_certificate", "driving_license",
+  ];
+  const credCounts: Record<string, number> = {};
+  for (const d of docsRows) {
+    if (CRED_DOC_TYPES.includes(d.doc_type)) credCounts[d.doc_type] = (credCounts[d.doc_type] ?? 0) + 1;
+  }
+
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
       <TopBarApp title="Dokumen" back backHref="/profile" />
@@ -74,6 +85,17 @@ export default async function DokumenPage() {
         </p>
         <CvNudge score={cvNudge?.quality_score ?? null} kekurangan={cvNudge?.quality?.kekurangan ?? []} />
         <DocUploader candidateId={candidate.id} initial={docItems} />
+
+        <div className="mt-6 mb-2">
+          <h2 className="text-[13px] font-extrabold tracking-[0.04em] uppercase text-pg-ink-secondary">
+            Dokumen pendukung
+          </h2>
+          <p className="text-[12px] text-pg-ink-tertiary mt-1 leading-snug">
+            Opsional. Punya sertifikat? Tambahin biar CV kamu makin kuat dinilai.
+          </p>
+        </div>
+        <SupportingDocsUploader candidateId={candidate.id} counts={credCounts} />
+
         <div
           className="mt-4 flex gap-2 items-start text-[12px] leading-snug"
           style={{ color: "var(--pg-ink-tertiary)" }}
