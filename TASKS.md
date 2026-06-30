@@ -2,7 +2,33 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-06-22 (Akademi learning-experience redesign — "passport" — + Xendit payment scaffolding; shipped overnight)
+**Last updated:** 2026-06-30 (CV grader v2 — position-grounded fit + requirement_checks + multi-doc + CORS fix — and signup-trigger regression fix 0087/0088; pool backfilled to v2)
+
+## 2026-06-30 — CV grader v2 + signup-trigger regression fix ✅ SHIPPED + BACKFILLED
+
+Audited the CV grader, found both organic grading paths broken, rebuilt the engine to v2, fixed a critical signup-trigger regression, smoke-tested end-to-end, backfilled the whole pool.
+
+**Engine v2 — `grade-cv` v8 (deployed; JSONB output → NO migration):**
+- Fit grounded in `positions.content` (jobDescription + qualifications + details/benefits), not just `position_application_fields` form screeners.
+- **`requirement_checks[]`** per qualification (terpenuhi/sebagian/belum/tidak_diketahui + bukti) in `application_cv_fit.reasons` → admin CvFitPanel ("variabel yang cocok").
+- **Multi-doc extraction**: CV + credential docs (cert/str/language/professional/education/work_certificate/driving_license, max 6) merged; `parsed.sertifikat[].sumber` = cv|dokumen.
+- **CORS fix**: grade-cv had no OPTIONS handler → browser `functions.invoke` (auto-grade-on-upload) silently 405'd at preflight since it shipped → ZERO organic grades. v8 adds OPTIONS + ACAO (verified live: POST fires 200).
+- Admin **"Grade ulang"** button (PR #179, merged+deployed): server action `reGradeCv` via `createServiceRoleClient()` — admin JWT has NO `role=admin` claim so a cookie-session invoke → grade-cv 403; service-role is the path. Zod `packages/db/schemas/cv` → v2.
+
+**Signup-trigger regression (root of "0 organic grades"):** migration 0081 (`event_account_bridge`) rebuilt `handle_new_auth_user` from a stale base + silently dropped 3 blocks since ~06-13: front-funnel CV-materialize (0078), affiliate attribution (0067), utm-regex (0078). Front-funnel CVs staged in `pending-cv` but never got a `candidate_documents` row → `cv-materialize` no-op'd → ~133 CVs orphaned (most purged). Referral attribution (`referred_by_agent_id`) dead (only the trigger writes it, no app fallback).
+- **0087** restored CV block (+NOT EXISTS guard) · **0088** restored affiliate + utm. Applied prod + merged (#180, #181). Trigger now reconciled = event+CV+affiliate+utm. **Gotcha: always edit this trigger from `pg_get_functiondef` (live), never an old migration copy** (memory `project_signup_trigger_regression`).
+
+**Smoke test (agent-email, prod, 3 signups):** web-form signup with CV (PDF + PNG) → validated extraction (both formats), position grounding, requirement_checks, contradiction flag (claimed ">5 thn" vs CV ~2.5 thn → flagged, score 65 not dropped), CORS auto-grade, candidate nudge ("70% CV kamu sudah kami baca"). +ff2 with code `ZALFA-644B71` → attributed to agent zalfa + 1 commission event.
+
+**Backfill (Panji ran `scripts/regrade-cv-v2.mjs` with JWT service key):** pool now **317 CV ok / 4 corrupt** ("no pages" empty PDFs — terminal), **285 non-terminal lamaran v2 fit**, 0 fit errors, 106 flagged. Script (Node, idempotent, **uncommitted**): Phase 1 extraction at **limit 6** (>~8 → 150s IDLE_TIMEOUT on v2 multi-doc), Phase 2 per-app refit (grade-cv `fit_backfill` TRUNCATES at oldest 800 apps + skips already-ok — don't use for full refit). Service key must be JWT `eyJ...` not `sb_secret_`.
+
+**Open / next:**
+1. **Test-data cleanup (DESTRUCTIVE — needs Panji greenlight):** 3 smoke-test candidates live (agentmail emails): Andi Saputra `PG-2026-59406`, Budi Hartono (+ff1), Citra Lestari (+ff2). **+ff2 has a FAKE `affiliate_commission_events` row on real agent zalfa — clean it.** Delete-by-email cascades apps/fit/docs/assessments.
+2. **Cert upload UI gap:** multi-doc engine ready but no candidate UI to upload standalone cert doc-types (only KTP/Paspor/Foto/CV in `/profile/dokumen`). Decide if worth adding slots.
+3. **Orphan recovery: moot** — only ~2 of ~133 orphan files survive (rest purged >48h). Fix prevents future loss.
+4. **grade-cv backfill `error`-requeue:** the 4 corrupt CVs retry every round (status='error' = pending). Harmless; could add permanent-skip guard for "no pages".
+5. Optional: re-extract the 227 v1-extracted CVs to v2 (only matters if they later get cert docs; low value now — their fit is already v2).
+
 
 ## 2026-06-22 — Akademi "passport" learning redesign + payment scaffolding ✅ SHIPPED
 
