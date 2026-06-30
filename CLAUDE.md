@@ -86,6 +86,7 @@ Magic link flow: form → `pending_submissions` (nonce) → magic link sent → 
 
 Newest first. Each has a memory note under `.claude/projects/.../memory/` (indexed in `MEMORY.md`); ongoing detail lives in `TASKS.md`.
 
+- **2026-06-30** — CV grader **v2** (edge fn `grade-cv` v8, PRs #179–184): position-grounded fit (scores against `positions.content` jobDescription+qualifications, not just form fields) + per-requirement `requirement_checks` checklist + multi-doc extraction (CV + uploaded certs merged) + **CORS fix** (auto-grade-on-upload had been silently 405'd at preflight → zero organic grades) + admin "Grade ulang" button. Also fixed a **signup-trigger regression**: migration 0081 had silently dropped the front-funnel CV-materialize + affiliate attribution + utm blocks from `handle_new_auth_user` (restored 0087+0088). Pool backfilled to v2. See `project_cv_grader` + `project_signup_trigger_regression`.
 - **2026-06-16** — Open-country support (PR #167): admin can create a position for ANY country; Meksiko / Welding Mexico = first case. Making a new country first-class on the public web = 5 code spots + 2 images → see `project_open_country_add_country`.
 - **2026-06-13** — Completeness vs qualifying split (PR #157, migration 0077): candidate "done" = presence (`application_completeness_view`); admin eligibility = qualifying (`hard_pass`). Never key candidate surfaces off `hard_pass`.
 - **2026-06-12** — UI/UX audit, 10-batch execution (PRs #147–155, migrations 0074–0076).
