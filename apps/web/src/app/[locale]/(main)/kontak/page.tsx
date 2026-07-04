@@ -3,13 +3,13 @@ import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { localBusinessJsonLd } from "@/lib/jsonld";
 import { Icon } from "@/components/pg/Icon";
-import { ContactForm } from "@/components/pg/ContactForm";
+import { waLink } from "@/lib/contact";
 import { Eyebrow } from "@/components/pg/primitives";
 
 export const metadata: Metadata = {
   title: "Kontak — Hubungi Perantau Global",
   description:
-    "Hubungi PT Daya Talenta Global (Perantau Global) untuk konsultasi penempatan kerja di luar negeri. Email: halo@perantauglobal.com",
+    "Hubungi PT Daya Talenta Global (Perantau Global) untuk konsultasi penempatan kerja di luar negeri. Chat WhatsApp atau email halo@perantauglobal.com",
 };
 
 export const dynamic = "force-static";
@@ -36,8 +36,8 @@ export default async function KontakPage({ params }: { params: Promise<{ locale:
               Hubungi kami.
             </h1>
             <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed mt-3">
-              Punya pertanyaan tentang lowongan, proses, atau biaya? Email kami atau kirim pesan via
-              form di samping. Kami balas dalam 1×24 jam kerja.
+              Punya pertanyaan tentang lowongan, proses, atau biaya? Chat admin kami langsung di
+              WhatsApp — cara paling cepat. Atau email kami di bawah.
             </p>
 
             <div className="mt-6 space-y-3">
@@ -73,7 +73,30 @@ export default async function KontakPage({ params }: { params: Promise<{ locale:
             </div>
           </div>
           <div className="mt-8 md:mt-0">
-            <ContactForm />
+            <div className="bg-pg-white border border-pg-ink-100 rounded-2xl p-6 md:p-8">
+              <div className="text-[12px] font-bold tracking-[0.12em] uppercase text-pg-red-600">
+                Chat langsung
+              </div>
+              <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-1">
+                Tanya admin di WhatsApp
+              </h2>
+              <p className="text-base text-pg-ink-700 leading-relaxed mt-3">
+                Cara tercepat dapat jawaban. Chat langsung dengan admin Perantau Global soal lowongan,
+                proses, biaya, atau kendala akun — dijawab tim kami, bukan bot.
+              </p>
+              <a
+                href={waLink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex items-center justify-center gap-2 w-full min-h-[52px] px-6 rounded-xl text-white font-bold no-underline"
+                style={{ background: "var(--pg-red-600)" }}
+              >
+                <Icon name="phone" size={20} stroke={2} /> Chat di WhatsApp
+              </a>
+              <p className="text-[13px] text-pg-ink-500 mt-3 text-center">
+                Nomor WhatsApp resmi Perantau Global.
+              </p>
+            </div>
           </div>
         </div>
       </main>

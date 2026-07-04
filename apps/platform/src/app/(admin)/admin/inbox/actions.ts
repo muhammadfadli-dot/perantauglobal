@@ -9,7 +9,7 @@ async function assertAdmin() {
   if (!session || role !== "admin") throw new Error("Forbidden");
 }
 
-export async function updateInboxStatus(id: string, status: "new" | "in_progress" | "done") {
+export async function updateInboxStatus(id: string, status: "new" | "in_progress" | "resolved") {
   await assertAdmin();
   await logAdminAction("update_inbox_status", "contact_submission", id, { new_status: status });
   const supabase = await createServerClient();

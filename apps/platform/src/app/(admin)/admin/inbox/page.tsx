@@ -43,7 +43,7 @@ export default async function InboxPage({
   const [{ count: newCount }, { count: progressCount }, { count: doneCount }] = await Promise.all([
     supabase.from("contact_submissions").select("*", { count: "exact", head: true }).eq("status", "new"),
     supabase.from("contact_submissions").select("*", { count: "exact", head: true }).eq("status", "in_progress"),
-    supabase.from("contact_submissions").select("*", { count: "exact", head: true }).eq("status", "done"),
+    supabase.from("contact_submissions").select("*", { count: "exact", head: true }).eq("status", "resolved"),
   ]);
 
   return (
@@ -55,15 +55,16 @@ export default async function InboxPage({
         Pesan dari kontak form
       </h1>
       <p className="text-base text-pg-ink-700 mt-2 leading-relaxed max-w-2xl">
-        Pesan yang masuk via <code className="font-mono text-[13px]">/kontak</code> di www. Balas
-        manual via email kandidat — kita catat statusnya di sini.
+        Arsip pesan lama dari <code className="font-mono text-[13px]">/kontak</code>. Kontak publik
+        sekarang diarahkan ke WhatsApp (yang ada adminnya) — tidak ada pesan baru masuk ke sini.
+        Tinggal balas &amp; tandai selesai sisa pesan lama di bawah.
       </p>
 
       <div className="mt-6 flex gap-2 flex-wrap">
         {[
           { key: "new", label: "Baru", count: newCount ?? 0, variant: "warn" as const },
           { key: "in_progress", label: "Sedang ditangani", count: progressCount ?? 0, variant: "info" as const },
-          { key: "done", label: "Selesai", count: doneCount ?? 0, variant: "ok" as const },
+          { key: "resolved", label: "Selesai", count: doneCount ?? 0, variant: "ok" as const },
           { key: "all", label: "Semua", count: (newCount ?? 0) + (progressCount ?? 0) + (doneCount ?? 0), variant: "mute" as const },
         ].map((c) => {
           const active = filterValue === c.key;
@@ -103,7 +104,7 @@ export default async function InboxPage({
                 phone: r.phone,
                 subject: r.subject,
                 message: r.message,
-                status: (r.status as "new" | "in_progress" | "done") ?? "new",
+                status: (r.status as "new" | "in_progress" | "resolved") ?? "new",
                 notes: r.notes,
                 created_at: r.created_at,
               }}

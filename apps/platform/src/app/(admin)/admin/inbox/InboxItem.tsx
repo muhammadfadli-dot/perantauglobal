@@ -12,7 +12,7 @@ type Item = {
   phone: string | null;
   subject: string;
   message: string;
-  status: "new" | "in_progress" | "done";
+  status: "new" | "in_progress" | "resolved";
   notes: string | null;
   created_at: string;
 };
@@ -20,13 +20,13 @@ type Item = {
 const STATUS_LABEL: Record<Item["status"], string> = {
   new: "Baru",
   in_progress: "Sedang ditangani",
-  done: "Selesai",
+  resolved: "Selesai",
 };
 
 const STATUS_VARIANT: Record<Item["status"], "warn" | "info" | "ok"> = {
   new: "warn",
   in_progress: "info",
-  done: "ok",
+  resolved: "ok",
 };
 
 export default function InboxItem({ item }: { item: Item }) {
@@ -112,7 +112,7 @@ export default function InboxItem({ item }: { item: Item }) {
               Status
             </div>
             <div className="flex gap-2">
-              {(["new", "in_progress", "done"] as const).map((s) => {
+              {(["new", "in_progress", "resolved"] as const).map((s) => {
                 const active = status === s;
                 return (
                   <button
