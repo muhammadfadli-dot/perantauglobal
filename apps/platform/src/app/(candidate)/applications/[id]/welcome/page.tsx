@@ -163,7 +163,7 @@ export default async function ApplyWelcomePage({ params }: PageProps) {
           >
             {/* Same roadmap component the lamaran-detail page uses — so the steps,
                 labels, and timeframes never diverge between the two screens. */}
-            <PipelineTimeline currentIdx={requiredMissing > 0 ? 2 : 1} />
+            <PipelineTimeline currentIdx={1} />
           </div>
         </div>
 

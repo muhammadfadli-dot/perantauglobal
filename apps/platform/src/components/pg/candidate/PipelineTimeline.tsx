@@ -2,21 +2,16 @@ import type { ReactNode } from "react";
 import { Icon } from "@/components/pg/Icon";
 
 /**
- * Pipeline 5-step timeline used on /applications/[id].
- *
- * Steps:
- *  1. Lamaran terkirim
- *  2. Verifikasi awal
- *  3. Lengkapi dokumen
- *  4. Wawancara
- *  5. Keputusan & offering
+ * Candidate-facing journey timeline — the canonical 3 stages
+ * (Terkirim → Diproses → Hasil), matching JourneyHero + the applicationStatus
+ * model. "Diproses" intentionally covers verifikasi / lengkapi dokumen /
+ * wawancara, so the candidate never sees the internal pipeline_stage vocabulary
+ * and the dashboard, detail, and welcome screens all read the same 3 stages.
  */
 export const PIPELINE_STEPS = [
-  { label: "Lamaran terkirim", defaultMeta: "Konfirmasi WhatsApp dikirim" },
-  { label: "Verifikasi awal", defaultMeta: "Tim Perantau Global cek data" },
-  { label: "Lengkapi dokumen", defaultMeta: "Upload + isi pertanyaan sisanya" },
-  { label: "Wawancara", defaultMeta: "Via WhatsApp / Zoom — jadwal nyusul" },
-  { label: "Keputusan & offering", defaultMeta: "3-5 hari setelah wawancara" },
+  { label: "Terkirim", defaultMeta: "Lamaran kamu sudah masuk" },
+  { label: "Diproses", defaultMeta: "Tim cek data & dokumen kamu" },
+  { label: "Hasil", defaultMeta: "Keputusan & tawaran kerja" },
 ];
 
 export function PipelineTimeline({
@@ -24,7 +19,7 @@ export function PipelineTimeline({
   customMeta = {},
   insets = {},
 }: {
-  /** 0-indexed: 0 = lamaran terkirim done, 1 = verifikasi current, etc. */
+  /** 0-indexed: 0 = Terkirim, 1 = Diproses, 2 = Hasil. */
   currentIdx: number;
   /** Override meta for specific step index */
   customMeta?: Record<number, string>;

@@ -39,24 +39,13 @@ type ApplicationRow = {
   positions: PositionRow | null;
 };
 
-// Map pipeline_stage → timeline currentIdx (0-4)
-function deriveTimelineIdx(
-  stage: string,
-  jobOrderId: string | null,
-  allRequiredFilled: boolean,
-): number {
-  // Terminal stages — move to step 5 (Keputusan)
-  if (["selected", "training", "deployed", "active"].includes(stage)) return 4;
-  if (["rejected", "exit"].includes(stage)) return 4;
-  // Has job order = past verification, currently in pipeline review
-  if (jobOrderId) {
-    if (stage === "wawancara" || stage === "interview") return 3;
-    if (stage === "screening" || stage === "review") return 2;
-    return 2;
+// Map pipeline_stage → 3-stage timeline currentIdx (0=Terkirim, 1=Diproses, 2=Hasil).
+// "Diproses" covers every in-progress internal stage; only terminal stages reach Hasil.
+function deriveTimelineIdx(stage: string): number {
+  if (["selected", "training", "deployed", "active", "rejected", "exit"].includes(stage)) {
+    return 2; // Hasil
   }
-  // No job order yet = talent pool stage
-  if (!allRequiredFilled) return 2; // still has required fields to answer — at "Lengkapi dokumen"
-  return 1; // everything answered, waiting for job_order assignment
+  return 1; // Diproses — Terkirim is already done once the lamaran exists
 }
 
 const REQUIRED_DOCS = [
@@ -125,11 +114,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const flag = countryKey ? COUNTRY_FLAG[countryKey] : "🌐";
   const tint = countryKey ? COUNTRY_TINT[countryKey] : "#36598c";
 
-  const timelineIdx = deriveTimelineIdx(
-    application.pipeline_stage,
-    application.job_order_id,
-    all_required_filled,
-  );
+  const timelineIdx = deriveTimelineIdx(application.pipeline_stage);
 
   // Doc state lookup
   const docsLatestByType = new Map<string, { verified: boolean; rejected: boolean }>();
@@ -239,7 +224,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
                 ? "Selamat! Tahap berikutnya: persiapan keberangkatan."
                 : isRejected
                 ? "Lamaran ini belum cocok. Cari posisi lain di Lowongan."
-                : `Tahap ${timelineIdx + 1} dari 5 · biasanya total 4-6 minggu`
+                : `Tahap ${timelineIdx + 1} dari 3 · biasanya total 4-6 minggu`
             }
           />
           <div
