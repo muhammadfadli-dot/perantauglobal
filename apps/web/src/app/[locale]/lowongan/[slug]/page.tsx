@@ -54,8 +54,11 @@ export async function generateMetadata({
   ]);
   if (!p) return { title: "Lowongan tidak ditemukan" };
   const cms = asMediaSeo(content);
+  // Some cardMeta.salary values already carry a unit ("¥300,000/bulan", "180 KWD/Month");
+  // only append "/bulan" when the value has none, otherwise the title doubles it.
+  const salaryLabel = /\/|per\s/i.test(p.salary) ? p.salary : `${p.salary}/bulan`;
   const title =
-    cms?.seo?.metaTitle?.trim() || `Lowongan ${p.role} ${p.country} — ${p.salary}/bulan`;
+    cms?.seo?.metaTitle?.trim() || `Lowongan ${p.role} ${p.country} — ${salaryLabel}`;
   const description =
     cms?.seo?.metaDescription?.trim() ||
     `Lowongan ${p.role} di ${p.country}. Gaji ${p.salary}, ${p.contractLabel ?? "kontrak resmi"}. Bebas biaya sebelum offering letter. Daftar di Perantau Global.`;
