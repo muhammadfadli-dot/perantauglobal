@@ -189,11 +189,11 @@ export function CekKesiapanFlow() {
 
         <div className="mt-6 space-y-3">
           <a
-            href="https://app.perantauglobal.com"
+            href="/lowongan"
             className="block w-full rounded-2xl px-5 py-4 text-center text-base font-bold text-white shadow-lg"
             style={{ background: PG_RED, boxShadow: "0 8px 20px rgba(215,38,47,0.28)" }}
           >
-            Naik level di app Perantau Global
+            Lihat lowongan yang cocok →
           </a>
           <a
             href="/paspor-gaji-ebook.pdf"
