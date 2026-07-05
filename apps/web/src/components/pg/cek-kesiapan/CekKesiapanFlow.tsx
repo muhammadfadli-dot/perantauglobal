@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Link from "next/link";
 import {
   PERSONA_META,
   QUESTIONS,
@@ -188,13 +189,13 @@ export function CekKesiapanFlow() {
         )}
 
         <div className="mt-6 space-y-3">
-          <a
+          <Link
             href="/lowongan"
             className="block w-full rounded-2xl px-5 py-4 text-center text-base font-bold text-white shadow-lg"
             style={{ background: PG_RED, boxShadow: "0 8px 20px rgba(215,38,47,0.28)" }}
           >
             Lihat lowongan yang cocok →
-          </a>
+          </Link>
           <a
             href="/paspor-gaji-ebook.pdf"
             target="_blank"
@@ -202,7 +203,7 @@ export function CekKesiapanFlow() {
             className="block w-full rounded-2xl border-2 px-5 py-3.5 text-center text-base font-bold"
             style={{ borderColor: "#ece6d8", color: "#1a1a1a" }}
           >
-            Download e-book "Paspor Gaji"
+            Download e-book “Paspor Gaji”
           </a>
         </div>
         <p className="mt-4 text-xs leading-relaxed" style={{ color: "#9a9a9a" }}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createBrowserClient } from "@perantauglobal/db";
 import {
@@ -67,9 +67,6 @@ export function LiveDashboard({
     if (!configured) return null;
     return createBrowserClient(url, anonKey) as unknown as SupabaseClient;
   }, [url, anonKey, configured]);
-
-  const snapRef = useRef(snap);
-  snapRef.current = snap;
 
   useEffect(() => {
     if (!client) return;
