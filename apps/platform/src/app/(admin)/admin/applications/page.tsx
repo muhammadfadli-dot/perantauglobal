@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import ApplicationFilters from "@/components/admin/ApplicationFilters";
-import { ReadinessBadge } from "@/components/admin/ReadinessBadge";
-import { JobOrderPicker } from "@/components/admin/JobOrderPicker";
-import ReachOutToggle from "@/components/admin/ReachOutToggle";
-import QuickReject from "@/components/admin/QuickReject";
+import {
+  ApplicationsTable,
+  type AppRow,
+  type OpenJobOrder,
+} from "@/components/admin/ApplicationsTable";
 import { Icon } from "@/components/pg/Icon";
-import { isRejectedStage, stageLabel } from "@/lib/applicationStatus";
 
 type PositionEntry = {
   slug: string;
@@ -16,43 +16,11 @@ type PositionEntry = {
   app_count: number;
 };
 
-type OpenJobOrder = {
-  id: string;
-  intake_label: string;
-  internal_employer_name: string;
-  position_slug: string;
-  slot_count: number;
-  slot_filled: number;
-};
-
 export const dynamic = "force-dynamic";
 
 const PAGE_SIZE = 40;
 type SortKey = "newest" | "readiness" | "fit";
 type PoolKey = "pool" | "in_job_order" | "all";
-
-type AppRow = {
-  id: string;
-  candidate_id: string;
-  position_slug: string;
-  pipeline_stage: string;
-  reached_out: boolean;
-  score: number | null;
-  created_at: string;
-  candidate_name: string | null;
-  candidate_phone: string | null;
-  candidate_city: string | null;
-  position_name: string | null;
-  position_country: string | null;
-  job_order_id: string | null;
-  job_order_intake_label: string | null;
-  readiness: unknown;
-  cv_fit_score: number | null;
-  cv_fit_status: string | null;
-  cv_has_flags: boolean;
-  candidate_has_cv: boolean;
-  total_count: number;
-};
 
 export default async function ApplicationsPage({
   searchParams,
@@ -129,11 +97,10 @@ export default async function ApplicationsPage({
     .filter((p) => p.active || p.app_count > 0);
 
   const openJobOrders = (joRes.data ?? []) as OpenJobOrder[];
-  const jobOrdersByPosition = new Map<string, OpenJobOrder[]>();
+  // Plain object (not a Map) so it can cross the server→client boundary.
+  const jobOrdersByPosition: Record<string, OpenJobOrder[]> = {};
   for (const jo of openJobOrders) {
-    const arr = jobOrdersByPosition.get(jo.position_slug) ?? [];
-    arr.push(jo);
-    jobOrdersByPosition.set(jo.position_slug, arr);
+    (jobOrdersByPosition[jo.position_slug] ??= []).push(jo);
   }
 
   if (listRes.error) {
@@ -164,7 +131,7 @@ export default async function ApplicationsPage({
               Pipeline (screening, interview, dst) terjadi di job order
             </span>{" "}
             — pindahkan kandidat ke job order yang sedang open buat mulai proses
-            seleksi.
+            seleksi. Centang beberapa sekaligus buat aksi massal.
           </p>
         </div>
         <div className="text-[12px] font-bold tracking-[0.1em] uppercase text-pg-ink-500 whitespace-nowrap">
@@ -182,119 +149,11 @@ export default async function ApplicationsPage({
         />
       </div>
 
-      <div className="mt-6 bg-pg-white border border-pg-ink-100 rounded-2xl overflow-hidden">
-        <table className="min-w-full text-sm">
-          <thead className="border-b border-pg-ink-100 bg-pg-ink-50">
-            <tr className="text-left text-[11px] font-bold tracking-[0.1em] uppercase text-pg-ink-500">
-              <th className="px-4 py-3">Kandidat</th>
-              <th className="px-4 py-3">Posisi</th>
-              <th className="px-4 py-3">Syarat</th>
-              <th className="px-4 py-3">Fit CV</th>
-              <th className="px-4 py-3">Outreach</th>
-              <th className="px-4 py-3">Masuk</th>
-              <th className="px-4 py-3 text-right">Job order</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-pg-ink-500">
-                  Tidak ada lamaran yang cocok.
-                </td>
-              </tr>
-            )}
-            {rows.map((r) => {
-              const posJOs = jobOrdersByPosition.get(r.position_slug) ?? [];
-              return (
-                <tr
-                  key={r.id}
-                  className="border-b border-pg-ink-100 last:border-b-0 hover:bg-pg-ink-50"
-                >
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/admin/candidates/${r.candidate_id}`}
-                      className="font-bold text-pg-ink-900 hover:text-pg-red-600 no-underline"
-                    >
-                      {r.candidate_name ?? "—"}
-                    </Link>
-                    <div className="text-[11px] text-pg-ink-500 font-mono">
-                      {r.candidate_city ?? "—"} · {r.candidate_phone ?? "—"}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-[13px]">
-                    <div className="font-semibold">
-                      {r.position_name ?? r.position_slug}
-                    </div>
-                    <div className="text-[11px] text-pg-ink-500 font-mono">
-                      {r.position_country ?? ""}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <ReadinessBadge readiness={r.readiness} />
-                  </td>
-                  <td className="px-4 py-3">
-                    <FitCell
-                      score={r.cv_fit_score}
-                      status={r.cv_fit_status}
-                      hasFlags={r.cv_has_flags}
-                      candidateHasCv={r.candidate_has_cv}
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-[13px]">
-                    <ReachOutToggle
-                      applicationId={r.id}
-                      reachedOut={r.reached_out}
-                      reachedOutAt={null}
-                    />
-                  </td>
-                  <td className="px-4 py-3 text-[12px] text-pg-ink-500 font-mono">
-                    {new Date(r.created_at).toLocaleDateString("id-ID")}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    {r.job_order_id ? (
-                      <Link
-                        href={`/admin/job-orders/${r.job_order_id}`}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg no-underline text-[12px] font-bold whitespace-nowrap transition-colors"
-                        style={{
-                          border: "1px solid var(--pg-info)",
-                          background: "var(--pg-info-bg)",
-                          color: "var(--pg-info)",
-                        }}
-                        title={`Pipeline stage: ${r.pipeline_stage}`}
-                      >
-                        <Icon name="arrow_right" size={12} stroke={2.4} />
-                        <span className="truncate max-w-[160px]">
-                          {r.job_order_intake_label ?? "in JO"}
-                        </span>
-                      </Link>
-                    ) : isRejectedStage(r.pipeline_stage) ? (
-                      <span
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[12px] font-bold"
-                        style={{ background: "var(--pg-ink-50)", color: "var(--pg-ink-tertiary)" }}
-                        title={`Stage: ${r.pipeline_stage}`}
-                      >
-                        <Icon name="x" size={11} stroke={2.4} /> {stageLabel(r.pipeline_stage)}
-                      </span>
-                    ) : (
-                      <div className="inline-flex flex-col items-end gap-1.5">
-                        <JobOrderPicker
-                          applicationId={r.id}
-                          candidateName={r.candidate_name ?? "kandidat"}
-                          openJobOrders={posJOs}
-                        />
-                        <QuickReject
-                          applicationId={r.id}
-                          candidateName={r.candidate_name ?? "kandidat"}
-                        />
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <ApplicationsTable
+        rows={rows}
+        jobOrdersByPosition={jobOrdersByPosition}
+        activePosition={position ?? ""}
+      />
 
       <Pagination
         page={page}
@@ -363,57 +222,5 @@ function Pagination({
         </span>
       )}
     </nav>
-  );
-}
-
-function FitCell({
-  score,
-  status,
-  hasFlags,
-  candidateHasCv,
-}: {
-  score: number | null;
-  status: string | null;
-  hasFlags: boolean;
-  candidateHasCv: boolean;
-}) {
-  if (score === null) {
-    // No fit score. Disambiguate the reason off the candidate's actual CV doc
-    // (candidate_has_cv) rather than the grader status — the grader hasn't run on
-    // every app, so status alone left no-CV rows showing an ambiguous "—".
-    //   no CV doc at all       → "Belum CV"     (CV is optional; most candidates)
-    //   has CV but errored     → "Gagal"
-    //   has CV, not yet graded → "Belum dinilai"
-    let label: string;
-    let title: string;
-    if (!candidateHasCv) {
-      label = "Belum CV";
-      title = "Kandidat belum upload CV";
-    } else if (status === "error") {
-      label = "Gagal";
-      title = "Penilaian CV gagal — buka kandidat";
-    } else {
-      label = "Belum dinilai";
-      title = "CV sudah ada, tapi belum dinilai AI";
-    }
-    return (
-      <span className="text-[11px] text-pg-ink-400" title={title}>
-        {label}
-      </span>
-    );
-  }
-  const fg =
-    score >= 75 ? "var(--pg-ok-soft-fg)" : score >= 50 ? "var(--pg-warn-soft-fg)" : "var(--pg-err)";
-  const bg =
-    score >= 75 ? "var(--pg-ok-soft-bg)" : score >= 50 ? "var(--pg-warn-soft-bg)" : "var(--pg-err-bg)";
-  return (
-    <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[12px] font-bold tabular-nums"
-      style={{ background: bg, color: fg }}
-      title={hasFlags ? "Ada klaim yang perlu dikonfirmasi vs CV" : "Kecocokan CV dengan posisi (AI)"}
-    >
-      {score}%
-      {hasFlags && <Icon name="warn" size={11} />}
-    </span>
   );
 }
