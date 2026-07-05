@@ -9,7 +9,7 @@ import { Testimoni } from "@/components/pg/home/Testimoni";
 import { Lineage } from "@/components/pg/home/Lineage";
 import { HomeFAQ } from "@/components/pg/home/HomeFAQ";
 import { FinalCTAv2 } from "@/components/pg/home/FinalCTAv2";
-import { POSITIONS } from "@/lib/positions";
+import { fetchPositionsForCatalog } from "@/lib/positions-db";
 
 export const revalidate = 60;
 
@@ -27,10 +27,11 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const totalPositions = POSITIONS.length;
-  const openCount = 1;
+  const positions = await fetchPositionsForCatalog();
+  const totalPositions = positions.length;
+  const openCount = positions.filter((p) => p.status === "open").length;
   const positionsByCountry: Record<string, number> = {};
-  for (const p of POSITIONS) {
+  for (const p of positions) {
     positionsByCountry[p.country] = (positionsByCountry[p.country] || 0) + 1;
   }
 

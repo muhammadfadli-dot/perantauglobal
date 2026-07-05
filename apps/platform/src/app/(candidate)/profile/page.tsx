@@ -9,6 +9,7 @@ import {
   SectionHead,
   ProfileRing,
 } from "@/components/pg/candidate/BerandaShared";
+import { getActiveAcademyResume } from "@/lib/academy-db";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +31,7 @@ export default async function ProfilePage() {
   const { candidateId } = await requireCandidate();
   const supabase = await createServerClient();
 
-  const [candRes, docsRes, appsRes] = await Promise.all([
+  const [candRes, docsRes, appsRes, academyResume] = await Promise.all([
     supabase
       .from("candidates")
       .select(
@@ -47,6 +48,7 @@ export default async function ProfilePage() {
       .from("applications")
       .select("id, pipeline_stage")
       .eq("candidate_id", candidateId),
+    getActiveAcademyResume(candidateId),
   ]);
 
   const candidate = candRes.data as CandidateRow | null;
@@ -222,9 +224,15 @@ export default async function ProfilePage() {
             <StatTile
               icon="passport"
               tone="amber"
-              label="Paspor"
-              value="—"
-              caption="Belum mulai"
+              label="Akademi"
+              value={academyResume ? `${academyResume.pct}%` : "—"}
+              caption={
+                academyResume
+                  ? academyResume.courseDone
+                    ? "Kelas selesai"
+                    : "Sedang belajar"
+                  : "Belum mulai"
+              }
             />
             <StatTile
               icon="check"

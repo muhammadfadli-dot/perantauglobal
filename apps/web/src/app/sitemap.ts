@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { POSITIONS } from "@/lib/positions";
+import { fetchPositionsForCatalog } from "@/lib/positions-db";
 import { CERTIFICATIONS } from "@/lib/certifications";
 import { SITE_URL } from "@/lib/site";
 
@@ -15,7 +15,7 @@ const STATIC_PAGES: { path: string; priority: number; changeFrequency: MetadataR
   { path: "kontak", priority: 0.7, changeFrequency: "monthly" },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date().toISOString();
   const entries: MetadataRoute.Sitemap = [];
 
@@ -28,7 +28,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
   }
 
-  for (const p of POSITIONS) {
+  // DB-driven so admin-created positions are crawlable, not just the static seed.
+  const positions = await fetchPositionsForCatalog();
+  for (const p of positions) {
     entries.push({
       url: `${SITE_URL}/lowongan/${p.slug}`,
       lastModified: now,
