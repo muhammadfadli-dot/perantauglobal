@@ -12,6 +12,7 @@ import {
   DocStateBadge,
 } from "@/components/pg/candidate/PipelineTimeline";
 import { PendampingCard } from "@/components/pg/candidate/PendampingCard";
+import { CvFitCard, type CvFit } from "@/components/pg/candidate/CvFitCard";
 import {
   COUNTRY_FLAG,
   COUNTRY_LABEL as COUNTRY_LABEL_PORTAL,
@@ -75,13 +76,21 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const application = appData as unknown as ApplicationRow | null;
   if (!application || !application.positions) notFound();
 
-  const [completenessRes, docsRes] = await Promise.all([
+  const [completenessRes, docsRes, cvFitRes] = await Promise.all([
     getApplicationCompleteness(application.id, supabase),
     supabase
       .from("candidate_documents")
       .select("doc_type, verified, rejected_at, uploaded_at")
       .eq("candidate_id", candidateId)
       .order("uploaded_at", { ascending: false }),
+    supabase
+      .from("application_cv_fit")
+      .select("fit_score, reasons, status")
+      .eq("application_id", application.id)
+      .eq("status", "ok")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
   const completeness = completenessRes;
   const docsRows = (docsRes.data ?? []) as Array<{
@@ -90,6 +99,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     rejected_at: string | null;
     uploaded_at: string;
   }>;
+  const cvFit = (cvFitRes.data ?? null) as CvFit | null;
 
   const position = application.positions;
   const { all_required_filled, required_remaining } = completeness;
@@ -335,6 +345,16 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             })}
           </div>
         </div>
+
+        {!isRejected && !isAccepted && cvFit && (
+          <div className="px-5 pt-5">
+            <SectionHead
+              title="Kecocokan CV kamu"
+              sub="Yang kami baca dari CV buat posisi ini — biar bisa kamu perkuat."
+            />
+            <CvFitCard fit={cvFit} />
+          </div>
+        )}
 
         {/* Pendamping */}
         <div className="px-5 pt-5">
