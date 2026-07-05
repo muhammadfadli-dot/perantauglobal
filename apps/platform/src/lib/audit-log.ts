@@ -37,6 +37,7 @@ export const AUDIT_ACTIONS = {
   assign_tier: { label: "Assign tier (legacy)", tone: "mute" },
   clear_tier: { label: "Clear tier (legacy)", tone: "mute" },
   move_application_to_job_order: { label: "Pindah ke job order", tone: "info" },
+  schedule_interview: { label: "Jadwalkan wawancara", tone: "info" },
   // Admin allowlist operations (escalation events)
   invite_admin: { label: "Invite admin", tone: "ok" },
   remove_admin: { label: "Remove admin", tone: "err" },

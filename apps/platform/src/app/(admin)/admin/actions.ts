@@ -47,6 +47,47 @@ export async function updateApplicationStage(
   revalidatePath("/admin", "layout"); // dashboard pipeline snapshot
 }
 
+export async function scheduleInterview(input: {
+  applicationId: string;
+  scheduledAt: string;
+  platform: string;
+  meetingUrl?: string;
+  candidateNote?: string;
+  adminNote?: string;
+}): Promise<{ ok: true } | { ok: false; error: string }> {
+  const { reviewedBy } = await assertAdmin();
+  const validPlatforms = ["whatsapp", "zoom", "google_meet", "phone", "in_person"];
+  if (!input.applicationId || !validPlatforms.includes(input.platform)) {
+    return { ok: false, error: "Data jadwal belum lengkap." };
+  }
+  const when = new Date(input.scheduledAt);
+  if (Number.isNaN(when.getTime())) {
+    return { ok: false, error: "Tanggal & jam wawancara tidak valid." };
+  }
+  await logAdminAction("schedule_interview", "application", input.applicationId, {
+    scheduled_at: when.toISOString(),
+    platform: input.platform,
+  });
+  const supabase = await createServerClient();
+  const { error } = await (
+    supabase as unknown as import("@supabase/supabase-js").SupabaseClient
+  )
+    .from("interview_scheduled")
+    .insert({
+      application_id: input.applicationId,
+      scheduled_at: when.toISOString(),
+      platform: input.platform,
+      meeting_url: input.meetingUrl?.trim() || null,
+      candidate_note: input.candidateNote?.trim() || null,
+      admin_note: input.adminNote?.trim() || null,
+      scheduled_by: reviewedBy,
+    });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/admin/job-orders", "layout");
+  revalidatePath("/admin/candidates", "layout");
+  return { ok: true };
+}
+
 export async function updateApplicationNotes(
   applicationId: string,
   notes: string,

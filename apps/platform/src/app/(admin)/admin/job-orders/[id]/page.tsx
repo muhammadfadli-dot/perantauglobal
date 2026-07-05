@@ -6,6 +6,7 @@ import { Icon } from "@/components/pg/Icon";
 import StatusControls from "./StatusControls";
 import NotesField from "./NotesField";
 import JobOrderKanbanBoard from "@/components/admin/JobOrderKanbanBoard";
+import { InterviewScheduler } from "@/components/admin/InterviewScheduler";
 import { countryLabelFromDb } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +81,40 @@ export default async function JobOrderDetailPage({
   const jo = joData as unknown as JobOrder | null;
   if (!jo) return notFound();
   const apps = (appsData ?? []) as unknown as LinkedApp[];
+
+  // Interview scheduling: candidates currently in an interview stage + their
+  // latest scheduled interview (interview_scheduled is newer than generated types).
+  const interviewApps = apps.filter((a) =>
+    ["interview", "voice_screen"].includes(a.pipeline_stage),
+  );
+  const interviewByApp = new Map<
+    string,
+    { scheduled_at: string; platform: string; meeting_url: string | null }
+  >();
+  if (interviewApps.length > 0) {
+    const { data: ivs } = await (
+      supabase as unknown as import("@supabase/supabase-js").SupabaseClient
+    )
+      .from("interview_scheduled")
+      .select("application_id, scheduled_at, platform, meeting_url")
+      .in("application_id", interviewApps.map((a) => a.id))
+      .eq("status", "scheduled")
+      .order("scheduled_at", { ascending: false });
+    for (const iv of (ivs ?? []) as Array<{
+      application_id: string;
+      scheduled_at: string;
+      platform: string;
+      meeting_url: string | null;
+    }>) {
+      if (!interviewByApp.has(iv.application_id)) {
+        interviewByApp.set(iv.application_id, {
+          scheduled_at: iv.scheduled_at,
+          platform: iv.platform,
+          meeting_url: iv.meeting_url,
+        });
+      }
+    }
+  }
 
   // Days to deadline
   let daysToDeadline: number | null = null;
@@ -194,6 +229,31 @@ export default async function JobOrderDetailPage({
         {/* Pipeline kanban — interactive: each card carries a stage selector so a
             recruiter can advance candidates from the job order itself. */}
         <JobOrderKanbanBoard apps={apps} slotCount={jo.slot_count} />
+
+        {/* Interview scheduling — for candidates in the interview stage */}
+        {interviewApps.length > 0 && (
+          <div
+            className="bg-pg-white rounded-2xl p-5 flex flex-col gap-3"
+            style={{ border: "1px solid var(--pg-border)" }}
+          >
+            <div
+              className="text-[10px] font-semibold tracking-[0.12em] uppercase"
+              style={{ color: "var(--pg-ink-tertiary)", fontFamily: "var(--font-mono)" }}
+            >
+              Wawancara · {interviewApps.length} kandidat
+            </div>
+            <div className="grid gap-2.5 md:grid-cols-2">
+              {interviewApps.map((a) => (
+                <InterviewScheduler
+                  key={a.id}
+                  applicationId={a.id}
+                  candidateName={a.candidates?.full_name ?? "Kandidat"}
+                  existing={interviewByApp.get(a.id) ?? null}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Internal notes / employer info */}
         <div className="grid gap-4 lg:grid-cols-3">

@@ -13,6 +13,7 @@ import {
 } from "@/components/pg/candidate/PipelineTimeline";
 import { PendampingCard } from "@/components/pg/candidate/PendampingCard";
 import { CvFitCard, type CvFit } from "@/components/pg/candidate/CvFitCard";
+import { InterviewCard, type ScheduledInterview } from "@/components/pg/candidate/InterviewCard";
 import {
   COUNTRY_FLAG,
   COUNTRY_LABEL as COUNTRY_LABEL_PORTAL,
@@ -76,7 +77,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
   const application = appData as unknown as ApplicationRow | null;
   if (!application || !application.positions) notFound();
 
-  const [completenessRes, docsRes, cvFitRes] = await Promise.all([
+  const [completenessRes, docsRes, cvFitRes, interviewRes] = await Promise.all([
     getApplicationCompleteness(application.id, supabase),
     supabase
       .from("candidate_documents")
@@ -91,6 +92,14 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    (supabase as unknown as import("@supabase/supabase-js").SupabaseClient)
+      .from("interview_scheduled")
+      .select("scheduled_at, platform, meeting_url, candidate_note, status")
+      .eq("application_id", application.id)
+      .eq("status", "scheduled")
+      .order("scheduled_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
   const completeness = completenessRes;
   const docsRows = (docsRes.data ?? []) as Array<{
@@ -100,6 +109,7 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
     uploaded_at: string;
   }>;
   const cvFit = (cvFitRes.data ?? null) as CvFit | null;
+  const interview = (interviewRes.data ?? null) as ScheduledInterview | null;
 
   const position = application.positions;
   const { all_required_filled, required_remaining } = completeness;
@@ -224,6 +234,12 @@ export default async function ApplicationDetailPage({ params }: PageProps) {
             </div>
           </div>
         </div>
+
+        {interview && !isRejected && (
+          <div className="px-5">
+            <InterviewCard interview={interview} />
+          </div>
+        )}
 
         {/* Timeline */}
         <div className="px-5">
