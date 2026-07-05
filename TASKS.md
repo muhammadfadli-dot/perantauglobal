@@ -2,7 +2,35 @@
 
 Session handoff. Next Claude Code session yang baca file ini harus tau exactly where to pick up.
 
-**Last updated:** 2026-06-30 (CV grader v2 — position-grounded fit + requirement_checks + multi-doc + CORS fix — and signup-trigger regression fix 0087/0088; pool backfilled to v2)
+**Last updated:** 2026-07-05 (platform audit execution — F0 security/hygiene + F1 UX/pipeline shipped across PRs #189–203; E2E funnel smoke-tested; leaked-password protection enabled)
+
+## 2026-07-04/05 — Full platform audit → execution loop ✅ SHIPPED (15 PRs)
+
+Two audit passes (this session + Panji's parallel research at `~/Cowork/Projects/2026-07-04_perantauglobal-turborepo-renovation/`) → merged UNIFIED-PLAN → autonomous one-by-one execution with eval + smoke-test + land per task. Audit report: `AUDIT-2026-07-04.md`.
+
+**Fase 0 — security + hygiene (PRs #189–194):**
+- **0089** readiness_responses column grants (hide answers/score/session_key from anon; it's a live event board so keep row read, not drop).
+- **0090** guard `handle_new_auth_user`: per-iteration BEGIN/EXCEPTION on the pending loop + guarded birth_date cast (a malformed pending row can't abort a whole signup). **Edit this trigger only from `pg_get_functiondef` live.**
+- **0091** owner-read RLS on application_cv_fit, scoped via candidates→`(select auth.uid())`.
+- Retire admin **Inbox → WhatsApp** (no PIC owned it); `done`→`resolved` status fix.
+- Double-`/bulan` salary titles; orphaned `program` i18n block removed (#190).
+- `scripts/pii-retention.sql` written (purge 30d+ pending_submissions) — **HANDOFF, classifier blocks autonomous bulk PII delete.**
+
+**Fase 1 — UX + pipeline (PRs #195–203):**
+- **F1-1 interview scheduling (#200, 0092):** closed the bare-"interview"-stage gap — admin schedules (date/platform/link/note) on JO detail, candidate sees InterviewCard. RLS `(select auth.uid())`, no IDOR view. **0093 (#201)** deduped its trigger fn onto shared `set_updated_at` (cleared a search_path advisor).
+- **F1-2 (#197)** candidate CvFitCard (constructive requirement checklist, no gate score). **F1-4 (#195)** PipelineTimeline → canonical 3 stages. **F1-5 (#196)** JobPosting + ItemList + breadcrumb JSON-LD on /lowongan. **F1-6 (#199)** cek-kesiapan result routes into job funnel + Lead event. **F1-7 (#198)** trust sweep (1998→Dayalima only, DB-driven sitemap/stats, Paspor tile).
+- **F1-3 admin bulk actions (#203):** multi-select on /admin/applications + floating bar → bulk reject (reversible, confirm) + bulk move-to-JO (position-filtered). Server actions re-validate eligibility off live rows; per-app audit log; cap 100. Verified w/ rolled-back DB behavioural test. Table extracted to client `ApplicationsTable`.
+- **web hygiene (#202):** dropped dead `snapRef` + the **orphaned `lowongan` i18n namespace (3272 lines/122KB)** shipped to every client for nothing (positions are DB-driven since 05-24); fixed #199's lint regression → main green again.
+
+**E2E smoke test (agentmail, real prod account, then cleaned up):** manual pending → direct Supabase Auth signup (bypasses API route → no Meta CAPI pollution) → real confirm email delivered to inbox (SPF/DKIM/DMARC pass) → verify link (303 → `app…#access_token`, implicit hash) → trigger materialized candidate + application + **utm attribution** + pending consumed. All test rows + auth user deleted. Prod evidence: 100/100 candidates in last 7d materialized with auth linkage — funnel healthy.
+
+**Dashboard/manual done this session:** leaked-password protection **ENABLED** (Auth→Email provider, via browser).
+
+**Open / next:**
+1. **F1-1b pre-departure checklist (0042 draft):** teed up, NOT built — the 8 default items encode a DTG ops process to confirm + candidate S5 display is ICP-sensitive. Ready to execute on Panji's go (harness task #15).
+2. **HANDOFF (Panji):** run `scripts/pii-retention.sql` (879 rows, destructive); reply/close ~29 legacy contact_submissions; confirm cv-purge Action stays green.
+3. **Not headless-verified:** in-browser click-through of F1-1 interview scheduler + F1-3 bulk bar (need admin session). Logic/build verified.
+4. Deliberately skipped: bulk-verify on /admin/documents (bulk-attesting identity docs undermines per-doc PDP "view before verify").
 
 ## 2026-06-30 — CV grader v2 + signup-trigger regression fix ✅ SHIPPED + BACKFILLED
 
