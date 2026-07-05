@@ -19,6 +19,7 @@ import {
   fetchPositionsForCatalog,
 } from "@/lib/positions-db";
 import { resolvePositionDetail } from "@/lib/positionContent";
+import { jobPostingJsonLd, breadcrumbJsonLd } from "@/lib/jsonld";
 import { COUNTRY_META, countryKeyFromName, cityForSlug } from "@/lib/lowonganCountries";
 import { waLink } from "@/lib/contact";
 import { SITE_URL } from "@/lib/site";
@@ -53,7 +54,7 @@ export async function generateMetadata({
     fetchPositionContent(slug),
   ]);
   if (!p) return { title: "Lowongan tidak ditemukan" };
-  const cms = asMediaSeo(content);
+  const cms = asMediaSeo(content.content);
   // Some cardMeta.salary values already carry a unit ("¥300,000/bulan", "180 KWD/Month");
   // only append "/bulan" when the value has none, otherwise the title doubles it.
   const salaryLabel = /\/|per\s/i.test(p.salary) ? p.salary : `${p.salary}/bulan`;
@@ -83,13 +84,14 @@ export default async function LowonganDetailPage({
   if (locale !== "id") notFound();
   setRequestLocale(locale);
 
-  const [baseStatic, jobOrders, appliedFields, dbContent, allPositions] = await Promise.all([
+  const [baseStatic, jobOrders, appliedFields, dbContentRes, allPositions] = await Promise.all([
     fetchPositionForDetail(slug),
     fetchOpenJobOrders(),
     fetchAppliedFields(slug),
     fetchPositionContent(slug),
     fetchPositionsForCatalog(),
   ]);
+  const dbContent = dbContentRes.content;
   if (!baseStatic) notFound();
 
   const detail = resolvePositionDetail(slug, dbContent);
@@ -118,8 +120,38 @@ export default async function LowonganDetailPage({
     asMediaSeo(dbContent)?.media?.heroUrl?.trim() || `/images/lowongan/${slug}.jpg`;
   const waMessage = `Halo, saya mau tanya soal lowongan ${position.role} ${position.country}.`;
 
+  const datePosted = dbContentRes.publishedAt ?? dbContentRes.updatedAt;
+  const jobPosting = jobPostingJsonLd({
+    slug,
+    title: position.role,
+    countryLabel: position.country,
+    city,
+    jobDescription: detail.jobDescription,
+    datePosted: datePosted ? new Date(datePosted).toISOString() : null,
+    validThrough: jo?.deadline ? new Date(jo.deadline).toISOString() : null,
+    salary: position.salary,
+  });
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "Beranda", url: `${SITE_URL}/id` },
+    { name: "Lowongan", url: `${SITE_URL}/id/lowongan` },
+    {
+      name: `${position.role} — ${position.country}`,
+      url: `${SITE_URL}/id/lowongan/${slug}`,
+    },
+  ]);
+
   return (
     <main className="pb-24 md:pb-0">
+      {jobPosting && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jobPosting) }}
+        />
+      )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+      />
       {/* Editorial hero */}
       <EditorialHero
         role={position.role}

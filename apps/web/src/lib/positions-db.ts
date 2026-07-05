@@ -148,18 +148,34 @@ export async function fetchAppliedFields(slug: string): Promise<AppliedFormField
  * object if not set (legacy position) — caller falls back to
  * lib/positionDetails.ts.
  */
-export async function fetchPositionContent(slug: string): Promise<PositionContentBlob> {
+export type PositionContentResult = {
+  content: PositionContentBlob;
+  publishedAt: string | null;
+  updatedAt: string | null;
+};
+
+/** One round-trip for the position content blob + dates (dates feed JobPosting datePosted). */
+export async function fetchPositionContent(slug: string): Promise<PositionContentResult> {
   try {
     const sb = supabaseV2();
     const { data, error } = await sb
       .from("positions")
-      .select("content")
+      .select("content, published_at, updated_at")
       .eq("slug", slug)
       .maybeSingle();
-    if (error || !data) return null;
-    return (data as { content: unknown }).content ?? null;
+    if (error || !data) return { content: null, publishedAt: null, updatedAt: null };
+    const row = data as {
+      content: unknown;
+      published_at: string | null;
+      updated_at: string | null;
+    };
+    return {
+      content: (row.content as PositionContentBlob) ?? null,
+      publishedAt: row.published_at,
+      updatedAt: row.updated_at,
+    };
   } catch {
-    return null;
+    return { content: null, publishedAt: null, updatedAt: null };
   }
 }
 

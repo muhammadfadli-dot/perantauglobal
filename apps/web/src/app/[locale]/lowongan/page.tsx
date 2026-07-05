@@ -10,6 +10,7 @@ import { ChapterBand } from "@/components/pg/lowongan/ChapterBand";
 import { CrossLinkSertifikasi } from "@/components/pg/lowongan/CrossLinkSertifikasi";
 import { COUNTRY_META, COUNTRY_KEYS, countryKeyFromName, type CountryMeta } from "@/lib/lowonganCountries";
 import { fetchPositionsForCatalog } from "@/lib/positions-db";
+import { jobListItemListJsonLd } from "@/lib/jsonld";
 import { waLink } from "@/lib/contact";
 
 export const metadata: Metadata = {
@@ -81,8 +82,16 @@ export default async function LowonganIndexPage({
     indonesia: byCountry.indonesia.length,
   };
 
+  const itemList = jobListItemListJsonLd(
+    positions.map((p) => ({ slug: p.slug, title: `${p.role} ${p.country}` })),
+  );
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemList) }}
+      />
       <main>
         {/* Hero — Mau berangkat ke negara mana? */}
         <section className="px-5 md:px-8 py-12 md:py-16">
