@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef } from "react";
 
 const NODES = [
@@ -48,8 +49,14 @@ export function Process() {
   };
 
   return (
-    <section ref={ref} id="process" style={{ background: "#EDE7D9", padding: "96px 0", scrollMarginTop: 74 }}>
-      <div style={{ maxWidth: 1240, margin: "0 auto", padding: "0 40px" }}>
+    <section ref={ref} id="process" style={{ position: "relative", overflow: "hidden", background: "#EDE7D9", padding: "96px 0", scrollMarginTop: 74 }}>
+      {/* soft golden-hour Gulf sky: a quiet atmosphere layer, faded into the paper
+          so the journey card stays clean and the plane animation legible */}
+      <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
+        <Image src="/images/process-sky.jpg" alt="" fill sizes="100vw" style={{ objectFit: "cover", objectPosition: "center top", opacity: 0.58 }} />
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,rgba(237,231,217,.34) 0%,rgba(237,231,217,.68) 46%,#EDE7D9 80%)" }} />
+      </div>
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 1240, margin: "0 auto", padding: "0 40px" }}>
         <div className="anim ar" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
           <span style={{ width: 7, height: 7, background: "#B28A48", transform: "rotate(45deg)", display: "block" }} />
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: ".18em", color: "#8A6D2E" }}>HOW IT WORKS</span>

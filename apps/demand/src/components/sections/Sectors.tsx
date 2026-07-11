@@ -13,7 +13,7 @@ const SECTORS = [
     title: "Healthcare",
     subtitle: "For hospitals, clinics, and care facilities.",
     img: "/images/sector-healthcare.jpg",
-    alt: "Calm modern hospital ward interior",
+    alt: "Indonesian nurse reviewing a patient chart in a modern hospital ward",
     roles: ["Registered nurses", "Caregivers and orderlies", "Allied health professionals"],
     cta: "Request healthcare talent",
     medallion: (
@@ -28,7 +28,7 @@ const SECTORS = [
     title: "Hospitality",
     subtitle: "For hotels, restaurants, and coffee chains.",
     img: "/images/sector-hospitality.jpg",
-    alt: "Upscale hotel lobby cafe interior",
+    alt: "Indonesian barista preparing pour-over coffee in an upscale hotel cafe",
     roles: ["Baristas and F&B service", "Housekeeping teams", "Cooks and kitchen staff"],
     cta: "Request hospitality talent",
     medallion: (
@@ -45,7 +45,7 @@ const SECTORS = [
     title: "Wellness",
     subtitle: "For resorts, spas, and wellness centers.",
     img: "/images/sector-wellness.jpg",
-    alt: "Serene luxury spa treatment room",
+    alt: "Indonesian wellness therapist preparing a serene spa treatment room",
     roles: ["Spa and massage therapists", "Salon professionals", "Fitness and wellness staff"],
     cta: "Request wellness talent",
     medallion: (
