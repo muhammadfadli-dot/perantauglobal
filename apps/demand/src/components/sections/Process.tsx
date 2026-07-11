@@ -103,13 +103,13 @@ export function Process() {
             ))}
           </div>
         </div>
-        <div className="anim ar" style={{ marginTop: 24, background: "#20301F", backgroundImage: "repeating-linear-gradient(45deg,rgba(216,185,120,.045) 0,rgba(216,185,120,.045) 1px,transparent 1px,transparent 24px),repeating-linear-gradient(-45deg,rgba(216,185,120,.045) 0,rgba(216,185,120,.045) 1px,transparent 1px,transparent 24px)", borderRadius: 14, padding: "38px 44px", display: "grid", gridTemplateColumns: "auto 1fr", gap: 48, alignItems: "center", animationDelay: ".5s" }}>
+        <div className="anim ar g-2mo" style={{ marginTop: 24, background: "#20301F", backgroundImage: "repeating-linear-gradient(45deg,rgba(216,185,120,.045) 0,rgba(216,185,120,.045) 1px,transparent 1px,transparent 24px),repeating-linear-gradient(-45deg,rgba(216,185,120,.045) 0,rgba(216,185,120,.045) 1px,transparent 1px,transparent 24px)", borderRadius: 14, padding: "38px 44px", display: "grid", gridTemplateColumns: "auto 1fr", gap: 48, alignItems: "center", animationDelay: ".5s" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
             <span style={{ width: 52, height: 52, position: "relative", display: "block", flex: "none" }}>
               <span style={{ position: "absolute", inset: 0, border: "1.5px solid #B28A48", transform: "rotate(45deg)", display: "block" }} />
               <svg width="22" height="22" fill="none" stroke="#D8B978" strokeWidth="1.7" style={{ position: "absolute", left: 15, top: 15 }}><circle cx="9" cy="9" r="8" /><path d="M9 4.2V9l3.2 2" strokeLinecap="round" /></svg>
             </span>
-            <div><div style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "clamp(30px,7vw,46px)", lineHeight: 1, color: "#F3EEE1", whiteSpace: "nowrap" }}>About 2 months</div><div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".16em", color: "#D8B978", marginTop: 10 }}>SIGNED JOB ORDER TO ARRIVAL</div></div>
+            <div><div className="h2mo" style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "clamp(30px,7vw,46px)", lineHeight: 1, color: "#F3EEE1", whiteSpace: "nowrap" }}>About 2 months</div><div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".16em", color: "#D8B978", marginTop: 10 }}>SIGNED JOB ORDER TO ARRIVAL</div></div>
           </div>
           <p style={{ margin: 0, fontSize: 15.5, lineHeight: 1.62, color: "#B9C4A6", maxWidth: 600, textWrap: "pretty" }}>That is what a fully legal cross-border placement takes. We are 100% legal, and that is exactly why you can trust the timeline. An agency promising a visa in days is skipping the steps that protect you. We do not skip any of them.</p>
         </div>

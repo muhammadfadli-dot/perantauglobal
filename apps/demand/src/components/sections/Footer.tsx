@@ -1,4 +1,5 @@
 import { CONTACT, CREDENTIALS, waLink } from "@/lib/site-config";
+import { LogoMark } from "@/components/LogoMark";
 
 export function Footer() {
   return (
@@ -6,10 +7,7 @@ export function Footer() {
       <div className="g-foot" style={{ maxWidth: 1240, margin: "0 auto", padding: "0 40px 48px" }}>
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: 13, marginBottom: 18 }}>
-            <span style={{ position: "relative", width: 34, height: 34, display: "block", flex: "none" }}>
-              <span style={{ position: "absolute", inset: 0, border: "1.5px solid #B28A48", transform: "rotate(45deg)", display: "block" }} />
-              <span style={{ position: "absolute", inset: 11, background: "#B28A48", transform: "rotate(45deg)", display: "block" }} />
-            </span>
+            <LogoMark size={34} />
             <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <span style={{ fontWeight: 700, fontSize: 13.5, letterSpacing: ".09em", color: "#F3EEE1" }}>DAYA TALENTA GLOBAL</span>
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: ".22em", color: "#8A9781" }}>PART OF DAYALIMA GROUP</span>

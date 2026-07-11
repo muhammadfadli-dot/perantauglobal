@@ -661,6 +661,27 @@ textarea::placeholder {
   .nav-sub {
     display: none;
   }
+  /* "About 2 months" callout: stack so the nowrap heading cannot overflow */
+  .g-2mo {
+    grid-template-columns: 1fr !important;
+    gap: 22px !important;
+    padding: 30px 26px !important;
+  }
+  .g-2mo .h2mo {
+    white-space: normal !important;
+    font-size: clamp(26px, 8vw, 40px) !important;
+  }
+}
+@media (max-width: 480px) {
+  /* hero trust strip: at phone widths the long registration numbers do not fit
+     two-up, so stack them full width and swap side dividers for top dividers */
+  .g-trust {
+    grid-template-columns: 1fr;
+  }
+  .g-trust > div + div {
+    border-left: none !important;
+    border-top: 1px solid rgba(216, 185, 120, 0.14);
+  }
 }
 
 /* ---- reduced motion: reveal everything, kill animation ---- */

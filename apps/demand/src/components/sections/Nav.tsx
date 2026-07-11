@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LogoMark } from "@/components/LogoMark";
 
 const NAV_LINKS = [
   { href: "#why", label: "Why DTG" },
@@ -38,10 +39,7 @@ export function Nav() {
         }}
       >
         <a href="#top" style={{ display: "flex", alignItems: "center", gap: 13, textDecoration: "none" }}>
-          <span style={{ position: "relative", width: 34, height: 34, display: "block", flex: "none" }}>
-            <span style={{ position: "absolute", inset: 0, border: "1.5px solid #B28A48", transform: "rotate(45deg)", display: "block" }} />
-            <span style={{ position: "absolute", inset: 11, background: "#B28A48", transform: "rotate(45deg)", display: "block" }} />
-          </span>
+          <LogoMark size={34} />
           <span style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <span style={{ fontWeight: 700, fontSize: 13.5, letterSpacing: ".09em", color: brand1, transition: "color .3s ease" }}>
               DAYA TALENTA GLOBAL
