@@ -50,11 +50,17 @@ export function Process() {
 
   return (
     <section ref={ref} id="process" style={{ position: "relative", overflow: "hidden", background: "#EDE7D9", padding: "96px 0", scrollMarginTop: 74 }}>
-      {/* soft golden-hour Gulf sky: a quiet atmosphere layer, faded into the paper
-          so the journey card stays clean and the plane animation legible */}
+      {/* golden-hour Gulf sky, clearly visible. It fades in softly from the paper
+          section above and settles back to paper behind the white journey card so
+          the plane animation stays legible. A hard color break is avoided at both
+          seams (feathered top; the section below fades in from paper). */}
       <div aria-hidden style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: "none" }}>
-        <Image src="/images/process-sky.jpg" alt="" fill sizes="100vw" style={{ objectFit: "cover", objectPosition: "center top", opacity: 0.58 }} />
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,rgba(237,231,217,.34) 0%,rgba(237,231,217,.68) 46%,#EDE7D9 80%)" }} />
+        <Image src="/images/process-sky.jpg" alt="" fill sizes="100vw" style={{ objectFit: "cover", objectPosition: "center 42%", opacity: 0.92 }} />
+        {/* soft entry: dissolve the seam with the paper section above */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 130, background: "linear-gradient(180deg,#EDE7D9 0%,rgba(237,231,217,0) 100%)" }} />
+        {/* legibility wash: light enough to keep the sky present, clears in the
+            upper-mid band, then settles to paper by the journey card */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,rgba(237,231,217,.4) 0%,rgba(237,231,217,.12) 24%,rgba(237,231,217,.16) 46%,rgba(237,231,217,.52) 70%,#EDE7D9 90%)" }} />
       </div>
       <div style={{ position: "relative", zIndex: 1, maxWidth: 1240, margin: "0 auto", padding: "0 40px" }}>
         <div className="anim ar" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>

@@ -23,9 +23,14 @@ export function Guarantee() {
           "radial-gradient(1000px 520px at 50% -18%,rgba(178,138,72,.17),transparent 60%),repeating-linear-gradient(45deg,rgba(216,185,120,.04) 0,rgba(216,185,120,.04) 1px,transparent 1px,transparent 26px),repeating-linear-gradient(-45deg,rgba(216,185,120,.04) 0,rgba(216,185,120,.04) 1px,transparent 1px,transparent 26px)",
         padding: "104px 0",
         scrollMarginTop: 74,
+        position: "relative",
+        overflow: "hidden",
       }}
     >
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "0 40px" }}>
+      {/* soft seam from the paper section above: fade paper down into the dark so
+          the color does not break hard between How It Works and the guarantee */}
+      <div aria-hidden style={{ position: "absolute", top: 0, left: 0, right: 0, height: 150, background: "linear-gradient(180deg,#EDE7D9 0%,rgba(237,231,217,0) 100%)", pointerEvents: "none", zIndex: 0 }} />
+      <div style={{ position: "relative", zIndex: 1, maxWidth: 900, margin: "0 auto", padding: "0 40px" }}>
         <div style={{ position: "relative", border: "1px solid rgba(178,138,72,.55)", borderRadius: 14, padding: "64px 68px", textAlign: "center", background: "rgba(10,20,10,.28)" }}>
           {Object.entries(CORNERS).map(([k, s]) => (
             <span key={k} style={{ position: "absolute", width: 18, height: 18, ...s }} />

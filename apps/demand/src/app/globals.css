@@ -709,3 +709,61 @@ textarea::placeholder {
     color: #d8b978 !important;
   }
 }
+
+/* ---- talent stories marquee ---- */
+.tmarq {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+.tmarq-track {
+  display: flex;
+  width: max-content;
+  animation: tScroll 52s linear infinite;
+}
+.tmarq:hover .tmarq-track {
+  animation-play-state: paused;
+}
+@keyframes tScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.tcard {
+  flex: none;
+  width: 320px;
+  margin: 0 20px 0 0;
+  padding: 22px 24px;
+  text-align: left;
+  background: #fbf8f0;
+  border: 1px solid #dcd3be;
+  border-radius: 12px;
+  box-shadow: 0 10px 26px rgba(32, 48, 31, 0.06);
+}
+.tavatar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #20301f;
+  border: 1px solid #b28a48;
+  color: #d8b978;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tmarq {
+    overflow-x: auto;
+  }
+  .tmarq-track {
+    animation: none !important;
+  }
+}
