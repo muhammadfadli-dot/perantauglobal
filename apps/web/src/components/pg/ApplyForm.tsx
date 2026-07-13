@@ -87,7 +87,10 @@ export function ApplyForm({
   // Fase 2 CV grader: CV di depan funnel. Variant + pendingId di-init client-side
   // via lazy initializer (LP statis SSG; bukan setState-in-effect biar lolos lint).
   // pendingId dipakai sebagai path upload anon DAN PK pending_submissions nanti.
-  const [pendingId] = useState<string>(() =>
+  // DIREGENERATE per attempt upload (handleCvChange) - lihat catatan di sana:
+  // bucket pending-cv anon INSERT-only tanpa upsert, jadi re-upload ke path yg
+  // sama = 409. UUID baru tiap attempt = path baru = re-upload (loop gate) lolos.
+  const [pendingId, setPendingId] = useState<string>(() =>
     typeof window !== "undefined" && typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID()
       : "",
@@ -189,14 +192,14 @@ export function ApplyForm({
 
   // Fire the position-fit preview once a CV is staged. Best-effort + non-blocking:
   // any failure just leaves the card hidden (the route already 200s with no fit).
-  async function runCvPreview(path: string, mime: string) {
+  async function runCvPreview(id: string, path: string, mime: string) {
     setCvFit(null);
     setCvFitLoading(true);
     try {
       const res = await fetch(`/api/lowongan/${positionSlug}/cv-preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pending_id: pendingId, cv_path: path, cv_mime: mime, answers }),
+        body: JSON.stringify({ pending_id: id, cv_path: path, cv_mime: mime, answers }),
       });
       const data = res.ok ? await res.json().catch(() => null) : null;
       setCvFit((data?.fit as CvFitPreview | null) ?? null);
@@ -232,13 +235,22 @@ export function ApplyForm({
     }
     setCvFileName(file.name);
     setCvStatus("uploading");
-    const res = await uploadPendingCv(pendingId, file);
+    // Tiap attempt upload pakai pendingId BARU. Path pending-cv deterministic
+    // (pending/<id>/cv.<ext>) + bucket anon INSERT-only tanpa upsert -> upload
+    // ulang ke path yg sama balikin 409. UUID baru per attempt = path baru =
+    // re-upload (mis. abis diblok gate lalu perbaiki CV) selalu lolos. File
+    // attempt sebelumnya jadi orphan -> kepurge otomatis <=48 jam. pendingId
+    // state jadi attemptId terakhir; dipakai submit sebagai PK + validasi path.
+    const attemptId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : pendingId;
+    setPendingId(attemptId);
+    const res = await uploadPendingCv(attemptId, file);
     if (res.ok) {
       setCvPath(res.path);
       setCvMime(res.mime);
       setCvSize(res.size);
       setCvStatus("uploaded");
-      void runCvPreview(res.path, res.mime);
+      void runCvPreview(attemptId, res.path, res.mime);
     } else {
       setCvError(res.error);
       setCvStatus("error");
