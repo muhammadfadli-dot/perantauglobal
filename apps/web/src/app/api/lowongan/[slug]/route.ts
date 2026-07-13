@@ -242,7 +242,11 @@ export async function POST(
       // RPC ditambah migration 0079; generated DB types baru include-nya setelah
       // migration di-apply + types di-regen (Fase 5). Cast ke signature generik
       // (bukan `any`) supaya typecheck lolos sebelum itu.
-      const rpc = supabaseV2().rpc as unknown as (
+      // Bind rpc ke client: `const rpc = db.rpc` yang lepas kehilangan `this` dan
+      // throw di dalam supabase-js (ketelen catch fail-open) -> rate limit ini
+      // sebelumnya nggak pernah jalan. Bind supaya call beneran nyampe PostgREST.
+      const rlDb = supabaseV2();
+      const rpc = rlDb.rpc.bind(rlDb) as unknown as (
         fn: string,
         args: Record<string, unknown>,
       ) => Promise<{ data: boolean | null; error: { message: string } | null }>;

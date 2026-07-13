@@ -57,7 +57,12 @@ export async function POST(
       request.headers.get("x-real-ip") ||
       null;
 
-    const rpc = supabaseV2().rpc as unknown as (
+    const db = supabaseV2();
+    // Bind rpc to the client. A detached `const rpc = db.rpc` loses `this` and
+    // throws inside supabase-js (silently swallowed by the fail-open catch below),
+    // so the rate limit + telemetry never actually ran. Bind so the call reaches
+    // PostgREST.
+    const rpc = db.rpc.bind(db) as unknown as (
       fn: string,
       args: Record<string, unknown>,
     ) => Promise<{ data: unknown; error: { message: string } | null }>;
@@ -81,7 +86,7 @@ export async function POST(
       // ignore — fail open
     }
 
-    const { data, error } = await supabaseV2().functions.invoke("grade-cv-preview", {
+    const { data, error } = await db.functions.invoke("grade-cv-preview", {
       body: {
         cv_path: body.cv_path,
         cv_mime: body.cv_mime ?? null,
