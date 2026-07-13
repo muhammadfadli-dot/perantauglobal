@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { waitUntil } from "@vercel/functions";
 import { supabaseV2 } from "@/lib/supabase-v2";
 
 /**
@@ -98,18 +99,23 @@ export async function POST(
 
     const scored = Boolean(!error && data?.ok && data?.fit);
 
-    // Telemetry (fire-and-forget): stamp fit_score + outcome onto the event row so
-    // the gate threshold can be tuned from the real distribution (WS-6a). Never
-    // blocks or delays the response.
+    // Telemetry: stamp fit_score + outcome onto the event row so the gate threshold
+    // can be tuned from the real distribution (WS-6a). waitUntil keeps the lambda
+    // alive past the response so this background write actually completes — a bare
+    // un-awaited promise gets frozen the moment Vercel flushes the response.
     if (eventId != null) {
       const outcome = error ? "error" : scored ? "scored" : "no_fit";
       const fitScore =
         scored && typeof data.fit.fit_score === "number" ? data.fit.fit_score : null;
-      void rpc("record_cv_preview_outcome", {
-        p_event_id: eventId,
-        p_fit_score: fitScore,
-        p_outcome: outcome,
-      }).catch(() => {});
+      waitUntil(
+        rpc("record_cv_preview_outcome", {
+          p_event_id: eventId,
+          p_fit_score: fitScore,
+          p_outcome: outcome,
+        })
+          .then(() => undefined)
+          .catch(() => undefined),
+      );
     }
 
     if (!scored) return noFit();
