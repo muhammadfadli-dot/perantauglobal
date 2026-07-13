@@ -6,6 +6,7 @@ import { Button, Field, Input, Textarea } from "./primitives";
 import { trackEvent, generateEventId, getMetaCookies } from "@/lib/tracking";
 import type { AppliedFormField } from "@/lib/positions-db";
 import { uploadPendingCv, validateCvFile, isCvUploadConfigured } from "@/lib/supabase-storage-anon";
+import { useTurnstile } from "./useTurnstile";
 import { CV_UPLOAD_MICROCOPY, CV_CONSENT_TEXT } from "@/lib/cv-consent";
 import { CvFitCard, type CvFitPreview } from "./CvFitCard";
 
@@ -102,6 +103,11 @@ export function ApplyForm({
       new URLSearchParams(window.location.search).get("ab") === "cv_req",
   );
   const cvUploadAvailable = isCvUploadConfigured();
+  // Cloudflare Turnstile (managed, invisible-first). Inert when the site key is
+  // absent (preview/dev) — runTurnstile() resolves null and callers proceed.
+  const { setContainer: turnstileContainerRef, execute: runTurnstile } = useTurnstile(
+    process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+  );
   const [cvStatus, setCvStatus] = useState<"idle" | "uploading" | "uploaded" | "error">("idle");
   const [cvPath, setCvPath] = useState("");
   const [cvMime, setCvMime] = useState("");
@@ -196,10 +202,11 @@ export function ApplyForm({
     setCvFit(null);
     setCvFitLoading(true);
     try {
+      const turnstileToken = await runTurnstile();
       const res = await fetch(`/api/lowongan/${positionSlug}/cv-preview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ pending_id: id, cv_path: path, cv_mime: mime, answers }),
+        body: JSON.stringify({ pending_id: id, cv_path: path, cv_mime: mime, answers, turnstile_token: turnstileToken }),
       });
       const data = res.ok ? await res.json().catch(() => null) : null;
       setCvFit((data?.fit as CvFitPreview | null) ?? null);
@@ -301,6 +308,7 @@ export function ApplyForm({
 
     setStatus("loading");
 
+    const turnstileToken = await runTurnstile();
     const eventId = generateEventId(`lowongan_${positionSlug}`);
     const { fbp, fbc } = getMetaCookies();
     const cleanedEmail = identity.email.trim().toLowerCase();
@@ -328,6 +336,7 @@ export function ApplyForm({
         ? { cv_path: cvPath, cv_mime: cvMime, cv_size: cvSize }
         : {}),
       ab_variant: cvRequired ? "cv_required" : "control",
+      turnstile_token: turnstileToken,
       hp: honeypot,
       eventId,
       fbp,
@@ -427,6 +436,11 @@ export function ApplyForm({
       className="bg-pg-white border border-pg-ink-100 rounded-2xl p-5 md:p-6"
     >
       <StepIndicator step={step} />
+
+      {/* Cloudflare Turnstile (managed, interaction-only). Invisible for most
+          visitors; renders a challenge here only when Cloudflare flags the
+          request. Kept outside the step branches so it mounts once. */}
+      <div ref={turnstileContainerRef} className="flex justify-center empty:hidden [&:not(:empty)]:mt-3" />
 
       {/* Honeypot: hidden anti-bot field. Humans never see it / tab to it. */}
       <input

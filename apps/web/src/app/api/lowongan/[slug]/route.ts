@@ -3,6 +3,7 @@ import { waitUntil } from "@vercel/functions";
 import { sendMetaEvent } from "@/lib/meta-capi";
 import { writePendingSubmission } from "@/lib/pending-write";
 import { supabaseV2 } from "@/lib/supabase-v2";
+import { verifyTurnstile } from "@/lib/turnstile-verify";
 import { CV_CONSENT_PURPOSE, CV_CONSENT_TEXT, CV_CONSENT_VERSION } from "@/lib/cv-consent";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -77,6 +78,9 @@ interface CandidatePayload {
   cv_size?: number;
   /** A/B variant tag: 'cv_required' (treatment) | anything else -> 'control'. */
   ab_variant?: string;
+  /** Cloudflare Turnstile token (managed widget). Verified server-side; submit
+   * fail-opens on absence/failure — honeypot + rate limit + email verify guard. */
+  turnstile_token?: string;
   /** Honeypot: hidden field, bots fill it, humans never see it. Non-empty = drop. */
   hp?: string;
   eventId?: string;
@@ -234,6 +238,14 @@ export async function POST(
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       request.headers.get("x-real-ip") ||
       null;
+
+    // Turnstile: defense-in-depth only on submit — NEVER block (this is the
+    // conversion event). Honeypot + DB rate limit + email verification are the
+    // hard guards. Just log a rejected/absent token for visibility.
+    const ts = await verifyTurnstile(body.turnstile_token, clientIp);
+    if (!ts.pass && ts.reason !== "off" && ts.reason !== "network-error") {
+      console.warn(`[lowongan] turnstile ${ts.reason} on submit for ${email}`);
+    }
 
     // Anti-abuse: DB-level rate limit per email + per IP (migration 0079).
     // Fail-open if the RPC errors (e.g. not yet applied) so a transient issue

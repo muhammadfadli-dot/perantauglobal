@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
 import { supabaseV2 } from "@/lib/supabase-v2";
+import { verifyTurnstile } from "@/lib/turnstile-verify";
 
 /**
  * CV fit preview ("CV di depan") for the public apply form.
@@ -49,6 +50,7 @@ export async function POST(
       cv_path?: string;
       cv_mime?: string;
       answers?: Record<string, string | string[]>;
+      turnstile_token?: string;
     };
 
     if (!validCvPath(body.pending_id, body.cv_path)) return noFit();
@@ -57,6 +59,13 @@ export async function POST(
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       request.headers.get("x-real-ip") ||
       null;
+
+    // Turnstile: keep bots off the LLM path. Fail-CLOSED on a missing/rejected
+    // token (a bot gets no fit), but fail-OPEN on a Cloudflare outage or when the
+    // feature is off — and the gate itself is fail-open, so a legit user whose
+    // widget failed still just sees no card and can submit.
+    const ts = await verifyTurnstile(body.turnstile_token, clientIp);
+    if (!ts.pass && (ts.reason === "no-token" || ts.reason === "failed")) return noFit();
 
     const db = supabaseV2();
     // Bind rpc to the client. A detached `const rpc = db.rpc` loses `this` and
