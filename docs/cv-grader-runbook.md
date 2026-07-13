@@ -56,7 +56,17 @@ prints in the run log. `errors: []` = healthy.
 | Turnstile (managed) | preview + submit | preview **fail-closed** on bad/missing token; submit **fail-open** (log only) |
 | Rate limit — submit | `check_apply_rate_limit` (0079) | 5/email + 15/IP per 10 min, fail-open |
 | Rate limit — preview | `check_cv_preview_rate_limit` (0095) | 8/IP per 10 min + 5/pending per 24 h, fail-open |
-| Bucket caps | `pending-cv` | 5 MB + MIME whitelist, anon INSERT-only, blind write-only |
+| Rate limit — upload | `check_cv_upload_rate_limit` (0098) | 10/IP per 10 min, fail-open |
+| Bucket caps | `pending-cv` | 5 MB + MIME whitelist; upload via server-minted signed URL (anon INSERT policy dropped, 0099) |
+
+**Why no Turnstile on the CV-upload path** (`cv-upload-url`): a CV is required to
+submit, so a fail-closed check there would kill legitimate applications whose
+widget was blocked — unlike preview, whose gate is fail-open. The upload flood
+vector is instead bounded by the per-IP upload limit + the 5 MB/MIME caps + the
+48 h purge, and the expensive LLM path stays Turnstile-gated at preview. Adding a
+third Turnstile execute to the upload would cost real funnel friction for little
+gain. Telemetry writes (`record_cv_preview_outcome`) are bound to the caller's
+own `pending_id` (migration 0100) so a guessable event id can't poison tuning.
 
 Turnstile keys live on Vercel **Production only** (`NEXT_PUBLIC_TURNSTILE_SITE_KEY`
 public + `TURNSTILE_SECRET_KEY` server-only). Widget hostname allowlist
@@ -129,6 +139,9 @@ daily, reset by the cron), errors [] in the cron report.
 | 0095 | purge excludes referenced files; telemetry columns; rate-limit v2 (per-IP + per-pending, returns event id); `record_cv_preview_outcome` |
 | 0096 | `pending_purge_daily` + `purge_stale_pending_submissions`; `stamp_pending_cv_fit` |
 | 0097 | `list_stale_referenced_pending_cv` (dangling backstop) |
+| 0098 | `cv_upload_events` + `check_cv_upload_rate_limit` (per-IP, for signed-URL mint) |
+| 0099 | drop the open anon-INSERT policy on `pending-cv` (upload now via signed URL) |
+| 0100 | bind `record_cv_preview_outcome` to caller's `pending_id` (telemetry-poisoning guard) |
 
 Do **not** edit `grade-cv` (verify_jwt must stay true) or the
 `handle_new_auth_user` signup trigger without the verbatim-replace + one-block

@@ -14,6 +14,14 @@ import { supabaseV2 } from "@/lib/supabase-v2";
  * Feature-flagged: no CV_PREVIEW_SECRET → `{ ok: false }`, and the client falls
  * back to a direct upload (dev/preview, or a safe rollback while the policy is
  * still in place).
+ *
+ * No Turnstile here (deliberate deviation from the WS-5 spec): this is the CV
+ * upload, and a CV is required to submit, so a fail-CLOSED Turnstile check would
+ * kill legitimate applications whose widget was blocked — unlike cv-preview,
+ * whose gate is fail-open. The residual risk (scripted storage flood) is small
+ * and already bounded: per-IP rate limit (10/10min, migration 0098), 5 MB + MIME
+ * caps on the bucket, and the 48 h orphan purge. The expensive LLM path stays
+ * Turnstile-gated at cv-preview, so a flood here burns only transient storage.
  */
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

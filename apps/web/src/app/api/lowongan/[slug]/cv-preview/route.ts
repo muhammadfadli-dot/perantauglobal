@@ -122,6 +122,9 @@ export async function POST(
       waitUntil(
         rpc("record_cv_preview_outcome", {
           p_event_id: eventId,
+          // Bind the write to this caller's own event (migration 0100): the
+          // event id is sequential/guessable, pending_id is the random uuid.
+          p_pending_id: body.pending_id,
           p_fit_score: fitScore,
           p_outcome: outcome,
         })

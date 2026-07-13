@@ -279,7 +279,15 @@ export async function POST(
     // CV staged anon (Fase 2). Strict re-validation server-side; invalid -> drop
     // the pointer (submit still proceeds without a CV).
     const cvStaging = validatePendingCv(body.pending_id, body.cv_path, body.cv_mime, body.cv_size);
-    const abVariant = body.ab_variant === "cv_required" ? "cv_required" : "control";
+    // Era tag for the submission + CAPI. Whitelist the known values so a bogus
+    // client value can't poison analytics; anything else falls back to "control".
+    // "gate_v1" = the CV-fit-gate era (client sends this now); "cv_required" +
+    // "control" = pre-gate A/B history. Without "gate_v1" here every gate-era
+    // submit was silently written as "control" (per-era conversion analysis lost).
+    const abVariant =
+      body.ab_variant === "gate_v1" || body.ab_variant === "cv_required"
+        ? body.ab_variant
+        : "control";
 
     // Reconstruct _fbc from fbclid when the Pixel cookie wasn't set in time
     // (Meta accepts `fb.1.<ts>.<fbclid>`). Rescues attribution for the ~25% of
