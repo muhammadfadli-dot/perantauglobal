@@ -337,6 +337,24 @@ export async function POST(
       );
     }
 
+    // WS-6d: stamp the CV fit onto the just-created pending. The score is read
+    // from the SERVER-recorded preview telemetry (cv_preview_events), never from
+    // the client, so admin/BD can see the pre-verification fit and we can analyze
+    // conversion per band. No-op when no preview ran. waitUntil so the background
+    // write survives the response flush; bound rpc so `this` isn't lost.
+    {
+      const stampDb = supabaseV2();
+      const stampRpc = stampDb.rpc.bind(stampDb) as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: unknown; error: { message: string } | null }>;
+      waitUntil(
+        stampRpc("stamp_pending_cv_fit", { p_pending_id: writeResult.pendingId })
+          .then(() => undefined)
+          .catch(() => undefined),
+      );
+    }
+
     // Step 2: create auth user with password. Supabase sends the verification
     // email. Redirect lands on the platform domain (cross-subdomain) where
     // PKCE code exchange sets the session cookie; the trigger fires on the
