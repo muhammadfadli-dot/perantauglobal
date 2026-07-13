@@ -28,6 +28,12 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.perantauglobal.c
 // once enough characters are typed so we don't ping the API on every keystroke.
 const REFERRAL_MIN_LEN = 4;
 
+// "CV di depan" gate: skor kecocokan minimum ("lumayan cocok") supaya kandidat
+// boleh submit lamaran. Di bawah ini, submit diblok + kandidat diarahkan
+// memperkuat CV lalu unggah ulang. Gate ini soft/UX (bukan security boundary);
+// admin tetap melihat fit asli setelah materialisasi.
+const CV_FIT_THRESHOLD = 45;
+
 type Identity = {
   fullName: string;
   email: string;
@@ -105,6 +111,16 @@ export function ApplyForm({
   // this runs, and a miss just shows nothing.
   const [cvFit, setCvFit] = useState<CvFitPreview | null>(null);
   const [cvFitLoading, setCvFitLoading] = useState(false);
+
+  // CV-gate derived state. Gate aktif kalau upload CV tersedia (di prod: selalu).
+  // Fail-open: fitScore null setelah loading kelar (penilaian gagal / CV tak
+  // terbaca) TIDAK memblok submit — jangan hukum kandidat karena error transient.
+  const fitScore = cvFit?.fit_score ?? null;
+  const cvGateActive = cvUploadAvailable;
+  const cvGateReady = cvStatus === "uploaded" && !cvFitLoading;
+  const cvGateBlocked = cvGateActive && cvGateReady && fitScore != null && fitScore < CV_FIT_THRESHOLD;
+  const cvGatePassed =
+    !cvGateActive || (cvGateReady && (fitScore == null || fitScore >= CV_FIT_THRESHOLD));
   // Honeypot: hidden field, bots fill it, humans never see/tab to it.
   const [honeypot, setHoneypot] = useState("");
 
@@ -251,12 +267,22 @@ export function ApplyForm({
       return;
     }
 
-    // Treatment "CV wajib": hard gate. Submit baru boleh kalau CV udah ke-upload.
-    if (cvRequired && cvUploadAvailable && cvStatus !== "uploaded") {
+    // "CV di depan" gate: CV wajib + kecocokan >= threshold ("lumayan cocok").
+    if (cvGateActive && cvStatus !== "uploaded") {
       setErrorMsg(
         cvStatus === "uploading"
           ? "Tunggu CV selesai diunggah dulu."
-          : "Lampirkan CV dulu (wajib) untuk lanjut daftar.",
+          : "Lampirkan CV dulu untuk lanjut daftar posisi ini.",
+      );
+      return;
+    }
+    if (cvGateActive && cvFitLoading) {
+      setErrorMsg("Sebentar, kami sedang menilai kecocokan CV kamu.");
+      return;
+    }
+    if (cvGateBlocked) {
+      setErrorMsg(
+        "CV kamu belum cukup cocok untuk posisi ini. Lihat bagian yang bisa diperkuat di atas, lalu unggah CV yang sudah diperbarui.",
       );
       return;
     }
@@ -520,9 +546,9 @@ export function ApplyForm({
             <div className="mt-6 border-t border-pg-ink-100 pt-5">
               <div className="flex items-center gap-2 mb-1">
                 <div className="text-sm font-bold text-pg-ink-900">
-                  Lampirkan CV {cvRequired ? "(wajib)" : "(opsional)"}
+                  Lampirkan CV {cvGateActive ? "(wajib)" : "(opsional)"}
                 </div>
-                {cvRequired && (
+                {cvGateActive && (
                   <span
                     className="inline-flex px-2 py-0.5 rounded text-[10px] font-bold tracking-[0.06em] uppercase"
                     style={{ background: "var(--pg-err-bg)", color: "var(--pg-err)" }}
@@ -532,9 +558,7 @@ export function ApplyForm({
                 )}
               </div>
               <p className="text-[13px] text-pg-ink-500 leading-relaxed mb-3">
-                {cvRequired
-                  ? `Lamaran kamu langsung dinilai tim kami. ${CV_UPLOAD_MICROCOPY}`
-                  : `Bikin lamaran kamu lebih kuat dan langsung dinilai. ${CV_UPLOAD_MICROCOPY}`}
+                {`CV kamu langsung dinilai kecocokannya dengan posisi ini. Kalau sudah cukup cocok, kamu bisa lanjut daftar. ${CV_UPLOAD_MICROCOPY}`}
               </p>
 
               <label
@@ -671,6 +695,32 @@ export function ApplyForm({
             </div>
           )}
 
+          {cvGateActive && !cvGatePassed && !cvGateBlocked && status !== "loading" && (
+            <div
+              className="mt-4 px-3.5 py-3 rounded-lg flex items-start gap-2 text-[12px] leading-relaxed"
+              style={{ background: "var(--pg-info-bg)", color: "var(--pg-info)" }}
+            >
+              <Icon name="info" size={16} className="shrink-0 mt-0.5" />
+              <span>
+                {cvStatus === "uploaded"
+                  ? "Menunggu hasil penilaian CV untuk bisa lanjut daftar."
+                  : "Lampirkan CV kamu dulu - kami cek kecocokannya dengan posisi ini sebelum daftar."}
+              </span>
+            </div>
+          )}
+          {cvGateBlocked && (
+            <div
+              className="mt-4 px-3.5 py-3 rounded-lg flex items-start gap-2"
+              style={{ background: "var(--pg-warn-bg)", color: "var(--pg-warn)" }}
+            >
+              <Icon name="warn" size={16} className="shrink-0 mt-0.5" />
+              <div className="text-[12px] leading-relaxed">
+                <b>CV kamu belum cukup cocok untuk posisi ini.</b> Perkuat CV kamu (tambah
+                pengalaman atau sertifikat yang relevan), lalu unggah lagi untuk bisa lanjut daftar.
+              </div>
+            </div>
+          )}
+
           <div className="mt-5 flex gap-2">
             <button
               type="button"
@@ -683,7 +733,12 @@ export function ApplyForm({
             >
               <Icon name="arrow_left" size={18} /> Kembali
             </button>
-            <Button type="submit" variant="primary" block disabled={status === "loading"}>
+            <Button
+              type="submit"
+              variant="primary"
+              block
+              disabled={status === "loading" || !cvGatePassed}
+            >
               {status === "loading" ? (
                 "Mengirim…"
               ) : (
