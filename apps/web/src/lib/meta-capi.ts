@@ -31,6 +31,20 @@ function sha256(value: string): string {
     .digest("hex");
 }
 
+/**
+ * Normalize an Indonesian phone to E.164 digits (no "+") before hashing.
+ * Meta matches `ph` on country-coded numbers, so a bare "08xx"/"8xx" hashes to a
+ * value that can never match a Meta profile — silently tanking match quality on
+ * every Lead. Convert the local prefixes to 62; leave already-coded or foreign
+ * numbers as digits-only (never worse than the previous strip-only behaviour).
+ */
+function normalizePhoneId(phone: string): string {
+  let d = phone.replace(/\D/g, "");
+  if (d.startsWith("0")) d = "62" + d.slice(1);
+  else if (d.startsWith("8")) d = "62" + d;
+  return d;
+}
+
 /** Standard Meta event names we use */
 export type MetaEventName = "Lead" | "Contact" | "CompleteRegistration";
 
@@ -94,9 +108,7 @@ export async function sendMetaEvent(params: MetaEventParams): Promise<void> {
 
   if (userData.email) user_data.em = [sha256(userData.email)];
   if (userData.phone) {
-    // Remove non-digit characters, then hash
-    const cleanPhone = userData.phone.replace(/\D/g, "");
-    user_data.ph = [sha256(cleanPhone)];
+    user_data.ph = [sha256(normalizePhoneId(userData.phone))];
   }
   if (userData.firstName) user_data.fn = [sha256(userData.firstName)];
   if (userData.city) user_data.ct = [sha256(userData.city)];
