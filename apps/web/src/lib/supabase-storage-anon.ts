@@ -78,14 +78,42 @@ function friendlyUploadError(msg: string): string {
   return "Gagal mengunggah CV. Coba lagi sebentar ya.";
 }
 
+/** Ask the server to mint a signed upload URL for this pending path (WS-5). */
+async function mintSignedUpload(
+  slug: string,
+  pendingId: string,
+  ext: string,
+): Promise<{ token: string; path: string } | null> {
+  try {
+    const res = await fetch(`/api/lowongan/${slug}/cv-upload-url`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pending_id: pendingId, ext }),
+    });
+    const data = res.ok ? await res.json().catch(() => null) : null;
+    if (data?.ok && typeof data.token === "string" && typeof data.path === "string") {
+      return { token: data.token, path: data.path };
+    }
+  } catch {
+    // ignore — caller falls back to a direct upload
+  }
+  return null;
+}
+
 /**
  * Upload CV ke pending-cv/pending/<pendingId>/cv.<ext>. pendingId WAJIB sama
  * dengan PK pending_submissions yang nanti dibikin server (path === PK), biar
- * trigger + cv-materialize bisa nyambungin. upsert:false -> gak bisa numpuk.
+ * trigger + cv-materialize bisa nyambungin.
+ *
+ * WS-5: pakai signed upload URL yang di-mint server (rate-limited) kalau `slug`
+ * ada + route-nya aktif. Kalau nggak (dev/preview tanpa secret, atau error),
+ * fallback ke direct anon upload. Setelah policy anon-INSERT dicabut (0099),
+ * jalur signed URL yang jadi satu-satunya yang works.
  */
 export async function uploadPendingCv(
   pendingId: string,
   file: File,
+  slug?: string,
 ): Promise<CvUploadResult> {
   const v = validateCvFile(file);
   if (!v.ok) return v;
@@ -95,6 +123,21 @@ export async function uploadPendingCv(
 
   const ext = MIME_EXT[file.type] ?? "pdf";
   const path = `pending/${pendingId}/cv.${ext}`;
+
+  // Preferred path: server-minted signed URL (no open anon INSERT).
+  if (slug) {
+    const signed = await mintSignedUpload(slug, pendingId, ext);
+    if (signed) {
+      const { error } = await c.storage
+        .from(PENDING_CV_BUCKET)
+        .uploadToSignedUrl(signed.path, signed.token, file, { contentType: file.type });
+      if (!error) return { ok: true, path: signed.path, mime: file.type, size: file.size };
+      // fall through to direct upload on a signed-URL upload error
+    }
+  }
+
+  // Fallback: direct anon upload (works only while the 0078 anon-INSERT policy
+  // is still in place; after 0099 this fails and returns a friendly error).
   const { error } = await c.storage.from(PENDING_CV_BUCKET).upload(path, file, {
     upsert: false,
     contentType: file.type,

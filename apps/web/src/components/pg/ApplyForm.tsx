@@ -263,7 +263,7 @@ export function ApplyForm({
     const attemptId =
       typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : pendingId;
     setPendingId(attemptId);
-    const res = await uploadPendingCv(attemptId, file);
+    const res = await uploadPendingCv(attemptId, file, positionSlug);
     if (res.ok) {
       setCvPath(res.path);
       setCvMime(res.mime);
