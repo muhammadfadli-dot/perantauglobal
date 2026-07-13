@@ -80,6 +80,17 @@ Deno.serve(async (req) => {
       .from("pending-cv")
       .move(doc.file_path, dest, { destinationBucket: "candidate-documents" });
     if (mv.error) {
+      // File sudah TIDAK ADA di pending-cv: kandidat verify email > 48 jam setelah
+      // upload sehingga purge harian keburu menghapusnya (kasus lama, sebelum fix
+      // exclude WS-2a migration 0095). Row candidate_documents jadi dangling —
+      // kandidat "punya CV" padahal filenya hilang, dan grade-cv nggak pernah
+      // jalan. Bersihkan metadata-nya biar konsisten; kandidat bisa upload CV baru
+      // lewat portal. Bukan error fatal (WS-2b).
+      const emsg = (mv.error.message || "").toLowerCase();
+      if (emsg.includes("not found") || emsg.includes("does not exist") || emsg.includes("no such")) {
+        await svc.from("candidate_documents").delete().eq("id", doc.id);
+        return json({ ok: true, materialized: false, reason: "stale pointer cleaned", document_id: doc.id }, 200);
+      }
       return json({ ok: false, materialized: false, error: `move: ${mv.error.message}` }, 200);
     }
   } catch (e) {

@@ -57,15 +57,26 @@ export async function POST(
       request.headers.get("x-real-ip") ||
       null;
 
-    // Per-IP rate limit (migration 0094). Fail-open if the RPC errors / isn't
-    // applied yet, so a transient issue never blocks a legit applicant.
+    const rpc = supabaseV2().rpc as unknown as (
+      fn: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: unknown; error: { message: string } | null }>;
+
+    // Rate limit v2 (migration 0095): cap per-IP (8/10min) + per-pending (5/24h).
+    // Returns the event id to stamp the outcome on, or null when blocked. Fail-open
+    // if the RPC errors / isn't applied yet — a transient issue never blocks a legit
+    // applicant; we just skip telemetry for that call (eventId stays null).
+    let eventId: number | null = null;
     try {
-      const rpc = supabaseV2().rpc as unknown as (
-        fn: string,
-        args: Record<string, unknown>,
-      ) => Promise<{ data: boolean | null; error: { message: string } | null }>;
-      const { data: underLimit, error } = await rpc("check_cv_preview_rate_limit", { p_ip: clientIp });
-      if (!error && underLimit === false) return noFit();
+      const { data: evId, error } = await rpc("check_cv_preview_rate_limit", {
+        p_ip: clientIp,
+        p_pending_id: body.pending_id,
+        p_position_slug: slug,
+      });
+      if (!error) {
+        if (evId == null) return noFit(); // rate limited
+        eventId = Number(evId);
+      }
     } catch {
       // ignore — fail open
     }
@@ -80,7 +91,23 @@ export async function POST(
       headers: { "x-preview-secret": process.env.CV_PREVIEW_SECRET },
     });
 
-    if (error || !data?.ok || !data?.fit) return noFit();
+    const scored = Boolean(!error && data?.ok && data?.fit);
+
+    // Telemetry (fire-and-forget): stamp fit_score + outcome onto the event row so
+    // the gate threshold can be tuned from the real distribution (WS-6a). Never
+    // blocks or delays the response.
+    if (eventId != null) {
+      const outcome = error ? "error" : scored ? "scored" : "no_fit";
+      const fitScore =
+        scored && typeof data.fit.fit_score === "number" ? data.fit.fit_score : null;
+      void rpc("record_cv_preview_outcome", {
+        p_event_id: eventId,
+        p_fit_score: fitScore,
+        p_outcome: outcome,
+      }).catch(() => {});
+    }
+
+    if (!scored) return noFit();
     return NextResponse.json({ fit: data.fit });
   } catch {
     return noFit();
