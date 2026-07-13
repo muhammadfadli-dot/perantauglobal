@@ -135,14 +135,16 @@ const PENDING_CV_PATH_RE = /^pending\/[0-9a-f-]{36}\/cv\.(pdf|jpe?g|png|heic|hei
 
 async function previewFit(input: {
   cv_path: string; cv_mime: string | null; position_slug: string; answers: Record<string, unknown> | null;
-}): Promise<{ ok: true; fit: PreviewFit } | { ok: false; error: string }> {
+}): Promise<{ ok: true; fit: PreviewFit } | { ok: false; error: string; unreadable?: boolean }> {
   if (!PENDING_CV_PATH_RE.test(input.cv_path)) return { ok: false, error: "bad cv_path" };
   if (!input.position_slug) return { ok: false, error: "no position" };
 
   // 1. Extract the CV in-memory from pending-cv (single doc — no credential docs
   //    exist pre-account). Same prompt/model/schema as the persisted path.
+  //    unreadable=true marks a genuine "we couldn't read this file" so the apply
+  //    form can nudge the candidate to re-upload a clearer one (WS-7a).
   const cvUrl = await downloadDataUrl("pending-cv", input.cv_path, input.cv_mime);
-  if (!cvUrl) return { ok: false, error: "cv not readable" };
+  if (!cvUrl) return { ok: false, error: "cv not readable", unreadable: true };
   // deno-lint-ignore no-explicit-any
   const extractContent: any[] = [
     { type: "text", text: EXTRACTION_PROMPT },
@@ -154,9 +156,9 @@ async function previewFit(input: {
     const { res, payload } = await callGateway(EXTRACT_MODEL, extractContent, EXTRACTION_JSON_SCHEMA);
     // deno-lint-ignore no-explicit-any
     const choice = (payload as any)?.choices?.[0]?.message?.content;
-    if (!res.ok || !choice) return { ok: false, error: "extract failed" };
+    if (!res.ok || !choice) return { ok: false, error: "extract failed", unreadable: true };
     parsed = JSON.parse(choice);
-  } catch { return { ok: false, error: "extract error" }; }
+  } catch { return { ok: false, error: "extract error", unreadable: true }; }
 
   // 2. Fit against the position's REAL requirements + this applicant's answers.
   const slug = input.position_slug;
@@ -210,5 +212,7 @@ Deno.serve(async (req) => {
     position_slug: String(body.position_slug ?? ""),
     answers: (body.answers ?? null) as Record<string, unknown> | null,
   });
-  return json({ mode: "preview", ...r }, r.ok ? 200 : 422);
+  // Always 200 so the same-origin proxy route can read the body (ok flag +
+  // unreadable reason). Non-ok is signalled in the JSON, not the HTTP status.
+  return json({ mode: "preview", ...r }, 200);
 });

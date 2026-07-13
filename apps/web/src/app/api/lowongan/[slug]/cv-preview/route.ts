@@ -107,13 +107,16 @@ export async function POST(
     });
 
     const scored = Boolean(!error && data?.ok && data?.fit);
+    // Distinguish "we couldn't read the CV" from a generic miss so the client can
+    // nudge a re-upload (WS-7a). The gate stays fail-open on both.
+    const unreadable = !scored && Boolean((data as { unreadable?: boolean } | null)?.unreadable);
 
     // Telemetry: stamp fit_score + outcome onto the event row so the gate threshold
     // can be tuned from the real distribution (WS-6a). waitUntil keeps the lambda
     // alive past the response so this background write actually completes — a bare
     // un-awaited promise gets frozen the moment Vercel flushes the response.
     if (eventId != null) {
-      const outcome = error ? "error" : scored ? "scored" : "no_fit";
+      const outcome = error ? "error" : scored ? "scored" : unreadable ? "unreadable" : "no_fit";
       const fitScore =
         scored && typeof data.fit.fit_score === "number" ? data.fit.fit_score : null;
       waitUntil(
@@ -127,7 +130,7 @@ export async function POST(
       );
     }
 
-    if (!scored) return noFit();
+    if (!scored) return NextResponse.json({ fit: null, ...(unreadable ? { reason: "unreadable" } : {}) });
     return NextResponse.json({ fit: data.fit });
   } catch {
     return noFit();

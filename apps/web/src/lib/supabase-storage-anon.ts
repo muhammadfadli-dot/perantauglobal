@@ -66,6 +66,18 @@ export type CvUploadResult =
   | { ok: true; path: string; mime: string; size: number }
   | { ok: false; error: string };
 
+/** Map raw Supabase Storage errors to friendly Bahasa Indonesia messages. */
+function friendlyUploadError(msg: string): string {
+  const m = (msg || "").toLowerCase();
+  if (m.includes("exceeded") && m.includes("size")) return "Ukuran CV maksimal 5MB.";
+  if (m.includes("mime") || m.includes("not allowed") || m.includes("invalid"))
+    return "Format CV harus PDF atau gambar (JPG/PNG/HEIC/WEBP).";
+  if (m.includes("already exists")) return "Coba unggah ulang CV kamu sebentar ya.";
+  if (m.includes("network") || m.includes("fetch") || m.includes("load failed"))
+    return "Gagal mengunggah CV. Cek koneksi internet lalu coba lagi.";
+  return "Gagal mengunggah CV. Coba lagi sebentar ya.";
+}
+
 /**
  * Upload CV ke pending-cv/pending/<pendingId>/cv.<ext>. pendingId WAJIB sama
  * dengan PK pending_submissions yang nanti dibikin server (path === PK), biar
@@ -87,6 +99,6 @@ export async function uploadPendingCv(
     upsert: false,
     contentType: file.type,
   });
-  if (error) return { ok: false, error: error.message };
+  if (error) return { ok: false, error: friendlyUploadError(error.message) };
   return { ok: true, path, mime: file.type, size: file.size };
 }

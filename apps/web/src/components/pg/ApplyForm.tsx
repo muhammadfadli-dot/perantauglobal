@@ -96,12 +96,6 @@ export function ApplyForm({
       ? crypto.randomUUID()
       : "",
   );
-  // Treatment A/B "CV wajib" diaktifin lewat ?ab=cv_req (kontrol = opsional).
-  const [cvRequired] = useState<boolean>(
-    () =>
-      typeof window !== "undefined" &&
-      new URLSearchParams(window.location.search).get("ab") === "cv_req",
-  );
   const cvUploadAvailable = isCvUploadConfigured();
   // Cloudflare Turnstile (managed, invisible-first). Inert when the site key is
   // absent (preview/dev) — runTurnstile() resolves null and callers proceed.
@@ -114,6 +108,9 @@ export function ApplyForm({
   const [cvSize, setCvSize] = useState(0);
   const [cvFileName, setCvFileName] = useState("");
   const [cvError, setCvError] = useState("");
+  // Set when the preview reports the CV couldn't be read, so we nudge a clearer
+  // re-upload. The gate stays fail-open either way.
+  const [cvUnreadable, setCvUnreadable] = useState(false);
   // "CV di depan": position-fit preview shown right after CV upload. Powered by
   // /api/lowongan/[slug]/cv-preview -> grade-cv preview mode (extract+fit
   // in-memory, nothing persisted). Non-blocking — the form stays usable while
@@ -209,7 +206,21 @@ export function ApplyForm({
         body: JSON.stringify({ pending_id: id, cv_path: path, cv_mime: mime, answers, turnstile_token: turnstileToken }),
       });
       const data = res.ok ? await res.json().catch(() => null) : null;
-      setCvFit((data?.fit as CvFitPreview | null) ?? null);
+      const fit = (data?.fit as CvFitPreview | null) ?? null;
+      setCvFit(fit);
+      setCvUnreadable(data?.reason === "unreadable");
+      // GTM funnel (WS-6c): report the band only, never the raw score.
+      trackEvent("cv_preview_result", {
+        position: positionSlug,
+        band:
+          fit?.fit_score == null
+            ? "none"
+            : fit.fit_score >= 70
+              ? "hijau"
+              : fit.fit_score >= CV_FIT_THRESHOLD
+                ? "kuning"
+                : "merah",
+      });
     } catch {
       setCvFit(null);
     } finally {
@@ -220,6 +231,7 @@ export function ApplyForm({
   async function handleCvChange(file: File | null) {
     setCvError("");
     setCvFit(null);
+    setCvUnreadable(false);
     setCvFitLoading(false);
     if (!file) {
       setCvStatus("idle");
@@ -257,6 +269,7 @@ export function ApplyForm({
       setCvMime(res.mime);
       setCvSize(res.size);
       setCvStatus("uploaded");
+      trackEvent("cv_upload_success", { position: positionSlug });
       void runCvPreview(attemptId, res.path, res.mime);
     } else {
       setCvError(res.error);
@@ -300,6 +313,7 @@ export function ApplyForm({
       return;
     }
     if (cvGateBlocked) {
+      trackEvent("cv_gate_blocked", { position: positionSlug });
       setErrorMsg(
         "CV kamu belum cukup cocok untuk posisi ini. Lihat bagian yang bisa diperkuat di atas, lalu unggah CV yang sudah diperbarui.",
       );
@@ -335,7 +349,7 @@ export function ApplyForm({
       ...(cvStatus === "uploaded" && cvPath
         ? { cv_path: cvPath, cv_mime: cvMime, cv_size: cvSize }
         : {}),
-      ab_variant: cvRequired ? "cv_required" : "control",
+      ab_variant: "gate_v1",
       turnstile_token: turnstileToken,
       hp: honeypot,
       eventId,
@@ -353,6 +367,7 @@ export function ApplyForm({
       if (res.ok) {
         setSubmittedEmail(cleanedEmail);
         setStatus("success");
+        trackEvent("apply_submit_success", { position: positionSlug });
         trackEvent(
           "form_submission",
           { form_name: `lowongan_${positionSlug}`, form_location: window.location.pathname },
@@ -633,6 +648,10 @@ export function ApplyForm({
                 </div>
               </label>
 
+              <p className="text-[11px] text-pg-ink-400 leading-snug mt-2">
+                CV yang pendaftarannya tidak dilanjutkan otomatis kami hapus dari sistem dalam 48 jam.
+              </p>
+
               {cvError && (
                 <div
                   className="text-[12px] mt-2 flex items-center gap-1.5"
@@ -660,6 +679,18 @@ export function ApplyForm({
                 </div>
               )}
               {cvStatus === "uploaded" && !cvFitLoading && cvFit && <CvFitCard fit={cvFit} />}
+              {cvStatus === "uploaded" && !cvFitLoading && !cvFit && cvUnreadable && (
+                <div
+                  className="mt-3 rounded-xl p-3 flex items-start gap-2 text-[12.5px] leading-snug"
+                  style={{ background: "var(--pg-info-bg)", color: "var(--pg-info)" }}
+                >
+                  <Icon name="info" size={15} className="shrink-0 mt-0.5" />
+                  <span>
+                    CV kamu belum bisa kami baca otomatis. Kalau bisa, unggah versi PDF yang lebih
+                    jelas biar kami bantu cek kecocokannya. Kamu tetap bisa lanjut daftar.
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
