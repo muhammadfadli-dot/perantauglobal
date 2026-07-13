@@ -7,6 +7,7 @@ import { trackEvent, generateEventId, getMetaCookies } from "@/lib/tracking";
 import type { AppliedFormField } from "@/lib/positions-db";
 import { uploadPendingCv, validateCvFile, isCvUploadConfigured } from "@/lib/supabase-storage-anon";
 import { CV_UPLOAD_MICROCOPY, CV_CONSENT_TEXT } from "@/lib/cv-consent";
+import { CvFitCard, type CvFitPreview } from "./CvFitCard";
 
 type ApplyFormProps = {
   positionSlug: string;
@@ -98,6 +99,12 @@ export function ApplyForm({
   const [cvSize, setCvSize] = useState(0);
   const [cvFileName, setCvFileName] = useState("");
   const [cvError, setCvError] = useState("");
+  // "CV di depan": position-fit preview shown right after CV upload. Powered by
+  // /api/lowongan/[slug]/cv-preview -> grade-cv preview mode (extract+fit
+  // in-memory, nothing persisted). Non-blocking — the form stays usable while
+  // this runs, and a miss just shows nothing.
+  const [cvFit, setCvFit] = useState<CvFitPreview | null>(null);
+  const [cvFitLoading, setCvFitLoading] = useState(false);
   // Honeypot: hidden field, bots fill it, humans never see/tab to it.
   const [honeypot, setHoneypot] = useState("");
 
@@ -164,8 +171,30 @@ export function ApplyForm({
     setStep(2);
   }
 
+  // Fire the position-fit preview once a CV is staged. Best-effort + non-blocking:
+  // any failure just leaves the card hidden (the route already 200s with no fit).
+  async function runCvPreview(path: string, mime: string) {
+    setCvFit(null);
+    setCvFitLoading(true);
+    try {
+      const res = await fetch(`/api/lowongan/${positionSlug}/cv-preview`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pending_id: pendingId, cv_path: path, cv_mime: mime, answers }),
+      });
+      const data = res.ok ? await res.json().catch(() => null) : null;
+      setCvFit((data?.fit as CvFitPreview | null) ?? null);
+    } catch {
+      setCvFit(null);
+    } finally {
+      setCvFitLoading(false);
+    }
+  }
+
   async function handleCvChange(file: File | null) {
     setCvError("");
+    setCvFit(null);
+    setCvFitLoading(false);
     if (!file) {
       setCvStatus("idle");
       setCvPath("");
@@ -193,6 +222,7 @@ export function ApplyForm({
       setCvMime(res.mime);
       setCvSize(res.size);
       setCvStatus("uploaded");
+      void runCvPreview(res.path, res.mime);
     } else {
       setCvError(res.error);
       setCvStatus("error");
@@ -568,6 +598,18 @@ export function ApplyForm({
                   {CV_CONSENT_TEXT}
                 </p>
               )}
+
+              {/* "CV di depan": kecocokan CV ke posisi, langsung abis upload. */}
+              {cvStatus === "uploaded" && cvFitLoading && (
+                <div className="mt-3 flex items-center gap-2 text-[12.5px] text-pg-ink-500">
+                  <span
+                    className="inline-block w-3.5 h-3.5 rounded-full animate-spin"
+                    style={{ border: "2px solid var(--pg-ink-200)", borderTopColor: "var(--pg-red-600)" }}
+                  />
+                  Menganalisis kecocokan CV kamu untuk posisi ini…
+                </div>
+              )}
+              {cvStatus === "uploaded" && !cvFitLoading && cvFit && <CvFitCard fit={cvFit} />}
             </div>
           )}
 
