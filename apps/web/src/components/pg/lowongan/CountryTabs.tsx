@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { COUNTRY_META, COUNTRY_KEYS, type CountryMeta } from "@/lib/lowonganCountries";
+import type { CountryMeta } from "@/lib/lowonganCountries";
 
 type Props = {
-  initialActive: "all" | CountryMeta["key"];
-  counts: Record<CountryMeta["key"], number>;
+  initialActive: "all" | string;
+  /** Countries with at least one position, in display order. */
+  countries: CountryMeta[];
+  counts: Record<string, number>;
   total: number;
 };
 
@@ -14,15 +16,15 @@ type Props = {
  * Sticky country tabs with scroll-spy. Click → scroll to chapter section.
  * Scroll: when chapter enters viewport, update active.
  */
-export function CountryTabs({ initialActive, counts, total }: Props) {
-  const [active, setActive] = useState<"all" | CountryMeta["key"]>(initialActive);
+export function CountryTabs({ initialActive, countries, counts, total }: Props) {
+  const [active, setActive] = useState<"all" | string>(initialActive);
 
   // Scroll-spy via IntersectionObserver — update active as chapters enter view
   useEffect(() => {
-    const sections: { key: "all" | CountryMeta["key"]; el: Element }[] = [];
-    for (const k of COUNTRY_KEYS) {
-      const el = document.getElementById(`chapter-${k}`);
-      if (el) sections.push({ key: k, el });
+    const sections: { key: string; el: Element }[] = [];
+    for (const c of countries) {
+      const el = document.getElementById(`chapter-${c.key}`);
+      if (el) sections.push({ key: c.key, el });
     }
     if (sections.length === 0) return;
 
@@ -32,16 +34,16 @@ export function CountryTabs({ initialActive, counts, total }: Props) {
           .filter((e) => e.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (visible.length === 0) return;
-        const top = visible[0].target.id.replace("chapter-", "") as CountryMeta["key"];
+        const top = visible[0].target.id.replace("chapter-", "");
         setActive(top);
       },
       { rootMargin: "-140px 0px -50% 0px", threshold: 0 },
     );
     for (const s of sections) io.observe(s.el);
     return () => io.disconnect();
-  }, []);
+  }, [countries]);
 
-  const handleClick = (k: "all" | CountryMeta["key"]) => {
+  const handleClick = (k: "all" | string) => {
     setActive(k);
     if (k === "all") {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -91,8 +93,8 @@ export function CountryTabs({ initialActive, counts, total }: Props) {
             </span>
           </button>
 
-          {COUNTRY_KEYS.map((k) => {
-            const c = COUNTRY_META[k];
+          {countries.map((c) => {
+            const k = c.key;
             const isActive = active === k;
             return (
               <button
@@ -105,14 +107,15 @@ export function CountryTabs({ initialActive, counts, total }: Props) {
                     : "bg-pg-white text-pg-ink-900 border-pg-ink-100 hover:border-pg-ink-300"
                 }`}
               >
-                <div className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden shrink-0">
-                  <Image
-                    src={c.img}
-                    alt={c.name}
-                    fill
-                    sizes="36px"
-                    className="object-cover"
-                  />
+                <div
+                  className="relative w-8 h-8 md:w-9 md:h-9 rounded-full overflow-hidden shrink-0 grid place-items-center text-[15px]"
+                  style={{ background: c.tint }}
+                >
+                  {c.img ? (
+                    <Image src={c.img} alt={c.name} fill sizes="36px" className="object-cover" />
+                  ) : (
+                    <span aria-hidden>{c.flag}</span>
+                  )}
                 </div>
                 <span className="text-[13.5px] md:text-[15px] font-bold tracking-[-0.01em]">
                   <span className="md:hidden">{c.short}</span>

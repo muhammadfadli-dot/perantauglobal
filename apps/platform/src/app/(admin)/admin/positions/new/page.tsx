@@ -1,10 +1,22 @@
 import Link from "next/link";
 import AdminTopBar from "@/components/admin/TopBar";
+import { createServerClient } from "@/lib/supabase-server";
+import { getCountryRegistry } from "@perantauglobal/db/country";
 import PositionCreateForm from "./PositionCreateForm";
 
 export const dynamic = "force-dynamic";
 
-export default function NewPositionPage() {
+export default async function NewPositionPage() {
+  // Country presets come from the live registry (public.countries), so a country
+  // registered here (or via the "Tambah negara" flow) appears with no deploy.
+  const supabase = await createServerClient();
+  const registry = await getCountryRegistry(supabase);
+  const countryOptions = registry.activeCountries().map((c) => ({
+    value: c.dbValue,
+    label: c.label,
+    initials: c.initials,
+  }));
+
   return (
     <>
       <AdminTopBar
@@ -22,7 +34,7 @@ export default function NewPositionPage() {
           </Link>
         }
       />
-      <PositionCreateForm />
+      <PositionCreateForm countryOptions={countryOptions} />
     </>
   );
 }

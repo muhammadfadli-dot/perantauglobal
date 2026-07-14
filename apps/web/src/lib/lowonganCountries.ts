@@ -1,8 +1,23 @@
-import type { PositionCountry } from "./positions";
+/**
+ * Web-side country metadata — now an adapter over the shared country registry
+ * (@perantauglobal/db/country), not a hand-maintained copy. This removes the
+ * drift that hid Bulgaria + Kuwait from surfaces and makes the DB the single
+ * source of truth.
+ *
+ * The sync COUNTRY_META / COUNTRY_KEYS below derive from the embedded snapshot
+ * (all 8 live countries) and are the offline fallback. Render paths that must
+ * reflect a just-added country with no deploy fetch the live registry via
+ * lib/countries.getCountries() and map rows through toWebCountry().
+ */
+import {
+  SNAPSHOT_REGISTRY,
+  type CountryMeta as RegistryCountry,
+} from "@perantauglobal/db/country";
 
+/** Shape the web components consume (kept stable across the registry refactor). */
 export type CountryMeta = {
-  key: "saudi" | "jepang" | "taiwan" | "indonesia" | "europe" | "mexico" | "bulgaria" | "kuwait";
-  name: PositionCountry;
+  key: string;
+  name: string;
   short: string;
   flag: string;
   currency: string;
@@ -15,168 +30,36 @@ export type CountryMeta = {
   tint: string;
 };
 
-export const COUNTRY_META: Record<CountryMeta["key"], CountryMeta> = {
-  saudi: {
-    key: "saudi",
-    name: "Saudi Arabia",
-    short: "Saudi",
-    flag: "🇸🇦",
-    currency: "SAR riyal",
-    contract: "Kontrak 2 tahun",
-    img: "/images/countries/saudi.jpg",
-    tagline:
-      "Hospitality, perawat, mekanik berat — gaji riyal, makan ditanggung. Banyak posisi terbuka di Riyadh & Jeddah.",
-    imgFilter: "saturate(1.05) brightness(0.96) sepia(0.18)",
-    tint: "#b89358",
-  },
-  jepang: {
-    key: "jepang",
-    name: "Jepang",
-    short: "Jepang",
-    flag: "🇯🇵",
-    currency: "¥ yen",
-    contract: "Sistem SSW · 5 tahun",
-    img: "/images/countries/jepang.jpg",
-    tagline:
-      "Sistem SSW resmi pemerintah Jepang. Caregiver (Kaigo), food service, dan pengolahan makanan — kerja terstruktur, hak penuh.",
-    imgFilter: "saturate(0.85) brightness(0.92) hue-rotate(-8deg)",
-    tint: "#36598c",
-  },
-  taiwan: {
-    key: "taiwan",
-    name: "Taiwan",
-    short: "Taiwan",
-    flag: "🇹🇼",
-    currency: "NT$",
-    contract: "Kontrak 3 tahun",
-    img: "/images/countries/taiwan.jpg",
-    tagline:
-      "Caregiver di rumah tangga atau panti. Kontrak 3 tahun, lingkungan kerja yang dekat dengan keluarga Taiwan.",
-    imgFilter: "saturate(1.1) brightness(0.97)",
-    tint: "#3a8567",
-  },
-  indonesia: {
-    key: "indonesia",
-    name: "Indonesia",
-    short: "Indonesia",
-    flag: "🇮🇩",
-    currency: "Rupiah",
-    contract: "Penempatan domestik",
-    img: "/images/countries/indonesia.jpg",
-    tagline:
-      "Penempatan SPG & posisi domestik di Indonesia — buat yang belum siap berangkat ke luar negeri, tetap dapat support resmi.",
-    imgFilter: "saturate(1.05) brightness(0.95)",
-    tint: "#c4452f",
-  },
-  europe: {
-    key: "europe",
-    name: "Eropa Timur",
-    short: "Eropa Timur",
-    flag: "🇪🇺",
-    currency: "Euro (€)",
-    contract: "Kontrak 1 tahun",
-    img: "/images/countries/europe.jpg",
-    tagline:
-      "Posisi spesialis pengeboran (drilling) di project site Eropa Timur. Untuk tenaga berpengalaman — gaji euro, kontrak resmi lewat jalur yang benar.",
-    imgFilter: "saturate(0.95) brightness(0.93)",
-    tint: "#4f6d7a",
-  },
-  mexico: {
-    key: "mexico",
-    name: "Meksiko",
-    short: "Meksiko",
-    flag: "🇲🇽",
-    currency: "USD / peso",
-    contract: "Kontrak 1 tahun",
-    img: "/images/countries/mexico.jpg",
-    tagline:
-      "Posisi welder fabrikasi baja berat di Meksiko. Untuk tenaga las berpengalaman & bersertifikat — kontrak resmi lewat jalur yang benar.",
-    imgFilter: "saturate(1.08) brightness(0.93) sepia(0.08)",
-    tint: "#9c5a2a",
-  },
-  bulgaria: {
-    key: "bulgaria",
-    name: "Bulgaria",
-    short: "Bulgaria",
-    flag: "🇧🇬",
-    currency: "Euro (€)",
-    contract: "Kontrak 8 bulan",
-    img: "/images/countries/bulgaria.jpg",
-    tagline:
-      "Posisi teknisi HVAC (AC) di Bulgaria untuk tenaga terampil. Instalasi dan maintenance unit, gaji euro, kontrak resmi lewat jalur yang benar.",
-    imgFilter: "saturate(0.98) brightness(0.94)",
-    tint: "#5a6b8c",
-  },
-  kuwait: {
-    key: "kuwait",
-    name: "Kuwait",
-    short: "Kuwait",
-    flag: "🇰🇼",
-    currency: "KWD dinar",
-    contract: "Kontrak 2 tahun",
-    img: "/images/countries/kuwait.jpg",
-    tagline:
-      "Posisi hospitality di Kuwait. Gaji dinar, makan dan akomodasi ditanggung, buat tenaga yang siap kerja di kawasan Teluk.",
-    imgFilter: "saturate(1.05) brightness(0.96) sepia(0.12)",
-    tint: "#b0843f",
-  },
-};
-
-export const COUNTRY_KEYS: CountryMeta["key"][] = ["saudi", "jepang", "taiwan", "europe", "mexico", "bulgaria", "kuwait", "indonesia"];
-
-export function countryKeyFromName(name: PositionCountry): CountryMeta["key"] {
-  switch (name) {
-    case "Saudi Arabia": return "saudi";
-    case "Jepang": return "jepang";
-    case "Taiwan": return "taiwan";
-    case "Indonesia": return "indonesia";
-    case "Eropa Timur": return "europe";
-    case "Meksiko": return "mexico";
-    case "Bulgaria": return "bulgaria";
-    case "Kuwait": return "kuwait";
-  }
+/** Map a shared registry row to the web component shape. */
+export function toWebCountry(m: RegistryCountry): CountryMeta {
+  return {
+    key: m.key,
+    name: m.label,
+    short: m.label,
+    flag: m.flag,
+    currency: m.currency,
+    contract: m.contract,
+    img: m.imageUrl,
+    tagline: m.tagline,
+    imgFilter: m.imgFilter,
+    tint: m.tintHex,
+  };
 }
 
-/** Heuristic city lookup per position slug — extracted from old static catalog notes.
- *  Falls back to the country's primary city when slug is unknown. */
-const CITY_BY_SLUG: Record<string, string> = {
-  "perawat-saudi-arabia": "Riyadh",
-  "barista-saudi-arabia": "Jeddah",
-  "waiter-saudi-arabia": "Riyadh",
-  "waitress-saudi-arabia": "Riyadh",
-  "chef-bakery-saudi-arabia": "Jeddah",
-  "head-barista-saudi-arabia": "Riyadh",
-  "roaster-saudi-arabia": "Jeddah",
-  "chef-pastry-saudi-arabia": "Riyadh",
-  "spa-therapist-saudi-arabia": "Jeddah",
-  "laundry-worker-saudi-arabia": "Riyadh",
-  "heavy-diesel-mechanic-saudi-arabia": "Dammam",
-  "truck-driver-jepang": "Osaka",
-  "food-service-jepang": "Tokyo",
-  "kaigo-jepang": "Nagoya",
-  "pengolahan-makanan-jepang": "Hokkaido",
-  "manufaktur-pengelasan": "Aichi",
-  "caregiver-taiwan": "Taipei",
-  "spg-indonesia": "Jakarta",
-  "head-driller": "Balkan",
-  "assistant-driller": "Balkan",
-  "welder-heavy-steel-plate-fabrication": "Monterrey",
-  "hvac": "Sofia",
-  "hvac-helper": "Sofia",
-  "barista-kuwait": "Kuwait City",
-};
+const ACTIVE = SNAPSHOT_REGISTRY.activeCountries();
 
-const FALLBACK_CITY: Record<CountryMeta["key"], string> = {
-  saudi: "Riyadh",
-  jepang: "Tokyo",
-  taiwan: "Taipei",
-  indonesia: "Jakarta",
-  europe: "Balkan",
-  mexico: "Monterrey",
-  bulgaria: "Sofia",
-  kuwait: "Kuwait City",
-};
+export const COUNTRY_META: Record<string, CountryMeta> = Object.fromEntries(
+  ACTIVE.map((m) => [m.key, toWebCountry(m)]),
+);
 
-export function cityForSlug(slug: string, countryKey: CountryMeta["key"]): string {
-  return CITY_BY_SLUG[slug] ?? FALLBACK_CITY[countryKey];
+export const COUNTRY_KEYS: string[] = ACTIVE.map((m) => m.key);
+
+/** Resolve a display name / label back to a country key (snapshot-scoped). */
+export function countryKeyFromName(name: string): string {
+  return SNAPSHOT_REGISTRY.resolve(name)?.key ?? ACTIVE[0].key;
+}
+
+/** City for a position slug, falling back to the country's primary city. */
+export function cityForSlug(slug: string, countryKey: string): string {
+  return SNAPSHOT_REGISTRY.cityForSlug(slug, countryKey);
 }

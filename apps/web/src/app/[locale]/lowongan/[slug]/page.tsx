@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { Icon } from "@/components/pg/Icon";
 import { FinalCTA, ButtonLink } from "@/components/pg/primitives";
@@ -17,10 +17,12 @@ import {
   fetchPositionForDetail,
   fetchPositionSlugsForBuild,
   fetchPositionsForCatalog,
+  fetchSlugAlias,
 } from "@/lib/positions-db";
 import { resolvePositionDetail } from "@/lib/positionContent";
 import { jobPostingJsonLd, breadcrumbJsonLd } from "@/lib/jsonld";
-import { COUNTRY_META, countryKeyFromName, cityForSlug } from "@/lib/lowonganCountries";
+import { cityForSlug, toWebCountry } from "@/lib/lowonganCountries";
+import { getCountries } from "@/lib/countries";
 import { waLink } from "@/lib/contact";
 import { SITE_URL } from "@/lib/site";
 
@@ -58,11 +60,16 @@ export async function generateMetadata({
   // Some cardMeta.salary values already carry a unit ("¥300,000/bulan", "180 KWD/Month");
   // only append "/bulan" when the value has none, otherwise the title doubles it.
   const salaryLabel = /\/|per\s/i.test(p.salary) ? p.salary : `${p.salary}/bulan`;
+  // Some position names already include the country ("Spa Therapist — Saudi
+  // Arabia"); don't append it again or the title/description reads it twice.
+  const roleHasCountry = p.role.toLowerCase().includes(p.country.toLowerCase());
+  const roleLead = roleHasCountry ? p.role : `${p.role} ${p.country}`;
+  const roleInCountry = roleHasCountry ? p.role : `${p.role} di ${p.country}`;
   const title =
-    cms?.seo?.metaTitle?.trim() || `Lowongan ${p.role} ${p.country} — ${salaryLabel}`;
+    cms?.seo?.metaTitle?.trim() || `Lowongan ${roleLead} — ${salaryLabel}`;
   const description =
     cms?.seo?.metaDescription?.trim() ||
-    `Lowongan ${p.role} di ${p.country}. Gaji ${p.salary}, ${p.contractLabel ?? "kontrak resmi"}. Bebas biaya sebelum offering letter. Daftar di Perantau Global.`;
+    `Lowongan ${roleInCountry}. Gaji ${p.salary}, ${p.contractLabel ?? "kontrak resmi"}. Bebas biaya sebelum offering letter. Daftar di Perantau Global.`;
   const ogImage = cms?.media?.ogImageUrl?.trim() || cms?.media?.heroUrl?.trim();
   // Job-detail pages are id-only; emit a canonical so duplicate/query-string
   // URLs don't split ranking across the catalog's high-intent pages.
@@ -84,15 +91,22 @@ export default async function LowonganDetailPage({
   if (locale !== "id") notFound();
   setRequestLocale(locale);
 
-  const [baseStatic, jobOrders, appliedFields, dbContentRes, allPositions] = await Promise.all([
+  const [baseStatic, jobOrders, appliedFields, dbContentRes, allPositions, registry] = await Promise.all([
     fetchPositionForDetail(slug),
     fetchOpenJobOrders(),
     fetchAppliedFields(slug),
     fetchPositionContent(slug),
     fetchPositionsForCatalog(),
+    getCountries(),
   ]);
   const dbContent = dbContentRes.content;
-  if (!baseStatic) notFound();
+  if (!baseStatic) {
+    // Slug not an active position. If it was renamed, permanently redirect the
+    // old URL to the current one so live ads on the old link never 404.
+    const alias = await fetchSlugAlias(slug);
+    if (alias && alias !== slug) permanentRedirect(`/${locale}/lowongan/${alias}`);
+    notFound();
+  }
 
   const detail = resolvePositionDetail(slug, dbContent);
   if (!detail) notFound();
@@ -112,9 +126,9 @@ export default async function LowonganDetailPage({
       }
     : { ...baseStatic, status: "queue" as const, batch: undefined };
 
-  const countryKey = countryKeyFromName(position.country);
-  const country = COUNTRY_META[countryKey];
-  const city = cityForSlug(slug, countryKey);
+  const countryMeta = registry.resolveOrGlobal(position.country);
+  const country = toWebCountry(countryMeta);
+  const city = cityForSlug(slug, countryMeta.key);
   // Prefer the admin-authored hero (Media & SEO tab); fall back to the per-slug static asset.
   const heroImg =
     asMediaSeo(dbContent)?.media?.heroUrl?.trim() || `/images/lowongan/${slug}.jpg`;
@@ -125,17 +139,21 @@ export default async function LowonganDetailPage({
     slug,
     title: position.role,
     countryLabel: position.country,
+    countryIso: countryMeta.iso,
     city,
     jobDescription: detail.jobDescription,
     datePosted: datePosted ? new Date(datePosted).toISOString() : null,
     validThrough: jo?.deadline ? new Date(jo.deadline).toISOString() : null,
     salary: position.salary,
   });
+  const breadcrumbName = position.role.toLowerCase().includes(position.country.toLowerCase())
+    ? position.role
+    : `${position.role} — ${position.country}`;
   const breadcrumb = breadcrumbJsonLd([
     { name: "Beranda", url: `${SITE_URL}/id` },
     { name: "Lowongan", url: `${SITE_URL}/id/lowongan` },
     {
-      name: `${position.role} — ${position.country}`,
+      name: breadcrumbName,
       url: `${SITE_URL}/id/lowongan/${slug}`,
     },
   ]);
@@ -169,7 +187,12 @@ export default async function LowonganDetailPage({
         contractLabel={position.contractLabel}
         gender={position.gender}
         age={position.age}
-        processDuration={detail.processDuration}
+        processDuration={
+          detail.processDuration ??
+          (detail.process && detail.process.length > 0
+            ? `${detail.process.length} tahap`
+            : undefined)
+        }
       />
 
       {/* Batch banner (open/queue) */}
@@ -193,8 +216,9 @@ export default async function LowonganDetailPage({
                   {position.batch.label} · lagi buka
                 </div>
                 <div className="text-[12.5px] md:text-[13px] mt-0.5 text-pg-ok">
-                  {position.batch.slotsFilled} / {position.batch.slotsTotal} terisi · deadline{" "}
-                  {position.batch.deadline}
+                  {position.batch.slotsFilled > 0
+                    ? `${position.batch.slotsFilled} / ${position.batch.slotsTotal} terisi · deadline ${position.batch.deadline}`
+                    : `Pendaftaran dibuka · deadline ${position.batch.deadline}`}
                 </div>
               </div>
             </div>
@@ -519,7 +543,7 @@ export default async function LowonganDetailPage({
       </section>
 
       {/* Related positions */}
-      <RelatedPositions current={position} allPositions={allPositions} />
+      <RelatedPositions current={position} allPositions={allPositions} country={country} />
 
       {/* Trust block + share strip */}
       <TrustAndShare

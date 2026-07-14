@@ -9,7 +9,10 @@
 
 import type { IconName } from "@/components/pg/Icon";
 
-export type PositionCountry = "Saudi Arabia" | "Jepang" | "Taiwan" | "Indonesia" | "Eropa Timur" | "Meksiko" | "Bulgaria" | "Kuwait";
+// Country is now a free display label resolved from the country registry
+// (public.countries) rather than a fixed union, so a new country needs no code
+// change here. The legacy static catalog below still uses the canonical labels.
+export type PositionCountry = string;
 
 export type PositionStatus = "open" | "queue";
 

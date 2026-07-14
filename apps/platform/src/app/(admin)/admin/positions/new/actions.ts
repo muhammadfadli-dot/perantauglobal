@@ -97,3 +97,97 @@ export async function createPosition(
   revalidatePath("/admin/positions");
   return { ok: true, slug: input.slug };
 }
+
+export type CreateCountryInput = {
+  label: string;
+  flag: string;
+  defaultCity: string;
+};
+
+export type CreateCountryResult =
+  | { ok: true; dbValue: string; key: string; label: string; initials: string }
+  | { ok: false; error: string };
+
+/**
+ * Register a new placement country in the registry (public.countries) so it
+ * becomes a first-class option — selectable here, grouped on the public
+ * /lowongan chapters, and resolvable everywhere — with NO code deploy. This
+ * replaces the old "Negara lain" free-text path, which wrote an unregistered
+ * value into positions.country and produced a silently-404'd landing page.
+ *
+ * Minimal fields only (label, flag, primary city); tint/tagline/hero image use
+ * sensible defaults and can be refined later. The public listing shows the new
+ * country within the ISR window (~60s); no cross-app revalidation needed.
+ */
+export async function createCountry(
+  input: CreateCountryInput,
+): Promise<CreateCountryResult> {
+  await assertAdmin();
+
+  const label = input.label.trim();
+  if (label.length < 2) {
+    return { ok: false, error: "Nama negara minimum 2 karakter." };
+  }
+  const key = label
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  if (key.length < 2) {
+    return { ok: false, error: "Nama negara tidak valid." };
+  }
+  const initials = label.replace(/[^A-Za-z]/g, "").slice(0, 2).toUpperCase() || "GL";
+
+  const supabase = await createServerClient();
+  // `countries` was added after the generated Database types (and regenerating
+  // them drops the repo's hand-added enum exports), so type this table locally.
+  const db = supabase as unknown as {
+    from(table: "countries"): {
+      select(cols: string): {
+        order(
+          col: string,
+          opts: { ascending: boolean },
+        ): {
+          limit(n: number): {
+            maybeSingle(): Promise<{ data: { sort_order: number } | null }>;
+          };
+        };
+      };
+      insert(row: Record<string, unknown>): Promise<{ error: { message: string } | null }>;
+    };
+  };
+
+  const { data: maxRow } = await db
+    .from("countries")
+    .select("sort_order")
+    .order("sort_order", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const sortOrder = (maxRow?.sort_order ?? 10) + 1;
+
+  const { error } = await db.from("countries").insert({
+    key,
+    db_value: key,
+    label,
+    initials,
+    flag: input.flag.trim() || "🌐",
+    default_city: input.defaultCity.trim(),
+    tint_hex: "#4f6d7a",
+    portal_tint_hex: "#4f6d7a",
+    aliases: [key, label.toLowerCase()],
+    sort_order: sortOrder,
+    active: true,
+  });
+
+  if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes("duplicate") || msg.includes("unique")) {
+      return { ok: false, error: `Negara "${label}" (${key}) sudah terdaftar.` };
+    }
+    throw new Error(`DB error: ${error.message}`);
+  }
+
+  revalidatePath("/admin/positions/new");
+  return { ok: true, dbValue: key, key, label, initials };
+}

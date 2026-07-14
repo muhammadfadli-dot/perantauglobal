@@ -1,9 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import {
+  createServerClient,
+  createServiceRoleClient,
+  getSessionAndRole,
+} from "@/lib/supabase-server";
 import { logAdminAction } from "@/lib/audit-log";
+import { getCountryRegistry } from "@perantauglobal/db/country";
 import type { PositionContent, ContentMedia, ContentSeo } from "@/lib/position-content";
+
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 async function assertAdmin() {
   const { session, role } = await getSessionAndRole();
@@ -108,6 +115,109 @@ export async function updatePositionMeta(
     await notifyWebRevalidate(slug);
   }
   return { ok: true };
+}
+
+// ─── Identity edits: country + slug rename (Fase 1.3) ────────────────────
+
+export type UpdatePositionCountryResult = { ok: true } | { ok: false; error: string };
+
+/**
+ * Change a position's placement country. The value must resolve against the
+ * live country registry (public.countries) — an unknown value would drop the
+ * position out of the public /lowongan grouping (silent-404 class). We store
+ * the canonical db_value so downstream resolution is exact.
+ */
+export async function updatePositionCountry(
+  slug: string,
+  dbValue: string,
+): Promise<UpdatePositionCountryResult> {
+  await assertAdmin();
+  const supabase = await createServerClient();
+  const registry = await getCountryRegistry(supabase);
+  const meta = registry.resolve(dbValue);
+  if (!meta) {
+    return { ok: false, error: `Negara "${dbValue}" tidak ada di registry.` };
+  }
+  const { error } = await supabase
+    .from("positions")
+    .update({ country: meta.dbValue } as never)
+    .eq("slug", slug);
+  if (error) throw new Error(error.message);
+  await logAdminAction("update_position_country", "position", slug, {
+    country: meta.dbValue,
+  });
+  revalidatePath(`/admin/positions/${slug}`);
+  revalidatePath("/admin/positions");
+  await notifyWebRevalidate(slug);
+  return { ok: true };
+}
+
+export type RenameSlugResult =
+  | { ok: true; slug: string }
+  | { ok: false; error: string };
+
+/**
+ * Rename a position's slug (its public URL). Delegates to the SECURITY DEFINER
+ * `admin_rename_position_slug` DB function, which — in one transaction — renames
+ * the row (cascading to applications / job_orders / pending_submissions /
+ * application_fields via ON UPDATE CASCADE) and records old→new in
+ * position_slug_aliases so the web permanently redirects the old URL. This is
+ * what makes a slug fix safe while an ad points at the old link.
+ */
+export async function renamePositionSlug(
+  oldSlug: string,
+  newSlug: string,
+): Promise<RenameSlugResult> {
+  await assertAdmin();
+  const clean = newSlug.trim().toLowerCase();
+  if (!SLUG_RE.test(clean)) {
+    return { ok: false, error: "Slug invalid (huruf kecil, angka, tanda hubung)." };
+  }
+  if (clean === oldSlug) {
+    return { ok: true, slug: oldSlug };
+  }
+
+  const supabase = await createServerClient();
+  // The RPC isn't in the generated Database types (added post-generation), so
+  // type it locally rather than regenerate (which drops hand-added exports).
+  const db = supabase as unknown as {
+    rpc(
+      fn: "admin_rename_position_slug",
+      args: { p_old: string; p_new: string },
+    ): Promise<{ error: { message: string } | null }>;
+  };
+  const { error } = await db.rpc("admin_rename_position_slug", {
+    p_old: oldSlug,
+    p_new: clean,
+  });
+  if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes("slug already taken")) {
+      return { ok: false, error: `Slug "${clean}" sudah dipakai posisi lain. Pilih lain.` };
+    }
+    if (msg.includes("position not found")) {
+      return { ok: false, error: "Posisi tidak ditemukan." };
+    }
+    if (msg.includes("invalid slug")) {
+      return { ok: false, error: "Format slug tidak valid." };
+    }
+    if (msg.includes("forbidden")) {
+      return { ok: false, error: "Tidak diizinkan." };
+    }
+    throw new Error(`Rename gagal: ${error.message}`);
+  }
+
+  await logAdminAction("rename_position_slug", "position", clean, {
+    from: oldSlug,
+    to: clean,
+  });
+  revalidatePath("/admin/positions");
+  revalidatePath(`/admin/positions/${clean}`);
+  // Old URL now 301s + new page is canonical — bust web cache for both so the
+  // redirect and the renamed page are live within the ISR window.
+  await notifyWebRevalidate(oldSlug);
+  await notifyWebRevalidate(clean);
+  return { ok: true, slug: clean };
 }
 
 /**
@@ -260,6 +370,113 @@ export async function saveDraftMediaSeo(
     .eq("slug", slug);
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/positions/${slug}`);
+}
+
+// ─── Media upload (admin → Supabase Storage) ─────────────────────────────
+
+const MEDIA_BUCKET = "position-media";
+/** Accepted image MIME → file extension. Kept tight; employers send JPG/PNG. */
+const ALLOWED_MEDIA_TYPES: Record<string, string> = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+const MAX_MEDIA_BYTES = 6 * 1024 * 1024; // 6 MB
+
+export type MediaSlot = "hero" | "logo" | "og";
+export type UploadMediaResult =
+  | { ok: true; url: string }
+  | { ok: false; error: string };
+
+const MEDIA_SLOT_KEY: Record<MediaSlot, keyof ContentMedia> = {
+  hero: "heroUrl",
+  logo: "employerLogoUrl",
+  og: "ogImageUrl",
+};
+
+/**
+ * Upload a position image straight from the admin's machine to the public
+ * `position-media` bucket (service-role, RLS-bypassing) and record its public
+ * URL in draft_content.media[slot]. This retires BOTH legacy media paths:
+ * the "paste a URL" MVP and the engineer-commits-a-file-to-apps/web/public +
+ * deploy path. Photos become data — live within ~60s of publish, zero deploy,
+ * and the same object is read by web + portal.
+ *
+ * Stored at a stable per-slot path (lowongan/<slug>-<slot>.<ext>) with upsert;
+ * the returned URL carries a ?v=<ts> cache-buster so a re-upload to the same
+ * path busts the CDN/browser cache immediately instead of serving the old copy.
+ *
+ * Errors that are the admin's fault (bad type/size) are RETURNED as data (same
+ * Next.js production-stripping reason as publishPosition); infra failures throw.
+ */
+export async function uploadPositionMedia(
+  slug: string,
+  slot: MediaSlot,
+  formData: FormData,
+): Promise<UploadMediaResult> {
+  await assertAdmin();
+
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { ok: false, error: "Tidak ada file yang diunggah." };
+  }
+  const ext = ALLOWED_MEDIA_TYPES[file.type];
+  if (!ext) {
+    return { ok: false, error: "Format tidak didukung. Pakai JPG, PNG, atau WebP." };
+  }
+  if (file.size > MAX_MEDIA_BYTES) {
+    return {
+      ok: false,
+      error: `Ukuran maksimal 6 MB (file kamu ${(file.size / 1024 / 1024).toFixed(1)} MB). Kompres dulu.`,
+    };
+  }
+
+  const objectPath = `lowongan/${slug}-${slot}.${ext}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const admin = createServiceRoleClient();
+  const { error: uploadErr } = await admin.storage
+    .from(MEDIA_BUCKET)
+    .upload(objectPath, buffer, {
+      contentType: file.type,
+      upsert: true,
+      cacheControl: "3600",
+    });
+  if (uploadErr) throw new Error(`Upload gagal: ${uploadErr.message}`);
+
+  const {
+    data: { publicUrl },
+  } = admin.storage.from(MEDIA_BUCKET).getPublicUrl(objectPath);
+  const url = `${publicUrl}?v=${Date.now()}`;
+
+  // Merge into the working draft's media, preserving other media slots + every
+  // other content key (same disjoint-ownership contract as saveDraftMediaSeo:
+  // this owns one media slot, Konten owns the rest).
+  const supabase = await createServerClient();
+  const { data: existing } = await supabase
+    .from("positions")
+    .select("draft_content, content")
+    .eq("slug", slug)
+    .maybeSingle();
+  const row = existing as
+    | { draft_content: PositionContent | null; content: PositionContent | null }
+    | null;
+  const base = (row?.draft_content ?? row?.content ?? {}) as PositionContent;
+  const nextMedia: ContentMedia = { ...(base.media ?? {}), [MEDIA_SLOT_KEY[slot]]: url };
+  const next: PositionContent = { ...base, media: nextMedia };
+
+  const { error: writeErr } = await supabase
+    .from("positions")
+    .update({ draft_content: next as never } as never)
+    .eq("slug", slug);
+  if (writeErr) throw new Error(writeErr.message);
+
+  await logAdminAction("upload_position_media", "position", slug, {
+    slot,
+    ext,
+    bytes: file.size,
+  });
+  revalidatePath(`/admin/positions/${slug}`);
+  return { ok: true, url };
 }
 
 /**

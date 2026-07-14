@@ -460,7 +460,7 @@ function CertificateTerminal({
         <p className="text-[13px] text-pg-ink-600 mt-1 leading-relaxed">
           {both
             ? "Dua sertifikatmu sudah terbit. Kamu siap berangkat lebih percaya diri."
-            : "Sertifikat kursus sudah terbit. Satu langkah lagi: psikotes DayaLima untuk sertifikat kedua."}
+            : "Sertifikat kursus sudah terbit. Satu langkah lagi: psikotes Dayalima untuk sertifikat kedua."}
         </p>
       </div>
 
@@ -517,7 +517,7 @@ function CertificateTerminal({
             </span>
             <div className="flex flex-col flex-1 min-w-0">
               <span className="text-[13.5px] font-bold text-pg-ink-900 leading-snug">
-                Sertifikat Psikotes DayaLima
+                Sertifikat Psikotes Dayalima
               </span>
               <span
                 className="font-mono text-[10px] font-bold uppercase tracking-[0.06em] mt-0.5"
@@ -538,14 +538,14 @@ function CertificateTerminal({
           </p>
           <a
             href={waLink(
-              `Halo Perantau Global, saya sudah selesai kursus ${program.title} dan mau jadwalkan psikotes DayaLima.`,
+              `Halo Perantau Global, saya sudah selesai kursus ${program.title} dan mau jadwalkan psikotes Dayalima.`,
             )}
             target="_blank"
             rel="noreferrer"
             className="inline-flex items-center justify-center gap-2 w-full min-h-[52px] px-5 mt-3 text-[15px] font-bold rounded-xl text-white no-underline"
             style={{ background: "linear-gradient(135deg, var(--pa-amber-500), var(--pa-amber-600))" }}
           >
-            Jadwalkan psikotes DayaLima
+            Jadwalkan psikotes Dayalima
             <Icon name="arrow_right" size={18} />
           </a>
         </>

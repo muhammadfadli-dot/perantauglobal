@@ -8,7 +8,7 @@ import { waLink } from "@/lib/contact";
 export const metadata: Metadata = {
   title: "Tentang Kami — Perantau Global",
   description:
-    "PT Daya Talenta Global (Perantau Global) — P3MI resmi Kemnaker. Berdiri 2024, bagian dari DayaLima yang sudah jalan di bidang rekrutmen sejak 1998. Kerja luar negeri legal, transparan, tanpa calo.",
+    "PT Daya Talenta Global (Perantau Global) — P3MI resmi Kemnaker. Berdiri 2024, bagian dari Dayalima yang sudah jalan di bidang rekrutmen sejak 1998. Kerja luar negeri legal, transparan, tanpa calo.",
 };
 
 export const dynamic = "force-static";
@@ -55,7 +55,7 @@ export default async function TentangPage({ params }: { params: Promise<{ locale
           PT Daya Talenta Global (DTG) resmi berdiri Oktober 2024 sebagai perusahaan
           penempatan kerja luar negeri, dengan izin P3MI No. 1810240237512001 dari
           Kementerian Tenaga Kerja. Walaupun nama Perantau Global terbilang baru, kami
-          bagian dari <b className="text-pg-ink-900">DayaLima</b> — perusahaan Indonesia
+          bagian dari <b className="text-pg-ink-900">Dayalima</b> — perusahaan Indonesia
           yang sudah jalan di bidang rekrutmen & pengembangan tenaga kerja sejak 1998.
         </p>
         <p className="text-base md:text-lg text-pg-ink-700 leading-relaxed mt-4 max-w-prose">

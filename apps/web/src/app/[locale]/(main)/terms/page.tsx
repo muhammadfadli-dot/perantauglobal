@@ -41,7 +41,7 @@ export default async function TermsPage({ params }: { params: Promise<{ locale: 
               1. Definisi
             </h2>
             <ul className="list-disc pl-6 mt-3 space-y-2">
-              <li><strong>&ldquo;Perantau Global&rdquo;</strong> / <strong>&ldquo;kami&rdquo;</strong> — PT Daya Talenta Global, P3MI berlisensi Kemnaker (Izin No. 1810240237512001), bagian dari DayaLima Group.</li>
+              <li><strong>&ldquo;Perantau Global&rdquo;</strong> / <strong>&ldquo;kami&rdquo;</strong> — PT Daya Talenta Global, P3MI berlisensi Kemnaker (Izin No. 1810240237512001), bagian dari Dayalima Group.</li>
               <li><strong>&ldquo;Platform&rdquo;</strong> — situs perantauglobal.com beserta portal kandidat di app.perantauglobal.com.</li>
               <li><strong>&ldquo;Kandidat&rdquo;</strong> / <strong>&ldquo;kamu&rdquo;</strong> — pengguna individual yang mendaftar atau melamar lowongan melalui Platform.</li>
               <li><strong>&ldquo;Employer&rdquo;</strong> — perusahaan di luar negeri yang membuka lowongan dan bermitra dengan Perantau Global untuk perekrutan.</li>

@@ -3,10 +3,11 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "@/components/pg/Icon";
-import { createPosition } from "./actions";
-import { COUNTRY_OPTIONS } from "@perantauglobal/db/country";
+import { createPosition, createCountry } from "./actions";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+type CountryOption = { value: string; label: string; initials: string };
 
 function slugify(s: string) {
   return s
@@ -17,37 +18,33 @@ function slugify(s: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-export default function PositionCreateForm() {
+export default function PositionCreateForm({
+  countryOptions,
+}: {
+  countryOptions: CountryOption[];
+}) {
   const router = useRouter();
   const [pending, startTransition] = React.useTransition();
   const [name, setName] = React.useState("");
   const [slugInput, setSlugInput] = React.useState("");
   const [slugTouched, setSlugTouched] = React.useState(false);
   const [country, setCountry] = React.useState<string>("");
-  // "Negara lain" → admin types a country not in the canonical list. Stored as
-  // a slugified token (lowercase + underscores) to match positions.country
-  // convention ("saudi_arabia", "japan", "mexico"). The public landing visuals
-  // (label, flag, card image) get wired by the web team on-request — see the
-  // info note below. Until then the position works fully in admin.
-  const [customMode, setCustomMode] = React.useState(false);
-  const [customCountry, setCustomCountry] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
-  const customCountryValue = customCountry
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+  // Live registry presets, appended to when the admin registers a new country
+  // inline (no code deploy — the country becomes first-class immediately).
+  const [options, setOptions] = React.useState<CountryOption[]>(countryOptions);
+  const [addMode, setAddMode] = React.useState(false);
+  const [newLabel, setNewLabel] = React.useState("");
+  const [newFlag, setNewFlag] = React.useState("");
+  const [newCity, setNewCity] = React.useState("");
+  const [addPending, startAddTransition] = React.useTransition();
+  const [addError, setAddError] = React.useState<string | null>(null);
 
   const effectiveSlug = slugTouched ? slugInput : slugify(name);
-  const effectiveCountry = customMode ? customCountryValue : country;
   const nameOk = name.trim().length >= 2;
   const slugOk = SLUG_RE.test(effectiveSlug);
-  const countryOk = customMode
-    ? customCountryValue.length >= 2
-    : country !== "";
+  const countryOk = country !== "";
   const canSubmit = nameOk && slugOk && countryOk && !pending;
 
   function onSubmit(e: React.FormEvent) {
@@ -59,21 +56,50 @@ export default function PositionCreateForm() {
         const result = await createPosition({
           name: name.trim(),
           slug: effectiveSlug,
-          country: effectiveCountry,
+          country,
         });
         if (!result.ok) {
-          // Expected validation / duplicate slug — show inline, don't navigate.
           setError(result.error);
           return;
         }
         router.push(`/admin/positions/${result.slug}`);
       } catch (err) {
-        // Unexpected throw (auth failure, DB outage). Message is opaque in
-        // production by design — surface a generic note + suggest reload.
         setError(
           err instanceof Error
             ? err.message
             : "Gagal membuat posisi. Coba reload halaman & ulangi.",
+        );
+      }
+    });
+  }
+
+  function onAddCountry() {
+    if (newLabel.trim().length < 2) return;
+    setAddError(null);
+    startAddTransition(async () => {
+      try {
+        const res = await createCountry({
+          label: newLabel.trim(),
+          flag: newFlag.trim(),
+          defaultCity: newCity.trim(),
+        });
+        if (!res.ok) {
+          setAddError(res.error);
+          return;
+        }
+        setOptions((prev) =>
+          prev.some((o) => o.value === res.dbValue)
+            ? prev
+            : [...prev, { value: res.dbValue, label: res.label, initials: res.initials }],
+        );
+        setCountry(res.dbValue);
+        setAddMode(false);
+        setNewLabel("");
+        setNewFlag("");
+        setNewCity("");
+      } catch (err) {
+        setAddError(
+          err instanceof Error ? err.message : "Gagal menambah negara. Coba lagi.",
         );
       }
     });
@@ -92,7 +118,7 @@ export default function PositionCreateForm() {
           Mulai dari basic.
         </h1>
         <p className="text-[13px] text-pg-ink-tertiary mt-1 leading-relaxed">
-          Isi nama + negara dulu — langsung masuk ke editor di mana kamu bisa
+          Isi nama + negara dulu, langsung masuk ke editor di mana kamu bisa
           tulis deskripsi, set syarat, dan preview LP-nya langsung di samping.
           Mirip bikin landing page.
         </p>
@@ -148,10 +174,7 @@ export default function PositionCreateForm() {
             />
           </div>
           {!slugOk && effectiveSlug.length > 0 && (
-            <div
-              className="text-[11px] mt-1.5"
-              style={{ color: "var(--pg-err)" }}
-            >
+            <div className="text-[11px] mt-1.5" style={{ color: "var(--pg-err)" }}>
               Format slug invalid (hanya lowercase, angka, tanda hubung).
             </div>
           )}
@@ -159,18 +182,18 @@ export default function PositionCreateForm() {
 
         <Field
           label="Negara penempatan"
-          hint="Platform terbuka untuk semua negara. Kalau negaranya belum ada di daftar, pilih “Negara lain” dan ketik sendiri."
+          hint="Pilih dari negara terdaftar. Kalau negaranya belum ada, klik “Tambah negara” — langsung jadi first-class tanpa nunggu deploy."
           required
         >
           <div className="grid grid-cols-3 gap-2">
-            {COUNTRY_OPTIONS.map((c) => {
-              const active = !customMode && country === c.value;
+            {options.map((c) => {
+              const active = country === c.value;
               return (
                 <button
                   key={c.value}
                   type="button"
                   onClick={() => {
-                    setCustomMode(false);
+                    setAddMode(false);
                     setCountry(c.value);
                   }}
                   className="flex flex-col items-center gap-1.5 px-2 py-3 rounded-lg transition-colors"
@@ -184,9 +207,7 @@ export default function PositionCreateForm() {
                   <span
                     className="w-8 h-8 rounded-md grid place-items-center font-bold text-white"
                     style={{
-                      background: active
-                        ? "var(--pg-red-600)"
-                        : "var(--pg-ink-primary)",
+                      background: active ? "var(--pg-red-600)" : "var(--pg-ink-primary)",
                       fontFamily: "var(--font-mono)",
                       fontSize: "10px",
                     }}
@@ -196,9 +217,7 @@ export default function PositionCreateForm() {
                   <span
                     className="text-[11px] font-bold"
                     style={{
-                      color: active
-                        ? "var(--pg-red-600)"
-                        : "var(--pg-ink-secondary)",
+                      color: active ? "var(--pg-red-600)" : "var(--pg-ink-secondary)",
                     }}
                   >
                     {c.label}
@@ -209,23 +228,21 @@ export default function PositionCreateForm() {
             <button
               type="button"
               onClick={() => {
-                setCustomMode(true);
+                setAddMode(true);
                 setCountry("");
               }}
               className="flex flex-col items-center gap-1.5 px-2 py-3 rounded-lg transition-colors"
               style={{
-                border: customMode
+                border: addMode
                   ? "1.5px solid var(--pg-red-600)"
                   : "1.5px dashed var(--pg-border)",
-                background: customMode ? "var(--pg-red-soft-bg)" : "transparent",
+                background: addMode ? "var(--pg-red-soft-bg)" : "transparent",
               }}
             >
               <span
                 className="w-8 h-8 rounded-md grid place-items-center font-bold text-white"
                 style={{
-                  background: customMode
-                    ? "var(--pg-red-600)"
-                    : "var(--pg-ink-primary)",
+                  background: addMode ? "var(--pg-red-600)" : "var(--pg-ink-primary)",
                   fontFamily: "var(--font-mono)",
                   fontSize: "14px",
                 }}
@@ -235,42 +252,78 @@ export default function PositionCreateForm() {
               <span
                 className="text-[11px] font-bold"
                 style={{
-                  color: customMode
-                    ? "var(--pg-red-600)"
-                    : "var(--pg-ink-secondary)",
+                  color: addMode ? "var(--pg-red-600)" : "var(--pg-ink-secondary)",
                 }}
               >
-                Negara lain
+                Tambah negara
               </span>
             </button>
           </div>
 
-          {customMode && (
-            <div className="mt-3">
+          {addMode && (
+            <div
+              className="mt-3 p-3.5 rounded-lg flex flex-col gap-2.5"
+              style={{ background: "var(--pg-paper)", border: "1px solid var(--pg-border)" }}
+            >
+              <div className="text-[12px] font-bold text-pg-ink-primary">
+                Daftarkan negara baru
+              </div>
+              <div className="grid grid-cols-[1fr_64px] gap-2">
+                <input
+                  type="text"
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  placeholder="Nama negara (mis. Polandia)"
+                  className="text-[14px] px-3 py-2 rounded-lg outline-none focus:border-pg-red-600 transition-colors"
+                  style={{ border: "1.5px solid var(--pg-border)" }}
+                  autoFocus
+                />
+                <input
+                  type="text"
+                  value={newFlag}
+                  onChange={(e) => setNewFlag(e.target.value)}
+                  placeholder="🇵🇱"
+                  maxLength={4}
+                  className="text-[16px] text-center px-2 py-2 rounded-lg outline-none focus:border-pg-red-600 transition-colors"
+                  style={{ border: "1.5px solid var(--pg-border)" }}
+                />
+              </div>
               <input
                 type="text"
-                value={customCountry}
-                onChange={(e) => setCustomCountry(e.target.value)}
-                placeholder="Contoh: Meksiko, Vietnam, Polandia"
-                className="w-full text-[15px] px-3.5 py-2.5 rounded-lg outline-none focus:border-pg-red-600 transition-colors"
+                value={newCity}
+                onChange={(e) => setNewCity(e.target.value)}
+                placeholder="Kota utama (mis. Warsawa)"
+                className="text-[14px] px-3 py-2 rounded-lg outline-none focus:border-pg-red-600 transition-colors"
                 style={{ border: "1.5px solid var(--pg-border)" }}
-                autoFocus
               />
-              {customCountryValue.length > 0 && (
-                <div className="text-[11px] text-pg-ink-tertiary mt-1.5 font-mono">
-                  Tersimpan sebagai:{" "}
-                  <span className="font-bold">{customCountryValue}</span>
+              {addError && (
+                <div className="text-[11px]" style={{ color: "var(--pg-err)" }}>
+                  {addError}
                 </div>
               )}
-              <div
-                className="mt-2 px-3 py-2.5 rounded-lg flex items-start gap-2 text-[11px] leading-relaxed"
-                style={{ background: "var(--pg-paper)", color: "var(--pg-ink-tertiary)" }}
-              >
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={onAddCountry}
+                  disabled={newLabel.trim().length < 2 || addPending}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-bold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ background: "var(--pg-red-600)" }}
+                >
+                  {addPending ? "Menyimpan..." : "Simpan negara"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAddMode(false)}
+                  className="text-[13px] font-bold text-pg-ink-tertiary px-2 py-2"
+                >
+                  Batal
+                </button>
+              </div>
+              <div className="flex items-start gap-2 text-[11px] leading-relaxed text-pg-ink-tertiary">
                 <Icon name="info" size={13} className="shrink-0 mt-0.5 text-pg-info" />
                 <div>
-                  Posisi langsung jalan di admin. Tampilan landing page publik
-                  (label, bendera, foto kartu negara) difinalisasi tim web
-                  setelah kamu submit posisinya — kasih tau Panji ya.
+                  Foto & warna negara pakai default dulu (hero gelap). Tim web
+                  bisa lengkapi belakangan lewat Media & SEO.
                 </div>
               </div>
             </div>
@@ -306,8 +359,10 @@ export default function PositionCreateForm() {
         </div>
       </form>
 
-      <div className="mt-5 px-4 py-3 rounded-lg flex items-start gap-2.5 text-[12px] text-pg-ink-tertiary"
-        style={{ background: "var(--pg-paper)" }}>
+      <div
+        className="mt-5 px-4 py-3 rounded-lg flex items-start gap-2.5 text-[12px] text-pg-ink-tertiary"
+        style={{ background: "var(--pg-paper)" }}
+      >
         <Icon name="info" size={14} className="shrink-0 mt-0.5 text-pg-info" />
         <div>
           Setelah dibuat, kamu akan masuk ke editor untuk: tulis deskripsi

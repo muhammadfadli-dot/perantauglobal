@@ -18,7 +18,7 @@ import ApplicationFieldsEditor, {
 import { EditorTabsHeader } from "@/components/admin/EditorTabsHeader";
 import { BannerMetric } from "@/components/admin/BannerMetric";
 import { parseContent } from "@/lib/position-content";
-import { countryLabelFromDb } from "@perantauglobal/db/country";
+import { countryLabelFromDb, getCountryRegistry } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
 
@@ -111,6 +111,16 @@ export default async function PositionDetailPage({
 
   const position = positionData as Position | null;
   if (!position) return notFound();
+
+  // Country registry (live) → dropdown options for the Settings tab + the
+  // canonical current value so the select reflects the stored country exactly.
+  const registry = await getCountryRegistry(supabase);
+  const countryOptions = registry.activeCountries().map((c) => ({
+    value: c.dbValue,
+    label: c.label,
+    initials: c.initials,
+  }));
+  const currentCountry = registry.resolve(position.country)?.dbValue ?? position.country;
 
   const jobOrders = (jobOrdersData ?? []) as JobOrder[];
   const fields = (fieldsData ?? []) as ApplicationField[];
@@ -272,7 +282,9 @@ export default async function PositionDetailPage({
             initial={{
               name: position.name,
               description: position.description,
+              country: currentCountry,
             }}
+            countryOptions={countryOptions}
           />
           <DeletePositionCard
             slug={position.slug}

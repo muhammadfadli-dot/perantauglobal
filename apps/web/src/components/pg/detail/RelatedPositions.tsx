@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/pg/Icon";
 import type { Position } from "@/lib/positions";
-import { COUNTRY_META, countryKeyFromName, cityForSlug } from "@/lib/lowonganCountries";
+import { cityForSlug, type CountryMeta } from "@/lib/lowonganCountries";
 
 /**
  * Related positions — 4 mini cards of other open/queue positions in the same
@@ -10,16 +10,16 @@ import { COUNTRY_META, countryKeyFromName, cityForSlug } from "@/lib/lowonganCou
 export function RelatedPositions({
   current,
   allPositions,
+  country,
 }: {
   current: Position;
   allPositions: Position[];
+  country: CountryMeta;
 }) {
   const others = allPositions
     .filter((p) => p.country === current.country && p.slug !== current.slug)
     .slice(0, 4);
   if (others.length === 0) return null;
-  const countryKey = countryKeyFromName(current.country);
-  const country = COUNTRY_META[countryKey];
 
   return (
     <section className="px-5 md:px-8 py-12 md:py-14 bg-pg-paper border-t border-pg-ink-100">
@@ -44,7 +44,7 @@ export function RelatedPositions({
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {others.map((p) => {
-            const city = cityForSlug(p.slug, countryKey);
+            const city = cityForSlug(p.slug, country.key);
             return (
               <Link
                 key={p.slug}
@@ -55,8 +55,10 @@ export function RelatedPositions({
                 <div
                   className="relative h-32 bg-cover bg-center bg-pg-ink-100"
                   style={{
-                    // Stack: country photo fallback (always exists) + position photo on top.
-                    backgroundImage: `url(/images/lowongan/${p.slug}.jpg), url(/images/countries/${countryKey}.jpg)`,
+                    // Stack: position photo on top, country image underneath.
+                    backgroundImage: country.img
+                      ? `url(/images/lowongan/${p.slug}.jpg), url(${country.img})`
+                      : `url(/images/lowongan/${p.slug}.jpg)`,
                   }}
                 >
                   <div

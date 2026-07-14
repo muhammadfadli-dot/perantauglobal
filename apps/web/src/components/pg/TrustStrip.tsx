@@ -14,7 +14,7 @@ const PERMIT_NO = "1810240237512001";
 
 const ITEMS = [
   `Resmi P3MI Kemnaker · No. ${PERMIT_NO}`,
-  "Bagian dari DayaLima Group, sejak 1998",
+  "Bagian dari Dayalima Group, sejak 1998",
   "Bebas biaya sebelum offering letter",
 ];
 
@@ -58,7 +58,7 @@ export function TrustStrip() {
   return (
     <div
       className="bg-pg-ink-900 text-white/92 overflow-hidden"
-      aria-label={`Perantau Global — Izin resmi P3MI Kemnaker No. ${PERMIT_NO}. Bagian dari DayaLima Group sejak 1998. Bebas biaya sebelum offering letter.`}
+      aria-label={`Perantau Global — Izin resmi P3MI Kemnaker No. ${PERMIT_NO}. Bagian dari Dayalima Group sejak 1998. Bebas biaya sebelum offering letter.`}
     >
       <div
         className="flex items-center h-9 font-mono text-[11px] md:text-[12px] tracking-[0.04em] whitespace-nowrap"

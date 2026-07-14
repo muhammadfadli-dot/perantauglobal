@@ -108,7 +108,7 @@ export function Footer() {
           ))}
         </div>
         <div className="mt-10 pt-5 border-t border-white/10 text-xs text-white/50 flex flex-col md:flex-row gap-2 justify-between">
-          <div>© {new Date().getFullYear()} PT Daya Talenta Global · Bagian dari DayaLima (sejak 1998)</div>
+          <div>© {new Date().getFullYear()} PT Daya Talenta Global · Bagian dari Dayalima (sejak 1998)</div>
           <div>Anggota Asosiasi P3MI</div>
         </div>
       </div>

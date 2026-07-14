@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return generateMeta({
     title: "Perantau Global — Aplikasi Kerja Luar Negeri Resmi (P3MI)",
     description:
-      "Perantau Global (PT Daya Talenta Global) — P3MI resmi Kemnaker, bagian dari DayaLima yang sudah jalan sejak 1998. Lowongan & sertifikasi siap kerja: bebas biaya sebelum offering letter, proses transparan, tanpa calo.",
+      "Perantau Global (PT Daya Talenta Global) — P3MI resmi Kemnaker, bagian dari Dayalima yang sudah jalan sejak 1998. Lowongan & sertifikasi siap kerja: bebas biaya sebelum offering letter, proses transparan, tanpa calo.",
     locale: "id",
   });
 }

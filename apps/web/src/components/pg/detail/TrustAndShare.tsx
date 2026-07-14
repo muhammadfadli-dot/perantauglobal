@@ -55,7 +55,7 @@ export function TrustAndShare({
           </div>
           <p className="text-[13px] md:text-[14px] text-pg-ink-700 leading-relaxed max-w-[60ch]">
             Dijalankan PT Daya Talenta Global — unit penempatan kerja luar negeri dari
-            DayaLima Group, sejak 1998. Bukan janji calo.
+            Dayalima Group, sejak 1998. Bukan janji calo.
           </p>
         </div>
 

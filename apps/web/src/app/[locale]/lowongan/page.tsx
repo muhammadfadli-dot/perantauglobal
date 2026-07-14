@@ -8,7 +8,8 @@ import { FinalCTA } from "@/components/pg/primitives";
 import { CountryTabs } from "@/components/pg/lowongan/CountryTabs";
 import { ChapterBand } from "@/components/pg/lowongan/ChapterBand";
 import { CrossLinkSertifikasi } from "@/components/pg/lowongan/CrossLinkSertifikasi";
-import { COUNTRY_META, COUNTRY_KEYS, countryKeyFromName, type CountryMeta } from "@/lib/lowonganCountries";
+import { toWebCountry } from "@/lib/lowonganCountries";
+import { getCountries } from "@/lib/countries";
 import { fetchPositionsForCatalog } from "@/lib/positions-db";
 import { jobListItemListJsonLd } from "@/lib/jsonld";
 import { waLink } from "@/lib/contact";
@@ -21,23 +22,6 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-function inferInitialActive(country: string | undefined): "all" | CountryMeta["key"] {
-  if (!country) return "all";
-  const lower = country.toLowerCase();
-  if (lower === "semua" || lower === "all") return "all";
-  for (const k of COUNTRY_KEYS) {
-    const c = COUNTRY_META[k];
-    if (
-      c.key === lower ||
-      c.short.toLowerCase() === lower ||
-      c.name.toLowerCase() === lower
-    ) {
-      return k;
-    }
-  }
-  return "all";
-}
-
 export default async function LowonganIndexPage({
   params,
   searchParams,
@@ -49,38 +33,39 @@ export default async function LowonganIndexPage({
   if (locale !== "id") notFound();
   setRequestLocale(locale);
 
-  const { country } = await searchParams;
-  const initialActive = inferInitialActive(country);
+  const { country: countryParam } = await searchParams;
 
-  const positions = await fetchPositionsForCatalog();
+  const [positions, registry] = await Promise.all([
+    fetchPositionsForCatalog(),
+    getCountries(),
+  ]);
   const openCountTotal = positions.filter((p) => p.status === "open").length;
 
-  // Group positions by country key (in the order COUNTRY_KEYS defines)
-  const byCountry: Record<CountryMeta["key"], typeof positions> = {
-    saudi: [],
-    jepang: [],
-    taiwan: [],
-    europe: [],
-    mexico: [],
-    bulgaria: [],
-    kuwait: [],
-    indonesia: [],
-  };
+  // Country chapters come from the registry (DB-backed), so a country added in
+  // the admin shows up here with no code deploy. Web shape keeps the components
+  // unchanged.
+  const webCountries = registry.activeCountries().map(toWebCountry);
+
+  // Group positions under their country key (resolved via the registry, which
+  // normalizes db_value / label / aliases).
+  const byCountry = new Map<string, typeof positions>();
+  for (const c of webCountries) byCountry.set(c.key, []);
   for (const p of positions) {
-    const key = countryKeyFromName(p.country);
-    byCountry[key].push(p);
+    const key = registry.resolve(p.country)?.key;
+    if (key && byCountry.has(key)) byCountry.get(key)!.push(p);
   }
 
-  const counts: Record<CountryMeta["key"], number> = {
-    saudi: byCountry.saudi.length,
-    jepang: byCountry.jepang.length,
-    taiwan: byCountry.taiwan.length,
-    europe: byCountry.europe.length,
-    mexico: byCountry.mexico.length,
-    bulgaria: byCountry.bulgaria.length,
-    kuwait: byCountry.kuwait.length,
-    indonesia: byCountry.indonesia.length,
-  };
+  const counts: Record<string, number> = {};
+  for (const c of webCountries) counts[c.key] = byCountry.get(c.key)?.length ?? 0;
+
+  // Only count / tab countries that actually have positions.
+  const presentCountries = webCountries.filter((c) => counts[c.key] > 0);
+  const activeCountryCount = presentCountries.length;
+
+  const initialActive =
+    countryParam && registry.resolve(countryParam)
+      ? registry.resolve(countryParam)!.key
+      : "all";
 
   const itemList = jobListItemListJsonLd(
     positions.map((p) => ({ slug: p.slug, title: `${p.role} ${p.country}` })),
@@ -111,8 +96,9 @@ export default async function LowonganIndexPage({
                   className="mt-4 leading-relaxed text-pg-ink-700 font-medium"
                   style={{ fontSize: "clamp(15px, 1.3vw, 18px)", maxWidth: "56ch" }}
                 >
-                  {positions.length} posisi resmi dari employer terverifikasi P3MI di 4 negara.
-                  Pilih negaranya — gaji, syarat, dan kontrak semua jelas di depan. Bebas calo.
+                  {positions.length} posisi resmi dari employer terverifikasi P3MI di{" "}
+                  {activeCountryCount} negara.
+                  Pilih negaranya, gaji, syarat, dan kontrak semua jelas di depan. Bebas calo.
                   Bebas biaya sebelum offering letter.
                 </p>
               </div>
@@ -144,7 +130,7 @@ export default async function LowonganIndexPage({
                     className="font-mono font-extrabold leading-none tracking-[-0.025em]"
                     style={{ fontSize: "clamp(26px, 4vw, 48px)" }}
                   >
-                    4
+                    {activeCountryCount}
                   </span>
                   <span className="font-mono text-[10.5px] md:text-[13px] text-pg-ink-500 tracking-[0.02em]">
                     negara tujuan
@@ -156,20 +142,24 @@ export default async function LowonganIndexPage({
         </section>
 
         {/* Sticky country tabs */}
-        <CountryTabs initialActive={initialActive} counts={counts} total={positions.length} />
+        <CountryTabs
+          initialActive={initialActive}
+          countries={presentCountries}
+          counts={counts}
+          total={positions.length}
+        />
 
         {/* Country chapters */}
-        {COUNTRY_KEYS.map((k) => {
-          const list = byCountry[k];
+        {webCountries.map((country) => {
+          const list = byCountry.get(country.key) ?? [];
           if (list.length === 0) return null;
           const open = list.filter((p) => p.status === "open");
           const queue = list.filter((p) => p.status === "queue");
-          const country = COUNTRY_META[k];
 
           return (
             <section
-              key={k}
-              id={`chapter-${k}`}
+              key={country.key}
+              id={`chapter-${country.key}`}
               className="px-5 md:px-8 py-12 md:py-14 scroll-mt-[140px]"
               data-screen-label={`Chapter — ${country.name}`}
             >
@@ -192,7 +182,7 @@ export default async function LowonganIndexPage({
                 {open.length > 0 && (
                   <div className="flex flex-col gap-4 mb-6">
                     {open.map((p) => (
-                      <PositionCard key={p.slug} p={p} variant="featured" />
+                      <PositionCard key={p.slug} p={p} country={country} variant="featured" />
                     ))}
                   </div>
                 )}
@@ -211,7 +201,7 @@ export default async function LowonganIndexPage({
                     {open.length > 0 ? (
                       <div className="flex flex-col gap-2.5">
                         {queue.map((p) => (
-                          <PositionCard key={p.slug} p={p} variant="row" />
+                          <PositionCard key={p.slug} p={p} country={country} variant="row" />
                         ))}
                       </div>
                     ) : (
@@ -222,7 +212,7 @@ export default async function LowonganIndexPage({
                         }}
                       >
                         {queue.map((p) => (
-                          <PositionCard key={p.slug} p={p} variant="themed" />
+                          <PositionCard key={p.slug} p={p} country={country} variant="themed" />
                         ))}
                       </div>
                     )}

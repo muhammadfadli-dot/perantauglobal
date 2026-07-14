@@ -1,31 +1,22 @@
 import Link from "next/link";
 import { Icon } from "./Icon";
 import type { Position } from "@/lib/positions";
-import { COUNTRY_META, countryKeyFromName, cityForSlug } from "@/lib/lowonganCountries";
+import { cityForSlug, type CountryMeta } from "@/lib/lowonganCountries";
 
 type Variant = "themed" | "featured" | "row";
 
 type Props = {
   p: Position;
+  /** Resolved country metadata for this position (from the registry). */
+  country: CountryMeta;
   variant?: Variant;
-};
-
-const FALLBACK_TINT: Record<ReturnType<typeof countryKeyFromName>, string> = {
-  saudi: "#b89358",
-  jepang: "#36598c",
-  taiwan: "#3a8567",
-  indonesia: "#c4452f",
-  europe: "#4f6d7a",
-  mexico: "#9c5a2a",
-  bulgaria: "#5a6b8c",
-  kuwait: "#b0843f",
 };
 
 function heroImgSrc(slug: string): string {
   return `/images/lowongan/${slug}.jpg`;
 }
 
-function FlagPill({ countryKey, country }: { countryKey: ReturnType<typeof countryKeyFromName>; country: string }) {
+function FlagPill({ country }: { country: CountryMeta }) {
   return (
     <span
       className="absolute top-3 left-3 inline-flex items-center gap-1.5 pl-1.5 pr-2.5 py-1 rounded-full font-mono text-[11px] font-bold tracking-[0.04em] text-pg-ink-900"
@@ -39,9 +30,9 @@ function FlagPill({ countryKey, country }: { countryKey: ReturnType<typeof count
         aria-hidden
         className="inline-grid place-items-center w-[18px] h-[18px] rounded-full bg-pg-white text-[11px] leading-none"
       >
-        {COUNTRY_META[countryKey].flag}
+        {country.flag}
       </span>
-      {country}
+      {country.name}
     </span>
   );
 }
@@ -75,20 +66,21 @@ function StatusChip({ status, inline }: { status: Position["status"]; inline?: b
   );
 }
 
-function CardImg({ slug, icon, countryKey }: { slug: string; icon: Position["icon"]; countryKey: ReturnType<typeof countryKeyFromName> }) {
+function CardImg({ slug, icon, country }: { slug: string; icon: Position["icon"]; country: CountryMeta }) {
   // 3-layer stack (bottom → top):
   // 1. Country tint + icon — shows when nothing else loads
-  // 2. Country photo (always exists per countryKey) — shows when position photo missing
+  // 2. Country photo (from the registry image) — shows when position photo missing
   // 3. Position-specific photo — top layer, only renders if file exists
   //
-  // Using background-image (not next/image) so missing files degrade silently.
+  // Using background-image (not next/image) so missing files degrade silently
+  // and registry image URLs (public path or bucket URL) both work.
   return (
     <>
       <div
         className="absolute inset-0 grid place-items-center"
         style={{
           background:
-            `repeating-linear-gradient(135deg, rgba(255,255,255,.08) 0 12px, transparent 12px 24px), ${FALLBACK_TINT[countryKey]}`,
+            `repeating-linear-gradient(135deg, rgba(255,255,255,.08) 0 12px, transparent 12px 24px), ${country.tint}`,
           color: "rgba(255,255,255,0.85)",
         }}
       >
@@ -99,15 +91,16 @@ function CardImg({ slug, icon, countryKey }: { slug: string; icon: Position["ico
           <Icon name={icon} size={32} stroke={1.8} />
         </div>
       </div>
-      {/* Country photo fallback — always present at /images/countries/<key>.jpg */}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(/images/countries/${countryKey}.jpg)`,
-          filter: "saturate(0.95) contrast(1.05) brightness(0.85)",
-        }}
-      />
+      {country.img && (
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${country.img})`,
+            filter: "saturate(0.95) contrast(1.05) brightness(0.85)",
+          }}
+        />
+      )}
       {/* Position-specific photo — top layer; transparent if file missing */}
       <div
         aria-hidden
@@ -122,9 +115,8 @@ function CardImg({ slug, icon, countryKey }: { slug: string; icon: Position["ico
 }
 
 // ─── Themed (default) ───────────────────────────────────────────────────────
-function ThemedCard({ p }: { p: Position }) {
-  const countryKey = countryKeyFromName(p.country);
-  const city = cityForSlug(p.slug, countryKey);
+function ThemedCard({ p, country }: { p: Position; country: CountryMeta }) {
+  const city = cityForSlug(p.slug, country.key);
   return (
     <Link
       href={`/lowongan/${p.slug}`}
@@ -132,8 +124,8 @@ function ThemedCard({ p }: { p: Position }) {
       style={{ boxShadow: "var(--pg-shadow-1)" }}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-pg-ink-50">
-        <CardImg slug={p.slug} icon={p.icon} countryKey={countryKey} />
-        <FlagPill countryKey={countryKey} country={p.country} />
+        <CardImg slug={p.slug} icon={p.icon} country={country} />
+        <FlagPill country={country} />
         <StatusChip status={p.status} />
       </div>
       <div className="flex flex-col gap-2 p-4 md:p-[18px] flex-1">
@@ -160,7 +152,7 @@ function ThemedCard({ p }: { p: Position }) {
             {p.age} th
           </span>
         </div>
-        {p.batch && (
+        {p.batch && p.batch.slotsFilled > 0 ? (
           <div className="mt-1">
             <div className="h-[6px] bg-pg-ink-50 rounded-full overflow-hidden">
               <div
@@ -177,6 +169,12 @@ function ThemedCard({ p }: { p: Position }) {
               <span>Tutup {p.batch.deadline}</span>
             </div>
           </div>
+        ) : (
+          p.batch && (
+            <div className="flex justify-end font-mono text-[11.5px] text-pg-ink-500 mt-1 tracking-[0.02em]">
+              <span>Tutup {p.batch.deadline}</span>
+            </div>
+          )
         )}
         <div className="flex items-center justify-between mt-auto pt-3 border-t border-dashed border-pg-ink-100 text-[13.5px] font-bold text-pg-red-600">
           <span>{p.contractLabel ?? "Detail"}</span>
@@ -191,12 +189,15 @@ function ThemedCard({ p }: { p: Position }) {
 }
 
 // ─── Featured ───────────────────────────────────────────────────────────────
-function FeaturedCard({ p }: { p: Position }) {
-  if (!p.batch) return <ThemedCard p={p} />;
-  const countryKey = countryKeyFromName(p.country);
-  const city = cityForSlug(p.slug, countryKey);
+function FeaturedCard({ p, country }: { p: Position; country: CountryMeta }) {
+  if (!p.batch) return <ThemedCard p={p} country={country} />;
+  const city = cityForSlug(p.slug, country.key);
   const pct = Math.round((p.batch.slotsFilled / p.batch.slotsTotal) * 100);
   const slotsLeft = p.batch.slotsTotal - p.batch.slotsFilled;
+  // slot_filled isn't wired to the pipeline yet, so it's 0 for every batch.
+  // Only show the slot meter once real fill data exists (>0); otherwise it's
+  // a misleading "X dari X sisa". Restores automatically when wiring lands.
+  const hasSlotData = p.batch.slotsFilled > 0;
   return (
     <Link
       href={`/lowongan/${p.slug}`}
@@ -204,8 +205,8 @@ function FeaturedCard({ p }: { p: Position }) {
       style={{ boxShadow: "var(--pg-shadow-2)" }}
     >
       <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[320px] overflow-hidden bg-pg-ink-50">
-        <CardImg slug={p.slug} icon={p.icon} countryKey={countryKey} />
-        <FlagPill countryKey={countryKey} country={p.country} />
+        <CardImg slug={p.slug} icon={p.icon} country={country} />
+        <FlagPill country={country} />
         <StatusChip status={p.status} />
       </div>
       <div className="flex flex-col gap-3 p-6 md:p-8 justify-center">
@@ -233,18 +234,24 @@ function FeaturedCard({ p }: { p: Position }) {
           </span>
           <span className="text-[14px] text-pg-ink-500">{p.salaryNote}</span>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 pt-3 mt-1 border-t border-pg-ink-100">
-          <div className="md:col-span-1 col-span-2 flex flex-col gap-1">
-            <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-pg-ink-500">
-              Slot
-            </span>
-            <span className="text-[15px] md:text-[16px] font-bold text-pg-ink-900">
-              {slotsLeft} dari {p.batch.slotsTotal} sisa
-            </span>
-            <div className="h-[6px] bg-pg-ink-50 rounded-full overflow-hidden mt-1">
-              <div className="h-full bg-pg-ok" style={{ width: `${pct}%` }} />
+        <div
+          className={`grid ${
+            hasSlotData ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"
+          } gap-3 md:gap-4 pt-3 mt-1 border-t border-pg-ink-100`}
+        >
+          {hasSlotData && (
+            <div className="md:col-span-1 col-span-2 flex flex-col gap-1">
+              <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-pg-ink-500">
+                Slot
+              </span>
+              <span className="text-[15px] md:text-[16px] font-bold text-pg-ink-900">
+                {slotsLeft} dari {p.batch.slotsTotal} sisa
+              </span>
+              <div className="h-[6px] bg-pg-ink-50 rounded-full overflow-hidden mt-1">
+                <div className="h-full bg-pg-ok" style={{ width: `${pct}%` }} />
+              </div>
             </div>
-          </div>
+          )}
           <div className="flex flex-col gap-1">
             <span className="font-mono text-[10.5px] uppercase tracking-[0.08em] text-pg-ink-500">
               Kandidat
@@ -275,9 +282,8 @@ function FeaturedCard({ p }: { p: Position }) {
 }
 
 // ─── Row (compact for queue in mixed mode) ──────────────────────────────────
-function RowCard({ p }: { p: Position }) {
-  const countryKey = countryKeyFromName(p.country);
-  const city = cityForSlug(p.slug, countryKey);
+function RowCard({ p, country }: { p: Position; country: CountryMeta }) {
+  const city = cityForSlug(p.slug, country.key);
   return (
     <Link
       href={`/lowongan/${p.slug}`}
@@ -288,11 +294,11 @@ function RowCard({ p }: { p: Position }) {
         className="relative w-[72px] h-[72px] md:w-[88px] md:h-[88px] rounded-[12px] overflow-hidden shrink-0 bg-pg-ink-50"
         aria-hidden
       >
-        <CardImg slug={p.slug} icon={p.icon} countryKey={countryKey} />
+        <CardImg slug={p.slug} icon={p.icon} country={country} />
       </div>
       <div className="flex flex-col gap-1 flex-1 min-w-0">
         <div className="font-mono text-[10px] md:text-[10.5px] font-bold uppercase tracking-[0.04em] text-pg-ink-500">
-          {COUNTRY_META[countryKey].flag} {p.country} · {city}
+          {country.flag} {p.country} · {city}
         </div>
         <div className="text-[14.5px] md:text-[15.5px] font-extrabold leading-tight text-pg-ink-900 tracking-[-0.018em]">
           {p.role}
@@ -320,8 +326,8 @@ function RowCard({ p }: { p: Position }) {
 }
 
 // ─── Picker ─────────────────────────────────────────────────────────────────
-export function PositionCard({ p, variant = "themed" }: Props) {
-  if (variant === "featured") return <FeaturedCard p={p} />;
-  if (variant === "row") return <RowCard p={p} />;
-  return <ThemedCard p={p} />;
+export function PositionCard({ p, country, variant = "themed" }: Props) {
+  if (variant === "featured") return <FeaturedCard p={p} country={country} />;
+  if (variant === "row") return <RowCard p={p} country={country} />;
+  return <ThemedCard p={p} country={country} />;
 }

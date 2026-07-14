@@ -20,7 +20,9 @@
  */
 
 import { supabaseV2 } from "./supabase-v2";
-import { POSITIONS, getPosition as getStaticPosition, type Position, type PositionCountry } from "./positions";
+import { getPosition as getStaticPosition, type Position } from "./positions";
+import { getCountries } from "./countries";
+import type { CountryRegistry } from "@perantauglobal/db/country";
 import type { IconName } from "@/components/pg/Icon";
 
 export type ActiveJobOrder = {
@@ -83,12 +85,18 @@ const REVALIDATE_SECONDS = 60;
 export async function fetchOpenJobOrders(): Promise<Map<string, ActiveJobOrder>> {
   try {
     const sb = supabaseV2();
+    // A job order only counts as "open" to the public if its deadline hasn't
+    // passed. Batches with no deadline (deadline IS NULL) stay open until an
+    // admin closes them. Excludes stale batches whose deadline is in the past
+    // so candidates never see "LAGI BUKA · deadline 5 Juni" weeks later.
+    const today = new Date().toISOString().slice(0, 10);
     const { data, error } = await sb
       .from("job_orders")
       .select(
         "id, position_slug, intake_label, slot_count, slot_filled, deadline, public_employer_name, employer_city, public_description"
       )
       .eq("status", "open")
+      .or(`deadline.is.null,deadline.gte.${today}`)
       .order("created_at", { ascending: false });
     if (error || !data) return new Map();
 
@@ -190,18 +198,6 @@ type DbPositionRow = {
   content: unknown;
 };
 
-/** Map DB country slug ("japan", "saudi_arabia", …) → display label. */
-const COUNTRY_LABEL: Record<string, PositionCountry> = {
-  japan: "Jepang",
-  saudi_arabia: "Saudi Arabia",
-  taiwan: "Taiwan",
-  indonesia: "Indonesia",
-  europe: "Eropa Timur",
-  mexico: "Meksiko",
-  bulgaria: "Bulgaria",
-  kuwait: "Kuwait",
-};
-
 const VALID_ICONS = new Set<IconName>([
   "briefcase",
   "stethoscope",
@@ -238,10 +234,15 @@ function pickHeroMetaLine(content: unknown): string | null {
  * resolution chain runs per-field so a partial cardMeta plus static can
  * coexist.
  */
-function resolveCard(row: DbPositionRow, staticEntry: Position | undefined): Omit<Position, "status" | "batch"> | null {
+function resolveCard(
+  row: DbPositionRow,
+  staticEntry: Position | undefined,
+  registry: CountryRegistry,
+): Omit<Position, "status" | "batch"> {
   const cardMeta = pickCardMeta(row.content);
-  const country = COUNTRY_LABEL[row.country];
-  if (!country) return null; // unknown country → skip
+  // Registry resolves every seeded country + normalizes aliases; an unrecognized
+  // value falls back to "Global" instead of silently vanishing (old behavior).
+  const country = registry.resolveOrGlobal(row.country).label;
 
   const heroLine = pickHeroMetaLine(row.content);
   // Try splitting hero "¥244.200/bulan" → salary="¥244.200", note="/bulan"
@@ -260,14 +261,15 @@ function resolveCard(row: DbPositionRow, staticEntry: Position | undefined): Omi
     staticEntry?.salary ??
     derivedFromHero?.salary ??
     "—";
-  const salaryNote =
+  const rawSalaryNote =
     nonEmpty(cardMeta.salaryNote) ??
     staticEntry?.salaryNote ??
     derivedFromHero?.salaryNote ??
     "";
+  const salaryNote = dedupSalaryNote(salary, rawSalaryNote);
 
   const gender = nonEmpty(cardMeta.gender) ?? staticEntry?.gender ?? "L/P";
-  const age = nonEmpty(cardMeta.age) ?? staticEntry?.age ?? "—";
+  const age = normalizeAge(nonEmpty(cardMeta.age) ?? staticEntry?.age ?? "—");
   const contractLabel = nonEmpty(cardMeta.contractLabel) ?? staticEntry?.contractLabel;
 
   return {
@@ -289,6 +291,35 @@ function nonEmpty(v: string | undefined): string | undefined {
   return t.length > 0 ? t : undefined;
 }
 
+/**
+ * Strip a trailing age unit from an authored age value so renderers can append
+ * their own ("th" on cards, "tahun" in QuickFacts) without doubling it.
+ * "25 - 35 tahun" → "25 - 35"; "20-35 years old" → "20-35"; "21–30" → "21–30".
+ */
+function normalizeAge(age: string): string {
+  return age.replace(/\s*((tahun|thn|years?|yrs?|yo)(\s+old)?|old)\.?$/i, "").trim() || age;
+}
+
+/**
+ * Drop a salary note that merely repeats a unit already present in the salary
+ * string, so cards/detail don't render "¥300,000/bulan /bulan". Notes that add
+ * real information ("+ makan SAR 300") are kept.
+ */
+function dedupSalaryNote(salary: string, note: string): string {
+  if (!note) return "";
+  const s = salary.toLowerCase().replace(/\s+/g, "");
+  const n = note.toLowerCase().replace(/\s+/g, "");
+  if (!n) return "";
+  // Note fully duplicated at the tail of salary ("¥300,000/bulan" + "/bulan").
+  if (s.endsWith(n)) return "";
+  // Note is a bare period unit whose word already appears in the salary.
+  const bareUnit = /^\/?(per)?(bulan|month|mo|jam|hour|hr|tahun|year|thn|hari|day|minggu|week)$/i.test(
+    note.trim(),
+  );
+  if (bareUnit && s.includes(n.replace(/^\//, "").replace(/^per/, ""))) return "";
+  return note;
+}
+
 function splitMetaLine(line: string): { salary: string; salaryNote: string } | null {
   // Common patterns: "¥244.200/bulan", "SAR 3.200 / bulan", "Rp 5.000.000 / bulan".
   // Split at "/" or " / " — first segment = salary, rest = note.
@@ -301,37 +332,39 @@ function splitMetaLine(line: string): { salary: string; salaryNote: string } | n
 }
 
 /**
- * Fetch ALL active positions from DB and shape into Position[]. Each card's
- * meta is resolved through the chain: positions.content.cardMeta → static
- * catalog (lib/positions.ts) → defaults. Job orders overlay status/batch.
+ * Fetch active positions from DB and shape into Position[]. Each card's meta is
+ * resolved through the chain: positions.content.cardMeta → static catalog
+ * (lib/positions.ts, per-field enrichment only) → defaults. Job orders overlay
+ * status/batch.
  *
- * Falls back to the pure-static catalog when the DB is unreachable so the
- * site keeps rendering during incidents.
+ * The DB (RLS: active=true visible to anon) is the ONLY source of which
+ * positions exist. The static catalog is NOT backfilled as a list source:
+ * an admin-deactivated position must stay hidden, and resurrecting it from the
+ * static catalog produced live cards whose apply form 404s on submit. On DB
+ * failure the list is empty (ISR serves the last good render); the static
+ * catalog is no longer a render-time list fallback.
  */
 export async function fetchPositionsForCatalog(): Promise<Position[]> {
   try {
     const sb = supabaseV2();
-    const [posResult, jobOrders] = await Promise.all([
-      // Fetch ALL positions (incl. inactive) so we know which slugs the DB owns.
-      // An inactive slug must be HIDDEN, not resurrected from the static catalog
-      // — backfilling it produced a live card whose apply 404s on submit.
+    const [posResult, jobOrders, registry] = await Promise.all([
+      // RLS (positions_anon_read_active) already filters to active=true, so the
+      // anon client never sees inactive rows — hence no static backfill below.
       sb.from("positions").select("slug, name, role, country, active, content"),
       fetchOpenJobOrders(),
+      getCountries(),
     ]);
     if (posResult.error || !posResult.data) {
-      return mergePositionsWithJobOrders(jobOrders);
+      return [];
     }
 
     const rows = posResult.data as DbPositionRow[];
     const out: Position[] = [];
-    // Every slug the DB owns (active OR inactive) — static backfill skips these.
-    const knownInDb = new Set<string>(rows.map((r) => r.slug));
 
     for (const row of rows) {
-      if (!row.active) continue; // known to DB but intentionally hidden
+      if (!row.active) continue; // defensive: RLS should already exclude these
       const staticEntry = getStaticPosition(row.slug);
-      const card = resolveCard(row, staticEntry);
-      if (!card) continue;
+      const card = resolveCard(row, staticEntry, registry);
       // Skip positions that have no authored cardMeta AND no static fallback —
       // they'd render as broken cards (no salary, no age). Admin needs to
       // fill in the "Card di katalog" section in the editor first.
@@ -361,60 +394,36 @@ export async function fetchPositionsForCatalog(): Promise<Position[]> {
       }
     }
 
-    // Backfill static-only positions the DB doesn't own yet — e.g. legacy
-    // entries not migrated. A slug that exists in the DB as INACTIVE is
-    // intentionally hidden, so knownInDb (not just the active ones) gates this.
-    for (const p of POSITIONS) {
-      if (knownInDb.has(p.slug)) continue;
-      const jo = jobOrders.get(p.slug);
-      if (jo) {
-        out.push({
-          ...p,
-          status: "open",
-          batch: {
-            label: jo.intake_label,
-            slotsFilled: jo.slot_filled,
-            slotsTotal: jo.slot_count,
-            deadline: jo.deadline
-              ? new Date(jo.deadline).toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })
-              : "—",
-          },
-        });
-      } else {
-        out.push({ ...p, status: "queue" });
-      }
-    }
-
-    // Stable ordering: country group then slug, so the page isn't reshuffled
-    // every time admin saves a position.
-    const COUNTRY_ORDER: PositionCountry[] = ["Saudi Arabia", "Jepang", "Taiwan", "Eropa Timur", "Meksiko", "Bulgaria", "Kuwait", "Indonesia"];
+    // Stable ordering: country (registry sort_order) then slug, so the page
+    // isn't reshuffled every time admin saves a position.
+    const orderOf = (label: string) => registry.resolve(label)?.sortOrder ?? 999;
     out.sort((a, b) => {
-      const ai = COUNTRY_ORDER.indexOf(a.country);
-      const bi = COUNTRY_ORDER.indexOf(b.country);
+      const ai = orderOf(a.country);
+      const bi = orderOf(b.country);
       if (ai !== bi) return ai - bi;
       return a.slug.localeCompare(b.slug);
     });
 
     return out;
   } catch {
-    // Hard failure → use static catalog as last resort.
-    const jobOrders = await fetchOpenJobOrders().catch(() => new Map<string, ActiveJobOrder>());
-    return mergePositionsWithJobOrders(jobOrders);
+    // Hard failure → empty list; ISR keeps serving the last good render and the
+    // catalog shows its empty state rather than resurrecting stale positions.
+    return [];
   }
 }
 
 /**
  * Resolve a single Position for the detail page (status="queue" — caller
- * overlays job_orders separately). Used by /lowongan/[slug] when an admin-
- * created position isn't in the static catalog. Returns undefined when the
- * slug doesn't exist or is inactive.
+ * overlays job_orders separately). Returns undefined when the slug doesn't
+ * exist or is inactive, so the page 404s.
+ *
+ * Because RLS (positions_anon_read_active) hides inactive rows from the anon
+ * client, a null row means the position is inactive OR nonexistent — both 404.
+ * We NEVER fall back to the static catalog here: doing so resurrected
+ * deactivated positions into a live page whose apply form 404s on submit. The
+ * static catalog is still used for per-field card enrichment on ACTIVE rows.
  */
 export async function fetchPositionForDetail(slug: string): Promise<Position | undefined> {
-  const staticEntry = getStaticPosition(slug);
   try {
     const sb = supabaseV2();
     const { data, error } = await sb
@@ -422,34 +431,60 @@ export async function fetchPositionForDetail(slug: string): Promise<Position | u
       .select("slug, name, role, country, active, content")
       .eq("slug", slug)
       .maybeSingle();
-    if (error) {
-      // DB error (not a missing row) — fall back to static for resilience.
-      return staticEntry;
-    }
-    if (data) {
-      // Row exists in DB. If it's inactive it's intentionally hidden — return
-      // undefined so the page 404s instead of resurrecting it from the static
-      // catalog (which let candidates fill the form then 404 on submit).
-      if (!(data as DbPositionRow).active) return undefined;
-      const card = resolveCard(data as DbPositionRow, staticEntry);
-      if (!card) return staticEntry;
-      return { ...card, status: "queue" };
-    }
-    // No DB row at all → legacy slug that only lives in the static catalog.
-    return staticEntry;
+    if (error || !data) return undefined;
+    if (!(data as DbPositionRow).active) return undefined; // defensive; RLS already hides
+    const registry = await getCountries();
+    const card = resolveCard(data as DbPositionRow, getStaticPosition(slug), registry);
+    return { ...card, status: "queue" };
   } catch {
-    return staticEntry;
+    // Transient DB error → 404 on a cold miss; ISR serves the last good render
+    // for already-cached active pages.
+    return undefined;
   }
 }
 
 /**
- * Returns slugs of all active positions for generateStaticParams. Union
- * of DB (active=true) and the static catalog so detail pages keep building
- * even during DB outages or migrations.
+ * Resolve a retired slug to its current one via position_slug_aliases. Lets the
+ * detail route permanently redirect an old (renamed) URL so live ads pointing at
+ * the previous slug never 404. Returns undefined when the slug was never renamed.
+ */
+export async function fetchSlugAlias(slug: string): Promise<string | undefined> {
+  try {
+    // position_slug_aliases is newer than the generated Database types; type the
+    // single query locally rather than regenerate (which drops hand-added exports).
+    const sb = supabaseV2() as unknown as {
+      from(table: "position_slug_aliases"): {
+        select(cols: string): {
+          eq(
+            col: string,
+            val: string,
+          ): {
+            maybeSingle(): Promise<{
+              data: { new_slug: string } | null;
+              error: unknown;
+            }>;
+          };
+        };
+      };
+    };
+    const { data, error } = await sb
+      .from("position_slug_aliases")
+      .select("new_slug")
+      .eq("old_slug", slug)
+      .maybeSingle();
+    if (error || !data) return undefined;
+    return data.new_slug;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Returns slugs of all active positions for generateStaticParams (DB active=true
+ * only). Inactive/unknown slugs render on demand via dynamicParams and 404.
  */
 export async function fetchPositionSlugsForBuild(): Promise<string[]> {
   const slugs = new Set<string>();
-  for (const p of POSITIONS) slugs.add(p.slug);
   try {
     const sb = supabaseV2();
     const { data, error } = await sb.from("positions").select("slug").eq("active", true);
@@ -457,35 +492,9 @@ export async function fetchPositionSlugsForBuild(): Promise<string[]> {
       for (const row of data as { slug: string }[]) slugs.add(row.slug);
     }
   } catch {
-    // ignore; static catalog already populated
+    // ignore; dynamicParams renders any missing slug on demand
   }
   return Array.from(slugs);
-}
-
-/**
- * Legacy: augments static catalog with live batch data. Kept as the offline
- * fallback used when the DB list query fails. New code should call
- * `fetchPositionsForCatalog()` instead.
- */
-export function mergePositionsWithJobOrders(
-  jobOrdersBySlug: Map<string, ActiveJobOrder>
-): Position[] {
-  return POSITIONS.map((p) => {
-    const jo = jobOrdersBySlug.get(p.slug);
-    if (!jo) return { ...p, status: "queue" };
-    return {
-      ...p,
-      status: "open",
-      batch: {
-        label: jo.intake_label,
-        slotsFilled: jo.slot_filled,
-        slotsTotal: jo.slot_count,
-        deadline: jo.deadline
-          ? new Date(jo.deadline).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
-          : "—",
-      },
-    };
-  });
 }
 
 export const POSITIONS_REVALIDATE = REVALIDATE_SECONDS;

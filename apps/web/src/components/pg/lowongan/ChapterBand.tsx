@@ -24,15 +24,20 @@ export function ChapterBand({
       }}
       data-country={country.key}
     >
-      <Image
-        src={country.img}
-        alt={country.name}
-        fill
-        sizes="(min-width:1280px) 1280px, 100vw"
-        className="object-cover z-0"
-        style={{ filter: country.imgFilter }}
-        priority={false}
-      />
+      {country.img ? (
+        <Image
+          src={country.img}
+          alt={country.name}
+          fill
+          sizes="(min-width:1280px) 1280px, 100vw"
+          className="object-cover z-0"
+          style={{ filter: country.imgFilter }}
+          priority={false}
+        />
+      ) : (
+        // New country without a band image yet — solid tint until one is added.
+        <div aria-hidden className="absolute inset-0 z-0" style={{ background: country.tint }} />
+      )}
       <div
         aria-hidden
         className="absolute inset-0 z-[1]"

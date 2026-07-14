@@ -44,7 +44,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
               Data pribadi kamu dikendalikan oleh <strong>PT Daya Talenta Global</strong> (selanjutnya
               disebut <em>&ldquo;Perantau Global&rdquo;</em>, <em>&ldquo;kami&rdquo;</em>), berkedudukan di Jakarta,
               Indonesia. Perantau Global adalah P3MI resmi Kemnaker (Izin No. 1810240237512001), bagian dari
-              DayaLima Group.
+              Dayalima Group.
             </p>
             <p className="mt-3">
               Pertanyaan tentang data kamu bisa dikirim ke <a href="mailto:halo@perantauglobal.com" className="text-pg-red-600 font-bold no-underline hover:underline">halo@perantauglobal.com</a> atau WhatsApp{" "}

@@ -1,9 +1,9 @@
 /**
  * Lineage — "kenapa bisa dipercaya" + P3MI license card.
  *
- * Note: 1998 belongs to DayaLima Group, NOT Perantau Global / DTG (est. Oct 2024).
+ * Note: 1998 belongs to Dayalima Group, NOT Perantau Global / DTG (est. Oct 2024).
  * Per project_corporate_lineage_trust_claims memory — always phrase as
- * "bagian dari DayaLima Group sejak 1998", never "Perantau sejak 1998".
+ * "bagian dari Dayalima Group sejak 1998", never "Perantau sejak 1998".
  */
 export function Lineage() {
   return (
@@ -15,11 +15,11 @@ export function Lineage() {
               Kenapa bisa dipercaya
             </div>
             <h2 className="text-[24px] md:text-[36px] font-extrabold tracking-[-0.022em] leading-[1.1] text-pg-ink-900 text-balance">
-              Bukan pemain baru. Bagian dari DayaLima Group.
+              Bukan pemain baru. Bagian dari Dayalima Group.
             </h2>
             <p className="text-[14px] md:text-[16px] font-medium text-pg-ink-700 leading-relaxed max-w-[60ch] mt-2">
               Perantau Global dijalankan PT Daya Talenta Global — unit penempatan kerja luar
-              negeri dari <b className="text-pg-ink-900">DayaLima Group</b>, grup layanan SDM
+              negeri dari <b className="text-pg-ink-900">Dayalima Group</b>, grup layanan SDM
               Indonesia yang sudah berpengalaman <b className="text-pg-ink-900">sejak 1998</b>.
               Resmi berizin P3MI Kemnaker.
             </p>

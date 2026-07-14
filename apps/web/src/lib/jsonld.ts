@@ -31,7 +31,7 @@ export function organizationJsonLd() {
     ],
     parentOrganization: {
       "@type": "Organization",
-      name: "DayaLima Group",
+      name: "Dayalima Group",
       url: "https://dayalima.com",
     },
   };
@@ -190,6 +190,8 @@ export function jobPostingJsonLd(params: {
   slug: string;
   title: string;
   countryLabel: string;
+  /** ISO 3166-1 alpha-2 from the country registry (preferred over the local map). */
+  countryIso?: string | null;
   city?: string | null;
   jobDescription?: string[];
   datePosted: string | null;
@@ -207,7 +209,7 @@ export function jobPostingJsonLd(params: {
           .join("")}</ul>`
       : `Lowongan ${params.title} di ${params.countryLabel} lewat Perantau Global — P3MI resmi Kemnaker, bebas biaya sebelum offering letter.`;
 
-  const iso = COUNTRY_ISO[params.countryLabel];
+  const iso = params.countryIso || COUNTRY_ISO[params.countryLabel];
   const sal = params.salary ? parseSalary(params.salary) : null;
 
   const baseSalary = sal

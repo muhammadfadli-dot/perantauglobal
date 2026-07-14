@@ -57,6 +57,9 @@ export const AUDIT_ACTIONS = {
   discard_position_draft: { label: "Buang draft posisi", tone: "mute" },
   delete_position: { label: "Hapus posisi", tone: "err" },
   update_position_meta: { label: "Ubah meta/visibility posisi", tone: "info" },
+  upload_position_media: { label: "Upload media posisi", tone: "info" },
+  update_position_country: { label: "Ubah negara posisi", tone: "info" },
+  rename_position_slug: { label: "Ganti slug posisi", tone: "info" },
   // Application-field (screening) operations — these drive hard_pass/readiness,
   // so every mutation is tracked (PDP + scoring accountability).
   create_application_field: { label: "Tambah field lamaran", tone: "ok" },
