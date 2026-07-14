@@ -272,6 +272,18 @@ function resolveCard(
   const age = normalizeAge(nonEmpty(cardMeta.age) ?? staticEntry?.age ?? "—");
   const contractLabel = nonEmpty(cardMeta.contractLabel) ?? staticEntry?.contractLabel;
 
+  // Admin-uploaded hero (bucket URL) when present; the card falls back to the
+  // static per-slug asset otherwise. Rendered as a CSS background-image, so a
+  // bucket URL needs no next/image remotePatterns.
+  const mediaObj =
+    row.content && typeof row.content === "object"
+      ? (row.content as { media?: { heroUrl?: unknown } }).media
+      : undefined;
+  const heroUrl =
+    typeof mediaObj?.heroUrl === "string" && mediaObj.heroUrl.trim()
+      ? mediaObj.heroUrl.trim()
+      : undefined;
+
   return {
     slug: row.slug,
     role: row.name || staticEntry?.role || row.role,
@@ -282,6 +294,7 @@ function resolveCard(
     gender,
     age,
     ...(contractLabel ? { contractLabel } : {}),
+    ...(heroUrl ? { heroUrl } : {}),
   };
 }
 

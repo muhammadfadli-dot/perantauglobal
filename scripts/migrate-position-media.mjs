@@ -53,7 +53,10 @@ const COUNTRY_FILE_TO_KEY = {
 };
 
 function loadEnv() {
-  const raw = readFileSync(join(REPO, "apps/web/.env.local"), "utf8");
+  // PG_ENV_FILE lets us point at a `vercel env pull` dump (which carries the V2
+  // project's service-role key) without committing it anywhere.
+  const envPath = process.env.PG_ENV_FILE || join(REPO, "apps/web/.env.local");
+  const raw = readFileSync(envPath, "utf8");
   const env = {};
   for (const line of raw.split("\n")) {
     const m = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/);

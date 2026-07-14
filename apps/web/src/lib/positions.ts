@@ -32,6 +32,9 @@ export type Position = {
   age: string;
   /** Short summary, used on detail hero meta */
   contractLabel?: string;
+  /** Admin-authored hero photo (positions.content.media.heroUrl). The card
+   * falls back to the static per-slug asset when this is absent. */
+  heroUrl?: string | null;
   /** Active job order info (when status === "open") */
   batch?: {
     label: string;

@@ -66,7 +66,17 @@ function StatusChip({ status, inline }: { status: Position["status"]; inline?: b
   );
 }
 
-function CardImg({ slug, icon, country }: { slug: string; icon: Position["icon"]; country: CountryMeta }) {
+function CardImg({
+  slug,
+  icon,
+  country,
+  heroUrl,
+}: {
+  slug: string;
+  icon: Position["icon"];
+  country: CountryMeta;
+  heroUrl?: string | null;
+}) {
   // 3-layer stack (bottom → top):
   // 1. Country tint + icon — shows when nothing else loads
   // 2. Country photo (from the registry image) — shows when position photo missing
@@ -101,12 +111,15 @@ function CardImg({ slug, icon, country }: { slug: string; icon: Position["icon"]
           }}
         />
       )}
-      {/* Position-specific photo — top layer; transparent if file missing */}
+      {/* Position-specific photo — top layer; transparent if file missing.
+          Prefer the admin-uploaded hero (bucket URL); fall back to the static
+          per-slug asset. CSS background-image, so a bucket URL needs no
+          next/image config. */}
       <div
         aria-hidden
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: `url(${heroImgSrc(slug)})`,
+          backgroundImage: `url(${heroUrl || heroImgSrc(slug)})`,
           filter: "saturate(1.05) contrast(1.02)",
         }}
       />
@@ -124,7 +137,7 @@ function ThemedCard({ p, country }: { p: Position; country: CountryMeta }) {
       style={{ boxShadow: "var(--pg-shadow-1)" }}
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-pg-ink-50">
-        <CardImg slug={p.slug} icon={p.icon} country={country} />
+        <CardImg slug={p.slug} icon={p.icon} country={country} heroUrl={p.heroUrl} />
         <FlagPill country={country} />
         <StatusChip status={p.status} />
       </div>
@@ -205,7 +218,7 @@ function FeaturedCard({ p, country }: { p: Position; country: CountryMeta }) {
       style={{ boxShadow: "var(--pg-shadow-2)" }}
     >
       <div className="relative aspect-[4/3] md:aspect-auto md:min-h-[320px] overflow-hidden bg-pg-ink-50">
-        <CardImg slug={p.slug} icon={p.icon} country={country} />
+        <CardImg slug={p.slug} icon={p.icon} country={country} heroUrl={p.heroUrl} />
         <FlagPill country={country} />
         <StatusChip status={p.status} />
       </div>
@@ -294,7 +307,7 @@ function RowCard({ p, country }: { p: Position; country: CountryMeta }) {
         className="relative w-[72px] h-[72px] md:w-[88px] md:h-[88px] rounded-[12px] overflow-hidden shrink-0 bg-pg-ink-50"
         aria-hidden
       >
-        <CardImg slug={p.slug} icon={p.icon} country={country} />
+        <CardImg slug={p.slug} icon={p.icon} country={country} heroUrl={p.heroUrl} />
       </div>
       <div className="flex flex-col gap-1 flex-1 min-w-0">
         <div className="font-mono text-[10px] md:text-[10.5px] font-bold uppercase tracking-[0.04em] text-pg-ink-500">

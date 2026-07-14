@@ -58,6 +58,16 @@ const nextConfig: NextConfig = {
     // Prefer AVIF (smaller) → WebP → JPEG. AVIF can be 30-50% smaller than JPEG
     // at same visual quality, important for mobile users on slow connections.
     formats: ["image/avif", "image/webp"],
+    // Country band images (ChapterBand/CountryTabs render via next/image) can be
+    // served from the public position-media Supabase Storage bucket. CSP already
+    // allows *.supabase.co for img-src; remotePatterns lets the optimizer fetch it.
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "jeadtvxgxmqnsqwxjmhj.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
   },
   async headers() {
     return [
