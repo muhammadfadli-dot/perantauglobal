@@ -34,6 +34,9 @@ export async function POST(request: NextRequest) {
   }
 
   if (typeof body.secret !== "string" || body.secret !== secret) {
+    // Observability (E2): a bad/missing secret is the failure the platform side
+    // couldn't see (it only inspects res.ok). Log it here too.
+    console.warn("[revalidate] forbidden - bad or missing secret");
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -47,6 +50,7 @@ export async function POST(request: NextRequest) {
   if (slug) {
     revalidatePath(`/[locale]/lowongan/${slug}`, "page");
   }
+  console.info(`[revalidate] ok slug=${slug ?? "(list only)"}`);
 
   return NextResponse.json({
     ok: true,

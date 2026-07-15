@@ -188,6 +188,10 @@ export async function createCountry(
     throw new Error(`DB error: ${error.message}`);
   }
 
+  // Registering a country is a catalog-shaping action that used to leave no
+  // trail (E4) - log it after the row lands, mirroring createPosition.
+  await logAdminAction("create_country", "country", key, { label, db_value: key });
+
   revalidatePath("/admin/positions/new");
   return { ok: true, dbValue: key, key, label, initials };
 }

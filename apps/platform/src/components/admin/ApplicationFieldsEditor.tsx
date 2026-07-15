@@ -10,6 +10,7 @@ import {
   updateApplicationField,
   type ApplicationFieldInput,
 } from "../../app/(admin)/admin/positions/actions";
+import { fieldScreens } from "@/lib/position-readiness";
 
 /**
  * Edits position_application_fields for a slug — admin-facing UX is
@@ -374,6 +375,33 @@ function FieldRow({
                 Wajib
               </span>
             )}
+            {/* Screening effectiveness (Fase 2.2b): does this field actually
+                filter applicants, or just collect data? */}
+            {fieldScreens(field) ? (
+              <span
+                className="text-[9px] font-bold tracking-[0.1em] uppercase px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                style={{
+                  background: "var(--pg-ok-soft-bg)",
+                  color: "var(--pg-ok-soft-fg)",
+                  fontFamily: "var(--font-mono)",
+                }}
+                title="Menyaring: wajib + tipe pilihan + ada opsi ditandai Lolos."
+              >
+                <Icon name="check" size={9} stroke={2.6} /> menyaring
+              </span>
+            ) : field.importance === "required" ? (
+              <span
+                className="text-[9px] font-bold tracking-[0.1em] uppercase px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+                style={{
+                  background: "var(--pg-warn-soft-bg)",
+                  color: "var(--pg-warn-soft-fg)",
+                  fontFamily: "var(--font-mono)",
+                }}
+                title="Wajib tapi belum menyaring. Ubah ke tipe pilihan lalu tandai opsi 'Lolos' supaya benar-benar menyaring pelamar (kalau tidak, semua pelamar auto-lolos)."
+              >
+                belum menyaring
+              </span>
+            ) : null}
           </div>
           <div className="text-[11px] text-pg-ink-tertiary mt-1 flex items-center gap-2 flex-wrap">
             <span className="inline-flex items-center gap-1">

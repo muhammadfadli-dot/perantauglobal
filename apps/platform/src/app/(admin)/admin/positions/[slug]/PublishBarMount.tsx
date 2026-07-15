@@ -21,12 +21,16 @@ export default function PublishBarMount({
   hasPendingDraft: initialHasPendingDraft,
   draftSavedAt: initialDraftSavedAt,
   publishedAt,
+  publishBlockers,
 }: {
   slug: string;
   positionName: string;
   hasPendingDraft: boolean;
   draftSavedAt: string | null;
   publishedAt: string | null;
+  /** Fase 2.1: unmet blocking readiness items (card won't show / screens nobody).
+   * Non-empty triggers an explicit confirm before publish. */
+  publishBlockers: string[];
 }) {
   const router = useRouter();
   const [clientDirty, setClientDirty] = useState(false);
@@ -67,6 +71,18 @@ export default function PublishBarMount({
 
   async function handlePublish() {
     if (busyAction) return;
+    // Fase 2.1 - publishing with an unmet blocking item (card won't show in the
+    // listing, or the position screens nobody) is allowed, but only as a
+    // conscious choice with the consequence spelled out.
+    if (publishBlockers.length > 0) {
+      const proceed = window.confirm(
+        "Posisi ini mau dipublish, tapi ada yang belum beres:\n\n" +
+          publishBlockers.map((b) => `• ${b}`).join("\n") +
+          "\n\nKalau tetap publish, posisi bisa tidak tampil di listing publik " +
+          "atau meloloskan semua pelamar. Lanjut publish?",
+      );
+      if (!proceed) return;
+    }
     setBusyAction("publish");
     try {
       const result = await publishPosition(slug);

@@ -9,6 +9,7 @@ import {
   countryInitialsFromDb,
 } from "@perantauglobal/db/country";
 import { fetchAllRows } from "@/lib/fetch-all-rows";
+import { positionHasEffectiveScreening } from "@/lib/position-readiness";
 
 /**
  * Compute days-ago index in Asia/Jakarta time (most recent = 0, 6 days ago = 6).
@@ -54,6 +55,7 @@ export default async function AdminPositionsPage({
     { data: appsData },
     { data: weekAppsData },
     { data: readinessData },
+    { data: fieldsData },
     { count: candidateCount },
     { count: weekApps },
   ] = await Promise.all([
@@ -78,6 +80,14 @@ export default async function AdminPositionsPage({
     ).then((data) => ({ data })),
     fetchAllRows((f, t) =>
       supabase.from("application_readiness_view").select("position_slug, hard_pass").range(f, t),
+    ).then((data) => ({ data })),
+    // Screening config per position (Fase 2.1 catalog badge) - resolved in JS via
+    // the shared predicate so the catalog flags the "screens nobody" state (C1).
+    fetchAllRows((f, t) =>
+      supabase
+        .from("position_application_fields")
+        .select("position_slug, field_type, importance, options")
+        .range(f, t),
     ).then((data) => ({ data })),
     supabase.from("candidates").select("*", { count: "exact", head: true }),
     supabase
@@ -132,6 +142,27 @@ export default async function AdminPositionsPage({
   }
 
   const totalReady = [...readyByPosition.values()].reduce((s, v) => s + v.ready, 0);
+
+  // Per-position screening effectiveness (Fase 2.1) - an active position that
+  // screens nobody (finding C1) gets a warning pill in the catalog.
+  const fieldsBySlug = new Map<
+    string,
+    { field_type: string; importance: string | null; options: unknown }[]
+  >();
+  for (const f of (fieldsData ?? []) as {
+    position_slug: string;
+    field_type: string;
+    importance: string | null;
+    options: unknown;
+  }[]) {
+    const arr = fieldsBySlug.get(f.position_slug) ?? [];
+    arr.push({ field_type: f.field_type, importance: f.importance, options: f.options });
+    fieldsBySlug.set(f.position_slug, arr);
+  }
+  const screensByPosition = new Map<string, boolean>();
+  for (const [slug, fs] of fieldsBySlug) {
+    screensByPosition.set(slug, positionHasEffectiveScreening(fs));
+  }
 
   const totalActive = positions.filter((p) => p.active).length;
   const totalInactive = positions.length - totalActive;
@@ -246,6 +277,7 @@ export default async function AdminPositionsPage({
             const ready = readyByPosition.get(p.slug);
             const weekly = weeklyByPosition.get(p.slug) ?? ZERO_WEEK;
             const weeklyTotal = weekly.reduce((s, n) => s + n, 0);
+            const screens = screensByPosition.get(p.slug) ?? false;
             return (
               <div
                 key={p.slug}
@@ -280,6 +312,19 @@ export default async function AdminPositionsPage({
                     >
                       {p.slug}
                     </div>
+                    {p.active && !screens && (
+                      <span
+                        className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[9.5px] font-bold tracking-[0.04em] uppercase"
+                        style={{
+                          background: "var(--pg-warn-soft-bg)",
+                          color: "var(--pg-warn-soft-fg)",
+                          fontFamily: "var(--font-mono)",
+                        }}
+                        title="Tidak ada pertanyaan yang menyaring - semua pelamar auto-lolos. Buka tab Form lamaran."
+                      >
+                        <Icon name="warn" size={9} stroke={2.6} /> tidak menyaring
+                      </span>
+                    )}
                   </div>
                 </Link>
                 <span className="text-[13px] text-pg-ink-secondary">

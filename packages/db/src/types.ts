@@ -1468,11 +1468,10 @@ export type Database = {
           created_at: string
           description: string | null
           draft_content: Json | null
+          last_revalidated_at: string | null
           name: string
-          pipeline: Json
           published_at: string | null
           role: string
-          scoring: Json
           slug: string
           updated_at: string
         }
@@ -1483,11 +1482,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           draft_content?: Json | null
+          last_revalidated_at?: string | null
           name: string
-          pipeline?: Json
           published_at?: string | null
           role: string
-          scoring?: Json
           slug: string
           updated_at?: string
         }
@@ -1498,11 +1496,10 @@ export type Database = {
           created_at?: string
           description?: string | null
           draft_content?: Json | null
+          last_revalidated_at?: string | null
           name?: string
-          pipeline?: Json
           published_at?: string | null
           role?: string
-          scoring?: Json
           slug?: string
           updated_at?: string
         }

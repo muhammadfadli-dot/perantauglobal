@@ -15,14 +15,27 @@ export function PublishHistoryCard({
   hasPendingDraft,
   draftSavedAt,
   publishedAt,
+  lastRevalidatedAt,
 }: {
   slug: string;
   active: boolean;
   hasPendingDraft: boolean;
   draftSavedAt: string | null;
   publishedAt: string | null;
+  /** Fase 2.5: when apps/web ISR was last confirmed-busted for this position.
+   * NULL = no successful revalidate recorded (or webhook not configured). */
+  lastRevalidatedAt: string | null;
 }) {
   const publicHref = `https://perantauglobal.com/lowongan/${slug}`;
+
+  const webUpdatedLabel = lastRevalidatedAt
+    ? new Date(lastRevalidatedAt).toLocaleString("id-ID", {
+        day: "numeric",
+        month: "short",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Belum tercatat";
 
   const publishedLabel = publishedAt
     ? new Date(publishedAt).toLocaleString("id-ID", {
@@ -114,6 +127,12 @@ export function PublishHistoryCard({
               : "Disembunyikan — tidak muncul di /lowongan"
           }
           tone={active ? "ok" : "mute"}
+        />
+        <Row
+          dt="Web ter-update"
+          ddIcon={<Icon name={lastRevalidatedAt ? "check" : "clock"} size={11} stroke={2.4} />}
+          dd={webUpdatedLabel}
+          tone={lastRevalidatedAt ? "ok" : "mute"}
         />
         <Row
           dt="URL publik"

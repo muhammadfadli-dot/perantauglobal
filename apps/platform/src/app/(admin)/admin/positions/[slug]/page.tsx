@@ -10,6 +10,8 @@ import DeletePositionCard from "./DeletePositionCard";
 import PublishBarMount from "./PublishBarMount";
 import PreviewMount from "./PreviewMount";
 import { PublishHistoryCard } from "./PublishHistoryCard";
+import { PublicReadinessPanel } from "./PublicReadinessPanel";
+import { computePositionReadiness, unmetBlockers } from "@/lib/position-readiness";
 import PositionEditorShell from "@/components/admin/PositionEditorShell";
 import MediaSeoTab from "@/components/admin/MediaSeoTab";
 import ApplicationFieldsEditor, {
@@ -32,6 +34,7 @@ type Position = {
   draft_content: unknown;
   updated_at: string | null;
   published_at: string | null;
+  last_revalidated_at: string | null;
 };
 
 type JobOrder = {
@@ -68,7 +71,7 @@ export default async function PositionDetailPage({
     supabase
       .from("positions")
       .select(
-        "slug, name, country, description, active, content, draft_content, updated_at, published_at",
+        "slug, name, country, description, active, content, draft_content, updated_at, published_at, last_revalidated_at",
       )
       .eq("slug", slug)
       .maybeSingle(),
@@ -132,6 +135,30 @@ export default async function PositionDetailPage({
   const hasPendingDraft = position.draft_content != null;
   const applicationsCount = appCount ?? 0;
   const jobOrdersCount = jobOrders.length;
+
+  // Publish-readiness checklist (Fase 2.1) - computed from the data already
+  // loaded (draft content, screening fields, JO deadlines), zero extra queries.
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const hasValidOpenJobOrder = jobOrders.some(
+    (jo) => jo.status === "open" && (jo.deadline == null || jo.deadline >= todayIso),
+  );
+  const readinessItems = computePositionReadiness({
+    content: editorContent,
+    fields: fields.map((f) => ({
+      field_type: f.field_type,
+      importance: f.importance,
+      options: f.options,
+    })),
+    hasValidOpenJobOrder,
+  });
+  const publishBlockers = unmetBlockers(readinessItems).map((b) => b.label);
+
+  // Open batches whose deadline has passed (B1). The web already hides these
+  // (Fase 0 filter), but the internal status is still 'open' - surface it so the
+  // admin closes/extends instead of it rotting silently.
+  const staleJobOrders = jobOrders.filter(
+    (jo) => jo.status === "open" && jo.deadline != null && jo.deadline < todayIso,
+  );
 
   // Banner-metric computation: 7-day inflow + conv → screening (lifetime)
   const weekApps = (weekAppsData ?? []) as Array<{ created_at: string }>;
@@ -269,12 +296,14 @@ export default async function PositionDetailPage({
 
         {/* === Tab: Settings & publish === */}
         <section data-tab="settings" className="mb-8 max-w-3xl flex flex-col gap-4">
+          <PublicReadinessPanel items={readinessItems} active={position.active} />
           <PublishHistoryCard
             slug={position.slug}
             active={position.active}
             hasPendingDraft={hasPendingDraft}
             draftSavedAt={hasPendingDraft ? position.updated_at : null}
             publishedAt={position.published_at}
+            lastRevalidatedAt={position.last_revalidated_at}
           />
           <PositionActiveToggle slug={position.slug} initialActive={position.active} />
           <PositionMetaEditor
@@ -312,6 +341,29 @@ export default async function PositionDetailPage({
               <Icon name="plus" size={14} stroke={2.4} /> Tambah
             </Link>
           </div>
+          {staleJobOrders.length > 0 && (
+            <div
+              className="mb-3 px-3.5 py-2.5 rounded-xl flex items-start gap-2.5 text-[12.5px]"
+              style={{
+                background: "var(--pg-warn-soft-bg)",
+                color: "var(--pg-warn-soft-fg)",
+                border: "1px solid var(--pg-warn-soft-border)",
+              }}
+            >
+              <span className="mt-0.5 shrink-0">
+                <Icon name="warn" size={14} stroke={2.4} />
+              </span>
+              <span>
+                <span className="font-bold">
+                  {staleJobOrders.length} batch lewat deadline tapi masih open.
+                </span>{" "}
+                <span style={{ color: "var(--pg-ink-secondary)" }}>
+                  Di web sudah otomatis disembunyikan, tapi status internalnya masih
+                  &quot;open&quot;. Tutup atau perpanjang deadline-nya.
+                </span>
+              </span>
+            </div>
+          )}
           {jobOrders.length === 0 ? (
             <div
               className="bg-pg-white rounded-2xl p-6 text-center text-sm text-pg-ink-tertiary"
@@ -335,6 +387,14 @@ export default async function PositionDetailPage({
                         {jo.internal_employer_name}
                         {jo.deadline &&
                           ` · deadline ${new Date(jo.deadline).toLocaleDateString("id-ID")}`}
+                        {jo.status === "open" &&
+                          jo.deadline != null &&
+                          jo.deadline < todayIso && (
+                            <span style={{ color: "var(--pg-warn-soft-fg)", fontWeight: 700 }}>
+                              {" "}
+                              · lewat deadline
+                            </span>
+                          )}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -387,6 +447,7 @@ export default async function PositionDetailPage({
         hasPendingDraft={hasPendingDraft}
         draftSavedAt={hasPendingDraft ? position.updated_at : null}
         publishedAt={position.published_at}
+        publishBlockers={publishBlockers}
       />
     </>
   );

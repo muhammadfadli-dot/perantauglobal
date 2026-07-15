@@ -42,6 +42,11 @@ export default function JobOrderForm({
     presetSlug ?? "",
   );
 
+  // Suggested batch labels (Fase 2.3): nudge one of the two sanctioned patterns
+  // ("Batch {N}" here; "Batch {Bulan Tahun}" guided by the field help + placeholder).
+  // Static so there's no client-only date read / hydration mismatch.
+  const labelPresets = ["Batch 1", "Batch 2", "Batch 3"];
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -69,7 +74,10 @@ export default function JobOrderForm({
           // Success redirects (returns void); a returned union means validation failed.
           if (res && !res.ok) setError(res.error);
         } else {
-          await createJobOrder({ position_slug: positionSlug, ...payload });
+          const res = await createJobOrder({ position_slug: positionSlug, ...payload });
+          // Success redirects (void); a returned union means it was blocked
+          // (e.g. this position already has an open batch).
+          if (res && !res.ok) setError(res.error);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Gagal menyimpan job order.");
@@ -137,15 +145,21 @@ export default function JobOrderForm({
             className={INPUT_CLASS}
           />
         </Field>
-        <Field label="Label batch" required>
+        <Field label="Label batch" required help="Pola konsisten: Batch {Bulan Tahun}. Pilih saran atau ketik sendiri.">
           <input
             name="intake_label"
             type="text"
             required
+            list="intake-label-presets"
             defaultValue={initial?.intake_label ?? ""}
             placeholder="Batch Juni 2026"
             className={INPUT_CLASS}
           />
+          <datalist id="intake-label-presets">
+            {labelPresets.map((p) => (
+              <option key={p} value={p} />
+            ))}
+          </datalist>
         </Field>
       </div>
 

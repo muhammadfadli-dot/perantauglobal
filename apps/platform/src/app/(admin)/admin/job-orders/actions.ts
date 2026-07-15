@@ -26,9 +26,33 @@ export type CreateJobOrderInput = {
 
 export type UpdateJobOrderInput = Omit<CreateJobOrderInput, "position_slug">;
 
-export async function createJobOrder(input: CreateJobOrderInput) {
+/** Success redirects (returns void); a returned union means it was blocked. */
+export type CreateJobOrderResult = { ok: false; error: string };
+
+export async function createJobOrder(
+  input: CreateJobOrderInput,
+): Promise<CreateJobOrderResult | void> {
   const session = await assertAdmin();
   const supabase = await createServerClient();
+
+  // One open job order per position (B4). Backs the DB unique index in 0104 -
+  // check here first so the admin gets a friendly nudge instead of a raw unique
+  // violation. The web renders only the most-recent open JO anyway, so a second
+  // open batch is pure noise.
+  const { data: existingOpen } = await supabase
+    .from("job_orders")
+    .select("id")
+    .eq("position_slug", input.position_slug)
+    .eq("status", "open")
+    .limit(1)
+    .maybeSingle();
+  if (existingOpen) {
+    return {
+      ok: false,
+      error:
+        "Posisi ini sudah punya job order yang OPEN. Tutup atau edit batch lama dulu - satu batch open per posisi.",
+    };
+  }
 
   const { data, error } = await supabase
     .from("job_orders")

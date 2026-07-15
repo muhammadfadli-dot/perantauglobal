@@ -58,8 +58,10 @@ export const AUDIT_ACTIONS = {
   delete_position: { label: "Hapus posisi", tone: "err" },
   update_position_meta: { label: "Ubah meta/visibility posisi", tone: "info" },
   upload_position_media: { label: "Upload media posisi", tone: "info" },
+  save_position_media_seo: { label: "Simpan media & SEO (draft)", tone: "mute" },
   update_position_country: { label: "Ubah negara posisi", tone: "info" },
   rename_position_slug: { label: "Ganti slug posisi", tone: "info" },
+  create_country: { label: "Daftar negara baru", tone: "ok" },
   // Application-field (screening) operations — these drive hard_pass/readiness,
   // so every mutation is tracked (PDP + scoring accountability).
   create_application_field: { label: "Tambah field lamaran", tone: "ok" },
@@ -97,6 +99,7 @@ export const AUDIT_RESOURCES = {
   commission_event: "Komisi",
   job_order: "Job order",
   position: "Posisi",
+  country: "Negara",
   application_field: "Field lamaran",
   event: "Event",
   event_registration: "Pendaftar event",

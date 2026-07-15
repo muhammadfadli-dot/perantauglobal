@@ -9,6 +9,10 @@ import {
 import { logAdminAction } from "@/lib/audit-log";
 import { getCountryRegistry } from "@perantauglobal/db/country";
 import type { PositionContent, ContentMedia, ContentSeo } from "@/lib/position-content";
+import {
+  validateContentForWrite,
+  validateFieldInput,
+} from "@/lib/position-write-validation";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -29,9 +33,14 @@ async function assertAdmin() {
 async function notifyWebRevalidate(slug: string): Promise<void> {
   const url = process.env.WEB_REVALIDATE_URL;
   const secret = process.env.REVALIDATE_SECRET;
-  if (!url || !secret) return;
+  if (!url || !secret) {
+    // Observability: make the silent-in-dev skip explicit in logs.
+    console.info(`[revalidate-web] skipped (env not configured) slug=${slug}`);
+    return;
+  }
+  let ok = false;
   try {
-    await fetch(url, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ secret, slug }),
@@ -39,9 +48,37 @@ async function notifyWebRevalidate(slug: string): Promise<void> {
       // within 60s if the call fails.
       signal: AbortSignal.timeout(3000),
     });
+    // fetch only rejects on transport errors - a 403 (bad secret) / 500 resolves
+    // as "success" unless we inspect the status. That was the truly-silent
+    // failure mode (E2). Check it.
+    ok = res.ok;
+    if (!ok) {
+      console.warn(`[revalidate-web] non-OK ${res.status} from ${url} slug=${slug}`);
+    }
   } catch (err) {
     console.warn(
-      `[revalidate-web] failed to notify ${url} for slug=${slug}:`,
+      `[revalidate-web] failed to notify ${url} slug=${slug}:`,
+      err instanceof Error ? err.message : String(err),
+    );
+    return;
+  }
+  if (!ok) return;
+
+  // Record the confirmed cache-bust so the admin editor can show
+  // "web ter-update HH:MM" and a webhook that stops working becomes visible.
+  // Stamp via service-role (this UPDATE touches only last_revalidated_at, so the
+  // activation trigger's false->true guard never fires). Best-effort - never fail
+  // the admin action over observability.
+  try {
+    const admin = createServiceRoleClient();
+    await admin
+      .from("positions")
+      .update({ last_revalidated_at: new Date().toISOString() } as never)
+      .eq("slug", slug);
+    console.info(`[revalidate-web] ok slug=${slug}`);
+  } catch (err) {
+    console.warn(
+      `[revalidate-web] stamp failed slug=${slug}:`,
       err instanceof Error ? err.message : String(err),
     );
   }
@@ -62,17 +99,25 @@ export async function updatePositionMeta(
   // and show as 100% ready. Activation requires: published at least once +
   // non-empty content + >=1 syarat_utama field.
   if (patch.active === true) {
-    const [{ data: pos }, { count: fieldCount }] = await Promise.all([
+    // Mirror the DB activation trigger (migration 0104) exactly: a position may
+    // only go live if it's been published, has non-empty content, AND actually
+    // screens applicants. Effective-screening resolves through the same SQL
+    // predicate the trigger uses (position_has_effective_screening, 0103) so app
+    // and DB never disagree. The old check merely counted syarat_utama rows,
+    // which let non-screening free-text questions satisfy activation (finding C1).
+    const db = supabase as unknown as {
+      rpc(
+        fn: "position_has_effective_screening",
+        args: { p_slug: string },
+      ): Promise<{ data: boolean | null; error: { message: string } | null }>;
+    };
+    const [{ data: pos }, { data: screens }] = await Promise.all([
       supabase
         .from("positions")
         .select("published_at, content")
         .eq("slug", slug)
         .maybeSingle(),
-      supabase
-        .from("position_application_fields")
-        .select("*", { count: "exact", head: true })
-        .eq("position_slug", slug)
-        .eq("section", "syarat_utama"),
+      db.rpc("position_has_effective_screening", { p_slug: slug }),
     ]);
     const row = pos as { published_at: string | null; content: unknown } | null;
     const published = row?.published_at != null;
@@ -80,15 +125,18 @@ export async function updatePositionMeta(
       !!row?.content &&
       typeof row.content === "object" &&
       Object.keys(row.content as object).length > 0;
-    const hasScreening = (fieldCount ?? 0) >= 1;
+    const hasScreening = screens === true;
     if (!published || !hasContent || !hasScreening) {
       const missing: string[] = [];
       if (!published) missing.push("belum pernah di-publish");
       if (!hasContent) missing.push("konten masih kosong");
-      if (!hasScreening) missing.push("belum ada syarat utama");
+      if (!hasScreening)
+        missing.push(
+          "belum ada pertanyaan screening yang menyaring (butuh >=1 pertanyaan wajib dengan opsi Lolos)",
+        );
       return {
         ok: false,
-        error: `Belum bisa diaktifkan: ${missing.join(", ")}. Lengkapi konten + syarat utama lalu Publish dulu.`,
+        error: `Belum bisa diaktifkan: ${missing.join(", ")}. Lengkapi lalu Publish dulu.`,
       };
     }
   }
@@ -310,6 +358,13 @@ export async function deletePosition(slug: string): Promise<void> {
  */
 export async function saveDraft(slug: string, content: PositionContent) {
   await assertAdmin();
+  // Reject a malformed content blob before it lands in the DB (E3) - the editor
+  // is a trusted client, so this fires only on a genuine shape bug, not on
+  // normal autosaves. NOTE: autosave is intentionally NOT audit-logged (it fires
+  // on a debounce; the substance is captured by publish_position). media/seo
+  // saves ARE logged (saveDraftMediaSeo) since they're deliberate, low-frequency.
+  const invalid = validateContentForWrite(content);
+  if (invalid) throw new Error(invalid);
   const supabase = await createServerClient();
 
   // media/seo are owned exclusively by the Media & SEO tab (saveDraftMediaSeo).
@@ -351,6 +406,13 @@ export async function saveDraftMediaSeo(
   seo: ContentSeo | undefined,
 ) {
   await assertAdmin();
+  // Media/SEO edits are deliberate + low-frequency (unlike the Konten autosave),
+  // so they're worth an audit trail (E4) - the old gap meant a hero/OG swap left
+  // no record. Logged before the write, per the audit-log contract.
+  await logAdminAction("save_position_media_seo", "position", slug, {
+    changed_media: media !== undefined,
+    changed_seo: seo !== undefined,
+  });
   const supabase = await createServerClient();
 
   const { data: existing } = await supabase
@@ -523,6 +585,13 @@ export async function publishPosition(slug: string): Promise<PublishActionResult
       error: "Tidak ada draft untuk dipublish. Edit dulu sebelum publish.",
     };
   }
+  // Defense in depth: never promote a malformed blob to live content (E3). The
+  // draft was written by saveDraft (which validates), but publish is the
+  // last gate before the public renderer reads it.
+  const invalidDraft = validateContentForWrite(draft);
+  if (invalidDraft) {
+    return { ok: false, error: `Draft belum bisa dipublish: ${invalidDraft}` };
+  }
 
   await logAdminAction("publish_position", "position", slug);
 
@@ -592,6 +661,10 @@ export type ApplicationFieldInput = {
 
 export async function createApplicationField(positionSlug: string, input: ApplicationFieldInput) {
   await assertAdmin();
+  // Reject malformed field/options before write - a bad qualifying flag would
+  // silently break the screening predicate (E3/C1).
+  const invalidField = validateFieldInput(input);
+  if (invalidField) throw new Error(invalidField);
   await logAdminAction("create_application_field", "application_field", positionSlug, {
     field_key: input.field_key,
     field_type: input.field_type,
@@ -624,6 +697,8 @@ export async function updateApplicationField(
   patch: Partial<ApplicationFieldInput>,
 ) {
   await assertAdmin();
+  const invalidField = validateFieldInput(patch);
+  if (invalidField) throw new Error(invalidField);
   await logAdminAction("update_application_field", "application_field", positionSlug, {
     field_id: id,
     changed_type: patch.field_type !== undefined,

@@ -1,0 +1,46 @@
+name: smoke-position-lifecycle
+
+# Fase 2.5 - CI/canary guard for the position visibility + activation-invariant
+# contract (findings A1/A2/C1/E1). Drives a throwaway position end-to-end against
+# the LIVE DB (create draft -> add screening -> activate -> anon sees it ->
+# no-screening twin is rejected -> deactivate -> anon can't see it) and cleans up.
+# The script self-cleans even on failure. See scripts/smoke-position-lifecycle.mjs.
+#
+# The "activation blocked without screening" assertion needs migration 0104
+# applied; run this AFTER the Fase 2 rollout.
+#
+# Repo secrets required (V2 project jeadtvxgxmqnsqwxjmhj):
+#   SUPABASE_URL_V2, SUPABASE_SERVICE_ROLE_KEY_V2, SUPABASE_ANON_KEY_V2
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    - cron: "37 20 * * *" # daily 20:37 UTC = 03:37 WIB (jam sepi)
+
+concurrency:
+  group: smoke-position-lifecycle
+  cancel-in-progress: false
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run position lifecycle smoke
+        env:
+          SUPABASE_URL_V2: ${{ secrets.SUPABASE_URL_V2 }}
+          SUPABASE_SERVICE_ROLE_KEY_V2: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY_V2 }}
+          SUPABASE_ANON_KEY_V2: ${{ secrets.SUPABASE_ANON_KEY_V2 }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY_V2:-}" ]; then
+            echo "::error::SUPABASE_SERVICE_ROLE_KEY_V2 repo secret belum di-set."
+            exit 1
+          fi
+          node scripts/smoke-position-lifecycle.mjs
