@@ -59,6 +59,7 @@ export const AUDIT_ACTIONS = {
   update_position_meta: { label: "Ubah meta/visibility posisi", tone: "info" },
   upload_position_media: { label: "Upload media posisi", tone: "info" },
   save_position_media_seo: { label: "Simpan media & SEO (draft)", tone: "mute" },
+  create_preview_link: { label: "Bikin link preview draft", tone: "mute" },
   update_position_country: { label: "Ubah negara posisi", tone: "info" },
   rename_position_slug: { label: "Ganti slug posisi", tone: "info" },
   create_country: { label: "Daftar negara baru", tone: "ok" },

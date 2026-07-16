@@ -35,6 +35,12 @@ export type Position = {
   /** Admin-authored hero photo (positions.content.media.heroUrl). The card
    * falls back to the static per-slug asset when this is absent. */
   heroUrl?: string | null;
+  /** Last publish / last row edit, straight from the DB. Absent on the static
+   * catalog entries below (they have no row to date). The sitemap reports
+   * `publishedAt ?? updatedAt` as lastModified; without them every URL would
+   * claim it changed on every crawl. */
+  publishedAt?: string | null;
+  updatedAt?: string | null;
   /** Active job order info (when status === "open") */
   batch?: {
     label: string;

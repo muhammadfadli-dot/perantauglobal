@@ -1,13 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { createServerClient, requireAdmin } from "@/lib/supabase-server";
 import { logAdminAction } from "@/lib/audit-log";
 
 async function assertAdmin() {
-  const { session, role } = await getSessionAndRole();
-  if (!session || role !== "admin") throw new Error("Forbidden");
-  return session;
+  return requireAdmin("Forbidden");
 }
 
 export async function inviteAdmin(email: string, notes?: string) {

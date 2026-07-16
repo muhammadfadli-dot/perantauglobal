@@ -10,6 +10,8 @@ import { Lineage } from "@/components/pg/home/Lineage";
 import { HomeFAQ } from "@/components/pg/home/HomeFAQ";
 import { FinalCTAv2 } from "@/components/pg/home/FinalCTAv2";
 import { fetchPositionsForCatalog } from "@/lib/positions-db";
+import { getCountries } from "@/lib/countries";
+import { buildHomePreviewRows, buildHomeCountryChips } from "@/lib/homePreview";
 
 export const revalidate = 60;
 
@@ -27,13 +29,24 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const positions = await fetchPositionsForCatalog();
+  // getCountries() is React-cached and fetchPositionsForCatalog already warms it
+  // in this same request, so the registry read below costs nothing extra.
+  const [positions, registry] = await Promise.all([
+    fetchPositionsForCatalog(),
+    getCountries(),
+  ]);
   const totalPositions = positions.length;
   const openCount = positions.filter((p) => p.status === "open").length;
   const positionsByCountry: Record<string, number> = {};
   for (const p of positions) {
     positionsByCountry[p.country] = (positionsByCountry[p.country] || 0) + 1;
   }
+  // "negara tujuan" = countries a candidate can actually land a job in today,
+  // i.e. countries with a rendering position - not every registered country.
+  const countryCount = Object.keys(positionsByCountry).length;
+  const countryNames = Object.keys(positionsByCountry);
+  const previewRows = buildHomePreviewRows(positions, registry, 4);
+  const countryChips = buildHomeCountryChips(positions, registry, 3);
 
   return (
     <>
@@ -43,8 +56,18 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           openCount={openCount}
           positionsByCountry={positionsByCountry}
         />
-        <WhatIs />
-        <JobPortalDeep totalPositions={totalPositions} />
+        <WhatIs
+          totalPositions={totalPositions}
+          openCount={openCount}
+          countryCount={countryCount}
+          countryNames={countryNames}
+          rows={previewRows.slice(0, 3)}
+        />
+        <JobPortalDeep
+          totalPositions={totalPositions}
+          rows={previewRows}
+          countryChips={countryChips}
+        />
         <LearningPortalDeep />
         <Testimoni />
         <Lineage />

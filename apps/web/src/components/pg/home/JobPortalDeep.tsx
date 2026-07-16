@@ -1,5 +1,14 @@
 import Link from "next/link";
 import { Icon } from "@/components/pg/Icon";
+import type { HomePreviewRow, HomeCountryChip } from "@/lib/homePreview";
+
+type Props = {
+  totalPositions: number;
+  /** Real catalog rows for the phone mockup (was a hardcoded list, finding F5). */
+  rows: HomePreviewRow[];
+  /** Countries that actually have a live position, in catalog order. */
+  countryChips: HomeCountryChip[];
+};
 
 const FEATURES = [
   {
@@ -24,7 +33,7 @@ const FEATURES = [
   },
 ];
 
-export function JobPortalDeep({ totalPositions }: { totalPositions: number }) {
+export function JobPortalDeep({ totalPositions, rows, countryChips }: Props) {
   return (
     <section className="relative py-14 md:py-20 px-5 md:px-8 bg-pg-white border-t border-pg-ink-100" id="jobs">
       <div className="max-w-6xl mx-auto">
@@ -72,8 +81,12 @@ export function JobPortalDeep({ totalPositions }: { totalPositions: number }) {
             </Link>
           </div>
 
-          {/* Right column: phone mockup */}
-          <div className="relative flex justify-center lg:justify-end">
+          {/* Right column: phone mockup - an illustration of the app, not the
+              catalog. Real data now (so it can't contradict the live listing),
+              but still decorative: nothing here is a link, and the CTA beside it
+              goes to the real thing. Marked aria-hidden to match the equivalent
+              preview in WhatIs, which screen readers were already skipping. */}
+          <div className="relative flex justify-center lg:justify-end" aria-hidden>
             <div
               className="relative w-[280px] md:w-[320px] bg-pg-ink-900 rounded-[38px] p-2"
               style={{ boxShadow: "0 30px 60px rgba(20,20,20,0.18), 0 0 0 1px rgba(20,20,20,0.06)" }}
@@ -98,18 +111,18 @@ export function JobPortalDeep({ totalPositions }: { totalPositions: number }) {
                     <span className="w-3.5 h-3.5 rounded-full bg-white/16 inline-grid place-items-center text-[7px]">•</span>
                     Semua
                   </span>
-                  {[
-                    { thumb: "/images/countries/saudi.jpg", name: "Saudi" },
-                    { thumb: "/images/countries/jepang.jpg", name: "Jepang" },
-                    { thumb: "/images/countries/taiwan.jpg", name: "Taiwan" },
-                  ].map((c) => (
+                  {countryChips.map((c) => (
                     <span
-                      key={c.name}
+                      key={c.key}
                       className="flex items-center gap-1.5 pl-1 pr-2.5 py-1 bg-pg-white rounded-full border border-pg-ink-100 text-[10.5px] font-semibold text-pg-ink-700 whitespace-nowrap"
                     >
                       <span
                         className="w-4 h-4 rounded-full bg-cover bg-center"
-                        style={{ backgroundImage: `url(${c.thumb})` }}
+                        style={
+                          c.thumb
+                            ? { backgroundImage: `url(${c.thumb})` }
+                            : { background: c.tint }
+                        }
                       />
                       {c.name}
                     </span>
@@ -123,34 +136,29 @@ export function JobPortalDeep({ totalPositions }: { totalPositions: number }) {
                     className="absolute top-0 left-0 right-0 h-4 pointer-events-none z-[1]"
                     style={{ background: "linear-gradient(180deg, var(--pg-paper) 0%, transparent 100%)" }}
                   />
-                  {[
-                    { pic: "/images/lowongan/perawat-saudi-arabia.jpg", role: "Perawat", meta: "🇸🇦 Riyadh · Wanita · 21-38", salary: "SAR 3.200", open: true,  lift: true },
-                    { pic: "/images/lowongan/kaigo-jepang.jpg",          role: "Caregiver Kaigo", meta: "🇯🇵 Nagoya · Wanita · 18-35", salary: "¥190K", open: false, lift: false },
-                    { pic: "/images/lowongan/truck-driver-jepang.jpg",   role: "Truck Driver", meta: "🇯🇵 Osaka · L · maks 44", salary: "¥250K", open: false, lift: false },
-                    { pic: "/images/lowongan/barista-saudi-arabia.jpg",  role: "Barista", meta: "🇸🇦 Jeddah · L/P · 21-30", salary: "SAR 1.500", open: false, lift: false },
-                  ].map((j, i) => (
+                  {rows.map((j, i) => (
                     <div
-                      key={j.role}
+                      key={j.slug}
                       className={`flex items-center gap-2.5 p-2 rounded-[12px] transition-transform ${
-                        j.lift
+                        i === 0
                           ? "bg-pg-white relative z-[2]"
                           : "bg-pg-white"
                       }`}
                       style={{
-                        border: j.lift
+                        border: i === 0
                           ? "1.5px solid var(--pg-red-200)"
                           : "1px solid var(--pg-ink-100)",
-                        boxShadow: j.lift
+                        boxShadow: i === 0
                           ? "0 8px 22px rgba(215,38,47,0.18), 0 0 0 4px rgba(215,38,47,0.06)"
                           : "var(--pg-shadow-1)",
-                        transform: j.lift ? "scale(1.025)" : "scale(0.985)",
+                        transform: i === 0 ? "scale(1.025)" : "scale(0.985)",
                         opacity: i >= 3 ? 0.92 : 1,
                         animation: `pg-card-float 4s ease-in-out ${i * 0.5}s infinite`,
                       }}
                     >
                       <div
                         className="w-9 h-9 rounded-[8px] bg-cover bg-center bg-pg-ink-50 shrink-0"
-                        style={{ backgroundImage: `url(${j.pic})` }}
+                        style={{ backgroundImage: `url(${j.thumb})` }}
                       />
                       <div className="flex flex-col flex-1 min-w-0">
                         <span className="text-[11.5px] font-extrabold text-pg-ink-900 truncate">{j.role}</span>

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { createServerClient, requireAdmin } from "@/lib/supabase-server";
 import { logAdminAction } from "@/lib/audit-log";
 import {
   isAcceptedStage,
@@ -11,10 +11,7 @@ import {
 } from "@/lib/applicationStatus";
 
 async function assertAdmin() {
-  const { session, role } = await getSessionAndRole();
-  if (!session || role !== "admin") {
-    throw new Error("Unauthorized");
-  }
+  const session = await requireAdmin("Unauthorized");
   // applications.reviewed_by is UUID, so pass the auth_user_id not the email.
   return { reviewedBy: session.userId };
 }

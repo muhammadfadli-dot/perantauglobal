@@ -16,6 +16,7 @@ export function PublishHistoryCard({
   draftSavedAt,
   publishedAt,
   lastRevalidatedAt,
+  revalidateConfigured,
 }: {
   slug: string;
   active: boolean;
@@ -25,6 +26,11 @@ export function PublishHistoryCard({
   /** Fase 2.5: when apps/web ISR was last confirmed-busted for this position.
    * NULL = no successful revalidate recorded (or webhook not configured). */
   lastRevalidatedAt: string | null;
+  /** Whether the instant-update webhook has its env set at all. Without this,
+   * "Belum tercatat" reads like something went wrong for this position, when
+   * in fact the feature is simply off for every position and ISR is doing the
+   * work - a distinction the admin can act on (or ignore) knowingly. */
+  revalidateConfigured: boolean;
 }) {
   const publicHref = `https://perantauglobal.com/lowongan/${slug}`;
 
@@ -35,7 +41,9 @@ export function PublishHistoryCard({
         hour: "2-digit",
         minute: "2-digit",
       })
-    : "Belum tercatat";
+    : revalidateConfigured
+      ? "Belum tercatat"
+      : "Update instan off - web nyusul sendiri maks 60 detik";
 
   const publishedLabel = publishedAt
     ? new Date(publishedAt).toLocaleString("id-ID", {

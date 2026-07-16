@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { getSessionAndRole, createServerClient } from "@/lib/supabase-server";
+import { requireAdmin, createServerClient } from "@/lib/supabase-server";
 import { logAdminAction } from "@/lib/audit-log";
 
 /**
@@ -14,8 +14,7 @@ import { logAdminAction } from "@/lib/audit-log";
 export type AdminResult = { ok: true } | { ok: false; error: string };
 
 async function assertAdmin(): Promise<{ userId: string }> {
-  const { session, role } = await getSessionAndRole();
-  if (!session || role !== "admin") throw new Error("Unauthorized");
+  const session = await requireAdmin("Unauthorized");
   return { userId: session.userId };
 }
 

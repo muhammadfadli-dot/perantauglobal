@@ -3,7 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { PublishBar } from "@/components/admin/PublishBar";
-import { publishPosition, discardDraft } from "../actions";
+import { publishPosition, discardDraft, createPreviewLink } from "../actions";
 
 /**
  * Client wrapper that mounts PublishBar (the sticky-bottom publish/unpublish
@@ -41,9 +41,9 @@ export default function PublishBarMount({
   const [hasPendingDraft, setHasPendingDraft] = useState(initialHasPendingDraft);
   const [draftSavedAt, setDraftSavedAt] = useState(initialDraftSavedAt);
 
-  const [busyAction, setBusyAction] = useState<"save" | "publish" | "discard" | null>(
-    null,
-  );
+  const [busyAction, setBusyAction] = useState<
+    "save" | "publish" | "discard" | "preview" | null
+  >(null);
   const [, startTransition] = useTransition();
 
   // Listen for editor state changes (dirty / saving / saved)
@@ -68,6 +68,31 @@ export default function PublishBarMount({
     window.addEventListener("pg-editor-state", handler);
     return () => window.removeEventListener("pg-editor-state", handler);
   }, [router]);
+
+  async function handlePreview() {
+    if (busyAction) return;
+    // Open the tab BEFORE awaiting: a window.open() that happens after an await
+    // is no longer tied to the click, which is exactly what popup blockers stop.
+    const tab = window.open("", "_blank");
+    setBusyAction("preview");
+    try {
+      const result = await createPreviewLink(slug);
+      if (!result.ok) {
+        tab?.close();
+        alert(result.error);
+        return;
+      }
+      // Fall back to the current tab if the popup was blocked anyway, so the
+      // click never silently does nothing.
+      if (tab) tab.location.href = result.url;
+      else window.location.href = result.url;
+    } catch {
+      tab?.close();
+      alert("Gagal bikin link preview. Coba reload halaman.");
+    } finally {
+      setBusyAction(null);
+    }
+  }
 
   async function handlePublish() {
     if (busyAction) return;
@@ -144,8 +169,6 @@ export default function PublishBarMount({
     window.dispatchEvent(new CustomEvent("pg-editor-save-now"));
   }
 
-  const publicHref = `https://perantauglobal.com/lowongan/${slug}`;
-
   return (
     <PublishBar
       dirty={clientDirty}
@@ -154,11 +177,11 @@ export default function PublishBarMount({
       draftSavedAt={draftSavedAt}
       publishedAt={publishedAt}
       positionName={positionName}
-      publicHref={publicHref}
       busyAction={busyAction}
       onSaveDraft={handleSaveDraft}
       onPublish={handlePublish}
       onDiscard={handleDiscard}
+      onPreview={handlePreview}
     />
   );
 }

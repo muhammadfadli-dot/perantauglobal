@@ -70,7 +70,12 @@ export default async function ApplyNewPage({
   // Filter section='syarat_utama' = LP-stage questions for this portal apply
   // form. importance=required → required boolean for ApplyWizard props.
   const [{ data: positionData }, { data: fieldsData }, { data: jobOrderData }, { data: docsData }] = await Promise.all([
-    supabase.from("positions").select("slug, name, country, description, content").eq("slug", positionSlug).maybeSingle(),
+    // active=true is belt-and-braces: RLS (positions_anon_read_active) already
+    // hides inactive rows from anon AND authenticated, and submitApplication
+    // re-checks. Stating it here means the page no longer depends on an RLS
+    // policy staying exactly as it is to avoid rendering a closed position -
+    // mirrors the same defensive filter apps/web keeps in lookupPositionMapping.
+    supabase.from("positions").select("slug, name, country, description, content").eq("slug", positionSlug).eq("active", true).maybeSingle(),
     supabase
       .from("position_application_fields")
       .select("id, field_key, field_label, field_help, field_type, options, importance, sort_order")

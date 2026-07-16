@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
+import { draftMode } from "next/headers";
 import { setRequestLocale } from "next-intl/server";
 import { Icon } from "@/components/pg/Icon";
+import { PreviewBanner } from "@/components/pg/PreviewBanner";
 import { FinalCTA, ButtonLink } from "@/components/pg/primitives";
 import { ApplyForm } from "@/components/pg/ApplyForm";
 import { ExistingUserShortcut } from "@/components/pg/ExistingUserShortcut";
@@ -19,6 +21,7 @@ import {
   fetchPositionsForCatalog,
   fetchSlugAlias,
 } from "@/lib/positions-db";
+import { getPreviewForSlug } from "@/lib/preview";
 import { resolvePositionDetail } from "@/lib/positionContent";
 import { jobPostingJsonLd, breadcrumbJsonLd } from "@/lib/jsonld";
 import { cityForSlug, toWebCountry } from "@/lib/lowonganCountries";
@@ -74,10 +77,15 @@ export async function generateMetadata({
   // Job-detail pages are id-only; emit a canonical so duplicate/query-string
   // URLs don't split ranking across the catalog's high-intent pages.
   const canonical = `${SITE_URL}/id/lowongan/${slug}`;
+  // A draft preview must never be indexable: it is unpublished content served
+  // off the public domain, and for an inactive position it is content the
+  // public is not meant to see at all.
+  const { isEnabled: isPreview } = await draftMode();
   return {
     title,
     description,
     alternates: { canonical },
+    ...(isPreview ? { robots: { index: false, follow: false } } : {}),
     ...(ogImage ? { openGraph: { images: [ogImage], url: canonical } } : {}),
   };
 }
@@ -91,7 +99,15 @@ export default async function LowonganDetailPage({
   if (locale !== "id") notFound();
   setRequestLocale(locale);
 
-  const [baseStatic, jobOrders, appliedFields, dbContentRes, allPositions, registry] = await Promise.all([
+  // Fase 3.1 (D4): with a valid preview token for THIS slug, the draft blob
+  // replaces the live one and everything below - resolvePositionDetail, hero,
+  // QuickFacts, JSON-LD, apply form - runs unchanged. That is the point: the
+  // preview IS this page, so it cannot drift from what publishing will produce.
+  // Nobody else is affected; draft mode is per-visitor and the public page keeps
+  // serving its ISR cache.
+  const preview = await getPreviewForSlug(slug);
+
+  const [liveBase, jobOrders, appliedFields, liveContentRes, allPositions, registry] = await Promise.all([
     fetchPositionForDetail(slug),
     fetchOpenJobOrders(),
     fetchAppliedFields(slug),
@@ -99,6 +115,15 @@ export default async function LowonganDetailPage({
     fetchPositionsForCatalog(),
     getCountries(),
   ]);
+
+  const baseStatic = preview?.position ?? liveBase;
+  const dbContentRes = preview
+    ? {
+        content: preview.content,
+        publishedAt: preview.publishedAt,
+        updatedAt: preview.updatedAt,
+      }
+    : liveContentRes;
   const dbContent = dbContentRes.content;
   if (!baseStatic) {
     // Slug not an active position. If it was renamed, permanently redirect the
@@ -160,6 +185,7 @@ export default async function LowonganDetailPage({
 
   return (
     <main className="pb-24 md:pb-0">
+      {preview && <PreviewBanner slug={slug} active={preview.active} />}
       {jobPosting && (
         <script
           type="application/ld+json"

@@ -1,5 +1,26 @@
 import Link from "next/link";
 import { Icon } from "@/components/pg/Icon";
+import type { HomePreviewRow } from "@/lib/homePreview";
+
+type Props = {
+  totalPositions: number;
+  openCount: number;
+  countryCount: number;
+  /** Countries with a live position, in catalog order. */
+  countryNames: string[];
+  /** Real catalog rows for the decorative portal preview. */
+  rows: HomePreviewRow[];
+};
+
+/** "Saudi Arabia, Jepang & Taiwan" / "Saudi Arabia, Jepang, Taiwan & 4 negara lain" */
+function countryPhrase(names: string[]): string {
+  if (names.length === 0) return "beberapa negara";
+  const shown = names.slice(0, 3);
+  const rest = names.length - shown.length;
+  if (rest > 0) return `${shown.join(", ")} & ${rest} negara lain`;
+  if (shown.length === 1) return shown[0]!;
+  return `${shown.slice(0, -1).join(", ")} & ${shown[shown.length - 1]!}`;
+}
 
 /**
  * WhatIs — dual-portal preview cards.
@@ -7,8 +28,20 @@ import { Icon } from "@/components/pg/Icon";
  * Two big cards: Job Portal (red accent) + Akademi Perantau (gold accent).
  * Akademi Perantau is a "rich coming-soon" stub — schema for Paspor lessons
  * isn't shipped yet, CTA points at /akademi marketing page.
+ *
+ * Every Job Portal number here comes from the same catalog fetch the rest of
+ * the page uses. They were hardcoded ("17 posisi aktif", "4 negara tujuan",
+ * and prose naming Indonesia, which has zero active positions) while
+ * JobPortalDeep rendered the real count one section below - two different
+ * answers on one screen (finding F5).
  */
-export function WhatIs() {
+export function WhatIs({ totalPositions, openCount, countryCount, countryNames, rows }: Props) {
+  const stats = [
+    { num: String(totalPositions), label: "posisi aktif" },
+    { num: String(countryCount), label: "negara tujuan" },
+    { num: String(openCount), label: "batch buka" },
+  ];
+
   return (
     <section className="relative py-14 md:py-20 px-5 md:px-8 bg-pg-paper border-t border-pg-ink-100">
       <div className="max-w-6xl mx-auto">
@@ -49,7 +82,7 @@ export function WhatIs() {
               </div>
             </div>
             <p className="text-[14px] md:text-[15px] text-pg-ink-700 leading-relaxed">
-              Cari &amp; lamar kerjaan beneran di Saudi, Jepang, Taiwan &amp; Indonesia. Semua dari
+              Cari &amp; lamar kerjaan beneran di {countryPhrase(countryNames)}. Semua dari
               employer terverifikasi P3MI — bukan calo, bukan agen luar.
             </p>
 
@@ -57,12 +90,8 @@ export function WhatIs() {
               className="rounded-2xl bg-pg-paper border border-pg-ink-100 p-3 flex flex-col gap-2"
               aria-hidden
             >
-              {[
-                { thumb: "/images/lowongan/perawat-saudi-arabia.jpg", role: "Perawat · Riyadh", meta: "🇸🇦 Saudi Arabia · 2 thn", salary: "SAR 3.200", open: true },
-                { thumb: "/images/lowongan/truck-driver-jepang.jpg", role: "Truck Driver", meta: "🇯🇵 Osaka · 5 thn", salary: "¥250.000", open: false },
-                { thumb: "/images/lowongan/kaigo-jepang.jpg", role: "Caregiver Kaigo", meta: "🇯🇵 Nagoya · SSW", salary: "¥190.000", open: false },
-              ].map((item) => (
-                <div key={item.role} className="flex items-center gap-3 p-2 bg-pg-white rounded-xl border border-pg-ink-100">
+              {rows.map((item) => (
+                <div key={item.slug} className="flex items-center gap-3 p-2 bg-pg-white rounded-xl border border-pg-ink-100">
                   <div
                     className="w-10 h-10 rounded-[10px] bg-cover bg-center bg-pg-ink-50 shrink-0"
                     style={{ backgroundImage: `url(${item.thumb})` }}
@@ -85,11 +114,7 @@ export function WhatIs() {
             </div>
 
             <div className="grid grid-cols-3 gap-3 pt-3 mt-auto border-t border-dashed border-pg-ink-100">
-              {[
-                { num: "17", label: "posisi aktif" },
-                { num: "4", label: "negara tujuan" },
-                { num: "1", label: "batch buka" },
-              ].map((s) => (
+              {stats.map((s) => (
                 <div key={s.label} className="flex flex-col">
                   <span className="font-mono text-[20px] font-extrabold text-pg-ink-900 leading-none">{s.num}</span>
                   <span className="font-mono text-[10px] uppercase tracking-[0.08em] text-pg-ink-500 mt-1">{s.label}</span>

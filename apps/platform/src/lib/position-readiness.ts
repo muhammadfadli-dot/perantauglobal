@@ -150,6 +150,81 @@ export function computePositionReadiness(input: ReadinessInput): ReadinessItem[]
   ];
 }
 
+export type AdsReadinessInput = {
+  content: PositionContent;
+  fields: ReadinessField[];
+  /** positions.active - an ad pointing at an inactive position 404s. */
+  active: boolean;
+};
+
+/**
+ * "Siap diiklankan?" (Fase 3.2) - the handoff check before paid traffic points
+ * at this URL.
+ *
+ * The audit called for a separate "wizard siap iklan". A wizard would restate
+ * what the checklist above already says, so this is a second lens on the same
+ * facts instead: publish-readiness asks "will this look right to someone who
+ * finds it", ads-readiness asks "will a paid click survive". The overlap
+ * (screening, hero) is deliberate - same fact, harsher consequence, which is
+ * why items that are mere warnings above are blocking here.
+ */
+export function computeAdsReadiness(input: AdsReadinessInput): ReadinessItem[] {
+  const { content: c, fields, active } = input;
+  return [
+    {
+      key: "adsActive",
+      label: "Posisi aktif (LP kebuka publik)",
+      ok: active,
+      blocking: true,
+      hint: "Iklan ke posisi nonaktif = tiap klik berbayar mendarat di 404. Aktifkan dulu.",
+    },
+    {
+      key: "adsScreening",
+      label: "Pelamar tersaring",
+      ok: positionHasEffectiveScreening(fields),
+      blocking: true,
+      hint: "Tanpa penyaring, semua klik iklan masuk sebagai lead 'lolos' dan BD yang sortir manual.",
+    },
+    {
+      key: "adsHero",
+      label: "Foto hero terpasang",
+      ok: !!c.media?.heroUrl?.trim(),
+      blocking: true,
+      hint: "LP gelap polos bikin bounce - mahal kalau trafiknya berbayar. Upload di tab Media & SEO.",
+    },
+    {
+      key: "adsOg",
+      label: "Gambar share (OG) ada",
+      ok: !!(c.media?.ogImageUrl?.trim() || c.media?.heroUrl?.trim()),
+      blocking: false,
+      hint: "Dipakai waktu link dibagikan. Kosong = share tampil tanpa gambar. Hero otomatis dipakai kalau OG kosong.",
+    },
+    {
+      key: "adsSeo",
+      label: "Meta title + description",
+      ok: !!c.seo?.metaTitle?.trim() && !!c.seo?.metaDescription?.trim(),
+      blocking: false,
+      hint: "Judul/deskripsi share yang rapi menaikkan CTR.",
+    },
+  ];
+}
+
+/**
+ * The landing URL to paste into the Meta ad, with this account's ACTUAL
+ * attribution convention baked in.
+ *
+ * `{{site_source_name}}` and `{{campaign.id}}` are Meta macros - Meta expands
+ * them per impression, they are not placeholders to fill in by hand. This
+ * mirrors what is already live: candidates.utm_source holds ig/fb/th/an
+ * (placements) and utm_campaign holds numeric Meta campaign ids, across 535
+ * attributed candidates. A hand-rolled "utm_source=meta&utm_medium=paid_social"
+ * would have looked tidier and silently broken every existing report - and
+ * utm_medium has no column at all, so it would be dropped on arrival.
+ */
+export function adsUrlFor(slug: string): string {
+  return `https://perantauglobal.com/lowongan/${slug}?utm_source={{site_source_name}}&utm_campaign={{campaign.id}}`;
+}
+
 /** Blocking items that are NOT satisfied - drives the publish confirm gate. */
 export function unmetBlockers(items: ReadinessItem[]): ReadinessItem[] {
   return items.filter((i) => i.blocking && !i.ok);

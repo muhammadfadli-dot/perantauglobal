@@ -1,14 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { createServerClient, requireAdmin } from "@/lib/supabase-server";
 import { logAdminAction } from "@/lib/audit-log";
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 async function assertAdmin() {
-  const { session, role } = await getSessionAndRole();
-  if (!session || role !== "admin") throw new Error("Forbidden");
+  await requireAdmin("Forbidden");
 }
 
 export type CreatePositionInput = {

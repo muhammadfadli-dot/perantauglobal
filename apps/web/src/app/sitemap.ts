@@ -33,7 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   for (const p of positions) {
     entries.push({
       url: `${SITE_URL}/lowongan/${p.slug}`,
-      lastModified: now,
+      // A real content date, not `now`. publishedAt is the true "this page
+      // changed" signal (publishPosition stamps it); updatedAt is the fallback
+      // for rows edited but never republished. Stamping every entry with the
+      // crawl time told Google "everything changed" on every fetch, which is
+      // the same as telling it nothing.
+      lastModified: p.publishedAt ?? p.updatedAt ?? now,
       changeFrequency: "weekly",
       priority: p.status === "open" ? 0.9 : 0.7,
     });

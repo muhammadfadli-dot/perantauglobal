@@ -33,11 +33,11 @@ export function PublishBar({
   draftSavedAt,
   publishedAt,
   positionName,
-  publicHref,
   busyAction,
   onSaveDraft,
   onPublish,
   onDiscard,
+  onPreview,
   onRiwayat,
 }: {
   /** True while admin is actively editing (client-side, before auto-save fires) */
@@ -51,13 +51,15 @@ export function PublishBar({
   /** Server state: when content was last promoted to live. ISO string. */
   publishedAt: string | null;
   positionName: string;
-  /** Public URL for "Preview tab baru" button (apps/web /lowongan/[slug]) */
-  publicHref: string;
   /** Which action is currently busy (so the corresponding button shows spinner) */
-  busyAction: "save" | "publish" | "discard" | null;
+  busyAction: "save" | "publish" | "discard" | "preview" | null;
   onSaveDraft: () => void;
   onPublish: () => void;
   onDiscard?: () => void;
+  /** Mints a preview token and opens the DRAFT on apps/web. Was a plain <a> to
+   * the live public URL, which showed published content (or 404'd) rather than
+   * the draft the admin was looking at - finding D4. */
+  onPreview: () => void;
   onRiwayat?: () => void;
 }) {
   const statusContent = (() => {
@@ -149,19 +151,14 @@ export function PublishBar({
               Riwayat
             </BarButton>
           )}
-          <a
-            href={publicHref}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-semibold no-underline transition-colors"
-            style={{
-              color: "var(--pg-ink-secondary)",
-              background: "transparent",
-            }}
+          <BarButton
+            onClick={onPreview}
+            variant="ghost"
+            icon="arrow_right"
+            busy={busyAction === "preview"}
           >
-            <Icon name="arrow_right" size={12} stroke={2.2} />
-            Preview tab baru
-          </a>
+            Preview draft
+          </BarButton>
           {canDiscard && onDiscard && (
             <BarButton
               onClick={onDiscard}

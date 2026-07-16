@@ -11,7 +11,13 @@ import PublishBarMount from "./PublishBarMount";
 import PreviewMount from "./PreviewMount";
 import { PublishHistoryCard } from "./PublishHistoryCard";
 import { PublicReadinessPanel } from "./PublicReadinessPanel";
-import { computePositionReadiness, unmetBlockers } from "@/lib/position-readiness";
+import { AdsReadinessPanel } from "./AdsReadinessPanel";
+import {
+  computePositionReadiness,
+  computeAdsReadiness,
+  adsUrlFor,
+  unmetBlockers,
+} from "@/lib/position-readiness";
 import PositionEditorShell from "@/components/admin/PositionEditorShell";
 import MediaSeoTab from "@/components/admin/MediaSeoTab";
 import ApplicationFieldsEditor, {
@@ -142,16 +148,24 @@ export default async function PositionDetailPage({
   const hasValidOpenJobOrder = jobOrders.some(
     (jo) => jo.status === "open" && (jo.deadline == null || jo.deadline >= todayIso),
   );
+  const readinessFields = fields.map((f) => ({
+    field_type: f.field_type,
+    importance: f.importance,
+    options: f.options,
+  }));
   const readinessItems = computePositionReadiness({
     content: editorContent,
-    fields: fields.map((f) => ({
-      field_type: f.field_type,
-      importance: f.importance,
-      options: f.options,
-    })),
+    fields: readinessFields,
     hasValidOpenJobOrder,
   });
   const publishBlockers = unmetBlockers(readinessItems).map((b) => b.label);
+
+  // Fase 3.2: same facts, money lens - see computeAdsReadiness.
+  const adsReadinessItems = computeAdsReadiness({
+    content: editorContent,
+    fields: readinessFields,
+    active: position.active,
+  });
 
   // Open batches whose deadline has passed (B1). The web already hides these
   // (Fase 0 filter), but the internal status is still 'open' - surface it so the
@@ -297,6 +311,10 @@ export default async function PositionDetailPage({
         {/* === Tab: Settings & publish === */}
         <section data-tab="settings" className="mb-8 max-w-3xl flex flex-col gap-4">
           <PublicReadinessPanel items={readinessItems} active={position.active} />
+          <AdsReadinessPanel
+            items={adsReadinessItems}
+            adsUrl={adsUrlFor(position.slug)}
+          />
           <PublishHistoryCard
             slug={position.slug}
             active={position.active}
@@ -304,6 +322,9 @@ export default async function PositionDetailPage({
             draftSavedAt={hasPendingDraft ? position.updated_at : null}
             publishedAt={position.published_at}
             lastRevalidatedAt={position.last_revalidated_at}
+            revalidateConfigured={Boolean(
+              process.env.WEB_REVALIDATE_URL && process.env.REVALIDATE_SECRET,
+            )}
           />
           <PositionActiveToggle slug={position.slug} initialActive={position.active} />
           <PositionMetaEditor

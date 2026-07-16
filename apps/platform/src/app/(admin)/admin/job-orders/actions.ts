@@ -2,14 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { createServerClient, requireAdmin } from "@/lib/supabase-server";
 import { logAdminAction } from "@/lib/audit-log";
 import { ACCEPTED_STAGES } from "@/lib/applicationStatus";
 
 async function assertAdmin() {
-  const { session, role } = await getSessionAndRole();
-  if (!session || role !== "admin") throw new Error("Forbidden");
-  return session;
+  return requireAdmin("Forbidden");
 }
 
 export type CreateJobOrderInput = {

@@ -61,6 +61,17 @@ const DOC_LABEL: Record<DocStatus["type"], string> = {
   passport: "Passport",
 };
 
+/**
+ * "Did the candidate answer this?" - kept byte-identical to the public form's
+ * copy (apps/web ApplyForm.tsx) so the same answer to the same required
+ * question never passes on one surface and fails on the other.
+ */
+function isEmpty(v: string | string[] | undefined): boolean {
+  if (v === undefined) return true;
+  if (typeof v === "string") return v.trim() === "";
+  return v.length === 0;
+}
+
 export default function ApplyWizard({
   position,
   detail,
@@ -100,8 +111,11 @@ export default function ApplyWizard({
       // Allow proceed even with missing — block at submit if hard requirements still missing
       setStep(fields.length > 0 ? 2 : 3);
     } else if (step === 2) {
-      // Validate required custom fields
-      const missing = fields.filter((f) => f.required && !answers[f.field_key]);
+      // Validate required custom fields. Uses isEmpty rather than a bare
+      // falsy check: `!answers[k]` disagreed with the public form three ways -
+      // it let whitespace-only text and an empty multiselect ([]) through as
+      // "answered", and it rejected a legitimate "0" as missing.
+      const missing = fields.filter((f) => f.required && isEmpty(answers[f.field_key]));
       if (missing.length > 0) {
         setError(`Isi dulu pertanyaan wajib: ${missing.map((m) => m.field_label).join(", ")}`);
         return;

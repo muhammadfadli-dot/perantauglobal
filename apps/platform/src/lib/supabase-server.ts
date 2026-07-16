@@ -75,6 +75,31 @@ export async function getSessionAndRole(): Promise<{
 }
 
 /**
+ * Throws unless the caller is a signed-in admin. Sibling of requireCandidate
+ * below, and the single implementation of the admin gate.
+ *
+ * This logic was copy-pasted into 11 action files - identical every time, apart
+ * from a cosmetically different throw string - so touching the gate meant
+ * finding all 11 first. `message` preserves each caller's original string:
+ * nothing catches on it (an admin-gate throw surfaces as a 500, and Next strips
+ * the text in production), but keeping it makes the consolidation a pure
+ * refactor with no behavior change.
+ *
+ * Scope note: this is the APP-level gate only. The DB-level boundary is the
+ * is_admin() SQL function, referenced by ~97 RLS policies across 22 migrations.
+ * Any real privilege separation (e.g. "positions editor" vs full admin) has to
+ * be done there as well - a check added here alone would be cosmetic, since a
+ * signed-in admin still satisfies is_admin() on every table directly.
+ */
+export async function requireAdmin(
+  message = "Forbidden",
+): Promise<{ userId: string; email: string | null }> {
+  const { session, role } = await getSessionAndRole();
+  if (!session || role !== "admin") throw new Error(message);
+  return session;
+}
+
+/**
  * Returns `candidates.id` for the current session, self-healing if missing.
  *
  * Normal case: the DB trigger `handle_new_auth_user()` (migration 0015) always

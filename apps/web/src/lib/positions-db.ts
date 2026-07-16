@@ -196,6 +196,10 @@ type DbPositionRow = {
   country: string;
   active: boolean;
   content: unknown;
+  /** Optional: only the catalog select asks for these (the detail select has
+   * its own date read via fetchPositionContent). */
+  published_at?: string | null;
+  updated_at?: string | null;
 };
 
 const VALID_ICONS = new Set<IconName>([
@@ -363,7 +367,7 @@ export async function fetchPositionsForCatalog(): Promise<Position[]> {
     const [posResult, jobOrders, registry] = await Promise.all([
       // RLS (positions_anon_read_active) already filters to active=true, so the
       // anon client never sees inactive rows — hence no static backfill below.
-      sb.from("positions").select("slug, name, role, country, active, content"),
+      sb.from("positions").select("slug, name, role, country, active, content, published_at, updated_at"),
       fetchOpenJobOrders(),
       getCountries(),
     ]);
@@ -384,10 +388,17 @@ export async function fetchPositionsForCatalog(): Promise<Position[]> {
       const cardMeta = pickCardMeta(row.content);
       const hasCardMeta = Boolean(nonEmpty(cardMeta.salary) && nonEmpty(cardMeta.age));
       if (!hasCardMeta && !staticEntry) continue;
+      // Real content dates, so the sitemap can report a lastModified that means
+      // something instead of "now" on every crawl.
+      const dates = {
+        publishedAt: row.published_at ?? null,
+        updatedAt: row.updated_at ?? null,
+      };
       const jo = jobOrders.get(row.slug);
       if (jo) {
         out.push({
           ...card,
+          ...dates,
           status: "open",
           batch: {
             label: jo.intake_label,
@@ -403,7 +414,7 @@ export async function fetchPositionsForCatalog(): Promise<Position[]> {
           },
         });
       } else {
-        out.push({ ...card, status: "queue" });
+        out.push({ ...card, ...dates, status: "queue" });
       }
     }
 
@@ -452,6 +463,66 @@ export async function fetchPositionForDetail(slug: string): Promise<Position | u
   } catch {
     // Transient DB error → 404 on a cold miss; ISR serves the last good render
     // for already-cached active pages.
+    return undefined;
+  }
+}
+
+export type PositionDraftPreview = {
+  position: Position;
+  content: PositionContentBlob;
+  publishedAt: string | null;
+  updatedAt: string | null;
+  /** Live visibility of the previewed position - drives the banner's "this one
+   * isn't even public yet" note. Not on Position, which resolveCard strips. */
+  active: boolean;
+};
+
+/**
+ * Resolve a position from its DRAFT blob for admin preview (Fase 3.1, D4).
+ *
+ * Everything the detail page renders descends from resolvePositionDetail(slug,
+ * content), so handing it the draft blob renders the draft through the real
+ * page - no parallel preview renderer to drift out of sync.
+ *
+ * Authorization is the token, checked in the DB by get_position_draft_preview
+ * (SECURITY DEFINER, migration 0105). The anon key is enough on this path: web
+ * gets no blanket read on unpublished rows, only on the one slug it holds a
+ * live token for. Unlike the public fetchers, this deliberately resolves
+ * INACTIVE positions too - previewing a not-yet-activated position is the whole
+ * point (the old "Preview tab baru" just 404'd there).
+ */
+export async function fetchPositionDraftPreview(
+  slug: string,
+  token: string,
+): Promise<PositionDraftPreview | undefined> {
+  try {
+    const sb = supabaseV2();
+    const { data, error } = await (
+      sb as unknown as {
+        rpc(
+          fn: "get_position_draft_preview",
+          args: { p_slug: string; p_token: string },
+        ): Promise<{ data: unknown; error: { message: string } | null }>;
+      }
+    ).rpc("get_position_draft_preview", { p_slug: slug, p_token: token });
+
+    if (error || !data || typeof data !== "object") return undefined;
+    const row = data as DbPositionRow & {
+      published_at: string | null;
+      updated_at: string | null;
+    };
+    if (!row.slug) return undefined;
+
+    const registry = await getCountries();
+    const card = resolveCard(row, getStaticPosition(slug), registry);
+    return {
+      position: { ...card, status: "queue" },
+      content: (row.content as PositionContentBlob) ?? null,
+      publishedAt: row.published_at,
+      updatedAt: row.updated_at,
+      active: Boolean(row.active),
+    };
+  } catch {
     return undefined;
   }
 }

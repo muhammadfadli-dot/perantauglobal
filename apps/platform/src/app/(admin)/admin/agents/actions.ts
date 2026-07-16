@@ -3,7 +3,7 @@
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import { createServerClient, requireAdmin } from "@/lib/supabase-server";
 import { logAdminAction } from "@/lib/audit-log";
 import type {
   AffiliateAgentStatus,
@@ -26,8 +26,7 @@ import type {
 type ActionResult = { ok: true } | { ok: false; error: string };
 
 async function assertAdmin() {
-  const { session, role } = await getSessionAndRole();
-  if (!session || role !== "admin") throw new Error("Unauthorized");
+  const session = await requireAdmin("Unauthorized");
   return { userId: session.userId };
 }
 

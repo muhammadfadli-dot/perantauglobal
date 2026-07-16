@@ -1,10 +1,11 @@
 "use server";
 
+import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import {
   createServerClient,
   createServiceRoleClient,
-  getSessionAndRole,
+  requireAdmin,
 } from "@/lib/supabase-server";
 import { logAdminAction } from "@/lib/audit-log";
 import { getCountryRegistry } from "@perantauglobal/db/country";
@@ -17,8 +18,65 @@ import {
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 async function assertAdmin() {
-  const { session, role } = await getSessionAndRole();
-  if (!session || role !== "admin") throw new Error("Forbidden");
+  await requireAdmin("Forbidden");
+}
+
+/** How long a minted preview link stays usable. Long enough to review a draft,
+ * short enough that a link pasted into chat doesn't outlive the conversation. */
+const PREVIEW_TTL_MINUTES = 60;
+
+export type PreviewLinkResult = { ok: true; url: string } | { ok: false; error: string };
+
+/**
+ * Mint a draft-preview link for apps/web (Fase 3.1, closes D4).
+ *
+ * Replaces the old "Preview tab baru" anchor, which pointed straight at
+ * https://perantauglobal.com/lowongan/<slug> - the LIVE page. With a pending
+ * draft it showed the previous content, and on a never-published position it
+ * simply 404'd, which is the worst moment to lose the preview: first authoring.
+ *
+ * One token per position (PK on slug), so minting again rotates it and any
+ * previously shared link dies immediately. Service-role because
+ * position_preview_tokens has no RLS policies by design: the only read path is
+ * the SECURITY DEFINER function, which demands the token.
+ */
+export async function createPreviewLink(slug: string): Promise<PreviewLinkResult> {
+  await assertAdmin();
+
+  if (!SLUG_RE.test(slug)) return { ok: false, error: "Slug invalid." };
+
+  const token = randomBytes(32).toString("base64url");
+  const expiresAt = new Date(Date.now() + PREVIEW_TTL_MINUTES * 60_000).toISOString();
+
+  const admin = createServiceRoleClient() as unknown as {
+    from(table: "position_preview_tokens"): {
+      upsert(
+        row: Record<string, unknown>,
+        opts: { onConflict: string },
+      ): Promise<{ error: { message: string } | null }>;
+    };
+  };
+  const { error } = await admin.from("position_preview_tokens").upsert(
+    { slug, token, expires_at: expiresAt },
+    { onConflict: "slug" },
+  );
+  if (error) {
+    // Most likely cause: migration 0105 not applied yet on this environment.
+    console.warn(`[preview] mint failed slug=${slug}: ${error.message}`);
+    return { ok: false, error: "Gagal bikin link preview. Coba lagi." };
+  }
+
+  await logAdminAction("create_preview_link", "position", slug, {
+    expires_at: expiresAt,
+  });
+
+  // Env-overridable so a non-production deploy previews itself instead of
+  // sending the admin to the live site (the old anchor always did the latter).
+  const webUrl = process.env.WEB_PUBLIC_URL || "https://perantauglobal.com";
+  return {
+    ok: true,
+    url: `${webUrl}/api/preview?slug=${encodeURIComponent(slug)}&token=${encodeURIComponent(token)}`,
+  };
 }
 
 /**
@@ -54,6 +112,20 @@ async function notifyWebRevalidate(slug: string): Promise<void> {
     ok = res.ok;
     if (!ok) {
       console.warn(`[revalidate-web] non-OK ${res.status} from ${url} slug=${slug}`);
+    } else {
+      // res.ok is necessary but NOT sufficient. When apps/web has no
+      // REVALIDATE_SECRET of its own it deliberately answers 200 with
+      // {ok:true, skipped:"env not configured"} - a success status for a call
+      // that revalidated nothing. Stamping that would make the editor's "Web
+      // ter-update" row report a cache-bust that never happened: a worse lie
+      // than the silence this check was written to end.
+      const body = (await res.json().catch(() => null)) as { skipped?: string } | null;
+      if (body?.skipped) {
+        ok = false;
+        console.warn(
+          `[revalidate-web] 200 but skipped (${body.skipped}) slug=${slug} - apps/web needs REVALIDATE_SECRET too`,
+        );
+      }
     }
   } catch (err) {
     console.warn(
