@@ -152,6 +152,10 @@ export default async function PositionDetailPage({
     field_type: f.field_type,
     importance: f.importance,
     options: f.options,
+    // Without section, a qualifying question parked in `kualifikasi` counted as
+    // screening here while the public apply form asked nothing (fixed 2026-07-16,
+    // migration 0106).
+    section: f.section,
   }));
   const readinessItems = computePositionReadiness({
     content: editorContent,

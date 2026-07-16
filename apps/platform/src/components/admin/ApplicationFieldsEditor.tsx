@@ -167,7 +167,10 @@ export default function ApplicationFieldsEditor({
 }) {
   const [showAdd, setShowAdd] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [addInSection, setAddInSection] = useState<Field["section"]>("kualifikasi");
+  // Defaults to the apply form: that is what "add a screening question" means
+  // almost every time, and the old kualifikasi default silently parked new
+  // questions in a step the apply form never renders (see migration 0106).
+  const [addInSection, setAddInSection] = useState<Field["section"]>("syarat_utama");
 
   const grouped: Record<Field["section"], Field[]> = {
     syarat_utama: [],

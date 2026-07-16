@@ -86,7 +86,7 @@ export default async function AdminPositionsPage({
     fetchAllRows((f, t) =>
       supabase
         .from("position_application_fields")
-        .select("position_slug, field_type, importance, options")
+        .select("position_slug, field_type, importance, options, section")
         .range(f, t),
     ).then((data) => ({ data })),
     supabase.from("candidates").select("*", { count: "exact", head: true }),
@@ -147,16 +147,25 @@ export default async function AdminPositionsPage({
   // screens nobody (finding C1) gets a warning pill in the catalog.
   const fieldsBySlug = new Map<
     string,
-    { field_type: string; importance: string | null; options: unknown }[]
+    { field_type: string; importance: string | null; options: unknown; section: string | null }[]
   >();
   for (const f of (fieldsData ?? []) as {
     position_slug: string;
     field_type: string;
     importance: string | null;
     options: unknown;
+    section: string | null;
   }[]) {
     const arr = fieldsBySlug.get(f.position_slug) ?? [];
-    arr.push({ field_type: f.field_type, importance: f.importance, options: f.options });
+    // section is load-bearing: without it a qualifying question sitting in
+    // `kualifikasi` made this pill claim the position screens, while its apply
+    // form asked nothing (fixed 2026-07-16, migration 0106).
+    arr.push({
+      field_type: f.field_type,
+      importance: f.importance,
+      options: f.options,
+      section: f.section,
+    });
     fieldsBySlug.set(f.position_slug, arr);
   }
   const screensByPosition = new Map<string, boolean>();

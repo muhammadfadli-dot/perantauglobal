@@ -5,10 +5,11 @@
  * gate. This measures whether the POSITION CONFIG is ready to go live.
  *
  * The screening predicate here mirrors the SQL function
- * public.position_has_effective_screening (migration 0103) exactly, so the admin
- * panel, the per-field badge, and the DB activation trigger can never disagree:
- * a field "screens" iff it is REQUIRED, is a choice type, and has >=1 option
- * explicitly marked qualifying:true.
+ * public.position_has_effective_screening (0103, section-scoped in 0106)
+ * exactly, so the admin panel, the per-field badge, and the DB activation
+ * trigger can never disagree: a field "screens" iff it is in section
+ * syarat_utama, is REQUIRED, is a choice type, and has >=1 option explicitly
+ * marked qualifying:true.
  */
 
 import type { PositionContent } from "./position-content";
@@ -17,15 +18,30 @@ import type { PositionContent } from "./position-content";
  * legacy alias the editor normalizes to `radio`. Free-text/number/file never screen. */
 const CHOICE_TYPES = new Set(["radio", "multiselect", "select"]);
 
+/**
+ * The only section the public apply form renders (apps/web fetchAppliedFields).
+ * Questions in `kualifikasi` are asked later, in the portal's "lengkapi" step,
+ * and questions in `screening` later still - real questions, but they gate
+ * nothing at the moment someone applies.
+ */
+const APPLY_SECTION = "syarat_utama";
+
 export type ReadinessField = {
   field_type: string;
   importance: string | null;
   options: unknown;
+  /** Which step asks this. Absent is treated as "not the apply form": a field
+   * whose section we can't see must not be counted as gating the apply. */
+  section?: string | null;
 };
 
-/** True when this single field actually filters applicants (required + choice +
- * at least one qualifying:true option). Mirrors the SQL predicate. */
+/** True when this single field actually filters applicants at APPLY time
+ * (syarat_utama + required + choice + >=1 qualifying option). Mirrors the SQL. */
 export function fieldScreens(f: ReadinessField): boolean {
+  // Section first: this is the check that was missing, and its absence let a
+  // qualifying question sitting in `kualifikasi` report as screening while the
+  // apply form asked nothing at all (trainee-technicians-kuwait, 2026-07-16).
+  if (f.section !== APPLY_SECTION) return false;
   if (f.importance !== "required") return false;
   if (!CHOICE_TYPES.has(f.field_type)) return false;
   if (!Array.isArray(f.options)) return false;

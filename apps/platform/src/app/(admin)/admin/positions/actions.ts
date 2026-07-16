@@ -740,7 +740,14 @@ export async function createApplicationField(positionSlug: string, input: Applic
   await logAdminAction("create_application_field", "application_field", positionSlug, {
     field_key: input.field_key,
     field_type: input.field_type,
-    section: input.section ?? "kualifikasi",
+    // Default to the apply form, not the later "lengkapi" step. Screening
+    // questions are the overwhelming majority (170 syarat_utama fields across 39
+    // positions vs 7 kualifikasi across 6), so a caller who omits section almost
+    // always means "ask this when they apply". The old kualifikasi default put
+    // the question somewhere the apply form never renders, which is how
+    // trainee-technicians-kuwait went live screening nobody while every gate
+    // reported it as screening (see migration 0106).
+    section: input.section ?? "syarat_utama",
     importance: input.importance ?? "optional",
     options_count: input.options?.length ?? 0,
   });
@@ -753,7 +760,14 @@ export async function createApplicationField(positionSlug: string, input: Applic
     field_type: input.field_type,
     options: input.options ?? null,
     importance: input.importance ?? "optional",
-    section: input.section ?? "kualifikasi",
+    // Default to the apply form, not the later "lengkapi" step. Screening
+    // questions are the overwhelming majority (170 syarat_utama fields across 39
+    // positions vs 7 kualifikasi across 6), so a caller who omits section almost
+    // always means "ask this when they apply". The old kualifikasi default put
+    // the question somewhere the apply form never renders, which is how
+    // trainee-technicians-kuwait went live screening nobody while every gate
+    // reported it as screening (see migration 0106).
+    section: input.section ?? "syarat_utama",
     tier_weight: input.tier_weight ?? 0,
     sort_order: input.sort_order ?? 0,
     collect_at_stage: input.collect_at_stage ?? "applied",
