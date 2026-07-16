@@ -130,6 +130,16 @@ export default async function LowonganDetailPage({
     // old URL to the current one so live ads on the old link never 404.
     const alias = await fetchSlugAlias(slug);
     if (alias && alias !== slug) permanentRedirect(`/${locale}/lowongan/${alias}`);
+    //
+    // DO NOT add a loading.tsx to this route, or to [locale]/lowongan above it.
+    // It looks harmless and is not: loading.tsx wraps the segment in Suspense,
+    // the response then streams, and HTTP 200 is flushed BEFORE this line runs.
+    // The not-found page still renders, so it looks correct in a browser - but
+    // every dead, inactive, or mistyped position URL answers 200 instead of 404.
+    // That is a soft-404 to Google and it quietly undoes the "inactive means
+    // gone" guarantee from Fase 0 (finding A1). Measured, not theorised: Fase 3
+    // shipped a loading.tsx, an unknown slug returned 200 in prod, and removing
+    // it restored 404. error.tsx does NOT have this problem.
     notFound();
   }
 
