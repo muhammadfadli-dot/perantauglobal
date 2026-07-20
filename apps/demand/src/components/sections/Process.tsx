@@ -13,7 +13,7 @@ const NODES = [
 
 const STEPS = [
   { title: "Agreement", body: "We agree roles, requirements, and terms." },
-  { title: "Screening", body: "We shortlist and assess against your criteria." },
+  { title: "Sourcing", body: "We source and shortlist candidates against your criteria." },
   { title: "Documents & visa", body: "Permits, medicals, and visas, handled end to end." },
   { title: "Deployment", body: "Candidates arrive briefed and ready to start." },
   { title: "Support", body: "We stay involved through the guarantee period." },

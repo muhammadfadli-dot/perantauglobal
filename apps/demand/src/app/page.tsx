@@ -3,6 +3,7 @@ import { Hero } from "@/components/sections/Hero";
 import { ValueProps } from "@/components/sections/ValueProps";
 import { TalentPoolCounter } from "@/components/sections/TalentPoolCounter";
 import { Sectors } from "@/components/sections/Sectors";
+import { Clients } from "@/components/sections/Clients";
 import { Process } from "@/components/sections/Process";
 import { Guarantee } from "@/components/sections/Guarantee";
 import { Credentials } from "@/components/sections/Credentials";
@@ -19,6 +20,7 @@ export default function HomePage() {
         <ValueProps />
         <TalentPoolCounter />
         <Sectors />
+        <Clients />
         <Process />
         <Guarantee />
         <Credentials />

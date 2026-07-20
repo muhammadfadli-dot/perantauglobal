@@ -578,15 +578,48 @@ textarea::placeholder {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
 }
-.g-logos {
+/* Client logo wall. Each logo sits in its own white tile so the supplied
+   artwork (mixed white and solid-colour backgrounds) reads uniformly on paper.
+   Logos stay in colour: these are proof marks, and several of them go
+   unreadable once desaturated. Restraint comes from the uniform tiles and
+   sizing instead. */
+.g-clients {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 14px;
+}
+.ctile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 92px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #DCD3BE;
+  border-radius: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ctile:hover {
+  border-color: #C9BE9F;
+  box-shadow: 0 4px 14px rgba(32, 48, 31, 0.07);
 }
 .g-form {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
+}
+.g-form2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+/* .fld is a fixed-height control; the notes box has to grow instead. */
+.fld-ta {
+  height: auto;
+  min-height: 84px;
+  padding: 12px 14px;
+  line-height: 1.55;
+  resize: vertical;
 }
 .g-foot {
   display: grid;
@@ -632,8 +665,8 @@ textarea::placeholder {
     grid-template-columns: repeat(2, 1fr);
     gap: 26px 0;
   }
-  .g-logos {
-    grid-template-columns: repeat(3, 1fr);
+  .g-clients {
+    grid-template-columns: repeat(4, 1fr);
   }
   .navlinks {
     display: none !important;
@@ -649,11 +682,17 @@ textarea::placeholder {
   .g-proc {
     grid-template-columns: 1fr;
   }
-  .g-form {
+  .g-form,
+  .g-form2 {
     grid-template-columns: 1fr;
   }
-  .g-logos {
-    grid-template-columns: repeat(2, 1fr);
+  .g-clients {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .ctile {
+    height: 78px;
+    padding: 11px 12px;
   }
   .g-cred4 {
     grid-template-columns: 1fr;
@@ -681,6 +720,9 @@ textarea::placeholder {
   .g-trust > div + div {
     border-left: none !important;
     border-top: 1px solid rgba(216, 185, 120, 0.14);
+  }
+  .g-clients {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

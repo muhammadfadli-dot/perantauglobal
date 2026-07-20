@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Fraunces, IBM_Plex_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
-import { SITE } from "@/lib/site-config";
+import { SITE, CONTACT, CREDENTIALS } from "@/lib/site-config";
 
 // Gate indexing until the public launch is signed off (see robots.ts).
 const allowIndex = process.env.NEXT_PUBLIC_ALLOW_INDEX === "true";
@@ -50,6 +50,30 @@ export const metadata: Metadata = {
   robots: { index: allowIndex, follow: allowIndex },
 };
 
+// Organization markup so search and messaging previews resolve the legal entity,
+// its group, and the BD line rather than guessing from page copy.
+const orgJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: SITE.legalName,
+  alternateName: SITE.brandName,
+  url: `https://${SITE.domain}`,
+  logo: `https://${SITE.domain}/images/dtg-logo.png`,
+  description: SITE.tagline,
+  parentOrganization: { "@type": "Organization", name: SITE.group.name },
+  address: { "@type": "PostalAddress", addressLocality: "South Jakarta", addressCountry: "ID" },
+  identifier: [
+    { "@type": "PropertyValue", name: "P3MI License", value: CREDENTIALS.p3miLicenseNo },
+    { "@type": "PropertyValue", name: "Saudi MOFA Registration", value: CREDENTIALS.mofaApprovalDisplay },
+  ],
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "sales",
+    telephone: `+${CONTACT.whatsappDigits}`,
+    availableLanguage: ["en", "id", "ar"],
+  },
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
@@ -57,6 +81,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${plusJakarta.variable} ${fraunces.variable} ${ibmPlexMono.variable}`}
     >
       <body className="antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
         {/* No-JS fallback: scroll-reveal animations hide content until seen, so
             reveal everything when scripting is unavailable. */}
         <noscript>

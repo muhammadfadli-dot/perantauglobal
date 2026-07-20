@@ -27,7 +27,6 @@ export function Footer() {
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, letterSpacing: ".18em", color: "#B28A48", marginBottom: 18 }}>CONTACT</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 11, fontSize: 13, lineHeight: 1.5, color: "#B9C4A6" }}>
             <a href={waLink()} target="_blank" rel="noopener noreferrer" className="link-gold-underline" style={{ color: "#B9C4A6", textDecoration: "none", borderBottom: "none" }}>WhatsApp Business · {CONTACT.whatsappDisplay}</a>
-            <a href={`mailto:${CONTACT.email}`} className="link-gold-underline" style={{ color: "#B9C4A6", textDecoration: "none", borderBottom: "none" }}>{CONTACT.email}</a>
             <span>{CONTACT.office}</span>
           </div>
         </div>

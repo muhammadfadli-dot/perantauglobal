@@ -15,10 +15,11 @@ export const SITE = {
 } as const;
 
 export const CONTACT = {
-  // WhatsApp Business line for the BD funnel. Digits only for wa.me.
-  whatsappDigits: "6281999107455",
-  whatsappDisplay: "+62 819 9910 7455",
-  email: "info@dayatalentaglobal.com", // PENDING confirm - BD inbox
+  // WhatsApp Business line for the BD GCC funnel. Digits only for wa.me.
+  // No email here on purpose: info@dayatalentaglobal.com has no live inbox yet,
+  // and a dead channel costs more trust than a missing one.
+  whatsappDigits: "6285110555561",
+  whatsappDisplay: "+62 851 1055 5561",
   office: "Kuningan business district, South Jakarta",
 } as const;
 
@@ -30,7 +31,6 @@ export function waLink(
 
 export const CREDENTIALS = {
   p3miLicenseNo: "1810240237512001", // KNOWN
-  // Saudi MOFA registration number PENDING from BD; shown as a masked placeholder.
-  mofaApprovalDisplay: "•••• ••••",
+  mofaApprovalDisplay: "321",
   guaranteeMonths: 3,
 } as const;

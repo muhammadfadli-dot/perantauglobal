@@ -3,8 +3,13 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CONTACT, waLink } from "@/lib/site-config";
 
-type Field = "company" | "country" | "sector" | "quantity" | "name" | "email";
-const EMPTY: Record<Field, string> = { company: "", country: "", sector: "", quantity: "", name: "", email: "" };
+type Field =
+  | "company" | "country" | "sector" | "roles" | "quantity" | "timeline"
+  | "name" | "email" | "mapsLink" | "social" | "notes";
+const EMPTY: Record<Field, string> = {
+  company: "", country: "", sector: "", roles: "", quantity: "", timeline: "",
+  name: "", email: "", mapsLink: "", social: "", notes: "",
+};
 
 const COUNTRIES = ["Saudi Arabia", "United Arab Emirates", "Kuwait", "Qatar", "Bahrain", "Oman", "Other"];
 const SECTORS = ["Healthcare", "Hospitality", "Wellness", "Other"];
@@ -14,8 +19,21 @@ const QUANTITIES = [
   { value: "21-50", label: "21 to 50" },
   { value: "50+", label: "More than 50" },
 ];
+// Placement runs about two months. Asking upfront surfaces a mismatch before
+// BD spends a call on it, and tells them which inquiries to work first.
+const TIMELINES = [
+  { value: "asap", label: "As soon as possible" },
+  { value: "1-3m", label: "Within 1 to 3 months" },
+  { value: "3-6m", label: "Within 3 to 6 months" },
+  { value: "planning", label: "Planning ahead, no fixed date" },
+];
 
 const link = waLink();
+
+// The WhatsApp handoff carries the label BD reads, not the form's value token.
+function timelineLabel(value: string): string {
+  return TIMELINES.find((t) => t.value === value)?.label ?? value;
+}
 
 export function Contact() {
   const ref = useRef<HTMLElement>(null);
@@ -70,7 +88,12 @@ export function Contact() {
       `Company: ${form.company}`,
       `Country: ${form.country}`,
       `Sector: ${form.sector}`,
+      form.roles.trim() ? `Roles needed: ${form.roles.trim()}` : "",
       form.quantity ? `Number of hires: ${form.quantity}` : "",
+      form.timeline ? `Timeline: ${timelineLabel(form.timeline)}` : "",
+      form.mapsLink.trim() ? `Location: ${form.mapsLink.trim()}` : "",
+      form.social.trim() ? `Website or social: ${form.social.trim()}` : "",
+      form.notes.trim() ? `Notes: ${form.notes.trim()}` : "",
       `Contact: ${form.name} (${form.email})`,
     ].filter(Boolean);
     window.open(waLink(lines.join("\n")), "_blank", "noopener,noreferrer");
@@ -130,6 +153,24 @@ export function Contact() {
                   {errors.sector && <div id="e-sector" role="alert" className="errmsg">{errors.sector}</div>}
                 </div>
                 <div>
+                  <label className="lbl" htmlFor="f-roles">ROLES NEEDED</label>
+                  <input id="f-roles" aria-label="Roles needed" name="roles" type="text" placeholder="e.g. registered nurses, baristas" value={form.roles} onChange={(e) => onField("roles", e.target.value)} className="fld" />
+                </div>
+                <div>
+                  <label className="lbl" htmlFor="f-quantity">NUMBER OF HIRES</label>
+                  <select id="f-quantity" aria-label="Number of hires" name="quantity" value={form.quantity} onChange={(e) => onField("quantity", e.target.value)} className="fld sel">
+                    <option value="">Select</option>
+                    {QUANTITIES.map((q) => <option key={q.value} value={q.value}>{q.label}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="lbl" htmlFor="f-timeline">WHEN DO YOU NEED THEM</label>
+                  <select id="f-timeline" aria-label="When do you need them" name="timeline" value={form.timeline} onChange={(e) => onField("timeline", e.target.value)} className="fld sel">
+                    <option value="">Select</option>
+                    {TIMELINES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+                <div>
                   <label className="lbl" htmlFor="f-name">YOUR NAME *</label>
                   <input id="f-name" aria-label="Your name" name="name" type="text" autoComplete="name" placeholder="Full name" value={form.name} onChange={(e) => onField("name", e.target.value)} className={cls("name")} aria-invalid={!!errors.name} aria-describedby={errors.name ? "e-name" : undefined} />
                   {errors.name && <div id="e-name" role="alert" className="errmsg">{errors.name}</div>}
@@ -139,14 +180,32 @@ export function Contact() {
                   <input id="f-email" aria-label="Work email" name="email" type="email" autoComplete="email" placeholder="name@company.com" value={form.email} onChange={(e) => onField("email", e.target.value)} className={cls("email")} aria-invalid={!!errors.email} aria-describedby={errors.email ? "e-email" : undefined} />
                   {errors.email && <div id="e-email" role="alert" className="errmsg">{errors.email}</div>}
                 </div>
-                <div>
-                  <label className="lbl" htmlFor="f-quantity">NUMBER OF HIRES</label>
-                  <select id="f-quantity" aria-label="Number of hires" name="quantity" value={form.quantity} onChange={(e) => onField("quantity", e.target.value)} className="fld sel">
-                    <option value="">Select</option>
-                    {QUANTITIES.map((q) => <option key={q.value} value={q.value}>{q.label}</option>)}
-                  </select>
+              </div>
+
+              {/* Optional block. These carry a stated reason: asking a Gulf
+                  employer for their location and socials reads as intrusive
+                  without one, and unexplained fields get skipped. */}
+              <div style={{ marginTop: 26, paddingTop: 22, borderTop: "1px solid #DCD3BE", textAlign: "left" }}>
+                <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, fontWeight: 600, letterSpacing: ".13em", color: "#8A857A", marginBottom: 5 }}>ABOUT YOUR COMPANY (OPTIONAL)</div>
+                <p style={{ margin: "0 0 16px", fontSize: 12.5, lineHeight: 1.55, color: "#6E6752", maxWidth: 560 }}>
+                  This helps us confirm who we are speaking with, so we can skip the verification questions and answer your requirement on the first reply.
+                </p>
+                <div className="g-form2">
+                  <div>
+                    <label className="lbl" htmlFor="f-maps">COMPANY LOCATION</label>
+                    <input id="f-maps" aria-label="Company location" name="mapsLink" type="text" placeholder="Google Maps link or address" value={form.mapsLink} onChange={(e) => onField("mapsLink", e.target.value)} className="fld" />
+                  </div>
+                  <div>
+                    <label className="lbl" htmlFor="f-social">WEBSITE OR SOCIAL MEDIA</label>
+                    <input id="f-social" aria-label="Website or social media" name="social" type="text" placeholder="yourcompany.com or @yourcompany" value={form.social} onChange={(e) => onField("social", e.target.value)} className="fld" />
+                  </div>
+                </div>
+                <div style={{ marginTop: 16 }}>
+                  <label className="lbl" htmlFor="f-notes">ANYTHING ELSE WE SHOULD KNOW</label>
+                  <textarea id="f-notes" aria-label="Anything else we should know" name="notes" rows={3} placeholder="Shift patterns, language needs, certifications, accommodation, or anything specific to the role" value={form.notes} onChange={(e) => onField("notes", e.target.value)} className="fld fld-ta" />
                 </div>
               </div>
+
               <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 22, flexWrap: "wrap" }}>
                 <button type="submit" className="btn-terra" style={{ flex: "none", background: "#A8452F", color: "#F3EEE1", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 700, padding: "15px 34px", borderRadius: 8, transition: "background .15s, transform .15s", boxShadow: "0 12px 26px rgba(168,69,47,.26)" }}>Send Inquiry</button>
                 <span style={{ fontSize: 12, lineHeight: 1.5, color: "#6E6752", maxWidth: 240 }}>We open WhatsApp with your details so our BD team can reply within one business day.</span>
