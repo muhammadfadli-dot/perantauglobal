@@ -12,6 +12,7 @@ import {
   getRegistrationFields,
   flattenLessons,
   hasPaidAccess,
+  isScreenedProgram,
   deriveCaps,
   psikotesStatus,
   type ProgramContent,
@@ -86,7 +87,12 @@ export default async function ProgramDetailPage({
       : `/akademi/${slug}/lesson/${current.lesson.id}`
     : null;
 
-  const showPaidGate = Boolean(enrollment) && !paid && !program.is_free;
+  // Screened programs are paid but never invoiced here, and have no in-app
+  // lessons to unlock, so the payment gate would show "settle your payment" over
+  // zero content. They get a screening-status card instead.
+  const isScreened = isScreenedProgram(program);
+  const showScreeningCard = Boolean(enrollment) && isScreened;
+  const showPaidGate = Boolean(enrollment) && !paid && !program.is_free && !isScreened;
 
   return (
     <div className="min-h-screen flex flex-col" style={{ background: "var(--pg-paper)" }}>
@@ -167,6 +173,33 @@ export default async function ProgramDetailPage({
         )}
         {enrollment && paid && courseDone && !isPaspor && (
           <SimpleDoneCard certificateId={enrollment.certificate_id} certificateUrl={enrollment.certificate_url} />
+        )}
+
+        {/* Screened program: registered, waiting for the team to reach out. */}
+        {showScreeningCard && (
+          <>
+            <Section>
+              <div
+                className="rounded-[12px] p-3.5 flex gap-2.5"
+                style={{ background: "#FFFBEB", border: "1px solid var(--pa-amber-200)" }}
+              >
+                <span style={{ color: "var(--pa-amber-700)" }} className="shrink-0 mt-0.5">
+                  <Icon name="clock" size={16} />
+                </span>
+                <div className="text-[13px] text-pg-ink-700 leading-relaxed">
+                  <b className="text-pg-ink-900">Pendaftaranmu sudah kami terima.</b> Tim Perantau
+                  Global akan menghubungi kamu lewat WhatsApp untuk proses screening. Setelah lolos,
+                  kami informasikan biaya program dan langkah pembayarannya. Kamu belum perlu
+                  membayar apa pun sekarang.
+                </div>
+              </div>
+            </Section>
+            {content.benefits && content.benefits.length > 0 && (
+              <Section title="Yang kamu dapat">
+                <BenefitsList items={content.benefits} />
+              </Section>
+            )}
+          </>
         )}
 
         {/* ── Paid gate: value first, price last ── */}

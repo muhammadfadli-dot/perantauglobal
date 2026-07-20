@@ -23,8 +23,8 @@ export function CrossLinkSertifikasi() {
           Biar makin siap berangkat
         </div>
         <div className="text-[13px] md:text-[14px] text-pg-ink-500 mt-1 leading-relaxed">
-          Paspor Perantau Global menyiapkan psikotes &amp; fundamental per negara. Bukan syarat —
-          tapi bikin kamu lebih siap diterima employer.
+          Ada pelatihan bersertifikat bersama Lembaga Vokasi UI, plus kelas gratis yang bisa kamu
+          mulai sekarang. Bukan syarat melamar, tapi bikin kamu lebih siap diterima employer.
         </div>
       </div>
       <span

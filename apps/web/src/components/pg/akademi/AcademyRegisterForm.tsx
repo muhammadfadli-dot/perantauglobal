@@ -36,11 +36,18 @@ export function AcademyRegisterForm({
   programTitle,
   fields,
   isFree,
+  isScreened = false,
 }: {
   programSlug: string;
   programTitle: string;
   fields: AcademyRegField[];
   isFree: boolean;
+  /**
+   * Classroom-delivered paid program: registration is followed by a screening
+   * call, and the fee is only discussed after passing. Nothing unlocks in the
+   * app right away, so the confirmation copy must not promise that.
+   */
+  isScreened?: boolean;
 }) {
   const [identity, setIdentity] = useState<Identity>(EMPTY);
   const [answers, setAnswers] = useState<Record<string, string | string[]>>({});
@@ -150,9 +157,17 @@ export function AcademyRegisterForm({
         </div>
         <h3 className="text-xl font-extrabold tracking-tight mt-4">Pendaftaran kamu masuk!</h3>
         <p className="text-base text-pg-ink-700 leading-relaxed mt-2">
-          Kami kirim email verifikasi ke <b className="text-pg-ink-900">{submittedEmail}</b>. Klik
-          link di email untuk aktifkan akun + mulai kelasnya.
+          Kami kirim email verifikasi ke <b className="text-pg-ink-900">{submittedEmail}</b>.{" "}
+          {isScreened
+            ? "Klik link di email untuk mengaktifkan akunmu. Setelah itu tim Perantau Global akan menghubungi kamu lewat WhatsApp untuk proses screening."
+            : "Klik link di email untuk aktifkan akun lalu mulai kelasnya."}
         </p>
+        {isScreened && (
+          <p className="text-[13px] text-pg-ink-500 leading-relaxed mt-2">
+            Kamu belum perlu membayar apa pun. Biaya program baru kami informasikan setelah kamu
+            lolos screening.
+          </p>
+        )}
         <a
           href={`${APP_URL}/auth/sign-in?email=${encodeURIComponent(submittedEmail)}`}
           className="mt-5 inline-flex items-center gap-2 font-bold no-underline"
@@ -186,7 +201,9 @@ export function AcademyRegisterForm({
       </div>
       <h3 className="text-xl md:text-2xl font-extrabold tracking-tight mt-1">{programTitle}</h3>
       <p className="text-sm text-pg-ink-500 mt-1.5">
-        Isi data + pilih password. Kami buatkan akun Perantau Global kamu sekaligus.
+        {isScreened
+          ? "Pendaftaran gratis. Isi data dan pilih password, kami buatkan akun Perantau Global kamu sekaligus."
+          : "Isi data + pilih password. Kami buatkan akun Perantau Global kamu sekaligus."}
       </p>
 
       <div className="grid gap-3 mt-5">
@@ -275,7 +292,14 @@ export function AcademyRegisterForm({
       <div className="mt-5">
         <Button type="submit" variant="primary" block disabled={status === "loading"}>
           {status === "loading" ? "Mengirim…" : (
-            <>{isFree ? "Daftar gratis & buat akun" : "Daftar kelas & buat akun"}<Icon name="arrow_right" size={18} /></>
+            <>
+              {isFree
+                ? "Daftar gratis & buat akun"
+                : isScreened
+                  ? "Daftar gratis & ikut screening"
+                  : "Daftar kelas & buat akun"}
+              <Icon name="arrow_right" size={18} />
+            </>
           )}
         </Button>
         <div className="text-[12px] text-pg-ink-500 mt-3 text-center">

@@ -4,7 +4,7 @@ import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import type { Json } from "@perantauglobal/db";
 import { createServerClient, requireCandidate } from "@/lib/supabase-server";
-import { getPublishedProgram, getMyEnrollment } from "@/lib/academy-db";
+import { getPublishedProgram, getMyEnrollment, isScreenedProgram } from "@/lib/academy-db";
 import { createXenditInvoice } from "@/lib/xendit";
 import {
   ACADEMY_CONSENT_TEXT,
@@ -117,6 +117,18 @@ export async function createPaymentInvoiceAction(
 
   const program = await getPublishedProgram(slug);
   if (!program) return { ok: false, error: "Kelas tidak ditemukan." };
+  // Sertifikat Perantau and friends: the fee is quoted after screening and paid
+  // directly to the training partner, so this app must never mint an invoice for
+  // them. Guarded explicitly rather than relying on `price` being unset, so that
+  // filling in a price later cannot silently open a checkout.
+  if (isScreenedProgram(program)) {
+    return {
+      ok: false,
+      error:
+        "Program ini tidak dibayar lewat aplikasi. Tim Perantau Global akan menginformasikan biaya dan cara pembayarannya setelah kamu lolos screening.",
+    };
+  }
+
   if (program.is_free || !program.price || program.price <= 0) {
     return { ok: false, error: "Kelas ini tidak berbayar." };
   }

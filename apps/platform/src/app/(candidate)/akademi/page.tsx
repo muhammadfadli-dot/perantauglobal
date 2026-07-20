@@ -12,6 +12,7 @@ import {
   resumeTarget,
   psikotesStatus,
   hasPaidAccess,
+  isScreenedProgram,
 } from "@/lib/academy-db";
 import { PassportProgress } from "@/components/pg/academy/PassportProgress";
 import type { AcademyProgram, AcademyEnrollment } from "@perantauglobal/db";
@@ -122,7 +123,9 @@ function EnrolledCard({
     : courseDone || !resume
       ? `/akademi/${program.slug}`
       : `/akademi/${program.slug}/lesson/${resume.lessonId}`;
-  const ctaLabel = !paid
+  const ctaLabel = isScreenedProgram(program)
+    ? "Lihat status pendaftaran"
+    : !paid
     ? "Selesaikan pembayaran"
     : courseDone
       ? "Lihat sertifikat"

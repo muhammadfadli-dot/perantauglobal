@@ -94,9 +94,9 @@ export function LearningPortalDeep() {
               Bekal siap kerja, <span className="text-pg-gold-700">bukan janji manis.</span>
             </h2>
             <p className="text-[14px] md:text-[16px] text-pg-ink-700 leading-relaxed max-w-prose">
-              Sebelum berangkat, kamu bisa ikut Paspor Perantau Global — modul persiapan kerja per
-              negara. Bukan syarat apply, tapi kandidat yang ikut punya peluang 2× lebih besar
-              diterima employer di seleksi.
+              Sebelum berangkat, kamu bisa ikut pelatihan bersertifikat bersama Lembaga Vokasi
+              Universitas Indonesia, atau mulai dulu dari kelas gratis persiapan kerja. Bukan syarat
+              melamar, tapi bekal yang bikin kamu lebih siap waktu diseleksi employer.
             </p>
 
             <div className="flex flex-col gap-3 mt-2">

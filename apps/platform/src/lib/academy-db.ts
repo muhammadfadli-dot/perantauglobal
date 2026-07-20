@@ -278,6 +278,22 @@ export function hasPaidAccess(
   );
 }
 
+/**
+ * Screened programs (Sertifikat Perantau): paid, but delivered as classroom
+ * training rather than in-app lessons, and the fee is only quoted AFTER the
+ * candidate passes screening. Payment happens directly to the training partner,
+ * so this app must never invoice for them or ask the candidate to pay here.
+ *
+ * Everything downstream keys off this instead of `is_free` alone, because a
+ * screened program looks like a normal paid course to the old checks: it would
+ * otherwise show a "settle your payment" gate over zero lessons.
+ */
+export function isScreenedProgram(
+  program: Pick<AcademyProgram, "is_free" | "delivery_mode">,
+): boolean {
+  return !program.is_free && program.delivery_mode !== "in_app";
+}
+
 export function progressLabel(e: AcademyEnrollment | null): string {
   if (!e) return "Belum daftar";
   switch (e.status) {

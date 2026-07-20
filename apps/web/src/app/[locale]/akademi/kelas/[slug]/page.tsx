@@ -8,16 +8,11 @@ import {
   type AcademyRegField,
 } from "@/components/pg/akademi/AcademyRegisterForm";
 import { supabaseV2 } from "@/lib/supabase-v2";
+import type { ProgramContent } from "@/lib/academy";
 
 type RouteParams = { locale: string; slug: string };
 
 export const dynamic = "force-dynamic";
-
-interface ProgramContent {
-  intro?: string;
-  benefits?: string[];
-  doc_checklist?: { label: string; note?: string }[];
-}
 
 const MODE_LABEL: Record<string, string> = {
   in_app: "Belajar di aplikasi",
@@ -58,7 +53,7 @@ export async function generateMetadata({
   const result = await getProgram(slug);
   if (!result) return { title: "Kelas tidak ditemukan" };
   return {
-    title: `${result.program.title} — Akademi Perantau`,
+    title: `${result.program.title} - Akademi Perantau`,
     description: result.program.subtitle ?? "Daftar kelas persiapan kerja ke luar negeri.",
   };
 }
@@ -81,6 +76,10 @@ export default async function AcademyClassPage({
     : program.price
       ? `Rp${program.price.toLocaleString("id-ID")}`
       : "Berbayar";
+
+  // Classroom-delivered paid programs follow register -> screening -> pay.
+  // Their copy must not promise instant access to in-app lessons.
+  const isScreened = !program.is_free && program.delivery_mode !== "in_app";
 
   const regFields: AcademyRegField[] = result.fields.map((f) => ({
     field_key: f.field_key,
@@ -149,6 +148,89 @@ export default async function AcademyClassPage({
               </div>
             )}
 
+            {content.curriculum && content.curriculum.length > 0 && (
+              <div>
+                <h2 className="text-xl font-extrabold tracking-tight mb-3">Yang kamu pelajari</h2>
+                <div className="grid sm:grid-cols-2 gap-2.5">
+                  {content.curriculum.map((c) => (
+                    <div
+                      key={c.title}
+                      className="p-4 rounded-xl bg-pg-white border border-pg-ink-100"
+                    >
+                      <div className="text-[14px] font-bold text-pg-ink-900">{c.title}</div>
+                      {c.detail && (
+                        <div className="text-[13px] text-pg-ink-600 leading-relaxed mt-1">
+                          {c.detail}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {content.flow && content.flow.length > 0 && (
+              <div>
+                <h2 className="text-xl font-extrabold tracking-tight mb-3">
+                  Alur dari daftar sampai berangkat
+                </h2>
+                <ol className="flex flex-col gap-0 list-none p-0 m-0">
+                  {content.flow.map((step, i) => (
+                    <li key={step.title} className="flex gap-3.5 pb-4 last:pb-0">
+                      <div className="flex flex-col items-center shrink-0">
+                        <span
+                          className="grid place-items-center w-7 h-7 rounded-full font-mono text-[12px] font-bold"
+                          style={{
+                            background: "var(--pa-amber-100)",
+                            color: "var(--pa-amber-700)",
+                          }}
+                        >
+                          {i + 1}
+                        </span>
+                        {i < (content.flow?.length ?? 0) - 1 && (
+                          <span
+                            aria-hidden
+                            className="w-px flex-1 mt-1.5"
+                            style={{ background: "var(--pg-ink-200)" }}
+                          />
+                        )}
+                      </div>
+                      <div className="pt-0.5">
+                        <div className="text-[14.5px] font-bold text-pg-ink-900 leading-snug">
+                          {step.title}
+                        </div>
+                        {step.detail && (
+                          <p className="text-[13px] text-pg-ink-600 leading-relaxed m-0 mt-1">
+                            {step.detail}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
+
+            {content.fee_note && (
+              <div
+                className="rounded-xl p-4"
+                style={{
+                  background: "var(--pa-amber-50)",
+                  border: "1px solid var(--pa-amber-200)",
+                }}
+              >
+                <div className="flex items-center gap-2 text-[13px] font-extrabold text-pg-ink-900">
+                  <span style={{ color: "var(--pa-amber-700)" }}>
+                    <Icon name="wallet" size={16} />
+                  </span>
+                  Soal biaya
+                </div>
+                <p className="text-[13.5px] text-pg-ink-700 leading-relaxed m-0 mt-2">
+                  {content.fee_note}
+                </p>
+              </div>
+            )}
+
             {content.doc_checklist && content.doc_checklist.length > 0 && (
               <div>
                 <h2 className="text-xl font-extrabold tracking-tight mb-3">Siapin dokumen ini</h2>
@@ -175,9 +257,19 @@ export default async function AcademyClassPage({
               className="rounded-xl p-4 text-[13px] text-pg-ink-600 leading-relaxed"
               style={{ background: "var(--pa-amber-100)", border: "1px solid var(--pa-amber-200)" }}
             >
-              <b className="text-pg-ink-800">Cara kerjanya:</b> daftar di sini → cek email buat
-              verifikasi → akun Perantau Global kamu langsung aktif → buka tab Akademi buat mulai
-              kelasnya.
+              {isScreened ? (
+                <>
+                  <b className="text-pg-ink-800">Cara kerjanya:</b> daftar di sini, cek email buat
+                  verifikasi, lalu tim Perantau Global menghubungi kamu lewat WhatsApp untuk proses
+                  screening. Kamu tidak diminta membayar apa pun di tahap ini.
+                </>
+              ) : (
+                <>
+                  <b className="text-pg-ink-800">Cara kerjanya:</b> daftar di sini, cek email buat
+                  verifikasi, akun Perantau Global kamu langsung aktif, lalu buka tab Akademi buat
+                  mulai kelasnya.
+                </>
+              )}
             </div>
           </div>
 
@@ -188,6 +280,7 @@ export default async function AcademyClassPage({
               programTitle={program.title}
               fields={regFields}
               isFree={program.is_free}
+              isScreened={isScreened}
             />
           </div>
         </div>

@@ -100,6 +100,25 @@
   /* Cream — hero copy on red */
   --pg-cream: #f6efe0;
 
+  /* Akademi Perantau amber palette, mirrors apps/platform globals.css so the
+     learning surface looks identical across web and portal. The `--pa-amber-*`
+     aliases are the names the academy components actually reference; they were
+     already used by /akademi/kelas and AcademyRegisterForm but had never been
+     declared here, so those pages rendered with invalid (undefined) colors. */
+  --pg-amber-50: #fff7e8;
+  --pg-amber-100: #fcecc7;
+  --pg-amber-200: #f6d896;
+  --pg-amber-500: #c98a14;
+  --pg-amber-600: #a16d0c;
+  --pg-amber-700: #6e4906;
+
+  --pa-amber-50: var(--pg-amber-50);
+  --pa-amber-100: var(--pg-amber-100);
+  --pa-amber-200: var(--pg-amber-200);
+  --pa-amber-500: var(--pg-amber-500);
+  --pa-amber-600: var(--pg-amber-600);
+  --pa-amber-700: var(--pg-amber-700);
+
   /* Blue accent — SCOPED to the "campus" event hero (Travel.Work.Repeat).
      Not part of the global system; only used by the playful event LP. */
   --pg-blue-200: #b9d2ff;

@@ -155,8 +155,9 @@ export function WhatIs({ totalPositions, openCount, countryCount, countryNames, 
               </div>
             </div>
             <p className="text-[14px] md:text-[15px] text-pg-ink-700 leading-relaxed">
-              Paspor Perantau Global — psikotes &amp; modul fundamental per negara. Bukan syarat
-              apply, tapi kandidat yang ikut <b>2× lebih siap</b> diterima employer.
+              Pelatihan bersertifikat bersama Lembaga Vokasi UI, plus kelas gratis persiapan kerja
+              yang bisa kamu mulai sekarang. Bukan syarat melamar, tapi bekal yang bikin kamu lebih
+              siap waktu diseleksi employer.
             </p>
 
             <div
