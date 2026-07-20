@@ -302,6 +302,23 @@ export function AcademyRegisterForm({
             </>
           )}
         </Button>
+        {/* What happens next, kept next to the button rather than elsewhere on
+            the page: this is the moment the candidate is deciding, and it is
+            also where the "no payment yet" promise has to be visible. */}
+        <div
+          className="mt-3.5 px-3.5 py-3 rounded-[11px] text-[12.5px] leading-relaxed"
+          style={{
+            background: "var(--pa-amber-100)",
+            border: "1px solid var(--pa-amber-200)",
+            color: "var(--pa-amber-700)",
+          }}
+        >
+          <b className="text-pg-ink-900">Cara kerjanya:</b>{" "}
+          {isScreened
+            ? "daftar di sini, cek email buat verifikasi, lalu tim Perantau Global menghubungi kamu lewat WhatsApp untuk proses screening. Kamu tidak diminta membayar apa pun di tahap ini."
+            : "daftar di sini, cek email buat verifikasi, akun Perantau Global kamu langsung aktif, lalu buka tab Akademi buat mulai kelasnya."}
+        </div>
+
         <div className="text-[12px] text-pg-ink-500 mt-3 text-center">
           Sudah punya akun?{" "}
           <a href={`${APP_URL}/auth/sign-in`} className="font-bold no-underline" style={{ color: "var(--pa-amber-700)" }}>

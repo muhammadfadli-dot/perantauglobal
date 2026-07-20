@@ -74,13 +74,40 @@ export function freePrograms(all: AcademyProgram[]): AcademyProgram[] {
 }
 
 /**
+ * One shelf holding every program, alternating paid and free.
+ *
+ * Candidates do not shop by our internal taxonomy ("sertifikasi" vs
+ * "masterclass"); they scan for something they can start today. Splitting the
+ * catalog into a paid section and a free section buried the free classes below
+ * the fold and made the page read as a price list. Interleaving keeps a
+ * zero-cost entry point visible next to every paid one.
+ *
+ * Both groups keep their own sort_order, so editors still control ordering
+ * within a lane; only the weave is automatic. Uneven group sizes are fine, the
+ * longer group's remainder is appended.
+ */
+export function catalogPrograms(all: AcademyProgram[]): AcademyProgram[] {
+  const paid = certificationPrograms(all);
+  const free = freePrograms(all);
+  const woven: AcademyProgram[] = [];
+  for (let i = 0; i < Math.max(paid.length, free.length); i += 1) {
+    if (paid[i]) woven.push(paid[i]);
+    if (free[i]) woven.push(free[i]);
+  }
+  // Anything in neither lane (e.g. a paid in-app class) would otherwise vanish
+  // from the catalog entirely, so append it rather than silently dropping it.
+  const wovenSlugs = new Set(woven.map((p) => p.slug));
+  return [...woven, ...all.filter((p) => !wovenSlugs.has(p.slug))];
+}
+
+/**
  * Price label shown to candidates.
  *
  * A paid product with no price set renders as "Berbayar" on purpose: the fee
  * for the certification programs is set by the training partner and is only
  * communicated after screening, so the page must never invent a number.
  */
-export function priceLabel(program: AcademyProgram): string {
+export function priceLabel(program: Pick<AcademyProgram, "is_free" | "price">): string {
   if (program.is_free) return "Gratis";
   if (program.price) return `Rp${program.price.toLocaleString("id-ID")}`;
   return "Berbayar";

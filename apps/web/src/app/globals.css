@@ -140,6 +140,12 @@
   /* Paper-with-alpha for sticky/translucent surfaces */
   --pg-paper-blur: rgba(250,250,248,0.92);
 
+  /* Header pillar switch — the two-lane nav (Cari Kerja / Akademi). A warm
+     grey trough so the active lane's white card reads as raised against it;
+     plain ink-50 is too cool next to the cream surfaces it sits above. */
+  --pg-switch-bg: #f0efe9;
+  --pg-switch-border: #e4e2db;
+
   /* Ink */
   --pg-ink-900: #141414;
   --pg-ink-700: #2a2a2a;
@@ -240,6 +246,25 @@ article p {
 @keyframes pg-marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
+}
+
+/* Scroll shelves (Akademi catalog) drive their position with arrows and a
+ * progress bar, so the native scrollbar is redundant chrome under the cards.
+ * The container keeps real overflow scrolling, only the bar is hidden. */
+.pg-noscrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.pg-noscrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Snap lives in a class, not inline, so the arrow handler can switch it off
+ * for the duration of a programmatic scroll and restore it by clearing its
+ * inline override. Setting it inline instead would delete the value outright
+ * and the shelf would lose snapping after the first arrow click. */
+.pg-snap-x {
+  scroll-snap-type: x mandatory;
 }
 
 /* Respect reduced motion preferences */

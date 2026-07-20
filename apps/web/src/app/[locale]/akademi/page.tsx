@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
-import { Icon } from "@/components/pg/Icon";
+import { Icon, type IconName } from "@/components/pg/Icon";
 import { Section } from "@/components/pg/primitives";
 import { WhatsAppFab } from "@/components/pg/WhatsAppFab";
+import { AkademiCatalog, type CatalogCard } from "@/components/pg/akademi/AkademiCatalog";
+import { ProgramFlow } from "@/components/pg/akademi/ProgramFlow";
 import { waLink } from "@/lib/contact";
 import {
   fetchPublishedPrograms,
+  catalogPrograms,
   certificationPrograms,
   freePrograms,
   priceLabel,
-  countryLabel,
   type AcademyProgram,
   type ProgramFlowStep,
 } from "@/lib/academy";
@@ -36,8 +39,9 @@ export default async function AkademiPage({
   const all = await fetchPublishedPrograms();
   const certs = certificationPrograms(all);
   const free = freePrograms(all);
+  const cards = catalogPrograms(all).map((p) => toCard(p, p.slug === certs[0]?.slug));
 
-  // The registration flow is the same across certification products, so the
+  // The registration flow is identical across certification products, so the
   // page explains it once instead of repeating it on every card.
   const flow = certs.find((c) => (c.content.flow?.length ?? 0) > 0)?.content.flow ?? [];
   const feeNote = certs.find((c) => c.content.fee_note)?.content.fee_note;
@@ -46,11 +50,9 @@ export default async function AkademiPage({
     <>
       <main>
         <AkademiHero certCount={certs.length} freeCount={free.length} />
-
-        {certs.length > 0 && <CertSection programs={certs} />}
+        {cards.length > 0 && <CatalogSection cards={cards} />}
         {flow.length > 0 && <FlowSection flow={flow} feeNote={feeNote} />}
-        {free.length > 0 && <FreeSection programs={free} />}
-
+        <TrustSection />
         <FinalCta />
       </main>
       <WhatsAppFab />
@@ -58,246 +60,185 @@ export default async function AkademiPage({
   );
 }
 
+function toCard(program: AcademyProgram, featured: boolean): CatalogCard {
+  return {
+    slug: program.slug,
+    title: program.title,
+    value: program.subtitle ?? "",
+    price: priceLabel(program),
+    // A paid card answers "do I have to pay to find out?"; a free card has no
+    // such doubt to settle, so it spends the line on how long the class takes.
+    priceSub: program.is_free ? shortDuration(program.duration_label) : "Daftar dulu, gratis",
+    kindLabel: program.is_free ? "Gratis" : "Berbayar",
+    isFree: program.is_free,
+    cta: program.is_free ? "Mulai belajar" : "Lihat detail",
+    featured: featured && !program.is_free,
+    image: program.cover_image,
+    imageAlt: program.title,
+  };
+}
+
+/**
+ * Duration labels are written for the product page, where there is room for
+ * the full sentence ("Sekitar 45 menit, bisa dicicil per pelajaran"). In the
+ * card footer that wraps to three lines of mono type and crowds the CTA, so
+ * the card keeps only the headline duration.
+ */
+function shortDuration(label: string | null): string {
+  if (!label) return "Belajar di aplikasi";
+  return label.split(",")[0].trim();
+}
+
 /* ------------------------------------------------------------------ hero */
 
 function AkademiHero({ certCount, freeCount }: { certCount: number; freeCount: number }) {
   return (
-    <div
-      className="text-white"
-      style={{
-        background: "linear-gradient(135deg, var(--pa-amber-600) 0%, var(--pa-amber-700) 100%)",
-      }}
-    >
-      <div className="max-w-6xl mx-auto px-5 md:px-8 py-14 md:py-20">
-        <div
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded font-mono text-[11px] font-bold uppercase tracking-[0.1em]"
-          style={{ background: "rgba(255,255,255,0.18)" }}
-        >
-          Akademi Perantau
+    <div className="bg-pg-cream">
+      <div className="max-w-6xl mx-auto px-5 md:px-8 py-9 md:py-16 grid md:grid-cols-[1.05fr_.95fr] gap-6 md:gap-11 items-center">
+        <div>
+          <div className="font-mono text-[11px] md:text-[12px] font-bold uppercase tracking-[0.16em] text-pg-gold-700">
+            Akademi Perantau
+          </div>
+          <h1 className="text-[28px] md:text-[45px] font-extrabold tracking-[-0.02em] leading-[1.05] mt-3 max-w-[15ch] text-pg-ink-900">
+            Belajar dulu di sini, berangkat kerja lebih siap.
+          </h1>
+          <p className="text-[15px] md:text-[16px] font-medium leading-relaxed text-pg-ink-700 mt-4 max-w-[44ch]">
+            Pelatihan bersertifikat bersama Lembaga Vokasi UI, plus kelas gratis yang bisa kamu mulai
+            hari ini. Daftarnya gratis, semuanya.
+          </p>
+
+          <div className="flex flex-wrap gap-5 mt-6">
+            <HeroStat value={certCount} label={"program\nsertifikasi"} />
+            <span aria-hidden className="w-px self-stretch" style={{ background: "var(--pg-gold-border)" }} />
+            <HeroStat value={freeCount} label={"kelas\ngratis"} />
+            <span aria-hidden className="w-px self-stretch" style={{ background: "var(--pg-gold-border)" }} />
+            <div className="flex items-center">
+              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.04em] leading-tight text-pg-gold-700 whitespace-pre-line">
+                {"Jalur resmi\nP3MI"}
+              </span>
+            </div>
+          </div>
+
+          <div
+            className="inline-flex items-center gap-2 font-extrabold text-[13.5px] px-3.5 py-2.5 rounded-[11px] mt-5"
+            style={{ background: "var(--pg-ok-bg)", color: "var(--pg-ok)" }}
+          >
+            <Icon name="check" size={16} stroke={3} />
+            Semua pendaftaran gratis
+          </div>
         </div>
-        <h1 className="text-[30px] md:text-[52px] font-extrabold tracking-[-0.02em] leading-[1.06] mt-4 max-w-[19ch]">
-          Siapkan dirimu dulu, baru berangkat.
-        </h1>
-        <p className="text-[15px] md:text-[18px] opacity-90 mt-4 max-w-[58ch] leading-relaxed">
-          Pelatihan dan sertifikasi kompetensi bersama Lembaga Vokasi Universitas Indonesia, plus
-          kelas gratis yang bisa kamu mulai hari ini juga. Semua pendaftaran di sini gratis.
-        </p>
-        <div className="flex flex-wrap gap-2 mt-6">
-          <HeroChip>{certCount} program sertifikasi</HeroChip>
-          <HeroChip>{freeCount} kelas gratis</HeroChip>
-          <HeroChip>Jalur penempatan resmi P3MI</HeroChip>
+
+        <div
+          className="relative rounded-[18px] overflow-hidden border-[5px] border-pg-white bg-pg-ink-50"
+          style={{ aspectRatio: "4 / 3", boxShadow: "0 16px 40px rgba(20,20,20,0.12)" }}
+        >
+          <Image
+            src="/images/akademi/hero-akademi.jpg"
+            alt="Peserta pelatihan Akademi Perantau berlatih di ruang kelas vokasi"
+            fill
+            sizes="(max-width: 768px) 100vw, 520px"
+            className="object-cover"
+            priority
+          />
         </div>
       </div>
     </div>
   );
 }
 
-function HeroChip({ children }: { children: React.ReactNode }) {
+function HeroStat({ value, label }: { value: number; label: string }) {
   return (
-    <span
-      className="inline-flex items-center px-3 py-1.5 rounded-lg font-mono text-[12px] font-bold tracking-[0.02em]"
-      style={{ background: "rgba(255,255,255,0.2)" }}
-    >
-      {children}
-    </span>
+    <div>
+      <div className="font-mono text-[26px] md:text-[32px] font-bold leading-none" style={{ color: "var(--pa-amber-600)" }}>
+        {value}
+      </div>
+      <div className="text-[12px] font-semibold text-pg-ink-500 mt-1 whitespace-pre-line leading-tight">{label}</div>
+    </div>
   );
 }
 
-/* ----------------------------------------------------- certification cards */
+/* --------------------------------------------------------------- catalog */
 
-function CertSection({ programs }: { programs: AcademyProgram[] }) {
+function CatalogSection({ cards }: { cards: CatalogCard[] }) {
   return (
     <Section tone="paper" border="top">
-      <div className="flex flex-col gap-2 max-w-2xl mb-9">
-        <div className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-pg-gold-700">
-          Sertifikat Perantau
-        </div>
-        <h2 className="text-[24px] md:text-[38px] font-extrabold tracking-[-0.02em] leading-[1.1] text-pg-ink-900 m-0 text-balance">
-          Pelatihan bersertifikat, lalu jalur kerja ke luar negeri.
-        </h2>
-        <p className="text-[14px] md:text-[16px] font-medium leading-relaxed text-pg-ink-500 mt-2 max-w-[62ch]">
-          Program bersama Lembaga Vokasi Universitas Indonesia. Kamu dilatih sampai standar kerja
-          industri, diuji kompetensinya, lalu diarahkan ke lowongan Perantau Global lewat jalur
-          penempatan resmi.
-        </p>
+      <div className="font-mono text-[11px] md:text-[12px] font-bold uppercase tracking-[0.16em] text-pg-gold-700">
+        Kelas Akademi
       </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-        {programs.map((p, i) => (
-          <CertCard key={p.slug} program={p} highlight={i === 0} />
-        ))}
-      </div>
+      <h2 className="text-[24px] md:text-[34px] font-extrabold tracking-[-0.02em] leading-[1.1] text-pg-ink-900 mt-2 max-w-[20ch] text-balance">
+        Pilih kelas, mulai siapkan dirimu.
+      </h2>
+      <p className="text-[14px] md:text-[16px] font-medium leading-relaxed text-pg-ink-500 mt-2.5 max-w-[60ch]">
+        Semua kelas Akademi ada di sini, dari sertifikasi bersama Lembaga Vokasi UI sampai kelas
+        gratis yang bisa kamu mulai hari ini. Geser untuk lihat semua. Semua pendaftaran gratis.
+      </p>
+      <AkademiCatalog cards={cards} />
     </Section>
   );
 }
 
-function CertCard({ program, highlight }: { program: AcademyProgram; highlight: boolean }) {
-  const country = countryLabel(program.country);
-  const curriculum = program.content.curriculum ?? [];
-
-  return (
-    <div
-      className="flex flex-col gap-3.5 p-5 md:p-6 rounded-[20px] h-full"
-      style={{
-        background: "var(--pg-white)",
-        border: highlight
-          ? "1.5px solid var(--pa-amber-500)"
-          : "1px solid var(--pg-ink-200)",
-        boxShadow: "var(--shadow-pg-1)",
-      }}
-    >
-      <div className="flex items-center justify-between gap-2">
-        {country && (
-          <span className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold tracking-[0.04em] text-pg-ink-600">
-            <Icon name="location" size={13} />
-            {country}
-          </span>
-        )}
-        {highlight && (
-          <span
-            className="inline-flex items-center px-2.5 py-1 rounded-full font-mono text-[10px] font-bold uppercase tracking-[0.08em]"
-            style={{ background: "var(--pa-amber-100)", color: "var(--pa-amber-700)" }}
-          >
-            Dibuka duluan
-          </span>
-        )}
-      </div>
-
-      <h3 className="text-[19px] md:text-[21px] font-extrabold tracking-[-0.018em] text-pg-ink-900 m-0 leading-snug">
-        {program.title}
-      </h3>
-
-      {program.subtitle && (
-        <p className="text-[13.5px] text-pg-ink-600 leading-relaxed m-0">{program.subtitle}</p>
-      )}
-
-      {curriculum.length > 0 && (
-        <ul className="flex flex-col gap-1.5 list-none p-0 m-0 mt-0.5">
-          {curriculum.slice(0, 4).map((c) => (
-            <li key={c.title} className="flex items-start gap-2 text-[13px] text-pg-ink-700">
-              <span style={{ color: "var(--pa-amber-600)", marginTop: 2 }}>
-                <Icon name="check" size={13} stroke={3} />
-              </span>
-              {c.title}
-            </li>
-          ))}
-        </ul>
-      )}
-
-      <div
-        className="flex items-center justify-between gap-3 mt-auto pt-3.5"
-        style={{ borderTop: "1px dashed var(--pg-ink-200)" }}
-      >
-        <div className="flex flex-col">
-          <span className="text-[13.5px] font-bold text-pg-ink-900">{priceLabel(program)}</span>
-          <span className="font-mono text-[11px] text-pg-ink-500">Daftar dulu, gratis</span>
-        </div>
-        <Link
-          href={`/akademi/kelas/${program.slug}`}
-          className="inline-flex items-center gap-1.5 font-bold text-[13px] no-underline"
-          style={{ color: "var(--pa-amber-700)" }}
-        >
-          Lihat detail
-          <Icon name="arrow_right" size={14} stroke={2.4} />
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-/* --------------------------------------------------------------- the flow */
+/* ------------------------------------------------------------------ flow */
 
 function FlowSection({ flow, feeNote }: { flow: ProgramFlowStep[]; feeNote?: string }) {
   return (
     <Section tone="white" border="top">
-      <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(300px,380px)] gap-8 md:gap-12 items-start">
-        <div>
-          <div className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-pg-gold-700">
-            Alurnya
-          </div>
-          <h2 className="text-[22px] md:text-[32px] font-extrabold tracking-[-0.02em] leading-[1.12] text-pg-ink-900 m-0 mt-2 text-balance">
-            Dari daftar sampai berangkat kerja.
-          </h2>
+      <div className="font-mono text-[11px] md:text-[12px] font-bold uppercase tracking-[0.16em] text-pg-gold-700">
+        Alurnya
+      </div>
+      <h2 className="text-[24px] md:text-[34px] font-extrabold tracking-[-0.02em] leading-[1.1] text-pg-ink-900 mt-2 max-w-[20ch] text-balance">
+        Dari daftar sampai berangkat kerja.
+      </h2>
 
-          <ol className="flex flex-col gap-0 list-none p-0 m-0 mt-6">
-            {flow.map((step, i) => (
-              <li key={step.title} className="flex gap-4 pb-5 last:pb-0">
-                <div className="flex flex-col items-center shrink-0">
-                  <span
-                    className="grid place-items-center w-8 h-8 rounded-full font-mono text-[13px] font-bold"
-                    style={{ background: "var(--pa-amber-100)", color: "var(--pa-amber-700)" }}
-                  >
-                    {i + 1}
-                  </span>
-                  {i < flow.length - 1 && (
-                    <span
-                      aria-hidden
-                      className="w-px flex-1 mt-1.5"
-                      style={{ background: "var(--pg-ink-200)" }}
-                    />
-                  )}
-                </div>
-                <div className="pt-1">
-                  <div className="text-[15px] font-bold text-pg-ink-900 leading-snug">
-                    {step.title}
-                  </div>
-                  {step.detail && (
-                    <p className="text-[13.5px] text-pg-ink-600 leading-relaxed m-0 mt-1">
-                      {step.detail}
-                    </p>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
+      <div className="grid md:grid-cols-[1fr_340px] gap-6 md:gap-9 items-start mt-6">
+        <ProgramFlow flow={flow} />
 
-        <div className="md:sticky md:top-6 flex flex-col gap-4">
+        <div className="flex flex-col gap-3.5 md:sticky md:top-24">
           <div
-            className="rounded-2xl p-5"
+            className="rounded-2xl p-[18px]"
             style={{ background: "var(--pa-amber-50)", border: "1px solid var(--pa-amber-200)" }}
           >
-            <div className="flex items-center gap-2 text-[13px] font-extrabold text-pg-ink-900">
+            <div className="flex items-center gap-2 text-[13.5px] font-extrabold text-pg-ink-900">
               <span style={{ color: "var(--pa-amber-700)" }}>
-                <Icon name="wallet" size={17} />
+                <Icon name="wallet" size={18} />
               </span>
               Soal biaya, biar jelas dari awal
             </div>
-            <p className="text-[13.5px] text-pg-ink-700 leading-relaxed m-0 mt-2.5">
-              Mendaftar di halaman ini <b className="text-pg-ink-900">gratis</b>. Biaya program baru
-              kami informasikan setelah kamu lolos screening, jadi kamu tidak diminta membayar apa
-              pun sebelum tahu kamu cocok.
-            </p>
+            <div className="flex flex-col gap-2 mt-3">
+              <FeePoint>
+                Mendaftar di halaman ini <b className="text-pg-ink-900">gratis</b>.
+              </FeePoint>
+              <FeePoint>Biaya program baru dibahas setelah kamu lolos screening.</FeePoint>
+              <FeePoint>Pembayaran langsung ke lembaga pelatihan, bukan ke Perantau Global.</FeePoint>
+            </div>
             {feeNote && (
-              <p className="text-[13px] text-pg-ink-600 leading-relaxed m-0 mt-3 pt-3" style={{ borderTop: "1px dashed var(--pa-amber-200)" }}>
+              <p
+                className="text-[12px] leading-relaxed mt-3 pt-3 m-0"
+                style={{ color: "var(--pa-amber-700)", borderTop: "1px dashed var(--pg-gold-border)" }}
+              >
                 {feeNote}
               </p>
             )}
           </div>
 
-          <div
-            className="rounded-2xl p-5"
-            style={{ background: "var(--pg-ink-50)", border: "1px solid var(--pg-ink-200)" }}
-          >
-            <div className="flex items-center gap-2 text-[13px] font-extrabold text-pg-ink-900">
-              <span style={{ color: "var(--pg-ink-500)" }}>
-                <Icon name="shield" size={17} />
+          <div className="rounded-2xl p-[18px] bg-pg-ink-50 border border-pg-ink-200">
+            <div className="flex items-center gap-2 text-[13.5px] font-extrabold text-pg-ink-900">
+              <span className="text-pg-ink-500">
+                <Icon name="shield" size={18} />
               </span>
               Masih ragu?
             </div>
-            <p className="text-[13.5px] text-pg-ink-700 leading-relaxed m-0 mt-2.5">
-              Tanya dulu ke tim kami sebelum daftar. Konsultasinya gratis dan tidak ada kewajiban
-              apa pun.
+            <p className="text-[12.5px] leading-relaxed text-pg-ink-500 mt-2 m-0">
+              Tanya dulu ke tim kami sebelum daftar. Konsultasinya gratis dan tidak ada kewajiban apa
+              pun.
             </p>
             <a
               href={waLink("Halo Perantau Global, saya mau tanya soal program Sertifikat Perantau.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 font-bold text-[13px] no-underline mt-3"
-              style={{ color: "var(--pa-amber-700)" }}
+              className="inline-flex items-center justify-center gap-2 font-extrabold text-[14px] px-4 py-3 rounded-xl no-underline text-white mt-3.5 bg-pg-wa hover:opacity-90 transition-opacity"
             >
+              <Icon name="phone" size={16} />
               Konsultasi via WhatsApp
-              <Icon name="arrow_right" size={14} stroke={2.4} />
             </a>
           </div>
         </div>
@@ -306,111 +247,116 @@ function FlowSection({ flow, feeNote }: { flow: ProgramFlowStep[]; feeNote?: str
   );
 }
 
-/* ------------------------------------------------------------ free classes */
-
-function FreeSection({ programs }: { programs: AcademyProgram[] }) {
+function FeePoint({ children }: { children: React.ReactNode }) {
   return (
-    <Section tone="paper" border="top">
-      <div className="flex flex-col gap-2 max-w-2xl mb-9">
-        <div className="font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-pg-gold-700">
-          Belajar gratis
-        </div>
-        <h2 className="text-[24px] md:text-[38px] font-extrabold tracking-[-0.02em] leading-[1.1] text-pg-ink-900 m-0 text-balance">
-          Mulai sekarang, tanpa bayar apa pun.
-        </h2>
-        <p className="text-[14px] md:text-[16px] font-medium leading-relaxed text-pg-ink-500 mt-2 max-w-[62ch]">
-          Kelas singkat yang bisa kamu selesaikan sambil menunggu proses lamaranmu berjalan. Cukup
-          daftar, lalu belajar lewat aplikasi kapan saja.
-        </p>
-      </div>
+    <span className="flex gap-2 text-[12.5px] leading-relaxed text-pg-ink-700">
+      <span className="flex-none mt-0.5" style={{ color: "var(--pg-ok)" }}>
+        <Icon name="check" size={14} stroke={3} />
+      </span>
+      <span>{children}</span>
+    </span>
+  );
+}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
-        {programs.map((p) => (
-          <FreeCard key={p.slug} program={p} />
-        ))}
+/* ----------------------------------------------------------------- trust */
+
+function TrustSection() {
+  return (
+    <Section className="bg-pg-cream" border="top">
+      <div className="font-mono text-[11px] md:text-[12px] font-bold uppercase tracking-[0.16em] text-pg-gold-700">
+        Kenapa ini resmi
+      </div>
+      <h2 className="text-[24px] md:text-[34px] font-extrabold tracking-[-0.02em] leading-[1.1] text-pg-ink-900 mt-2 max-w-[22ch] text-balance">
+        Lembaga resmi, jalur resmi, biaya yang jujur.
+      </h2>
+
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5 mt-5">
+        {/* The partner's own logo is deliberately not shown yet: the DayaSkill
+            catalog and the file we were sent name different certifying bodies,
+            and the wrong seal on a page selling certification is not a small
+            mistake. The named institution carries the credibility until that
+            is confirmed. */}
+        <TrustCard
+          title="Lembaga Vokasi Universitas Indonesia"
+          body="Mitra pelatihan dan sertifikasi kompetensi untuk semua program Sertifikat Perantau."
+          icon="star"
+          tone="gold"
+        />
+        <TrustCard
+          title="Jalur penempatan resmi P3MI"
+          body="Penempatan kerja lewat izin resmi Kemnaker, bukan calo. Kamu diarahkan ke lowongan Perantau Global."
+          icon="shield"
+          tone="amber"
+        />
+        <TrustCard
+          title="Bayar ke lembaga pelatihan"
+          body="Perantau Global tidak menarik biaya penempatan dari kandidat. Yang berbayar hanya pelatihan dan sertifikasinya."
+          icon="check"
+          tone="ok"
+        />
       </div>
     </Section>
   );
 }
 
-function FreeCard({ program }: { program: AcademyProgram }) {
+const TRUST_TONES = {
+  gold: { background: "var(--pg-gold-100)", color: "var(--pg-gold-700)" },
+  amber: { background: "var(--pa-amber-50)", color: "var(--pa-amber-600)" },
+  ok: { background: "var(--pg-ok-bg)", color: "var(--pg-ok)" },
+} as const;
+
+function TrustCard({
+  title,
+  body,
+  icon,
+  tone,
+}: {
+  title: string;
+  body: string;
+  icon: IconName;
+  tone: keyof typeof TRUST_TONES;
+}) {
   return (
-    <Link
-      href={`/akademi/kelas/${program.slug}`}
-      className="flex flex-col gap-3 p-5 md:p-6 rounded-[20px] h-full no-underline"
-      style={{
-        background: "var(--pg-white)",
-        border: "1px solid var(--pg-ink-200)",
-        boxShadow: "var(--shadow-pg-1)",
-      }}
-    >
-      <span
-        className="inline-flex items-center self-start px-2.5 py-1 rounded-full font-mono text-[10px] font-bold uppercase tracking-[0.08em]"
-        style={{ background: "var(--pg-ok-bg)", color: "var(--pg-ok)" }}
-      >
-        Gratis
-      </span>
-
-      <h3 className="text-[18px] md:text-[20px] font-extrabold tracking-[-0.018em] text-pg-ink-900 m-0 leading-snug">
-        {program.title}
-      </h3>
-
-      {program.subtitle && (
-        <p className="text-[13.5px] text-pg-ink-600 leading-relaxed m-0">{program.subtitle}</p>
-      )}
-
-      <div className="flex items-center gap-3 mt-auto pt-3 text-[12.5px] text-pg-ink-500">
-        {program.duration_label && (
-          <span className="inline-flex items-center gap-1.5">
-            <Icon name="clock" size={13} />
-            {program.duration_label}
-          </span>
-        )}
+    <div className="bg-pg-white rounded-2xl p-5" style={{ border: "1px solid var(--pg-switch-border)" }}>
+      <div className="w-11 h-11 rounded-[9px] grid place-items-center" style={TRUST_TONES[tone]}>
+        <Icon name={icon} size={22} />
       </div>
-
-      <span
-        className="inline-flex items-center gap-1.5 font-bold text-[13px]"
-        style={{ color: "var(--pa-amber-700)" }}
-      >
-        Mulai belajar
-        <Icon name="arrow_right" size={14} stroke={2.4} />
-      </span>
-    </Link>
+      <h3 className="text-[15px] font-extrabold text-pg-ink-900 mt-3 leading-tight m-0">{title}</h3>
+      <p className="text-[12.5px] leading-relaxed text-pg-ink-500 mt-1.5 m-0">{body}</p>
+    </div>
   );
 }
 
-/* ------------------------------------------------------------- final block */
+/* ------------------------------------------------------------- final cta */
 
 function FinalCta() {
   return (
     <Section tone="white" border="top">
-      <div className="max-w-[52ch]">
-        <h2 className="text-[22px] md:text-[32px] font-extrabold tracking-[-0.02em] leading-[1.12] text-pg-ink-900 m-0 text-balance">
+      <div className="max-w-[640px] mx-auto text-center">
+        <h2 className="text-[24px] md:text-[34px] font-extrabold tracking-[-0.02em] leading-[1.1] text-pg-ink-900 m-0 text-balance">
           Belum yakin mau ambil yang mana?
         </h2>
-        <p className="text-[14.5px] md:text-[16px] text-pg-ink-600 leading-relaxed mt-3">
+        <p className="text-[14.5px] md:text-[16px] text-pg-ink-500 leading-relaxed mt-3.5 max-w-[52ch] mx-auto">
           Ceritakan dulu rencana kerjamu ke tim Perantau Global. Kami bantu memilih jalur yang paling
           masuk akal buat kondisimu sekarang, termasuk kalau ternyata kamu lebih cocok langsung
           melamar lowongan.
         </p>
-        <div className="flex flex-wrap gap-3 mt-6">
+        <div className="flex flex-wrap gap-3 justify-center mt-6">
           <a
             href={waLink("Halo Perantau Global, saya mau tanya soal Akademi Perantau.")}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-[14px] no-underline text-white"
-            style={{ background: "var(--pa-amber-600)" }}
+            className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl font-extrabold text-[14px] no-underline text-white bg-pg-wa hover:opacity-90 transition-opacity"
           >
+            <Icon name="phone" size={17} />
             Konsultasi gratis via WhatsApp
-            <Icon name="arrow_right" size={16} stroke={2.4} />
           </a>
           <Link
             href="/lowongan"
-            className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-[14px] no-underline text-pg-ink-900"
-            style={{ background: "var(--pg-white)", border: "1.5px solid var(--pg-ink-200)" }}
+            className="inline-flex items-center gap-2 px-5 py-3.5 rounded-xl font-extrabold text-[14px] no-underline text-pg-ink-900 bg-pg-white border-[1.5px] border-pg-ink-200 hover:bg-pg-ink-50 transition-colors"
           >
             Lihat lowongan dulu
-            <Icon name="arrow_right" size={16} stroke={2.4} />
+            <Icon name="arrow_right" size={16} stroke={2.2} />
           </Link>
         </div>
       </div>
