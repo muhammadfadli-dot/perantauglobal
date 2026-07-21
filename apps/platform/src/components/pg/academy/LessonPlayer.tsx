@@ -219,7 +219,214 @@ function CardMedia({ media }: { media: LessonMedia | null }) {
   );
 }
 
+/**
+ * Pecah satu butir jadi judul + penjelasan.
+ *
+ * Konten yang sudah ada menulis butir langkah sebagai "Judul singkat. Lalu
+ * penjelasannya." Memisahkannya di sini berarti diagram bisa punya hierarki
+ * tanpa menulis ulang satu pun kalimat di database. Kalau tidak ketemu pola
+ * itu, seluruh teks jadi judul dan penjelasannya kosong, jadi tidak pernah
+ * merusak butir yang ditulis dengan gaya lain.
+ */
+function splitLead(item: string): { lead: string; rest: string } {
+  // [\s\S] dipakai sebagai ganti flag `s`, yang tidak tersedia di target build.
+  const m = item.match(/^([\s\S]{3,70}?[.:])\s+([\s\S]+)$/);
+  if (!m) return { lead: item, rest: "" };
+  return { lead: m[1].replace(/[.:]$/, ""), rest: m[2] };
+}
+
+/** Daftar tanda bahaya bernomor. Merah, dibaca sekali pandang. */
+function DangerList({ block }: { block: ReadingBlock }) {
+  const items = block.items ?? [];
+  return (
+    <div
+      className="rounded-[14px] p-4"
+      style={{ background: "var(--pg-err-bg)", border: "1px solid #f7c9cd" }}
+    >
+      <div
+        className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.08em] mb-3"
+        style={{ color: "var(--pg-err)" }}
+      >
+        <Icon name="warn" size={13} />
+        {block.title ?? `${items.length} tanda bahaya`}
+      </div>
+      <ul className="list-none p-0 m-0">
+        {items.map((it, i) => (
+          <li
+            key={i}
+            className="flex gap-2.5 items-start py-2.5"
+            style={i > 0 ? { borderTop: "1px dashed #f0b9be" } : undefined}
+          >
+            <span
+              className="grid place-items-center w-5 h-5 rounded-full shrink-0 mt-px font-mono text-[10px] font-bold text-white"
+              style={{ background: "var(--pg-err)" }}
+            >
+              {i + 1}
+            </span>
+            <span className="text-[13.5px] font-semibold leading-snug" style={{ color: "#7a1418" }}>
+              {it}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Rel langkah bertahap: bulatan tersambung garis, judul tebal + penjelasan. */
+function StepRail({ block }: { block: ReadingBlock }) {
+  const items = block.items ?? [];
+  return (
+    <div
+      className="rounded-[14px] p-4"
+      style={{ background: "var(--pg-white)", border: "1px solid var(--pg-ink-100)" }}
+    >
+      {block.title && (
+        <div className="text-[14px] font-extrabold text-pg-ink-900 mb-3">{block.title}</div>
+      )}
+      <ol className="list-none p-0 m-0">
+        {items.map((it, i) => {
+          const { lead, rest } = splitLead(it);
+          const last = i === items.length - 1;
+          return (
+            <li key={i} className="flex gap-3">
+              <div className="flex flex-col items-center shrink-0">
+                <span
+                  className="grid place-items-center w-[30px] h-[30px] rounded-full font-mono text-[12px] font-bold"
+                  style={{ background: "var(--pa-amber-100)", color: "var(--pa-amber-700)" }}
+                >
+                  {i + 1}
+                </span>
+                {!last && <span aria-hidden className="w-0.5 flex-1 my-1 bg-pg-ink-100" />}
+              </div>
+              <div className={last ? "" : "pb-3.5"}>
+                <div className="text-[14px] font-extrabold text-pg-ink-900 leading-snug">{lead}</div>
+                {rest && (
+                  <p className="text-[13px] text-pg-ink-500 leading-relaxed m-0 mt-1">{rest}</p>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </div>
+  );
+}
+
+/** Kartu checklist: kotak centang kosong, terasa bisa dikerjakan satu per satu. */
+function CheckList({ block }: { block: ReadingBlock }) {
+  const items = block.items ?? [];
+  return (
+    <div
+      className="rounded-[14px] p-4"
+      style={{ background: "var(--pa-amber-50)", border: "1px solid var(--pa-amber-200)" }}
+    >
+      <div
+        className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.08em] mb-3"
+        style={{ color: "var(--pa-amber-700)" }}
+      >
+        <Icon name="doc_check" size={13} />
+        {block.title ?? "Checklist"}
+      </div>
+      <ul className="list-none p-0 m-0 flex flex-col gap-2.5">
+        {items.map((it, i) => (
+          <li key={i} className="flex gap-2.5 items-start">
+            <span
+              aria-hidden
+              className="w-[17px] h-[17px] rounded-[5px] shrink-0 mt-px"
+              style={{ border: "1.5px solid var(--pa-amber-500)", background: "var(--pg-white)" }}
+            />
+            <span className="text-[14px] text-pg-ink-700 leading-relaxed">{it}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Perbandingan dua kolom: yang resmi lawan yang bukan. */
+function CompareTwo({ block }: { block: ReadingBlock }) {
+  const cols = block.columns ?? [];
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+      {cols.map((col, ci) => {
+        const bad = col.tone === "bad";
+        return (
+          <div
+            key={ci}
+            className="rounded-[14px] p-3.5"
+            style={{
+              background: bad ? "var(--pg-err-bg)" : "var(--pg-ok-bg)",
+              border: `1px solid ${bad ? "#f7c9cd" : "#bfe3ce"}`,
+            }}
+          >
+            <div
+              className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.08em] mb-2.5"
+              style={{ color: bad ? "var(--pg-err)" : "var(--pg-ok)" }}
+            >
+              <Icon name={bad ? "x" : "check"} size={12} stroke={3} />
+              {col.title}
+            </div>
+            <ul className="list-none p-0 m-0 flex flex-col gap-2">
+              {col.items.map((it, i) => (
+                <li
+                  key={i}
+                  className="text-[13px] leading-snug"
+                  style={{ color: bad ? "#7a1418" : "#0b5132" }}
+                >
+                  {it}
+                </li>
+              ))}
+            </ul>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/** Gelembung percakapan, supaya contoh dialog terbaca sebagai dialog. */
+function DialogBubble({ block }: { block: ReadingBlock }) {
+  const mine = block.side === "you";
+  return (
+    <div className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
+      {block.speaker && (
+        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.06em] text-pg-ink-400 mb-1 px-1">
+          {block.speaker}
+        </span>
+      )}
+      <div
+        className="max-w-[88%] px-3.5 py-2.5 text-[14px] leading-relaxed"
+        style={
+          mine
+            ? {
+                background: "var(--pa-amber-600)",
+                color: "var(--pg-white)",
+                borderRadius: "14px 14px 4px 14px",
+              }
+            : {
+                background: "var(--pg-ink-50)",
+                color: "var(--pg-ink-800)",
+                borderRadius: "14px 14px 14px 4px",
+              }
+        }
+      >
+        {block.text}
+      </div>
+    </div>
+  );
+}
+
 function ReadingBlockView({ block }: { block: ReadingBlock }) {
+  // Perlakuan diagram dipilih lewat `variant` di atas tipe blok yang sudah ada,
+  // jadi data yang sama bisa tampil sebagai diagram tanpa diubah isinya.
+  if (block.type === "compare") return <CompareTwo block={block} />;
+  if (block.variant === "danger" && (block.type === "steps" || block.type === "list"))
+    return <DangerList block={block} />;
+  if (block.variant === "rail" && block.type === "steps") return <StepRail block={block} />;
+  if (block.variant === "check" && block.type === "list") return <CheckList block={block} />;
+  if (block.variant === "dialog" && block.type === "quote") return <DialogBubble block={block} />;
+
   switch (block.type) {
     case "heading":
       return (

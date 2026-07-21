@@ -35,14 +35,41 @@ export interface LessonMedia {
   alt?: string;
   audio_url?: string;
 }
+/** Satu kolom pada blok `compare` (mis. jalur resmi lawan jalur yang bukan). */
+export interface CompareColumn {
+  title: string;
+  items: string[];
+  /** `ok` hijau bercentang, `bad` merah bersilang. Default `ok`. */
+  tone?: "ok" | "bad";
+}
+
 export interface ReadingBlock {
-  type: "heading" | "paragraph" | "list" | "callout" | "steps" | "stat" | "quote";
+  type: "heading" | "paragraph" | "list" | "callout" | "steps" | "stat" | "quote" | "compare";
   text?: string;
   items?: string[];
-  /** callout: tone */
-  variant?: "tip" | "info" | "warn";
+  /**
+   * callout: nada (tip/info/warn).
+   *
+   * Selain itu ini juga memilih perlakuan DIAGRAM untuk data yang sudah ada,
+   * tanpa perlu menulis ulang isinya:
+   *   danger  pada steps/list  -> daftar tanda bahaya bernomor merah
+   *   rail    pada steps       -> rel langkah bertahap
+   *   check   pada list        -> kartu checklist
+   *   dialog  pada quote       -> gelembung percakapan
+   *
+   * Kenapa diagram dirender dari data dan bukan digenerate jadi gambar:
+   * tulisannya dijamin benar (model gambar terbukti mengarang huruf), bisa
+   * diedit tanpa membuat ulang aset, terbaca pembaca layar, dan jauh lebih
+   * ringan untuk audiens yang kuotanya terbatas.
+   */
+  variant?: "tip" | "info" | "warn" | "danger" | "rail" | "check" | "dialog";
   /** callout / stat: optional bold title or label */
   title?: string;
+  /** compare: dua kolom berdampingan. */
+  columns?: CompareColumn[];
+  /** quote + variant dialog: siapa yang bicara, dan di sisi mana. */
+  speaker?: string;
+  side?: "them" | "you";
   /** stat: the big figure + caption */
   value?: string;
   label?: string;
