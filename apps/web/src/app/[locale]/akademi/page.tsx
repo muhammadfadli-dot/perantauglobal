@@ -134,7 +134,7 @@ function AkademiHero({ certCount, freeCount }: { certCount: number; freeCount: n
         >
           <Image
             src="/images/akademi/hero-akademi.jpg"
-            alt="Peserta pelatihan Akademi Perantau berlatih di ruang kelas vokasi"
+            alt="Empat lulusan Akademi Perantau berdiri berjajar dengan seragam kerja masing-masing, menatap ke depan"
             fill
             sizes="(max-width: 768px) 100vw, 520px"
             className="object-cover"
