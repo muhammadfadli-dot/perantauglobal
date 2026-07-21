@@ -39,6 +39,83 @@ async function lookupPublishedProgram(
   return data ?? null;
 }
 
+interface RegistrationField {
+  field_key: string;
+  field_label: string;
+  field_type: string;
+  required: boolean;
+  options: { value?: string; label?: string }[] | null;
+}
+
+async function lookupRegistrationFields(
+  slug: string,
+): Promise<RegistrationField[]> {
+  const { data, error } = await supabaseV2()
+    .from("program_registration_fields")
+    .select("field_key, field_label, field_type, required, options")
+    .eq("program_slug", slug)
+    .order("sort_order", { ascending: true });
+  if (error) {
+    console.error("[akademi] registration fields lookup failed:", error.message);
+    return [];
+  }
+  return (data ?? []) as RegistrationField[];
+}
+
+/**
+ * Screening contract. `sanitizeAnswers` only bounds types and lengths; it has no
+ * idea which fields the program actually declares. Without this second pass a
+ * POST straight to the endpoint produced a valid certification enrollment with
+ * ZERO screening answers, and radio/select values were never matched against
+ * their own option list. Audit 2026-07-21, finding K1.
+ *
+ * Returns the whitelisted answer set, or an error message for the registrant.
+ */
+function validateAnswers(
+  fields: RegistrationField[],
+  raw: Record<string, string | string[]>,
+): { ok: true; answers: Record<string, string | string[]> } | { ok: false; error: string } {
+  if (fields.length === 0) return { ok: true, answers: {} };
+
+  const answers: Record<string, string | string[]> = {};
+
+  for (const field of fields) {
+    const value = raw[field.field_key];
+    const missing =
+      value === undefined ||
+      (typeof value === "string" && value.trim().length === 0) ||
+      (Array.isArray(value) && value.length === 0);
+
+    if (missing) {
+      if (field.required) {
+        return { ok: false, error: `Pertanyaan "${field.field_label}" wajib diisi.` };
+      }
+      continue;
+    }
+
+    // Choice fields must resolve to an option the program actually offers.
+    const allowed = (field.options ?? [])
+      .map((o) => o?.value)
+      .filter((v): v is string => typeof v === "string" && v.length > 0);
+
+    if (allowed.length > 0) {
+      const picked = Array.isArray(value) ? value : [value];
+      const bad = picked.filter((v) => !allowed.includes(v));
+      if (bad.length > 0) {
+        return {
+          ok: false,
+          error: `Jawaban untuk "${field.field_label}" tidak valid.`,
+        };
+      }
+    }
+
+    answers[field.field_key] = value;
+  }
+
+  // Anything the program does not declare is dropped, not stored.
+  return { ok: true, answers };
+}
+
 interface AcademyRegisterPayload {
   full_name: string;
   whatsapp: string;
@@ -146,7 +223,48 @@ export async function POST(
       );
     }
 
+    // Screening answers are validated against what the program actually
+    // declares, not just shape-checked. See validateAnswers (finding K1).
+    const fields = await lookupRegistrationFields(slug);
+    const validated = validateAnswers(fields, sanitizeAnswers(body.answers));
+    if (!validated.ok) {
+      return NextResponse.json({ error: validated.error }, { status: 400 });
+    }
+
     const email = body.email.toLowerCase().trim();
+
+    const clientIp =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      null;
+
+    // Rate limit. This endpoint writes pending_submissions + consents BEFORE
+    // signUp, and every call triggers a Supabase Auth verification email, so an
+    // unthrottled loop both bloats those tables and burns the auth email quota
+    // shared with the job-application flow. Reuses check_apply_rate_limit, which
+    // already counts pending_submissions by email and IP regardless of intent.
+    // Audit 2026-07-21, finding K2.
+    try {
+      // supabase-js swallows a throw here (fail-open), so bind the call the same
+      // way the lowongan route does or the limit silently never runs.
+      const rlDb = supabaseV2();
+      const rpc = rlDb.rpc.bind(rlDb) as unknown as (
+        fn: string,
+        args: Record<string, unknown>,
+      ) => Promise<{ data: boolean | null; error: { message: string } | null }>;
+      const { data: underLimit, error: rlErr } = await rpc(
+        "check_apply_rate_limit",
+        { p_email: email, p_ip: clientIp },
+      );
+      if (!rlErr && underLimit === false) {
+        return NextResponse.json(
+          { error: "Terlalu banyak percobaan. Coba lagi dalam beberapa menit." },
+          { status: 429 },
+        );
+      }
+    } catch {
+      // ignore - fail open
+    }
 
     // Step 1: stage the academy pending. Trigger materializes the enrollment on
     // email_confirmed_at flip.
@@ -166,7 +284,7 @@ export async function POST(
           education: body.education ?? null,
           program_slug: slug,
           source_url: body.source_url ?? null,
-          answers: sanitizeAnswers(body.answers),
+          answers: validated.answers,
         },
         consents: [
           {
