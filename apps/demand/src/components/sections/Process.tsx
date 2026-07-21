@@ -95,10 +95,13 @@ export function Process() {
             </div>
           </div>
           <div className="g-proc" style={{ marginTop: 8 }}>
-            {STEPS.map((s) => (
+            {STEPS.map((s, i) => (
               <div key={s.title} style={{ textAlign: "center", padding: "0 8px" }}>
-                <div style={{ fontSize: 14.5, fontWeight: 700, color: "#20301F", marginBottom: 6 }}>{s.title}</div>
-                <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.55, color: "#6E6752" }}>{s.body}</p>
+                {/* the numbered flight path above carries the sequence on desktop;
+                    on a phone that track is hidden, so each step numbers itself */}
+                <span className="procnum" aria-hidden>{NODES[i].n}</span>
+                <div className="procttl" style={{ fontSize: 14.5, fontWeight: 700, color: "#20301F", marginBottom: 6 }}>{s.title}</div>
+                <p className="procbody" style={{ margin: 0, fontSize: 12.5, lineHeight: 1.55, color: "#6E6752" }}>{s.body}</p>
               </div>
             ))}
           </div>

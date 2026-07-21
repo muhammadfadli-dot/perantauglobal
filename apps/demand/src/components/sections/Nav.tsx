@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { LogoMark } from "@/components/LogoMark";
+import { MobileMenu } from "@/components/MobileMenu";
 
 const NAV_LINKS = [
   { href: "#why", label: "Why DTG" },
@@ -73,6 +74,7 @@ export function Nav() {
         >
           Request Talent
         </a>
+        <MobileMenu dark={solid} />
       </div>
     </nav>
   );

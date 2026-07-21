@@ -242,7 +242,7 @@ export function Contact() {
                     aria-invalid={consentError}
                     style={{ marginTop: 3, width: 15, height: 15, flex: "none", accentColor: "#A8452F" }}
                   />
-                  <span style={{ fontSize: 12.5, lineHeight: 1.55, color: "#6E6752" }}>
+                  <span className="consent-label" style={{ fontSize: 12.5, lineHeight: 1.55, color: "#6E6752" }}>
                     {INQUIRY_CONSENT_TEXT}
                   </span>
                 </label>
@@ -267,7 +267,7 @@ export function Contact() {
 
               <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 22, flexWrap: "wrap" }}>
                 <button type="submit" className="btn-terra" style={{ flex: "none", background: "#A8452F", color: "#F3EEE1", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 700, padding: "15px 34px", borderRadius: 8, transition: "background .15s, transform .15s", boxShadow: "0 12px 26px rgba(168,69,47,.26)" }}>Send Inquiry</button>
-                <span style={{ fontSize: 12, lineHeight: 1.5, color: "#6E6752", maxWidth: 240 }}>We open WhatsApp with your details so our BD team can reply within one business day.</span>
+                <span className="form-help" style={{ fontSize: 12, lineHeight: 1.5, color: "#6E6752", maxWidth: 240 }}>We open WhatsApp with your details so our BD team can reply within one business day.</span>
               </div>
             </form>
           ) : (

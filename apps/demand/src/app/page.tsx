@@ -10,6 +10,7 @@ import { Credentials } from "@/components/sections/Credentials";
 import { Faq } from "@/components/sections/Faq";
 import { Contact } from "@/components/sections/Contact";
 import { Footer } from "@/components/sections/Footer";
+import { StickyCta } from "@/components/StickyCta";
 
 export default function HomePage() {
   return (
@@ -28,6 +29,7 @@ export default function HomePage() {
         <Contact />
       </main>
       <Footer />
+      <StickyCta />
     </>
   );
 }

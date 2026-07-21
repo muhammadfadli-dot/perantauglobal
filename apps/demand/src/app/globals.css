@@ -921,3 +921,468 @@ textarea::placeholder {
     animation: none !important;
   }
 }
+
+/* ==========================================================================
+   MOBILE LAYER
+   The desktop design is signed off and stays untouched. Everything below only
+   applies at phone widths, where the desktop layout was simply stacking: the
+   page ran 17.7 screens, nav links were hidden with nothing replacing them,
+   the hero headline broke to six lines, and 44 text elements sat under 14.5px.
+   Inline styles win on specificity, so overrides here need !important.
+   ========================================================================== */
+
+/* --- hero art direction: portrait crop on phones only --- */
+.hero-img-tall {
+  display: none;
+}
+@media (max-width: 780px) {
+  .hero-img-wide {
+    display: none;
+  }
+  .hero-img-tall {
+    display: block;
+  }
+  /* deeper top scrim so the eyebrow and headline stay legible on the stone */
+  /* Tuned to this specific frame: the copy block sits over dark stone up top,
+     so it needs less help than the desktop scrim gives, while the lower third
+     is deliberately left light enough that the arch and the walking figure
+     actually read. The stops are pinned to measured content: copy occupies
+     12% to 64% of this band, so the release starts right where it ends. */
+  .hero-scrim {
+    background: linear-gradient(
+      180deg,
+      rgba(16, 27, 16, 0.74) 0%,
+      rgba(16, 27, 16, 0.68) 40%,
+      rgba(16, 27, 16, 0.6) 64%,
+      rgba(16, 27, 16, 0.2) 78%,
+      rgba(16, 27, 16, 0.34) 100%
+    ) !important;
+  }
+}
+
+@media (max-width: 780px) {
+  /* --- hero ---
+     The portrait frame fits the viewport height exactly, so object-position has
+     nothing to pan and the walking figure always lands at 75% of the hero. The
+     content block therefore owns a full 92svh and the trust strip sits BELOW it
+     on its own opaque band, which leaves the lower third of the frame clear for
+     the arch and the figure to actually be seen. */
+  #top {
+    display: flex;
+    flex-direction: column;
+  }
+  .hero-in {
+    min-height: 92svh;
+    box-sizing: border-box;
+    padding: 92px 24px 28px !important;
+    text-align: left !important;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  /* Cover on a container far taller than the frame zooms into the dark inside
+     of the arch. Pin the image to the hero block so the crop stays close to the
+     frame's own 9:16, and let the trust strip sit on solid colour beneath it. */
+  .abg {
+    height: 92svh !important;
+    bottom: auto !important;
+    /* The desktop slow zoom fights the constrained mobile frame and leaves the
+       photo unpainted here. It is a desktop flourish; the phone does without. */
+    animation: none !important;
+    transform: none !important;
+  }
+  .hero-trust {
+    background: #16220f !important;
+    backdrop-filter: none !important;
+    margin-top: 0 !important;
+  }
+  /* the ornament and the drawn rule are desktop breathing room; on a phone
+     they push the CTA below the fold for no informational gain */
+  .hero-dia,
+  .hero-rule {
+    display: none !important;
+  }
+  .hero-eyebrow {
+    font-size: 10.5px !important;
+    letter-spacing: 0.16em !important;
+    line-height: 1.5;
+    margin-bottom: 18px !important;
+  }
+  .hero-h1 {
+    font-size: 27px !important;
+    line-height: 1.16 !important;
+    letter-spacing: -0.015em !important;
+    text-wrap: balance;
+  }
+  /* desktop breaks the headline by hand, one line per span; at 390px those
+     breaks are wrong, so let it reflow as one paragraph */
+  .hero-h1 > span {
+    display: inline !important;
+  }
+  .hero-lede {
+    font-size: 15px !important;
+    line-height: 1.62 !important;
+    margin: 16px 0 24px !important;
+  }
+  .hero-cta {
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: stretch !important;
+  }
+  .hero-cta > a {
+    text-align: center;
+    padding: 16px !important;
+    font-size: 15.5px !important;
+    border-radius: 9px !important;
+  }
+  .hero-trust {
+    margin-top: 22px !important;
+  }
+  .g-trust > div {
+    padding: 18px 20px !important;
+  }
+
+  /* --- typography floor: nothing readable under 14px --- */
+  body {
+    font-size: 15px;
+  }
+  .lbl {
+    font-size: 11px !important;
+  }
+  .errmsg {
+    font-size: 12px !important;
+  }
+
+  /* --- section rhythm: desktop used a flat 96px everywhere --- */
+  #why,
+  #pool,
+  #sectors,
+  #clients,
+  #process,
+  #guarantee,
+  #credentials,
+  #faq {
+    padding-top: 56px !important;
+    padding-bottom: 56px !important;
+  }
+
+  /* --- tap targets --- */
+  .navcta {
+    display: none !important;
+  }
+  .navburger {
+    display: flex !important;
+  }
+  #dtgnav > div {
+    padding: 13px 20px !important;
+  }
+}
+
+/* --- mobile menu overlay --- */
+.mmenu {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(16, 27, 16, 0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.mmenu.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+.mmenu-panel {
+  position: absolute;
+  inset: 0 0 auto auto;
+  width: min(88vw, 380px);
+  height: 100%;
+  overflow-y: auto;
+  background: #f5f1e6;
+  padding: 18px 24px calc(28px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.1, 1);
+}
+.mmenu.open .mmenu-panel {
+  transform: translateX(0);
+}
+.mmenu-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px 0;
+  border-top: 1px solid #dcd3be;
+  color: #20301f;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 21px;
+  min-height: 48px;
+}
+.mmenu-link:last-of-type {
+  border-bottom: 1px solid #dcd3be;
+}
+.mmenu-dia {
+  width: 6px;
+  height: 6px;
+  background: #b28a48;
+  transform: rotate(45deg);
+  flex: none;
+  display: block;
+}
+.mmenu-cta {
+  margin-top: 26px;
+  text-align: center;
+  background: #a8452f;
+  color: #f3eee1;
+  text-decoration: none;
+  font-size: 15.5px;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: 9px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --- sticky action bar (phones only) --- */
+.stickycta {
+  display: none;
+}
+@media (max-width: 780px) {
+  .stickycta {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 55;
+    display: flex;
+    gap: 10px;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(245, 241, 230, 0.96);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-top: 1px solid #dcd3be;
+    box-shadow: 0 -6px 24px rgba(32, 48, 31, 0.1);
+    transform: translateY(110%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.1, 1), opacity 0.3s ease;
+  }
+  .stickycta.show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* the bar floats over the footer, so give the page a matching tail */
+  footer {
+    padding-bottom: calc(76px + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mmenu,
+  .mmenu-panel,
+  .stickycta {
+    transition: none !important;
+  }
+}
+
+.procnum {
+  display: none;
+}
+
+/* --- phone tap targets: everything interactive clears 44px --- */
+@media (max-width: 780px) {
+  .faqbtn {
+    min-height: 48px !important;
+    padding: 6px 0 !important;
+  }
+  /* sector card CTA read as a 21px text link; give it a real hit area */
+  .g-3 .cta {
+    min-height: 48px;
+    align-items: center;
+  }
+  footer .link-gold-underline {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+  .replaybtn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* --- process: the horizontal flight path needs width it does not have on a
+     phone, so the animated track is dropped and the five steps carry the
+     sequence on their own as a vertical rail --- */
+  .track {
+    display: none !important;
+  }
+  .g-proc {
+    gap: 0 !important;
+    text-align: left;
+  }
+  .g-proc > div {
+    position: relative;
+    padding: 0 0 22px 38px !important;
+    text-align: left !important;
+  }
+  .g-proc > div::before {
+    content: "";
+    position: absolute;
+    left: 13px;
+    top: 26px;
+    bottom: 0;
+    width: 1px;
+    background: rgba(178, 138, 72, 0.35);
+  }
+  .g-proc > div:last-child {
+    padding-bottom: 0 !important;
+  }
+  .g-proc > div:last-child::before {
+    display: none;
+  }
+  .procnum {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    background: #20301f;
+    border: 1.5px solid #b28a48;
+    color: #d8b978;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .procttl {
+    font-size: 15.5px !important;
+  }
+  .procbody {
+    font-size: 13.5px !important;
+  }
+}
+
+@media (max-width: 780px) {
+  /* --- sectors: three stacked cards ran 2.5 screens. Side-by-side with snap
+     keeps all three reachable in one screen and reads as a deliberate shelf,
+     not an endless column. --- */
+  .g-3 {
+    display: flex !important;
+    grid-template-columns: none !important;
+    max-width: none !important;
+    margin: 0 -20px !important;
+    padding: 2px 20px 12px !important;
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .g-3::-webkit-scrollbar {
+    display: none;
+  }
+  .g-3 > div {
+    flex: 0 0 84%;
+    scroll-snap-align: center;
+  }
+  /* .imgslot owns the height; .imgclip and .imgfill are inset:0 children, so
+     sizing only the inner fill left a band of empty slot under the photo */
+  .imgslot {
+    height: 150px !important;
+  }
+
+  /* --- reading floor. Prose was sitting at 12 to 13.5px; mono labels stay
+     small on purpose, they are short and uppercase. --- */
+  main p,
+  footer p {
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+  }
+  .consent-label,
+  .form-help {
+    font-size: 13.5px !important;
+    line-height: 1.55 !important;
+  }
+
+  /* --- form: eleven fields plus consent is the longest section on the page --- */
+  .g-form,
+  .g-form2 {
+    gap: 13px !important;
+  }
+  .fld {
+    height: 48px !important;
+  }
+  .fld-ta {
+    height: auto !important;
+    min-height: 92px !important;
+  }
+}
+
+@media (max-width: 780px) {
+  /* section padding still living in inline styles */
+  #contact > div:first-child {
+    padding: 52px 20px 96px !important;
+  }
+  #contact > div:last-child {
+    padding: 0 20px 56px !important;
+  }
+  #contact > div:last-child > div {
+    padding: 26px 20px !important;
+  }
+  #why > div,
+  #pool > div,
+  #sectors > div,
+  #clients > div,
+  #process > div,
+  #guarantee > div,
+  #credentials > div,
+  #faq > div {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+  .g-foot {
+    padding: 0 20px 36px !important;
+    gap: 30px !important;
+  }
+  /* consent checkbox needs a real hit area */
+  input[name="consent"] {
+    width: 20px !important;
+    height: 20px !important;
+  }
+}
+
+@media (max-width: 780px) {
+  /* The headline reflows as one paragraph on mobile, but the wipe animation
+     clips per inline box, and an inline box that wraps across lines gets
+     clipped on every line at once. Words disappeared. Plain text here. */
+  .hero-h1 > span {
+    animation: none !important;
+    clip-path: none !important;
+    opacity: 1 !important;
+  }
+  /* trust strip: two columns squeezed every label into three wrapped lines,
+     so it stays one column and buys the space back from padding instead */
+  .g-trust {
+    grid-template-columns: 1fr !important;
+  }
+  .g-trust > div {
+    border-left: none !important;
+    padding: 12px 4px !important;
+    gap: 12px !important;
+  }
+  .g-trust > div + div {
+    border-top: 1px solid rgba(216, 185, 120, 0.14);
+  }
+}
