@@ -2,6 +2,11 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { CONTACT, waLink } from "@/lib/site-config";
+import {
+  INQUIRY_CONSENT_TEXT,
+  INQUIRY_CONSENT_REQUIRED_MSG,
+  PRIVACY_POLICY_URL,
+} from "@/lib/consent";
 
 type Field =
   | "company" | "country" | "sector" | "roles" | "quantity" | "timeline"
@@ -40,6 +45,9 @@ export function Contact() {
   const [form, setForm] = useState<Record<Field, string>>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [submitted, setSubmitted] = useState(false);
+  // PDP UU 27/2022: affirmative consent, default UNCHECKED. Gates the handoff.
+  const [agree, setAgree] = useState(false);
+  const [consentError, setConsentError] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -78,6 +86,13 @@ export function Contact() {
       ref.current?.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
       return;
     }
+    // PDP: nothing leaves the page until the box is ticked.
+    if (!agree) {
+      setConsentError(true);
+      ref.current?.querySelector<HTMLElement>('[name="consent"]')?.focus();
+      return;
+    }
+    setConsentError(false);
     setErrors({});
     // Hand the inquiry to the confirmed BD WhatsApp channel with the details
     // prefilled, so no lead is silently dropped. (A server-side BD-inbox/CRM
@@ -104,6 +119,10 @@ export function Contact() {
     setForm(EMPTY);
     setErrors({});
     setSubmitted(false);
+    // A fresh inquiry needs a fresh tick - carrying the old one over would make
+    // the consent apply to data the visitor has not entered yet.
+    setAgree(false);
+    setConsentError(false);
   };
 
   const cls = (k: Field) => `fld${errors[k] ? " ferr" : ""}`;
@@ -204,6 +223,46 @@ export function Contact() {
                   <label className="lbl" htmlFor="f-notes">ANYTHING ELSE WE SHOULD KNOW</label>
                   <textarea id="f-notes" aria-label="Anything else we should know" name="notes" rows={3} placeholder="Shift patterns, language needs, certifications, accommodation, or anything specific to the role" value={form.notes} onChange={(e) => onField("notes", e.target.value)} className="fld fld-ta" />
                 </div>
+              </div>
+
+              {/* PDP UU 27/2022: affirmative consent, default unchecked. The
+                  span text is the SoT string verbatim; the policy link sits on
+                  its own line so that string stays reproducible as plain text. */}
+              <div style={{ marginTop: 20 }}>
+                <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer" }}>
+                  <input
+                    type="checkbox"
+                    name="consent"
+                    checked={agree}
+                    onChange={(e) => {
+                      setAgree(e.target.checked);
+                      if (e.target.checked) setConsentError(false);
+                    }}
+                    aria-required
+                    aria-invalid={consentError}
+                    style={{ marginTop: 3, width: 15, height: 15, flex: "none", accentColor: "#A8452F" }}
+                  />
+                  <span style={{ fontSize: 12.5, lineHeight: 1.55, color: "#6E6752" }}>
+                    {INQUIRY_CONSENT_TEXT}
+                  </span>
+                </label>
+                <p style={{ margin: "6px 0 0 25px", fontSize: 12.5, lineHeight: 1.55, color: "#9FB0A2" }}>
+                  Read our{" "}
+                  <a
+                    href={PRIVACY_POLICY_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: "#A8452F", fontWeight: 700, textDecoration: "none" }}
+                  >
+                    Privacy Policy
+                  </a>
+                  .
+                </p>
+                {consentError && (
+                  <p role="alert" style={{ margin: "6px 0 0 25px", fontSize: 12.5, fontWeight: 600, color: "#A8452F" }}>
+                    {INQUIRY_CONSENT_REQUIRED_MSG}
+                  </p>
+                )}
               </div>
 
               <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 22, flexWrap: "wrap" }}>

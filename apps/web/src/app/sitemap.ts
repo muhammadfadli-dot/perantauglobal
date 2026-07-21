@@ -13,6 +13,11 @@ const STATIC_PAGES: { path: string; priority: number; changeFrequency: MetadataR
   { path: "proses", priority: 0.7, changeFrequency: "monthly" },
   { path: "faq", priority: 0.7, changeFrequency: "monthly" },
   { path: "kontak", priority: 0.7, changeFrequency: "monthly" },
+  // Legal pages are low priority but must be crawlable: the consent copy on
+  // every form points at them, so they need to be reachable and indexable
+  // rather than only linkable.
+  { path: "privacy", priority: 0.3, changeFrequency: "yearly" },
+  { path: "terms", priority: 0.3, changeFrequency: "yearly" },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

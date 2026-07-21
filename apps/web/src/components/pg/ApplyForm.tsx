@@ -8,6 +8,7 @@ import type { AppliedFormField } from "@/lib/positions-db";
 import { uploadPendingCv, validateCvFile, isCvUploadConfigured } from "@/lib/supabase-storage-anon";
 import { useTurnstile } from "./useTurnstile";
 import { CV_UPLOAD_MICROCOPY, CV_CONSENT_TEXT } from "@/lib/cv-consent";
+import { APPLY_CONSENT_TEXT, APPLY_CONSENT_REQUIRED_MSG } from "@/lib/apply-consent";
 import { CvFitCard, type CvFitPreview } from "./CvFitCard";
 
 type ApplyFormProps = {
@@ -84,6 +85,11 @@ export function ApplyForm({
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [submittedEmail, setSubmittedEmail] = useState("");
+
+  // PDP UU 27/2022 Pasal 20: consent must be affirmative - default UNCHECKED,
+  // candidate ticks it. Gates submit here and is re-validated server-side; the
+  // route refuses to write a consent row it was not explicitly given.
+  const [agree, setAgree] = useState(false);
 
   // Fase 2 CV grader: CV di depan funnel. Variant + pendingId di-init client-side
   // via lazy initializer (LP statis SSG; bukan setState-in-effect biar lolos lint).
@@ -320,6 +326,12 @@ export function ApplyForm({
       return;
     }
 
+    // PDP: affirmative consent is the last gate before anything is sent.
+    if (!agree) {
+      setErrorMsg(APPLY_CONSENT_REQUIRED_MSG);
+      return;
+    }
+
     setStatus("loading");
 
     const turnstileToken = await runTurnstile();
@@ -350,6 +362,9 @@ export function ApplyForm({
         ? { cv_path: cvPath, cv_mime: cvMime, cv_size: cvSize }
         : {}),
       ab_variant: "gate_v1",
+      // PDP: the ticked box travels with the payload. The route rejects the
+      // submit when this is absent, so no consent row is ever written by default.
+      consent_granted: agree,
       turnstile_token: turnstileToken,
       hp: honeypot,
       eventId,
@@ -778,6 +793,44 @@ export function ApplyForm({
             </div>
           )}
 
+          {/* PDP UU 27/2022 Pasal 20: persetujuan afirmatif, default KOSONG.
+              Teks di dalam <span> WAJIB sama persis dengan yang di-log server
+              (SoT: lib/apply-consent.ts), jadi tautan kebijakan sengaja ditaruh
+              di baris terpisah supaya string-nya tetap utuh. */}
+          <label className="mt-5 flex items-start gap-2.5 cursor-pointer rounded-xl p-1 -m-1 focus-within:ring-2 focus-within:ring-pg-red-600 focus-within:ring-offset-1">
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+              aria-required
+              className="mt-0.5 w-4 h-4 shrink-0 accent-[var(--pg-red-600)]"
+            />
+            <span className="text-[12.5px] text-pg-ink-600 leading-relaxed">
+              {APPLY_CONSENT_TEXT}
+            </span>
+          </label>
+          <div className="text-[12px] text-pg-ink-500 mt-1.5 leading-relaxed pl-[26px]">
+            Baca{" "}
+            <a
+              href="/privacy"
+              target="_blank"
+              rel="noreferrer"
+              className="text-pg-red-600 font-bold no-underline"
+            >
+              Kebijakan Privasi
+            </a>{" "}
+            dan{" "}
+            <a
+              href="/terms"
+              target="_blank"
+              rel="noreferrer"
+              className="text-pg-red-600 font-bold no-underline"
+            >
+              Syarat &amp; Ketentuan
+            </a>
+            .
+          </div>
+
           <div className="mt-5 flex gap-2">
             <button
               type="button"
@@ -822,9 +875,6 @@ export function ApplyForm({
             <a href={`${APP_URL}/auth/sign-in`} className="text-pg-red-600 font-bold no-underline">
               Masuk di sini
             </a>
-          </div>
-          <div className="text-[12px] text-pg-ink-500 mt-2 text-center leading-relaxed">
-            Dengan mendaftar, kamu setuju Syarat Layanan &amp; Kebijakan Privasi UU PDP 27/2022.
           </div>
         </>
       )}

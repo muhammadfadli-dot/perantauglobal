@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { headers } from "next/headers";
 import { createServerClient, getSessionAndRole } from "@/lib/supabase-server";
+import {
+  APPLY_CONSENT_PURPOSE,
+  APPLY_CONSENT_TEXT,
+  APPLY_CONSENT_VERSION,
+} from "@/lib/apply-consent";
 
 export type SubmitInput = {
   position_slug: string;
@@ -94,16 +99,17 @@ export async function submitApplication(
   if (!row) return { ok: false, error: "Gagal membuat lamaran." };
 
   // Log PDP consent for this application (purpose matches the web LP path).
-  // Best-effort: the affirmative checkbox is the binding consent — don't fail the
-  // apply if the audit-trail insert hiccups.
+  // Text + version come from lib/apply-consent.ts, the same module ApplyWizard
+  // renders, so the ledger row reproduces verbatim what the candidate was shown.
+  // Best-effort: the affirmative checkbox (re-checked above via input.agreed) is
+  // the binding consent - don't fail the apply if the audit-trail insert hiccups.
   const h = await headers();
   const fwd = h.get("x-forwarded-for");
   const { error: consentErr } = await supabase.from("consents").insert({
     candidate_id: candidate.id,
-    purpose: "application_processing",
-    purpose_text:
-      "Memproses lamaran kerja (verifikasi data, komunikasi via email, pencocokan lowongan).",
-    version: "2026-04-23",
+    purpose: APPLY_CONSENT_PURPOSE,
+    purpose_text: APPLY_CONSENT_TEXT,
+    version: APPLY_CONSENT_VERSION,
     granted_at: new Date().toISOString(),
     ip_address: fwd ? fwd.split(",")[0].trim() : undefined,
     user_agent: h.get("user-agent") ?? undefined,

@@ -5,6 +5,12 @@ import { writePendingSubmission } from "@/lib/pending-write";
 import { supabaseV2 } from "@/lib/supabase-v2";
 import { verifyTurnstile } from "@/lib/turnstile-verify";
 import { CV_CONSENT_PURPOSE, CV_CONSENT_TEXT, CV_CONSENT_VERSION } from "@/lib/cv-consent";
+import {
+  APPLY_CONSENT_PURPOSE,
+  APPLY_CONSENT_TEXT,
+  APPLY_CONSENT_VERSION,
+  APPLY_CONSENT_REQUIRED_MSG,
+} from "@/lib/apply-consent";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const MAX_CV_BYTES = 5 * 1024 * 1024;
@@ -65,6 +71,12 @@ interface CandidatePayload {
    * no-op and never blocks registration.
    */
   ref?: string;
+  /**
+   * PDP UU 27/2022 Pasal 20: affirmative consent ticked by the candidate in
+   * ApplyForm. Must be exactly `true` - the route refuses the submit otherwise,
+   * so a consent row can never be logged for someone who did not tick the box.
+   */
+  consent_granted?: boolean;
   /**
    * Fase 2 CV grader (CV di depan funnel). The LP uploads the CV anon to
    * `pending-cv/pending/<pending_id>/cv.*` BEFORE submit, then sends the
@@ -232,6 +244,16 @@ export async function POST(
       );
     }
 
+    // PDP UU 27/2022 Pasal 20: consent must be affirmative. Re-checked here so a
+    // client that skips the checkbox (or posts straight to the API) cannot have
+    // a consent row written on its behalf.
+    if (body.consent_granted !== true) {
+      return NextResponse.json(
+        { error: APPLY_CONSENT_REQUIRED_MSG },
+        { status: 400 }
+      );
+    }
+
     const email = body.email.toLowerCase().trim();
 
     const clientIp =
@@ -326,11 +348,14 @@ export async function POST(
         },
         consents: [
           {
-            purpose: "application_processing",
-            purpose_text:
-              "Memproses lamaran kerja (verifikasi data, komunikasi via email, pencocokan lowongan).",
-            version: "2026-04-23",
-            granted: true,
+            // SoT import keeps shown-text (ApplyForm checkbox) == logged-text.
+            // `granted` mirrors the ticked box, not a hardcoded true - the guard
+            // above already rejected anything else, so this is always an
+            // affirmative record with a real user action behind it.
+            purpose: APPLY_CONSENT_PURPOSE,
+            purpose_text: APPLY_CONSENT_TEXT,
+            version: APPLY_CONSENT_VERSION,
+            granted: body.consent_granted === true,
           },
           // Granular CV/AI-profiling consent (UU PDP) only when a CV is staged.
           // SoT import keeps shown-text (ApplyForm) == logged-text here.

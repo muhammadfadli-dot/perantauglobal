@@ -1,8 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
+import type { Json } from "@perantauglobal/db";
 import { sendMetaEvent } from "@/lib/meta-capi";
 import { supabaseV2 } from "@/lib/supabase-v2";
 import { sendEmail, buildEventThankYouEmail } from "@/lib/email";
+import {
+  EVENT_CONSENT_PURPOSE,
+  EVENT_CONSENT_TEXT,
+  EVENT_CONSENT_VERSION,
+  EVENT_CONSENT_REQUIRED_MSG,
+  EVENT_MARKETING_PURPOSE,
+  EVENT_MARKETING_TEXT,
+  EVENT_MARKETING_VERSION,
+} from "@/lib/event-consent";
 
 /**
  * Event registration endpoint.
@@ -21,6 +31,13 @@ interface EventRegPayload {
   city?: string;
   profession?: string;
   interest?: string;
+  /**
+   * PDP UU 27/2022 Pasal 20: affirmative consent ticked by the registrant in
+   * EventForm. Must be exactly `true` - the route refuses the registration
+   * otherwise, so no row is ever written for someone who did not tick the box.
+   */
+  consent_processing?: boolean;
+  /** Optional marketing opt-in. Separate legal basis, never gates the submit. */
   consent_marketing?: boolean;
   source_url?: string;
   utm?: {
@@ -101,6 +118,16 @@ export async function POST(
       );
     }
 
+    // PDP UU 27/2022 Pasal 20: consent must be affirmative. Re-checked here so a
+    // client that skips the checkbox (or posts straight to the API) cannot have
+    // a registration + consent record written on its behalf.
+    if (body.consent_processing !== true) {
+      return NextResponse.json(
+        { error: EVENT_CONSENT_REQUIRED_MSG },
+        { status: 400 },
+      );
+    }
+
     const ip =
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       request.headers.get("x-real-ip") ||
@@ -132,6 +159,37 @@ export async function POST(
       // fail-open — never block a legit registration on a rate-limit hiccup
     }
 
+    // PDP ledger for this registration. The `consents` table can't hold it: its
+    // CHECK requires candidate_id OR pending_id, and an anon event registration
+    // has neither (no auth, no pending_submissions - see migration 0055). So the
+    // verbatim shown-text + version + timestamp are persisted on the row itself,
+    // namespaced under answers.consents so a later event-question feature can
+    // still use `answers` freely. `granted` is derived from the client flag, not
+    // hardcoded; the guard above already rejected anything but `true`.
+    const consentLedger = {
+      consents: [
+        {
+          purpose: EVENT_CONSENT_PURPOSE,
+          purpose_text: EVENT_CONSENT_TEXT,
+          version: EVENT_CONSENT_VERSION,
+          granted: body.consent_processing === true,
+          granted_at: new Date().toISOString(),
+        },
+        // Optional opt-in: only recorded when actually ticked.
+        ...(body.consent_marketing === true
+          ? [
+              {
+                purpose: EVENT_MARKETING_PURPOSE,
+                purpose_text: EVENT_MARKETING_TEXT,
+                version: EVENT_MARKETING_VERSION,
+                granted: true,
+                granted_at: new Date().toISOString(),
+              },
+            ]
+          : []),
+      ],
+    };
+
     const { error: insertErr } = await db.from("event_registrations").insert({
       event_slug: slug,
       full_name,
@@ -140,6 +198,7 @@ export async function POST(
       city: clean(body.city, 80),
       profession: clean(body.profession, 80),
       interest: clean(body.interest, 200),
+      answers: consentLedger as unknown as Json,
       consent_marketing: body.consent_marketing === true,
       source: clean(body.utm?.source) ?? "event_lp",
       utm_source: clean(body.utm?.source),

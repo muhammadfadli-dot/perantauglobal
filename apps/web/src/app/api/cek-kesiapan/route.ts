@@ -9,6 +9,7 @@ import {
   type QuestionId,
   type Sector,
 } from "@/lib/cek-kesiapan";
+import { READINESS_CONSENT_REQUIRED_MSG } from "@/lib/readiness-consent";
 
 export const runtime = "nodejs";
 
@@ -18,6 +19,12 @@ interface Payload {
   sector?: string;
   session_key?: string;
   website?: string; // honeypot
+  /**
+   * PDP UU 27/2022 Pasal 20: affirmative consent ticked on the intro screen.
+   * Must be exactly `true` - this route stores a name, so without the tick
+   * there is no lawful basis and nothing is inserted.
+   */
+  consent_granted?: boolean;
 }
 
 const VALID_ANSWERS: AnswerKey[] = ["a", "b", "c"];
@@ -51,6 +58,15 @@ export async function POST(request: Request) {
     const name = cleanName(body.name);
     if (!name) {
       return NextResponse.json({ error: "Nama wajib diisi." }, { status: 400 });
+    }
+
+    // PDP: re-checked server-side so a client that skips the box (or posts
+    // straight to the API) cannot get a personal-data row written.
+    if (body.consent_granted !== true) {
+      return NextResponse.json(
+        { error: READINESS_CONSENT_REQUIRED_MSG },
+        { status: 400 }
+      );
     }
 
     // Coerce + validate the 6 readiness answers.

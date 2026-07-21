@@ -6,6 +6,12 @@ import { supabaseBrowser } from "@/lib/supabase-browser";
 import { translateAuthError, validatePassword } from "@/lib/auth-errors";
 import { Icon } from "@/components/pg/Icon";
 import { Button } from "@/components/pg/primitives";
+import {
+  SIGNUP_CONSENT_TEXT,
+  SIGNUP_CONSENT_VERSION,
+  SIGNUP_CONSENT_REQUIRED_MSG,
+  WEB_POLICY_ORIGIN,
+} from "@/lib/signup-consent";
 
 type State =
   | { kind: "idle" }
@@ -19,6 +25,8 @@ export default function SignUpForm() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPw, setShowPw] = useState(false);
+  // PDP UU 27/2022 Pasal 20: persetujuan afirmatif, default KOSONG.
+  const [agree, setAgree] = useState(false);
   const [state, setState] = useState<State>({ kind: "idle" });
 
   async function submit(e: React.FormEvent) {
@@ -42,6 +50,11 @@ export default function SignUpForm() {
       setState({ kind: "error", message: "Password tidak cocok." });
       return;
     }
+    // PDP: affirmative consent is the last gate before the account is created.
+    if (!agree) {
+      setState({ kind: "error", message: SIGNUP_CONSENT_REQUIRED_MSG });
+      return;
+    }
 
     setState({ kind: "submitting" });
 
@@ -52,7 +65,17 @@ export default function SignUpForm() {
       password,
       options: {
         emailRedirectTo,
-        data: { full_name: trimmedName, source: "direct_signup" },
+        // Consent is stamped into user metadata: this path writes straight to
+        // Supabase Auth from the browser, so there is no API route of ours to
+        // log a `consents` ledger row from. Storing the verbatim text + version
+        // keeps the same audit property (what was agreed, and when).
+        data: {
+          full_name: trimmedName,
+          source: "direct_signup",
+          consent_text: SIGNUP_CONSENT_TEXT,
+          consent_version: SIGNUP_CONSENT_VERSION,
+          consent_granted_at: new Date().toISOString(),
+        },
       },
     });
 
@@ -171,6 +194,43 @@ export default function SignUpForm() {
 
       <div className="text-[12px] text-pg-ink-500 leading-relaxed">
         Minimal 10 karakter, kombinasi huruf besar, kecil, dan angka.
+      </div>
+
+      {/* PDP UU 27/2022 Pasal 20: persetujuan afirmatif, default KOSONG. Teks di
+          <span> WAJIB sama persis dengan yang disimpan ke metadata akun (SoT:
+          lib/signup-consent.ts), jadi tautan kebijakan ditaruh di baris terpisah. */}
+      <label className="flex items-start gap-2.5 cursor-pointer rounded-xl p-1 -m-1 focus-within:ring-2 focus-within:ring-pg-red-600 focus-within:ring-offset-1">
+        <input
+          type="checkbox"
+          checked={agree}
+          onChange={(e) => setAgree(e.target.checked)}
+          aria-required
+          className="mt-0.5 w-4 h-4 shrink-0 accent-[var(--pg-red-600)]"
+        />
+        <span className="text-[12.5px] text-pg-ink-700 leading-relaxed">
+          {SIGNUP_CONSENT_TEXT}
+        </span>
+      </label>
+      <div className="text-[12px] text-pg-ink-500 leading-relaxed pl-[26px]">
+        Baca{" "}
+        <a
+          href={`${WEB_POLICY_ORIGIN}/privacy`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-pg-red-600 font-bold no-underline"
+        >
+          Kebijakan Privasi
+        </a>{" "}
+        dan{" "}
+        <a
+          href={`${WEB_POLICY_ORIGIN}/terms`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-pg-red-600 font-bold no-underline"
+        >
+          Syarat &amp; Ketentuan
+        </a>
+        .
       </div>
 
       {state.kind === "error" && (

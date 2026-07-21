@@ -3,6 +3,10 @@
 import { useState } from "react";
 import { Field, Input } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
+import {
+  EVENT_ACCOUNT_CONSENT_TEXT,
+  EVENT_ACCOUNT_CONSENT_REQUIRED_MSG,
+} from "@/lib/event-consent";
 
 type Status = "idle" | "submitting" | "success" | "error";
 
@@ -22,6 +26,11 @@ export function EventAccountUpsell({
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
+  // PDP UU 27/2022 Pasal 20: consent must be affirmative - default UNCHECKED.
+  // Creating the account is heavier processing than the event registration
+  // itself (auth user + candidate record that outlives the event), so it gets
+  // its own tick. Re-validated in /api/event/[slug]/account.
+  const [agree, setAgree] = useState(false);
 
   async function handle(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -47,6 +56,12 @@ export function EventAccountUpsell({
       setStatus("error");
       return;
     }
+    // PDP: affirmative consent is the last gate before anything is sent.
+    if (!agree) {
+      setError(EVENT_ACCOUNT_CONSENT_REQUIRED_MSG);
+      setStatus("error");
+      return;
+    }
 
     setError(null);
     setStatus("submitting");
@@ -60,6 +75,10 @@ export function EventAccountUpsell({
           email: prefill.email,
           city: prefill.city,
           password,
+          // PDP: the ticked box travels with the payload. The route rejects the
+          // submit when this is absent, so no consent row is ever written by
+          // default.
+          consent_granted: agree,
           website,
           source_url: typeof window !== "undefined" ? window.location.href : undefined,
         }),
@@ -138,6 +157,46 @@ export function EventAccountUpsell({
       <Field label="Ulangi password" required htmlFor="acct_pw2">
         <Input id="acct_pw2" name="confirm" type="password" autoComplete="new-password" required />
       </Field>
+
+      {/* PDP UU 27/2022 Pasal 20: persetujuan afirmatif, default KOSONG.
+          Teks di dalam <span> WAJIB sama persis dengan yang di-log server
+          (SoT: lib/event-consent.ts), jadi tautan kebijakan sengaja ditaruh di
+          baris terpisah supaya string-nya tetap utuh. */}
+      <div>
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={agree}
+            onChange={(e) => setAgree(e.target.checked)}
+            aria-required
+            className="mt-1 w-4 h-4 accent-[var(--pg-red-600)] shrink-0"
+          />
+          <span className="text-[12.5px] text-pg-ink-600 leading-relaxed">
+            {EVENT_ACCOUNT_CONSENT_TEXT}
+          </span>
+        </label>
+        <div className="text-[12px] text-pg-ink-500 mt-1.5 leading-relaxed pl-[26px]">
+          Baca{" "}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noreferrer"
+            className="text-pg-red-600 font-bold no-underline"
+          >
+            Kebijakan Privasi
+          </a>{" "}
+          dan{" "}
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noreferrer"
+            className="text-pg-red-600 font-bold no-underline"
+          >
+            Syarat &amp; Ketentuan
+          </a>
+          .
+        </div>
+      </div>
 
       {error && (
         <div

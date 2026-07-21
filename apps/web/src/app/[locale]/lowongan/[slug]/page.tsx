@@ -583,6 +583,7 @@ export default async function LowonganDetailPage({
 
       {/* Trust block + share strip */}
       <TrustAndShare
+        slug={slug}
         role={position.role}
         country={position.country}
         salary={position.salary}

@@ -15,7 +15,7 @@ export function generateStaticParams() {
   return [{ locale: "id" }];
 }
 
-const LAST_UPDATED = "28 Mei 2026";
+const LAST_UPDATED = "21 Juli 2026";
 
 export default async function PrivacyPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -92,7 +92,7 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
             </h2>
             <p>Pemrosesan data kamu didasarkan pada (UU 27/2022 Pasal 20):</p>
             <ul className="list-disc pl-6 mt-3 space-y-2">
-              <li><strong>Persetujuan kamu</strong> — dengan submit form pendaftaran/lamaran kamu memberikan persetujuan pemrosesan untuk tujuan rekrutmen.</li>
+              <li><strong>Persetujuan kamu</strong> - kamu mencentang kotak persetujuan sebelum mengirim form pendaftaran atau lamaran. Persetujuan tidak pernah tercentang otomatis, dan teks persis yang kamu setujui kami simpan sebagai catatan lengkap dengan tanggal dan versinya. Kamu bisa menariknya kapan saja lewat halo@perantauglobal.com.</li>
               <li><strong>Pelaksanaan kontrak</strong> — kontrak penempatan kerja yang kamu tandatangani dengan employer (via Perantau Global) memerlukan pemrosesan data.</li>
               <li><strong>Kewajiban hukum</strong> — pelaporan ke regulator (BP2MI, Kemnaker) sebagai P3MI berlisensi.</li>
               <li><strong>Kepentingan sah</strong> — untuk mencegah penipuan, melindungi sistem, dan memperbaiki layanan.</li>
@@ -152,8 +152,17 @@ export default async function PrivacyPage({ params }: { params: Promise<{ locale
               <li><strong>Meta Pixel & Conversions API</strong>: mengukur efektivitas iklan di Facebook/Instagram dan menampilkan konten yang relevan.</li>
             </ul>
             <p className="mt-3">
-              Kamu bisa menonaktifkan cookie lewat pengaturan browser, tetapi sebagian fitur situs mungkin
-              tidak berfungsi optimal.
+              Saat pertama membuka situs, kamu kami tanya dulu lewat banner pilihan cookie. Cookie
+              pengukuran dan cookie iklan <strong>tidak aktif sebelum kamu menyetujuinya</strong>, dan
+              kamu bisa memilih salah satu saja lewat opsi &quot;Atur sendiri&quot;. Menolak tidak
+              mengurangi fungsi situs sama sekali. Hanya cookie sesi dan keamanan yang selalu aktif,
+              karena tanpa itu situs tidak bisa bekerja, dan cookie tersebut tidak dipakai untuk
+              melacak kamu. Kamu juga tetap bisa menghapus cookie lewat pengaturan browser kapan saja.
+            </p>
+            <p className="mt-3">
+              Catatan: Meta Conversions API berjalan dari sisi server kami untuk mengukur hasil iklan,
+              dan itu memakai data lamaran yang sudah kamu setujui pemrosesannya, bukan cookie di
+              perangkat kamu.
             </p>
           </section>
 

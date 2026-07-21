@@ -68,7 +68,9 @@ export function EnrollPanel({
     }
     setError(null);
     startTransition(async () => {
-      const res = await enrollAction(slug, values);
+      // Consent goes to the server too: validate() above is UX, the action
+      // re-checks it before any consent row can be written (PDP).
+      const res = await enrollAction(slug, values, consent);
       if (!res.ok) {
         setError(res.error);
         return;

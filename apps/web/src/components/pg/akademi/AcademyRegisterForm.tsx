@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Icon } from "@/components/pg/Icon";
 import { Button, Field, Input, Textarea } from "@/components/pg/primitives";
 import { trackEvent, generateEventId, getMetaCookies } from "@/lib/tracking";
+import { ACADEMY_CONSENT_TEXT, ACADEMY_CONSENT_REQUIRED_MSG } from "@/lib/academy-consent";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.perantauglobal.com";
 
@@ -54,6 +55,9 @@ export function AcademyRegisterForm({
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+  // PDP UU 27/2022 Pasal 20: consent must be affirmative - default UNCHECKED.
+  // Gates submit here and is re-validated in /api/akademi/[slug]; the route
+  // refuses to write a consent row it was not explicitly given.
   const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
@@ -98,8 +102,9 @@ export function AcademyRegisterForm({
       setErrorMsg("Password dan konfirmasi tidak cocok.");
       return;
     }
+    // PDP: affirmative consent is the last gate before anything is sent.
     if (!consent) {
-      setErrorMsg("Centang persetujuan dulu ya.");
+      setErrorMsg(ACADEMY_CONSENT_REQUIRED_MSG);
       return;
     }
 
@@ -116,6 +121,9 @@ export function AcademyRegisterForm({
       password,
       answers,
       source_url: typeof window !== "undefined" ? window.location.href : "",
+      // PDP: the ticked box travels with the payload. The route rejects the
+      // submit when this is absent, so no consent row is ever written by default.
+      consent_granted: consent,
       eventId,
       fbp,
       fbc,
@@ -272,14 +280,31 @@ export function AcademyRegisterForm({
         </div>
       </div>
 
+      {/* PDP UU 27/2022 Pasal 20: persetujuan afirmatif, default KOSONG.
+          Teks di dalam <span> WAJIB sama persis dengan yang di-log server
+          (SoT: lib/academy-consent.ts), jadi tautan kebijakan sengaja ditaruh di
+          baris terpisah supaya string-nya tetap utuh. */}
       <label className="flex items-start gap-2.5 mt-4 cursor-pointer">
         <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)}
+          aria-required
           className="mt-0.5 w-4 h-4 shrink-0 accent-[var(--pa-amber-600)]" />
         <span className="text-[12px] text-pg-ink-600 leading-snug">
-          Saya setuju data saya diproses untuk pendaftaran &amp; penyelenggaraan kelas Akademi
-          Perantau (verifikasi, komunikasi, materi, sertifikat) sesuai UU PDP 27/2022.
+          {ACADEMY_CONSENT_TEXT}
         </span>
       </label>
+      <div className="text-[12px] text-pg-ink-500 mt-1.5 leading-relaxed pl-[26px]">
+        Baca{" "}
+        <a href="/privacy" target="_blank" rel="noreferrer" className="font-bold no-underline"
+          style={{ color: "var(--pa-amber-700)" }}>
+          Kebijakan Privasi
+        </a>{" "}
+        dan{" "}
+        <a href="/terms" target="_blank" rel="noreferrer" className="font-bold no-underline"
+          style={{ color: "var(--pa-amber-700)" }}>
+          Syarat &amp; Ketentuan
+        </a>
+        .
+      </div>
 
       {errorMsg && (
         <div className="mt-4 px-4 py-3 rounded-lg text-sm flex items-start gap-2"

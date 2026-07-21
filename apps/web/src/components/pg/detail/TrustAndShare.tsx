@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { Icon } from "@/components/pg/Icon";
+import { SITE_URL } from "@/lib/site";
 
 /**
  * Trust block + share strip — combined section to close the detail page
@@ -9,29 +10,37 @@ import { Icon } from "@/components/pg/Icon";
  * WhatsApp / Telegram / Copy-link buttons.
  */
 export function TrustAndShare({
+  slug,
   role,
   country,
   salary,
 }: {
+  slug: string;
   role: string;
   country: string;
   salary: string;
 }) {
   const [copied, setCopied] = useState(false);
 
+  // Share targets are derived from the canonical URL, never from
+  // window.location. Reading the browser during render made the server emit an
+  // empty url/text param and the client a real one, which React reported as a
+  // hydrated-attribute mismatch on every job detail page. Same shape as the
+  // canonical in generateMetadata() and the JobPosting JSON-LD, so a shared
+  // link also carries link equity to the canonical instead of to a
+  // query-string variant.
+  const pageUrl = `${SITE_URL}/id/lowongan/${slug}`;
+
   const handleCopy = useCallback(async () => {
-    const url = typeof window !== "undefined" ? window.location.href : "";
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(pageUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 1400);
     } catch {
       /* clipboard API blocked — ignore */
     }
-  }, []);
+  }, [pageUrl]);
 
-  // Build share URLs from the current page URL (only on client)
-  const pageUrl = typeof window !== "undefined" ? window.location.href : "";
   const shareText = `Lowongan ${role} ${country} — gaji ${salary}, resmi P3MI. Cek di Perantau Global.`;
   const waUrl = `https://wa.me/?text=${encodeURIComponent(shareText + "\n" + pageUrl)}`;
   const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(pageUrl)}&text=${encodeURIComponent(shareText)}`;

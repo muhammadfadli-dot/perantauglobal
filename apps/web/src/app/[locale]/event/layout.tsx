@@ -59,9 +59,28 @@ export default function EventLayout({
               Perantau<span className="text-pg-red-600">Global</span>
             </span>
           </div>
-          <p className="text-[12px] text-pg-ink-500 font-mono">
-            © 2026 PT Daya Talenta Global · dayalima.com
-          </p>
+          {/* Legal reachable from the LP itself: the registration form asks for
+              PDP consent that references these two documents, so they can't only
+              exist behind the global Footer this layout deliberately drops. */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <nav className="flex items-center justify-center gap-4">
+              <Link
+                href="/privacy"
+                className="text-[12px] text-pg-ink-500 hover:text-pg-ink-700 no-underline"
+              >
+                Kebijakan Privasi
+              </Link>
+              <Link
+                href="/terms"
+                className="text-[12px] text-pg-ink-500 hover:text-pg-ink-700 no-underline"
+              >
+                Syarat &amp; Ketentuan
+              </Link>
+            </nav>
+            <p className="text-[12px] text-pg-ink-500 font-mono">
+              © 2026 PT Daya Talenta Global · dayalima.com
+            </p>
+          </div>
         </div>
       </footer>
     </>

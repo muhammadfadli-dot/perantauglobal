@@ -773,6 +773,97 @@ textarea::placeholder {
   }
 }
 
+/* ---- legal pages (/privacy, /terms) ----
+   Prose-level typography lives here, not inline: the same handful of elements
+   repeats dozens of times per page, and Tailwind Preflight strips the list
+   markers legal copy needs back. Page layout stays inline, like every section. */
+.legal {
+  font-size: 15px;
+  line-height: 1.75;
+  color: #4a4636;
+}
+.legal h2 {
+  margin: 0 0 13px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(21px, 2.6vw, 26px);
+  line-height: 1.22;
+  letter-spacing: -0.01em;
+  color: #20301f;
+  text-wrap: pretty;
+}
+.legal p {
+  margin: 0 0 14px;
+  text-wrap: pretty;
+}
+.legal ul {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  list-style: disc;
+}
+.legal li {
+  margin-bottom: 9px;
+  padding-left: 3px;
+}
+.legal li:last-child {
+  margin-bottom: 0;
+}
+.legal li::marker {
+  color: #b28a48;
+}
+.legal > :last-child,
+.legal-sec > :last-child {
+  margin-bottom: 0;
+}
+.legal strong {
+  font-weight: 700;
+  color: #20301f;
+}
+.legal a {
+  color: #a8452f;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(168, 69, 47, 0.35);
+  transition: color 0.15s, border-color 0.15s;
+}
+.legal a:hover {
+  color: #be5138;
+  border-bottom-color: #be5138;
+}
+/* Clauses are separated by a hairline rule rather than whitespace alone, so a
+   long policy still scans as a list of discrete obligations. */
+.legal-sec + .legal-sec {
+  margin-top: 34px;
+  padding-top: 30px;
+  border-top: 1px solid #dcd3be;
+}
+/* These three sit on <p>, so they have to out-specify `.legal p`. */
+.legal .legal-lead {
+  margin: 0 0 30px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #6e6752;
+}
+.legal .legal-quote {
+  margin: 0 0 14px;
+  padding: 16px 20px;
+  background: #fbf8f0;
+  border: 1px solid #dcd3be;
+  border-left: 3px solid #b28a48;
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: #4a4636;
+}
+.legal .legal-foot {
+  margin: 34px 0 0;
+  padding-top: 26px;
+  border-top: 1px solid #dcd3be;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #6e6752;
+}
+
 /* ---- talent stories marquee ---- */
 .tmarq {
   overflow: hidden;

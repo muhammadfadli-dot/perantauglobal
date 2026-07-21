@@ -34,12 +34,28 @@ function mapError(message: string): string {
   return "Ada kendala. Coba lagi sebentar.";
 }
 
-/** Logged-in enroll: enrollment + PDP consent atomic, publish-gated. */
+/**
+ * Logged-in enroll: enrollment + PDP consent atomic, publish-gated.
+ *
+ * `consent` is the candidate's affirmative tick in EnrollPanel (default
+ * UNCHECKED). It is re-validated here, not just client-side: a server action is
+ * a POST endpoint, so without this guard a direct invocation would enroll AND
+ * write a `consents` row carrying the full ACADEMY_CONSENT_TEXT with no user
+ * action behind it. Same defence-in-depth as `input.agreed` in the apply action
+ * (applications/new/actions.ts). The RPC is only reached once consent is
+ * exactly true, so p_consent_text can never be logged for an unticked box.
+ */
 export async function enrollAction(
   slug: string,
   answers: Record<string, string | string[]> = {},
+  consent: boolean = false,
 ): Promise<ActionResult<{ enrollmentId: string }>> {
   await requireCandidate();
+  // Strict === true: over the wire an omitted arg arrives as undefined, and only
+  // a genuine tick may produce a consent row (PDP UU 27/2022 Pasal 20).
+  if (consent !== true) {
+    return { ok: false, error: "Centang persetujuan dulu ya." };
+  }
   const supabase = await createServerClient();
   const { data, error } = await supabase.rpc("enroll_in_academy_program", {
     p_program_slug: slug,

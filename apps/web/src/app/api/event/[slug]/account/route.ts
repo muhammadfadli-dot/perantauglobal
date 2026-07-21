@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writePendingSubmission } from "@/lib/pending-write";
 import { supabaseV2 } from "@/lib/supabase-v2";
+import {
+  EVENT_ACCOUNT_CONSENT_PURPOSE,
+  EVENT_ACCOUNT_CONSENT_TEXT,
+  EVENT_ACCOUNT_CONSENT_VERSION,
+  EVENT_ACCOUNT_CONSENT_REQUIRED_MSG,
+} from "@/lib/event-consent";
 
 /**
  * Event → talent-pool account bridge (migration 0081).
@@ -20,6 +26,14 @@ interface EventAccountPayload {
   email?: string;
   password?: string;
   city?: string;
+  /**
+   * PDP UU 27/2022 Pasal 20: affirmative consent ticked in EventAccountUpsell.
+   * Must be exactly `true`. Until 2026-07-21 this route logged an
+   * `event_account_processing` consent the registrant had never been shown, with
+   * `granted: true` hardcoded - implied consent for a heavier processing (auth
+   * user + candidate record) than the event registration itself.
+   */
+  consent_granted?: boolean;
   source_url?: string;
   website?: string; // honeypot
 }
@@ -83,6 +97,16 @@ export async function POST(
       );
     }
 
+    // PDP UU 27/2022 Pasal 20: consent must be affirmative. Re-checked here so a
+    // client that skips the checkbox (or posts straight to the API) cannot have
+    // a consent row written on its behalf.
+    if (body.consent_granted !== true) {
+      return NextResponse.json(
+        { error: EVENT_ACCOUNT_CONSENT_REQUIRED_MSG },
+        { status: 400 },
+      );
+    }
+
     // Stage the event pending. Trigger links event_registrations.candidate_id on
     // email confirmation (migration 0081).
     const writeResult = await writePendingSubmission(
@@ -101,11 +125,14 @@ export async function POST(
         },
         consents: [
           {
-            purpose: "event_account_processing",
-            purpose_text:
-              "Membuat akun talent pool Perantau Global dari pendaftaran event (verifikasi data, komunikasi via email/WhatsApp soal peluang kerja & program).",
-            version: "2026-06-16",
-            granted: true,
+            // SoT import keeps shown-text (EventAccountUpsell checkbox) ==
+            // logged-text. `granted` mirrors the ticked box, not a hardcoded
+            // true - the guard above already rejected anything else, so this is
+            // always an affirmative record with a real user action behind it.
+            purpose: EVENT_ACCOUNT_CONSENT_PURPOSE,
+            purpose_text: EVENT_ACCOUNT_CONSENT_TEXT,
+            version: EVENT_ACCOUNT_CONSENT_VERSION,
+            granted: body.consent_granted === true,
           },
         ],
       },

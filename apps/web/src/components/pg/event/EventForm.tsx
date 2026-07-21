@@ -6,6 +6,11 @@ import { Field, Input, Select } from "@/components/pg/primitives";
 import { Icon } from "@/components/pg/Icon";
 import { EventAccountUpsell } from "@/components/pg/event/EventAccountUpsell";
 import { generateEventId, getMetaCookies, trackEvent } from "@/lib/tracking";
+import {
+  EVENT_CONSENT_TEXT,
+  EVENT_CONSENT_REQUIRED_MSG,
+  EVENT_MARKETING_TEXT,
+} from "@/lib/event-consent";
 
 const DEFAULT_PROFESSIONS = [
   "Perawat",
@@ -56,6 +61,10 @@ export function EventForm({
   const [error, setError] = useState<string | null>(null);
   const [joinUrl, setJoinUrl] = useState<string | null>(initialJoinUrl);
   const [duplicate, setDuplicate] = useState(false);
+  // PDP UU 27/2022 Pasal 20: consent must be affirmative - default UNCHECKED,
+  // pendaftar yang mencentang. Gates submit here and is re-validated in
+  // /api/event/[slug]; the route refuses a registration it wasn't given.
+  const [agree, setAgree] = useState(false);
   const [submitted, setSubmitted] = useState<{
     full_name: string;
     whatsapp: string;
@@ -79,6 +88,12 @@ export function EventForm({
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError("Format email belum benar.");
+      setStatus("error");
+      return;
+    }
+    // PDP: affirmative consent is the last gate before anything is sent.
+    if (!agree) {
+      setError(EVENT_CONSENT_REQUIRED_MSG);
       setStatus("error");
       return;
     }
@@ -107,6 +122,10 @@ export function EventForm({
           city: String(fd.get("city") || "").trim() || undefined,
           profession: String(fd.get("profession") || "").trim() || undefined,
           interest: String(fd.get("interest") || "").trim() || undefined,
+          // PDP: the ticked box travels with the payload. The route rejects the
+          // submit when this is absent, so no registration is ever stored
+          // without a consent record behind it.
+          consent_processing: agree,
           consent_marketing: fd.get("consent_marketing") === "on",
           website: String(fd.get("website") || ""), // honeypot
           source_url: typeof window !== "undefined" ? window.location.href : undefined,
@@ -263,6 +282,49 @@ export function EventForm({
         )}
       </Field>
 
+      {/* PDP UU 27/2022 Pasal 20: persetujuan afirmatif, default KOSONG.
+          Teks di dalam <span> WAJIB sama persis dengan yang di-log server
+          (SoT: lib/event-consent.ts), jadi tautan kebijakan sengaja ditaruh di
+          baris terpisah supaya string-nya tetap utuh. */}
+      <div>
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={agree}
+            onChange={(e) => setAgree(e.target.checked)}
+            aria-required
+            className="mt-1 w-4 h-4 accent-[var(--pg-red-600)] shrink-0"
+          />
+          <span className="text-[12.5px] text-pg-ink-600 leading-relaxed">
+            {EVENT_CONSENT_TEXT}
+          </span>
+        </label>
+        <div className="text-[12px] text-pg-ink-500 mt-1.5 leading-relaxed pl-[26px]">
+          Baca{" "}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noreferrer"
+            className="text-pg-red-600 font-bold no-underline"
+          >
+            Kebijakan Privasi
+          </a>{" "}
+          dan{" "}
+          <a
+            href="/terms"
+            target="_blank"
+            rel="noreferrer"
+            className="text-pg-red-600 font-bold no-underline"
+          >
+            Syarat &amp; Ketentuan
+          </a>
+          .
+        </div>
+      </div>
+
+      {/* Basis hukum TERPISAH dari consent wajib di atas: opt-in marketing,
+          tetap opsional. Teks dari SoT yang sama supaya yang tampil == yang
+          dicatat di jejak audit registrasi. */}
       <label className="flex items-start gap-2.5 cursor-pointer">
         <input
           type="checkbox"
@@ -270,7 +332,7 @@ export function EventForm({
           className="mt-1 w-4 h-4 accent-[var(--pg-red-600)] shrink-0"
         />
         <span className="text-[12.5px] text-pg-ink-600 leading-relaxed">
-          Saya bersedia dihubungi Perantau Global soal peluang kerja ke luar negeri.
+          {EVENT_MARKETING_TEXT}
         </span>
       </label>
 
@@ -298,8 +360,11 @@ export function EventForm({
         )}
       </button>
 
+      {/* Klaim lama "hanya dipakai untuk acara ini" bertabrakan dengan opt-in
+          marketing di atas - sekarang ruang lingkupnya diikat ke centangan. */}
       <p className="text-[11px] text-pg-ink-400 text-center leading-relaxed">
-        Data kamu aman &amp; hanya dipakai untuk acara ini sesuai kebijakan privasi Perantau Global.
+        Kami nggak kirim spam. Data kamu diproses sesuai persetujuan yang kamu centang di atas dan
+        Kebijakan Privasi Perantau Global.
       </p>
     </form>
   );

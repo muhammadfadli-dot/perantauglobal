@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { Icon } from "@/components/pg/Icon";
 import { Button, Badge } from "@/components/pg/primitives";
 import { countryLabelFromDb } from "@perantauglobal/db/country";
+import { APPLY_CONSENT_TEXT } from "@/lib/apply-consent";
 import { submitApplication } from "./actions";
 
 type Position = {
@@ -695,6 +696,10 @@ function Step3({
         </section>
       )}
 
+      {/* PDP UU 27/2022 Pasal 20: persetujuan afirmatif, default KOSONG.
+          Teks di dalam <div> WAJIB sama persis dengan yang di-log server
+          (SoT: lib/apply-consent.ts), jadi tautan kebijakan sengaja ditaruh
+          di baris terpisah supaya string-nya tetap utuh. */}
       <section className="px-5 pt-5 pb-6">
         <label className="flex gap-3 items-start cursor-pointer rounded-xl p-1 -m-1 focus-within:ring-2 focus-within:ring-pg-red-600 focus-within:ring-offset-1">
           <input
@@ -712,19 +717,30 @@ function Step3({
             {agree && <Icon name="check" size={14} stroke={3} className="text-white" />}
           </div>
           <div className="text-[14px] leading-relaxed text-pg-ink-700">
-            Saya menyatakan semua data yang saya berikan benar dan saya setuju dengan{" "}
-            <a
-              href="https://perantauglobal.com/id/terms"
-              target="_blank"
-              rel="noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="font-bold text-pg-red-600 underline"
-            >
-              syarat &amp; ketentuan
-            </a>{" "}
-            Perantau Global.
+            {APPLY_CONSENT_TEXT}
           </div>
         </label>
+        <div className="text-[13px] text-pg-ink-500 mt-2 leading-relaxed pl-[38px]">
+          Baca{" "}
+          <a
+            href="https://perantauglobal.com/privacy"
+            target="_blank"
+            rel="noreferrer"
+            className="font-bold text-pg-red-600 underline"
+          >
+            Kebijakan Privasi
+          </a>{" "}
+          dan{" "}
+          <a
+            href="https://perantauglobal.com/terms"
+            target="_blank"
+            rel="noreferrer"
+            className="font-bold text-pg-red-600 underline"
+          >
+            Syarat &amp; Ketentuan
+          </a>
+          .
+        </div>
       </section>
     </div>
   );

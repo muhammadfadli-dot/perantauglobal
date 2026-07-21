@@ -3,6 +3,12 @@ import { waitUntil } from "@vercel/functions";
 import { sendMetaEvent } from "@/lib/meta-capi";
 import { writePendingSubmission } from "@/lib/pending-write";
 import { supabaseV2 } from "@/lib/supabase-v2";
+import {
+  ACADEMY_CONSENT_PURPOSE,
+  ACADEMY_CONSENT_TEXT,
+  ACADEMY_CONSENT_VERSION,
+  ACADEMY_CONSENT_REQUIRED_MSG,
+} from "@/lib/academy-consent";
 
 /**
  * Akademi Perantau registration endpoint. Mirror of /api/lowongan/[slug] but
@@ -44,6 +50,13 @@ interface AcademyRegisterPayload {
   password: string;
   /** Registration-field answers, keyed by program_registration_fields.field_key. */
   answers?: Record<string, string | string[]>;
+  /**
+   * PDP UU 27/2022 Pasal 20: affirmative consent ticked by the registrant in
+   * AcademyRegisterForm. Must be exactly `true` - the route refuses the submit
+   * otherwise, so a consent row can never be logged for someone who did not tick
+   * the box.
+   */
+  consent_granted?: boolean;
   source_url?: string;
   eventId?: string;
   fbp?: string;
@@ -123,6 +136,16 @@ export async function POST(
       );
     }
 
+    // PDP UU 27/2022 Pasal 20: consent must be affirmative. Re-checked here so a
+    // client that skips the checkbox (or posts straight to the API) cannot have
+    // a consent row written on its behalf.
+    if (body.consent_granted !== true) {
+      return NextResponse.json(
+        { error: ACADEMY_CONSENT_REQUIRED_MSG },
+        { status: 400 },
+      );
+    }
+
     const email = body.email.toLowerCase().trim();
 
     // Step 1: stage the academy pending. Trigger materializes the enrollment on
@@ -147,11 +170,14 @@ export async function POST(
         },
         consents: [
           {
-            purpose: "academy_processing",
-            purpose_text:
-              "Memproses pendaftaran kelas Akademi Perantau (verifikasi data, komunikasi via email, akses materi & sertifikat).",
-            version: "2026-06-02",
-            granted: true,
+            // SoT import keeps shown-text (AcademyRegisterForm checkbox) ==
+            // logged-text. `granted` mirrors the ticked box, not a hardcoded
+            // true - the guard above already rejected anything else, so this is
+            // always an affirmative record with a real user action behind it.
+            purpose: ACADEMY_CONSENT_PURPOSE,
+            purpose_text: ACADEMY_CONSENT_TEXT,
+            version: ACADEMY_CONSENT_VERSION,
+            granted: body.consent_granted === true,
           },
         ],
       },

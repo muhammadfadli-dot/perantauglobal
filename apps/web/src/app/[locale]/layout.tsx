@@ -4,6 +4,8 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { organizationJsonLd } from "@/lib/jsonld";
+import { CONSENT_DEFAULT_SNIPPET } from "@/lib/consent-mode";
+import { CookieConsent } from "@/components/pg/CookieConsent";
 
 const sourceSans = Source_Sans_3({ subsets: ["latin"], variable: "--font-source-sans" });
 const plusJakarta = Plus_Jakarta_Sans({
@@ -34,8 +36,12 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale}>
-      <GoogleTagManager gtmId="GTM-NK3TM7K7" />
       <head>
+        {/* MUST stay the first script in <head>. Google Consent Mode only binds
+            if the default is set before the GTM container loads, and this raw
+            inline tag runs during HTML parse while GTM is injected
+            afterInteractive. Do not reorder, and do not convert to next/script. */}
+        <script dangerouslySetInnerHTML={{ __html: CONSENT_DEFAULT_SNIPPET }} />
         <meta name="facebook-domain-verification" content="zx2p47avxqeti0ubzprw6diut6gte8" />
         <script
           type="application/ld+json"
@@ -44,9 +50,11 @@ export default async function LocaleLayout({
           }}
         />
       </head>
+      <GoogleTagManager gtmId="GTM-NK3TM7K7" />
       <body className={`${sourceSans.variable} ${plusJakarta.variable} ${ibmPlexMono.variable} font-sans antialiased`}>
         <NextIntlClientProvider messages={messages}>
           {children}
+          <CookieConsent />
         </NextIntlClientProvider>
       </body>
     </html>

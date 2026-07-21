@@ -1,5 +1,14 @@
+import Link from "next/link";
 import { CONTACT, CREDENTIALS, waLink } from "@/lib/site-config";
 import { LogoMark } from "@/components/LogoMark";
+
+// Legal links live in the base bar rather than as a fourth column: two items
+// would read thin next to the three-item Credentials and Contact stacks, and
+// the base bar is where visitors (and a compliance reviewer) look for them.
+const LEGAL_LINKS = [
+  { href: "/privacy", label: "Privacy Policy" },
+  { href: "/terms", label: "Terms of Use" },
+];
 
 export function Footer() {
   return (
@@ -34,6 +43,11 @@ export function Footer() {
       <div style={{ borderTop: "1px solid rgba(216,185,120,.16)" }}>
         <div style={{ maxWidth: 1240, margin: "0 auto", padding: "20px 40px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 24, flexWrap: "wrap" }}>
           <span style={{ fontSize: 12.5, color: "#8A9781" }}>© 2026 Daya Talenta Global. Part of Dayalima Group.</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
+            {LEGAL_LINKS.map((l) => (
+              <Link key={l.href} href={l.href} className="link-gold-underline" style={{ fontSize: 12.5, color: "#B9C4A6", textDecoration: "none" }}>{l.label}</Link>
+            ))}
+          </div>
           <span style={{ fontSize: 12.5, color: "#8A9781" }}>Looking for work abroad? Applications are handled at Perantau Global.</span>
         </div>
       </div>

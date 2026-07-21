@@ -21,15 +21,31 @@ export function Count({
   style?: CSSProperties;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
+  // Seeded with `target`, deliberately not 0: the server and the first client
+  // render must emit identical markup, so the animation may only ever begin on
+  // a LATER render (from the IntersectionObserver callback below).
   const [val, setVal] = useState(target);
+
+  // React's "adjust state when a prop changes" pattern, done during render
+  // instead of inside the effect. It only exists for the case where `target`
+  // changes after the count-up has already settled, which leaves `val` holding
+  // the previous number; the reduced-motion path has nothing else that would
+  // ever correct it. Doing it here rather than as a setState in the effect body
+  // avoids the cascading extra render that react-hooks/set-state-in-effect
+  // flags, and it is a no-op on first render (both start from the same prop),
+  // so hydration is untouched.
+  const [renderedTarget, setRenderedTarget] = useState(target);
+  if (renderedTarget !== target) {
+    setRenderedTarget(target);
+    setVal(target);
+  }
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setVal(target);
-      return;
-    }
+    // Reduced motion: the final value is already what is on screen, so there is
+    // no external system to subscribe to and no observer worth attaching.
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     let raf = 0;
     let started = false;
     const io = new IntersectionObserver(

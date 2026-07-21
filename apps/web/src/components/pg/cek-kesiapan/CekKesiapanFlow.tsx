@@ -1,6 +1,10 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import {
+  READINESS_CONSENT_TEXT,
+  READINESS_CONSENT_REQUIRED_MSG,
+} from "@/lib/readiness-consent";
 import Link from "next/link";
 import {
   PERSONA_META,
@@ -35,6 +39,9 @@ const PG_RED = "#d7262f";
 export function CekKesiapanFlow() {
   const [phase, setPhase] = useState<"intro" | "quiz" | "result">("intro");
   const [name, setName] = useState("");
+  // PDP UU 27/2022 Pasal 20: persetujuan afirmatif, default KOSONG. Nama +
+  // jawaban di sini beneran disimpan (readiness_responses), jadi butuh gate.
+  const [agree, setAgree] = useState(false);
   const [website, setWebsite] = useState(""); // honeypot
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
@@ -46,6 +53,10 @@ export function CekKesiapanFlow() {
   const start = () => {
     if (name.trim().length < 1) {
       setError("Isi nama dulu ya.");
+      return;
+    }
+    if (!agree) {
+      setError(READINESS_CONSENT_REQUIRED_MSG);
       return;
     }
     setError(null);
@@ -67,6 +78,8 @@ export function CekKesiapanFlow() {
             sector: finalSector,
             session_key: SESSION_KEY,
             website,
+            // PDP: gate afirmatif ikut ke server, yang menolak insert tanpa ini.
+            consent_granted: agree,
           }),
         });
         const data = (await res.json().catch(() => ({}))) as { persona?: Persona };
@@ -78,7 +91,7 @@ export function CekKesiapanFlow() {
         setSubmitting(false);
       }
     },
-    [name, website],
+    [name, website, agree],
   );
 
   const choose = (key: AnswerKey | Sector) => {
@@ -130,6 +143,34 @@ export function CekKesiapanFlow() {
           aria-hidden="true"
           style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
         />
+        {/* PDP: teks di <span> WAJIB sama persis dengan SoT readiness-consent.ts.
+            Tautan kebijakan ditaruh di baris terpisah supaya string-nya utuh. */}
+        <label className="mt-4 flex cursor-pointer items-start gap-2.5">
+          <input
+            type="checkbox"
+            checked={agree}
+            onChange={(e) => setAgree(e.target.checked)}
+            aria-required
+            className="mt-0.5 h-4 w-4 shrink-0"
+            style={{ accentColor: PG_RED }}
+          />
+          <span className="text-xs leading-relaxed" style={{ color: "#6a6a6a" }}>
+            {READINESS_CONSENT_TEXT}
+          </span>
+        </label>
+        <p className="mt-1.5 pl-[26px] text-xs" style={{ color: "#9a9a9a" }}>
+          Baca{" "}
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noreferrer"
+            className="font-bold no-underline"
+            style={{ color: PG_RED }}
+          >
+            Kebijakan Privasi
+          </a>
+          .
+        </p>
         {error && (
           <p className="mt-2 text-sm font-medium" style={{ color: PG_RED }}>
             {error}

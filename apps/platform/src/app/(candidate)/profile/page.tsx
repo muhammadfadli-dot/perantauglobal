@@ -276,11 +276,15 @@ export default async function ProfilePage() {
               tone={docsTone}
               href="/profile/dokumen"
             />
+            {/* In-app privacy centre: the consent ledger + withdrawal + the
+                data-deletion request route. Used to link straight out to the
+                public policy, which told a candidate what we promise but gave
+                them nothing to act on. The policy is still one tap away, on
+                the page itself. */}
             <SettingRow
               icon="shield"
-              label="Privasi & izin data"
-              href="https://perantauglobal.com/id/privacy"
-              external
+              label="Privasi & data saya"
+              href="/profile/privasi"
             />
             {candidate.phone && (
               <SettingRow
