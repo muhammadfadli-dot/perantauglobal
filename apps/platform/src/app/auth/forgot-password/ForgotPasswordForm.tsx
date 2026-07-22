@@ -29,7 +29,7 @@ export default function ForgotPasswordForm() {
     const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
 
     if (error) {
-      setState({ kind: "error", message: translateAuthError(error.message) });
+      setState({ kind: "error", message: translateAuthError(error.message, error.code) });
       return;
     }
     setState({ kind: "sent", email });

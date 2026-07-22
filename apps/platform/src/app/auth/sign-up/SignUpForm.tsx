@@ -80,7 +80,7 @@ export default function SignUpForm() {
     });
 
     if (error) {
-      setState({ kind: "error", message: translateAuthError(error.message) });
+      setState({ kind: "error", message: translateAuthError(error.message, error.code) });
       return;
     }
 

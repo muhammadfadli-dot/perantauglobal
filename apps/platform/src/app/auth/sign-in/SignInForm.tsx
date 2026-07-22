@@ -36,7 +36,7 @@ export default function SignInForm() {
     const sb = supabaseBrowser();
     const { error } = await sb.auth.signInWithPassword({ email, password });
     if (error) {
-      setState({ kind: "error", message: translateAuthError(error.message) });
+      setState({ kind: "error", message: translateAuthError(error.message, error.code) });
       return;
     }
     // Session cookie is set by @supabase/ssr. Root page routes by role.

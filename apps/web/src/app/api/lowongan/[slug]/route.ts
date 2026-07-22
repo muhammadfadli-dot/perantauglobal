@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
 import { sendMetaEvent } from "@/lib/meta-capi";
 import { writePendingSubmission } from "@/lib/pending-write";
+import { signUpErrorResponse } from "@/lib/signup-error";
 import { supabaseV2 } from "@/lib/supabase-v2";
 import { verifyTurnstile } from "@/lib/turnstile-verify";
 import { CV_CONSENT_PURPOSE, CV_CONSENT_TEXT, CV_CONSENT_VERSION } from "@/lib/cv-consent";
@@ -443,41 +444,15 @@ export async function POST(
     });
 
     if (signUpError) {
-      const msg = signUpError.message.toLowerCase();
       // Duplicate email: user already has an account. Keep the pending row
       // (trigger will materialize the new application on their next verify
       // event or on direct login via requireCandidate equivalent at the
       // platform). Tell the form to route them to sign-in.
-      if (msg.includes("already") || msg.includes("registered")) {
-        return NextResponse.json(
-          {
-            error:
-              "Email sudah terdaftar. Masuk ke Perantau Global pakai password kamu untuk lanjutkan lamaran.",
-            code: "email_exists",
-          },
-          { status: 409 }
-        );
-      }
-      if (msg.includes("weak password") || msg.includes("pwned")) {
-        return NextResponse.json(
-          {
-            error:
-              "Password terlalu umum atau pernah bocor di database publik. Pilih yang lain.",
-          },
-          { status: 400 }
-        );
-      }
-      if (msg.includes("rate limit") || msg.includes("too many requests")) {
-        return NextResponse.json(
-          { error: "Terlalu banyak percobaan. Coba lagi dalam beberapa menit." },
-          { status: 429 }
-        );
-      }
-      console.error("[lowongan] signUp failed:", signUpError.message);
-      return NextResponse.json(
-        { error: "Gagal membuat akun. Coba lagi sebentar." },
-        { status: 500 }
-      );
+      return signUpErrorResponse(signUpError, {
+        logPrefix: "[lowongan]",
+        emailExistsMessage:
+          "Email sudah terdaftar. Masuk ke Perantau Global pakai password kamu untuk lanjutkan lamaran.",
+      });
     }
 
     if (body.eventId) {

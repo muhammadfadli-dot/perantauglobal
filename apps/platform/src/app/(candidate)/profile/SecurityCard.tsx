@@ -25,7 +25,7 @@ export default function SecurityCard({ email }: { email: string }) {
     const redirectTo = `${window.location.origin}/auth/reset-password`;
     const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo });
     if (error) {
-      setState({ kind: "error", message: translateAuthError(error.message) });
+      setState({ kind: "error", message: translateAuthError(error.message, error.code) });
       return;
     }
     setState({ kind: "sent" });

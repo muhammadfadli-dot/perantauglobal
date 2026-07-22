@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { writePendingSubmission } from "@/lib/pending-write";
+import { signUpErrorResponse } from "@/lib/signup-error";
 import { supabaseV2 } from "@/lib/supabase-v2";
 import {
   EVENT_ACCOUNT_CONSENT_PURPOSE,
@@ -158,37 +159,11 @@ export async function POST(
     });
 
     if (signUpError) {
-      const msg = signUpError.message.toLowerCase();
-      if (msg.includes("already") || msg.includes("registered")) {
-        return NextResponse.json(
-          {
-            error:
-              "Email ini sudah punya akun Perantau Global. Langsung masuk aja di app.perantauglobal.com.",
-            code: "email_exists",
-          },
-          { status: 409 },
-        );
-      }
-      if (msg.includes("weak password") || msg.includes("pwned")) {
-        return NextResponse.json(
-          {
-            error:
-              "Password terlalu umum atau pernah bocor di database publik. Pilih yang lain.",
-          },
-          { status: 400 },
-        );
-      }
-      if (msg.includes("rate limit") || msg.includes("too many requests")) {
-        return NextResponse.json(
-          { error: "Terlalu banyak percobaan. Coba lagi dalam beberapa menit." },
-          { status: 429 },
-        );
-      }
-      console.error("[event/account] signUp failed:", signUpError.message);
-      return NextResponse.json(
-        { error: "Gagal membuat akun. Coba lagi sebentar." },
-        { status: 500 },
-      );
+      return signUpErrorResponse(signUpError, {
+        logPrefix: "[event/account]",
+        emailExistsMessage:
+          "Email ini sudah punya akun Perantau Global. Langsung masuk aja di app.perantauglobal.com.",
+      });
     }
 
     return NextResponse.json({ success: true });

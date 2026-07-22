@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { waitUntil } from "@vercel/functions";
 import { sendMetaEvent } from "@/lib/meta-capi";
 import { writePendingSubmission } from "@/lib/pending-write";
+import { signUpErrorResponse } from "@/lib/signup-error";
 import { supabaseV2 } from "@/lib/supabase-v2";
 import {
   ACADEMY_CONSENT_PURPOSE,
@@ -337,42 +338,16 @@ export async function POST(
     });
 
     if (signUpError) {
-      const msg = signUpError.message.toLowerCase();
-      if (msg.includes("already") || msg.includes("registered")) {
-        // NOTE: for an already-confirmed account the trigger never fires (no
-        // email_confirmed_at flip), so the staged academy pending won't
-        // materialize — an existing user must enroll from inside the app
-        // (enroll_in_academy_program). The message reflects that; the future
-        // web register form should route this 409 → login → /akademi/[slug].
-        return NextResponse.json(
-          {
-            error:
-              "Email sudah terdaftar. Masuk ke aplikasi Perantau Global, buka kelas ini, lalu klik Daftar untuk menyelesaikan pendaftaran.",
-            code: "email_exists",
-          },
-          { status: 409 },
-        );
-      }
-      if (msg.includes("weak password") || msg.includes("pwned")) {
-        return NextResponse.json(
-          {
-            error:
-              "Password terlalu umum atau pernah bocor di database publik. Pilih yang lain.",
-          },
-          { status: 400 },
-        );
-      }
-      if (msg.includes("rate limit") || msg.includes("too many requests")) {
-        return NextResponse.json(
-          { error: "Terlalu banyak percobaan. Coba lagi dalam beberapa menit." },
-          { status: 429 },
-        );
-      }
-      console.error("[akademi] signUp failed:", signUpError.message);
-      return NextResponse.json(
-        { error: "Gagal membuat akun. Coba lagi sebentar." },
-        { status: 500 },
-      );
+      // NOTE: for an already-confirmed account the trigger never fires (no
+      // email_confirmed_at flip), so the staged academy pending won't
+      // materialize — an existing user must enroll from inside the app
+      // (enroll_in_academy_program). The message reflects that; the future
+      // web register form should route this 409 → login → /akademi/[slug].
+      return signUpErrorResponse(signUpError, {
+        logPrefix: "[akademi]",
+        emailExistsMessage:
+          "Email sudah terdaftar. Masuk ke aplikasi Perantau Global, buka kelas ini, lalu klik Daftar untuk menyelesaikan pendaftaran.",
+      });
     }
 
     if (body.eventId) {

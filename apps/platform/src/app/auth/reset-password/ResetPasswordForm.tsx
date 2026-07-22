@@ -55,7 +55,7 @@ export default function ResetPasswordForm() {
 
       const { error } = await sb.auth.exchangeCodeForSession(code);
       if (error) {
-        setPhase({ kind: "invalid", message: translateAuthError(error.message) });
+        setPhase({ kind: "invalid", message: translateAuthError(error.message, error.code) });
         return;
       }
 
@@ -83,7 +83,7 @@ export default function ResetPasswordForm() {
     const { error } = await sb.auth.updateUser({ password });
 
     if (error) {
-      setPhase({ kind: "error", message: translateAuthError(error.message) });
+      setPhase({ kind: "error", message: translateAuthError(error.message, error.code) });
       return;
     }
 
