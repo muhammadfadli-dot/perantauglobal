@@ -299,9 +299,18 @@ export async function POST(
       // ignore - fail open
     }
 
-    // CV staged anon (Fase 2). Strict re-validation server-side; invalid -> drop
-    // the pointer (submit still proceeds without a CV).
+    // CV staged anon (Fase 2). Strict re-validation server-side.
     const cvStaging = validatePendingCv(body.pending_id, body.cv_path, body.cv_mime, body.cv_size);
+    // CV WAJIB di semua jalur apply (keputusan 2026-07-23). Gerbang klien sudah
+    // memblok submit tanpa CV sejak 13 Jul, tapi POST langsung ke API bisa
+    // melewatinya; fail-closed di sini supaya tidak ada lagi lamaran tanpa CV.
+    // Ditolak SEBELUM staging + Lead CAPI, jadi tidak ada event yang salah tembak.
+    if (!cvStaging) {
+      return NextResponse.json(
+        { error: "Lampirkan CV dulu untuk melamar posisi ini." },
+        { status: 400 }
+      );
+    }
     // Era tag for the submission + CAPI. Whitelist the known values so a bogus
     // client value can't poison analytics; anything else falls back to "control".
     // "gate_v1" = the CV-fit-gate era (client sends this now); "cv_required" +

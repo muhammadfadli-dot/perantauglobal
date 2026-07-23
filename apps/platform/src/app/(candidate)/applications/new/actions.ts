@@ -39,11 +39,33 @@ export async function submitApplication(
 
   const { data: candData } = await supabase
     .from("candidates")
-    .select("id")
+    .select("id, phone")
     .eq("auth_user_id", session.userId)
     .single();
-  const candidate = candData as { id: string } | null;
+  const candidate = candData as { id: string; phone: string | null } | null;
   if (!candidate) return { ok: false, error: "Profil kandidat belum tersedia." };
+
+  // CV + nomor WhatsApp WAJIB di SEMUA jalur apply (keputusan 2026-07-23).
+  // Fail-closed di server: jalur web publik sudah mewajibkan keduanya, tapi
+  // jalur portal ini sebelumnya tidak, sehingga lamaran tanpa CV/telepon masih
+  // lolos 1-5/hari. Cek di sini, bukan cuma di UI, supaya tidak bisa dilewati.
+  if (!candidate.phone || candidate.phone.trim() === "") {
+    return {
+      ok: false,
+      error: "Lengkapi nomor WhatsApp di profil dulu sebelum melamar.",
+    };
+  }
+  const { count: cvCount } = await supabase
+    .from("candidate_documents")
+    .select("id", { count: "exact", head: true })
+    .eq("candidate_id", candidate.id)
+    .eq("doc_type", "cv");
+  if (!cvCount || cvCount < 1) {
+    return {
+      ok: false,
+      error: "Upload CV dulu di profil sebelum melamar. CV wajib untuk semua posisi.",
+    };
+  }
 
   // Block apply to an inactive position. A position with no active job_order
   // is still valid (talent-pool model) — only an inactive POSITION is blocked.

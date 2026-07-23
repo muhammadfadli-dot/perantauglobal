@@ -489,8 +489,11 @@ function Step1({
           </Link>
         )}
         <div className="mt-3 text-[12px] text-pg-ink-500 leading-relaxed">
-          Dokumen tidak wajib lengkap sekarang. KTP yang utama; paspor, foto, &
-          CV diminta nanti di tahap Cek Dokumen.
+          CV dan nomor WhatsApp wajib sebelum kirim lamaran, lengkapi di{" "}
+          <Link href="/profile" className="font-bold text-pg-red-600 underline">
+            profil
+          </Link>
+          . Paspor & foto boleh menyusul di tahap Cek Dokumen.
         </div>
       </section>
     </div>

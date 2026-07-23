@@ -25,8 +25,12 @@ export default function DocActions({
     setError(null);
     start(async () => {
       try {
-        const url = await getDocumentSignedUrl(filePath);
-        window.open(url, "_blank", "noopener");
+        const res = await getDocumentSignedUrl(filePath);
+        if (res.ok) {
+          window.open(res.url, "_blank", "noopener");
+        } else {
+          setError(res.message);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Gagal buka file");
       }

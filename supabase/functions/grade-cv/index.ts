@@ -33,10 +33,22 @@ const CORS: Record<string, string> = {
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", ...CORS } });
 
+function bearerToken(req: Request): string {
+  return (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+}
 function roleFromJwt(req: Request): string | null {
-  const token = (req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "");
+  const token = bearerToken(req);
   if (!token) return null;
   try { return JSON.parse(atob(token.split(".")[1])).role ?? null; } catch { return null; }
+}
+// New-format service-role keys (sb_secret_...) are opaque, not JWTs, so
+// roleFromJwt() returns null for them. Admin server actions invoke this
+// function with exactly that key (createServiceRoleClient), so treat an
+// exact match to the service key as privileged. Exact-compare only, no
+// prefix/loose match, so this never widens access beyond the real secret.
+function isServiceRoleKey(req: Request): boolean {
+  const token = bearerToken(req);
+  return token.length > 0 && token === SERVICE_KEY;
 }
 function subFromJwt(req: Request): string | null {
   try { return JSON.parse(atob((req.headers.get("Authorization") ?? "").replace(/^Bearer\s+/i, "").split(".")[1])).sub ?? null; } catch { return null; }
@@ -303,7 +315,7 @@ Deno.serve(async (req) => {
   if (!GATEWAY_KEY) return json({ error: "AI_GATEWAY_API_KEY not set" }, 500);
 
   const role = roleFromJwt(req);
-  const privileged = role === "service_role" || role === "admin";
+  const privileged = role === "service_role" || role === "admin" || isServiceRoleKey(req);
   const body = await req.json().catch(() => ({}));
 
   if (body.fit_backfill) {

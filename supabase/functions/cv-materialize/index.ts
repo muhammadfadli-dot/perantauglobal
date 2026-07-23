@@ -75,26 +75,39 @@ Deno.serve(async (req) => {
   const ext = SAFE_EXT.has(rawExt) ? rawExt : "pdf";
   const dest = `${candidateId}/cv/cv-${Date.now()}.${ext}`;
 
-  try {
-    const mv = await svc.storage
-      .from("pending-cv")
-      .move(doc.file_path, dest, { destinationBucket: "candidate-documents" });
-    if (mv.error) {
-      // File sudah TIDAK ADA di pending-cv: kandidat verify email > 48 jam setelah
-      // upload sehingga purge harian keburu menghapusnya (kasus lama, sebelum fix
-      // exclude WS-2a migration 0095). Row candidate_documents jadi dangling —
-      // kandidat "punya CV" padahal filenya hilang, dan grade-cv nggak pernah
-      // jalan. Bersihkan metadata-nya biar konsisten; kandidat bisa upload CV baru
-      // lewat portal. Bukan error fatal (WS-2b).
-      const emsg = (mv.error.message || "").toLowerCase();
-      if (emsg.includes("not found") || emsg.includes("does not exist") || emsg.includes("no such")) {
-        await svc.from("candidate_documents").delete().eq("id", doc.id);
-        return json({ ok: true, materialized: false, reason: "stale pointer cleaned", document_id: doc.id }, 200);
-      }
-      return json({ ok: false, materialized: false, error: `move: ${mv.error.message}` }, 200);
+  // Move dengan retry sekali. Kegagalan move generik (timeout/transient storage)
+  // dulu diam-diam balas 200 {ok:false} dan MEMBIARKAN pointer di path pending
+  // tanpa jejak, sehingga ~5% CV nyangkut menyebar seminggu tanpa ketahuan
+  // (temuan 2026-07-23). Sekarang: coba lagi sekali, dan kalau tetap gagal
+  // generik, console.error supaya kelihatan di log edge function.
+  async function tryMove() {
+    try {
+      const mv = await svc.storage
+        .from("pending-cv")
+        .move(doc.file_path, dest, { destinationBucket: "candidate-documents" });
+      return { error: mv.error ? mv.error.message : null };
+    } catch (e) {
+      return { error: `throw: ${String(e).slice(0, 200)}` };
     }
-  } catch (e) {
-    return json({ ok: false, materialized: false, error: `move-throw: ${String(e).slice(0, 200)}` }, 200);
+  }
+  let moveErr = (await tryMove()).error;
+  if (moveErr) {
+    const emsg = moveErr.toLowerCase();
+    // File sudah TIDAK ADA di pending-cv: kandidat verify email > 48 jam setelah
+    // upload sehingga purge harian keburu menghapusnya. Row candidate_documents
+    // jadi dangling. Bersihkan metadata-nya biar konsisten; kandidat bisa upload
+    // CV baru lewat portal. Bukan error fatal, dan retry tidak akan menolong.
+    if (emsg.includes("not found") || emsg.includes("does not exist") || emsg.includes("no such")) {
+      await svc.from("candidate_documents").delete().eq("id", doc.id);
+      console.error(`cv-materialize: stale pointer cleaned doc=${doc.id} cand=${candidateId} (objek pending-cv hilang)`);
+      return json({ ok: true, materialized: false, reason: "stale pointer cleaned", document_id: doc.id }, 200);
+    }
+    // Error generik (bukan not-found): coba sekali lagi sebelum menyerah.
+    moveErr = (await tryMove()).error;
+    if (moveErr) {
+      console.error(`cv-materialize: MOVE GAGAL setelah retry doc=${doc.id} cand=${candidateId} path=${doc.file_path} err=${moveErr}`);
+      return json({ ok: false, materialized: false, error: `move: ${moveErr}` }, 200);
+    }
   }
 
   // 4. UPDATE pointer ke path baru (di bucket candidate-documents).
