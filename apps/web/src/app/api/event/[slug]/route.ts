@@ -260,6 +260,8 @@ export async function POST(
           success: true,
           duplicate: true,
           joinUrl: event.join_url ?? null,
+          communityUrl: eventContentString(event.content, "communityUrl"),
+          communityNote: eventContentString(event.content, "communityNote"),
         });
       }
       console.error("[event] insert failed:", insertErr.message);
@@ -337,6 +339,11 @@ export async function POST(
     return NextResponse.json({
       success: true,
       joinUrl: event.join_url ?? null,
+      // Handed over only in the response to a stored registration. Passing it
+      // as a prop to the client form instead would embed it in the page's RSC
+      // payload, i.e. readable in view-source by anyone who never registered.
+      communityUrl: eventContentString(event.content, "communityUrl"),
+      communityNote: eventContentString(event.content, "communityNote"),
     });
   } catch (err) {
     console.error("[event] unexpected error:", err);

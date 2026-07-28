@@ -470,8 +470,6 @@ export default async function EventPage({
               interestLabel={content.form?.interestLabel}
               interestOptions={content.form?.interestOptions}
               note={content.form?.note}
-              communityUrl={content.communityUrl}
-              communityNote={content.communityNote}
             />
           </div>
         </div>

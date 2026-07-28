@@ -43,8 +43,6 @@ export function EventForm({
   interestLabel = "Negara/posisi yang diminati",
   interestOptions,
   note,
-  communityUrl,
-  communityNote,
 }: {
   eventSlug: string;
   eventTitle: string;
@@ -54,9 +52,6 @@ export function EventForm({
   interestLabel?: string;
   interestOptions?: string[];
   note?: string;
-  /** Community invite shown only after a successful registration. */
-  communityUrl?: string;
-  communityNote?: string;
 }) {
   const professions =
     professionOptions && professionOptions.length > 0
@@ -66,6 +61,13 @@ export function EventForm({
   const [error, setError] = useState<string | null>(null);
   const [joinUrl, setJoinUrl] = useState<string | null>(initialJoinUrl);
   const [duplicate, setDuplicate] = useState(false);
+  // Community invite arrives with the API response, never as a prop: props of a
+  // client component land in the page's RSC payload, so the group link would be
+  // readable in view-source by people who never registered.
+  const [community, setCommunity] = useState<{
+    url: string;
+    note?: string;
+  } | null>(null);
   // PDP UU 27/2022 Pasal 20: consent must be affirmative - default UNCHECKED,
   // pendaftar yang mencentang. Gates submit here and is re-validated in
   // /api/event/[slug]; the route refuses a registration it wasn't given.
@@ -146,6 +148,8 @@ export function EventForm({
         joinUrl?: string | null;
         error?: string;
         duplicate?: boolean;
+        communityUrl?: string | null;
+        communityNote?: string | null;
       };
 
       if (!res.ok || !data.success) {
@@ -155,6 +159,12 @@ export function EventForm({
       }
 
       if (data.joinUrl) setJoinUrl(data.joinUrl);
+      if (data.communityUrl) {
+        setCommunity({
+          url: data.communityUrl,
+          note: data.communityNote ?? undefined,
+        });
+      }
       setDuplicate(data.duplicate === true);
       setSubmitted({ full_name, whatsapp, email });
       setStatus("success");
@@ -199,7 +209,7 @@ export function EventForm({
         {/* Community invite. Deliberately the loudest thing on this screen when
             there's no join link yet: this is the step that decides whether a
             registration turns into an attendance. */}
-        {communityUrl && (
+        {community && (
           <div
             className="mt-5 w-full rounded-2xl p-4 text-center"
             style={{ background: "var(--pg-ok-bg)", border: "1px solid var(--pg-ok)" }}
@@ -208,11 +218,11 @@ export function EventForm({
               Satu langkah lagi, gabung grup koordinasi
             </p>
             <p className="mt-1 text-[13px] text-pg-ink-600 leading-relaxed">
-              {communityNote ??
+              {community.note ??
                 "Pengingat, info teknis, dan link acara dibagikan di grup ini."}
             </p>
             <a
-              href={communityUrl}
+              href={community.url}
               target="_blank"
               rel="noopener noreferrer"
               className="mt-3 inline-flex items-center justify-center gap-2 min-h-[48px] px-6 rounded-xl font-bold text-white no-underline"
