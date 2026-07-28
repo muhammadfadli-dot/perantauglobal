@@ -53,6 +53,43 @@ interface EventRegPayload {
   website?: string; // honeypot — humans never fill this
 }
 
+/**
+ * What the confirmation email may promise, read from `events.content` so it
+ * always matches what the LP itself advertises. Prefers the rich benefit cards
+ * (title only), falls back to the plain benefits list, and returns [] when the
+ * event promises nothing extra.
+ */
+function eventPerks(content: unknown): string[] {
+  if (!content || typeof content !== "object" || Array.isArray(content)) {
+    return [];
+  }
+  const c = content as {
+    benefitsDetail?: { title?: unknown }[];
+    benefits?: unknown[];
+  };
+  const fromDetail = Array.isArray(c.benefitsDetail)
+    ? c.benefitsDetail
+        .map((b) => (typeof b?.title === "string" ? b.title.trim() : ""))
+        .filter(Boolean)
+    : [];
+  if (fromDetail.length > 0) return fromDetail.slice(0, 6);
+  return Array.isArray(c.benefits)
+    ? c.benefits
+        .map((b) => (typeof b === "string" ? b.trim() : ""))
+        .filter(Boolean)
+        .slice(0, 6)
+    : [];
+}
+
+/** Read one string field out of the `events.content` JSONB, or null. */
+function eventContentString(content: unknown, key: string): string | null {
+  if (!content || typeof content !== "object" || Array.isArray(content)) {
+    return null;
+  }
+  const v = (content as Record<string, unknown>)[key];
+  return typeof v === "string" && v.trim() ? v.trim() : null;
+}
+
 /** Trim + cap a free-text field; returns null for empty so we don't store "". */
 function clean(value: unknown, max = 200): string | null {
   if (typeof value !== "string") return null;
@@ -73,7 +110,9 @@ export async function POST(
     // too, but checking lets us 404/410 cleanly + grab the join_url to return).
     const { data: event, error: lookupErr } = await db
       .from("events")
-      .select("slug, title, status, join_url, starts_at, timezone, platform")
+      .select(
+        "slug, title, status, join_url, starts_at, timezone, platform, content",
+      )
       .eq("slug", slug)
       .eq("status", "published")
       .maybeSingle();
@@ -284,6 +323,9 @@ export async function POST(
             whenLabel,
             platform: event.platform || "Zoom",
             joinUrl: event.join_url ?? null,
+            perks: eventPerks(event.content),
+            communityUrl: eventContentString(event.content, "communityUrl"),
+            communityNote: eventContentString(event.content, "communityNote"),
           });
           await sendEmail({ to: email, subject, html });
         } catch (err) {

@@ -63,6 +63,15 @@ export type EventContent = {
   form?: EventFormConfig;
   /** Small note under the hero CTA, e.g. "Gratis · Kuota terbatas 300 peserta". */
   ctaNote?: string;
+  /**
+   * Post-registration community invite (WhatsApp group, Telegram, …). Shown on
+   * the success screen and in the confirmation email, never before someone has
+   * actually registered: the group is the show-up-rate lever, but a link handed
+   * out too early lets people join without ever leaving their data behind.
+   */
+  communityUrl?: string;
+  /** One line explaining what the community is for, shown next to the button. */
+  communityNote?: string;
   /** Trust band (3 quick credibility hits) under the hero. */
   stats?: EventStat[];
   /** "Sesi ini buat kamu yang…" self-selection bullets. */

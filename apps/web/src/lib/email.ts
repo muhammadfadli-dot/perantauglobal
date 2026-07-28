@@ -65,12 +65,48 @@ export function buildEventThankYouEmail(args: {
   whenLabel: string; // e.g. "Senin, 23 Juni 2026 · 10:00 WIB"
   platform: string; // e.g. "Zoom"
   joinUrl?: string | null; // when set, the confirmation includes the join button directly
+  /**
+   * What the registrant actually gets, per event (from `events.content`).
+   * Must be passed in: this block used to hardcode the Work.Travel.Repeat perks,
+   * so every later event promised an e-book and e-certificate nobody agreed to
+   * deliver. Empty/omitted = the block is dropped entirely.
+   */
+  perks?: string[];
+  /**
+   * Post-registration community invite (WhatsApp group). Repeated here on
+   * purpose: the success screen is seen once, on a phone, often in a hurry.
+   * The email is the only copy the registrant can come back to.
+   */
+  communityUrl?: string | null;
+  communityNote?: string | null;
 }): { subject: string; html: string } {
   const name = esc(args.firstName.split(" ")[0] || args.firstName);
   const title = esc(args.eventTitle);
   const when = esc(args.whenLabel);
   const platform = esc(args.platform);
   const joinUrl = args.joinUrl ? esc(args.joinUrl) : "";
+  const communityUrl = args.communityUrl ? esc(args.communityUrl) : "";
+  const communityNote = esc(
+    args.communityNote ||
+      "Pengingat, info teknis, dan link acara dibagikan di grup ini.",
+  );
+  const communityBlock = communityUrl
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px 0;background:#ECFDF3;border:1px solid #A6E9C5;border-radius:12px">
+              <tr><td style="padding:18px 20px;text-align:center">
+                <p style="margin:0 0 4px 0;font-size:15px;line-height:1.5;color:#065F46"><strong>Satu langkah lagi, gabung grup koordinasi</strong></p>
+                <p style="margin:0 0 12px 0;font-size:13px;line-height:1.6;color:#065F46">${communityNote}</p>
+                <a href="${communityUrl}" style="display:inline-block;background:#12805C;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;padding:13px 34px;border-radius:10px">Gabung grup WhatsApp</a>
+              </td></tr>
+            </table>`
+    : "";
+  const perks = (args.perks ?? []).map((p) => p.trim()).filter(Boolean);
+  const perksBlock =
+    perks.length > 0
+      ? `<p style="margin:0 0 6px 0;font-size:14px;line-height:1.6;color:#3A3A3A">Yang kamu dapat di sesi ini:</p>
+            <p style="margin:0 0 24px 0;font-size:14px;line-height:1.8;color:#3A3A3A">${perks
+              .map((p) => `✅ ${esc(p)}`)
+              .join("<br/>")}</p>`
+      : "";
 
   const subject = `Kamu terdaftar! ${args.eventTitle}`;
 
@@ -79,7 +115,7 @@ export function buildEventThankYouEmail(args: {
   const joinBlock = joinUrl
     ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px 0;background:#ECFDF3;border:1px solid #A6E9C5;border-radius:12px">
               <tr><td style="padding:18px 20px;text-align:center">
-                <p style="margin:0 0 12px 0;font-size:14px;line-height:1.6;color:#065F46"><strong>Link Zoom kamu sudah siap.</strong> Simpan email ini, ya — tinggal klik tombol di bawah pas acara mulai.</p>
+                <p style="margin:0 0 12px 0;font-size:14px;line-height:1.6;color:#065F46"><strong>Link Zoom kamu sudah siap.</strong> Simpan email ini, ya, tinggal klik tombol di bawah pas acara mulai.</p>
                 <a href="${joinUrl}" style="display:inline-block;background:#D1283C;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;padding:13px 34px;border-radius:10px">Join ${platform} →</a>
               </td></tr>
             </table>`
@@ -116,14 +152,15 @@ export function buildEventThankYouEmail(args: {
               <tr><td style="padding:18px 20px">
                 <p style="margin:0 0 10px 0;font-size:13px;line-height:1.5;color:#3A3A3A">📅 <strong>${when}</strong></p>
                 <p style="margin:0 0 10px 0;font-size:13px;line-height:1.5;color:#3A3A3A">💻 Online via ${platform}</p>
-                <p style="margin:0;font-size:13px;line-height:1.5;color:#3A3A3A">🎟️ Gratis — tanpa biaya, tanpa calo</p>
+                <p style="margin:0;font-size:13px;line-height:1.5;color:#3A3A3A">🎟️ Gratis, tanpa biaya, tanpa calo</p>
               </td></tr>
             </table>
 
             ${joinBlock}
 
-            <p style="margin:0 0 6px 0;font-size:14px;line-height:1.6;color:#3A3A3A">Yang kamu dapat di sesi ini:</p>
-            <p style="margin:0 0 24px 0;font-size:14px;line-height:1.8;color:#3A3A3A">📘 E-book "Paspor Gaji"<br/>🧭 Live "Cek Level Perantau"<br/>📜 E-Certificate kehadiran</p>
+            ${communityBlock}
+
+            ${perksBlock}
 
             <p style="margin:0 0 4px 0;font-size:12px;line-height:1.5;color:#6B6B6B">Diselenggarakan oleh PT Daya Talenta Global (Perantau Global)</p>
             <p style="margin:0;font-size:12px;line-height:1.5;color:#6B6B6B">Bersama Lembaga Vokasi Universitas Indonesia & LSP Universitas Indonesia</p>

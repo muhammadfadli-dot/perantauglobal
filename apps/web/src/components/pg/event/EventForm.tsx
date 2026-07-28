@@ -43,6 +43,8 @@ export function EventForm({
   interestLabel = "Negara/posisi yang diminati",
   interestOptions,
   note,
+  communityUrl,
+  communityNote,
 }: {
   eventSlug: string;
   eventTitle: string;
@@ -52,6 +54,9 @@ export function EventForm({
   interestLabel?: string;
   interestOptions?: string[];
   note?: string;
+  /** Community invite shown only after a successful registration. */
+  communityUrl?: string;
+  communityNote?: string;
 }) {
   const professions =
     professionOptions && professionOptions.length > 0
@@ -174,10 +179,10 @@ export function EventForm({
         <p className="mt-2 text-[14px] text-pg-ink-600 leading-relaxed max-w-sm">
           {duplicate ? (
             <>Kamu sudah terdaftar di <strong>{eventTitle}</strong>. Nggak perlu daftar
-            lagi — pastikan WhatsApp &amp; email kamu aktif ya.</>
+            lagi, pastikan WhatsApp &amp; email kamu aktif ya.</>
           ) : (
             <>Sampai jumpa di <strong>{eventTitle}</strong>. Menjelang acara, link Zoom
-            &amp; pengingat kami kirim ke WhatsApp dan email kamu — dari kontak resmi
+            &amp; pengingat kami kirim ke WhatsApp dan email kamu, dari kontak resmi
             Perantau Global. Pastikan WhatsApp kamu aktif ya.</>
           )}
         </p>
@@ -190,6 +195,32 @@ export function EventForm({
           >
             <Icon name="zoom" size={18} /> Buka link Zoom
           </a>
+        )}
+        {/* Community invite. Deliberately the loudest thing on this screen when
+            there's no join link yet: this is the step that decides whether a
+            registration turns into an attendance. */}
+        {communityUrl && (
+          <div
+            className="mt-5 w-full rounded-2xl p-4 text-center"
+            style={{ background: "var(--pg-ok-bg)", border: "1px solid var(--pg-ok)" }}
+          >
+            <p className="text-[14px] font-extrabold text-pg-ink-900 leading-snug">
+              Satu langkah lagi, gabung grup koordinasi
+            </p>
+            <p className="mt-1 text-[13px] text-pg-ink-600 leading-relaxed">
+              {communityNote ??
+                "Pengingat, info teknis, dan link acara dibagikan di grup ini."}
+            </p>
+            <a
+              href={communityUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center justify-center gap-2 min-h-[48px] px-6 rounded-xl font-bold text-white no-underline"
+              style={{ background: "var(--pg-ok)" }}
+            >
+              <Icon name="users" size={18} /> Gabung grup WhatsApp
+            </a>
+          </div>
         )}
         {submitted && (
           <EventAccountUpsell eventSlug={eventSlug} prefill={submitted} />

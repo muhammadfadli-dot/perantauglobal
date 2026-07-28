@@ -8,7 +8,7 @@ Website + candidate portal + internal CRM untuk PT Daya Talenta Global (P3MI bra
 
 ## Architecture
 
-**2 apps, 1 monorepo, 1 Supabase project.** Config-driven multi-position recruitment platform with evergreen talent pool development.
+**3 apps, 1 monorepo, 1 Supabase project.** Config-driven multi-position recruitment platform with evergreen talent pool development. The third app is `apps/demand` (`dayatalentaglobal.com`), the employer-facing site; it is not listed in the tree below but it ships from this repo and deploys on every merge to `main`.
 
 ```
 perantauglobal/ (monorepo root, pnpm + Turborepo)
