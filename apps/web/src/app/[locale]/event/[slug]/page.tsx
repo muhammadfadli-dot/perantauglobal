@@ -461,10 +461,12 @@ export default async function EventPage({
             className="bg-pg-white border border-pg-ink-200 rounded-2xl p-5 md:p-7"
             style={{ boxShadow: "var(--pg-shadow-2)" }}
           >
+            {/* joinUrl is deliberately NOT passed: it would land in the RSC
+                payload and leak the Zoom link to anyone reading view-source.
+                EventForm gets it from the registration API response instead. */}
             <EventForm
               eventSlug={ev.slug}
               eventTitle={ev.title}
-              joinUrl={ev.joinUrl}
               professionLabel={content.form?.professionLabel}
               professionOptions={content.form?.professionOptions}
               interestLabel={content.form?.interestLabel}

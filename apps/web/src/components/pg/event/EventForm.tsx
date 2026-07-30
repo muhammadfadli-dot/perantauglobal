@@ -37,7 +37,6 @@ function readUtm(): Record<string, string | undefined> {
 export function EventForm({
   eventSlug,
   eventTitle,
-  joinUrl: initialJoinUrl,
   professionLabel = "Profesi",
   professionOptions,
   interestLabel = "Negara/posisi yang diminati",
@@ -46,7 +45,6 @@ export function EventForm({
 }: {
   eventSlug: string;
   eventTitle: string;
-  joinUrl: string | null;
   professionLabel?: string;
   professionOptions?: string[];
   interestLabel?: string;
@@ -59,7 +57,13 @@ export function EventForm({
       : DEFAULT_PROFESSIONS;
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [joinUrl, setJoinUrl] = useState<string | null>(initialJoinUrl);
+  // The Zoom link arrives with the API response too, and for the same reason as
+  // the community invite below. It used to be a prop, which was harmless only as
+  // long as join_url was empty; the moment Ifa filled it in via admin on 30 Jul
+  // 2026 the full URL (password token included) became readable in view-source
+  // on a page whose entire point is that the link is what you get FOR
+  // registering. Do not reintroduce it as a prop.
+  const [joinUrl, setJoinUrl] = useState<string | null>(null);
   const [duplicate, setDuplicate] = useState(false);
   // Community invite arrives with the API response, never as a prop: props of a
   // client component land in the page's RSC payload, so the group link would be
