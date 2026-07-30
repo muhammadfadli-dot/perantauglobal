@@ -212,8 +212,9 @@ function FlowSection({ flow, feeNote }: { flow: ProgramFlowStep[]; feeNote?: str
                 sertifikasi, sampai kesempatan masuk tahap screening penempatan.
               </FeePoint>
               <FeePoint>
-                <b className="text-pg-ink-900">Commitment fee</b>-nya baru dibahas setelah kamu lolos
-                screening, dan dibayarkan ke lembaga pelatihan, bukan ke Perantau Global.
+                <b className="text-pg-ink-900">Commitment fee</b> (uang muka 30% dari biaya program)
+                baru dibahas setelah kamu lolos screening, dan dibayarkan ke lembaga pelatihan, bukan
+                ke Perantau Global.
               </FeePoint>
               <FeePoint>
                 Biaya keberangkatan dihitung terpisah, dan bisa ditanggung dulu lewat dana talang.
@@ -340,7 +341,7 @@ function TrustSection() {
             to. */}
         <TrustCard
           title="Biaya dirinci, bukan disembunyikan"
-          body="Yang kamu bayar untuk masuk program disebut commitment fee, dibayarkan ke lembaga pelatihan. Biaya keberangkatan dihitung terpisah dan bisa ditanggung dulu lewat dana talang."
+          body="Uang muka yang kamu bayar untuk masuk program disebut commitment fee (30% dari biaya program), dibayarkan ke lembaga pelatihan. Biaya keberangkatan dihitung terpisah dan bisa ditanggung dulu lewat dana talang."
           icon="check"
           tone="ok"
         />
