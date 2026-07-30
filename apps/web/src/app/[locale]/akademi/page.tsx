@@ -209,6 +209,10 @@ function FlowSection({ flow, feeNote }: { flow: ProgramFlowStep[]; feeNote?: str
               </FeePoint>
               <FeePoint>Biaya program baru dibahas setelah kamu lolos screening.</FeePoint>
               <FeePoint>Pembayaran langsung ke lembaga pelatihan, bukan ke Perantau Global.</FeePoint>
+              <FeePoint>
+                Biaya keberangkatan dihitung terpisah dari biaya program, dan bisa ditanggung dulu
+                lewat dana talang.
+              </FeePoint>
             </div>
             {feeNote && (
               <p
@@ -288,9 +292,16 @@ function TrustSection() {
           icon="shield"
           tone="amber"
         />
+        {/* Do not restore the old copy here ("Perantau Global tidak menarik
+            biaya penempatan dari kandidat"). Ifa (PO) corrected it on 30 Jul
+            2026: the departure cost IS charged to the candidate. What changes
+            with Sertifikat Perantau is that the cost is carried by dana talang
+            and repaid later, not waived. Denying the charge on a public page
+            that sells the program is the kind of error a candidate can hold us
+            to. */}
         <TrustCard
-          title="Bayar ke lembaga pelatihan"
-          body="Perantau Global tidak menarik biaya penempatan dari kandidat. Yang berbayar hanya pelatihan dan sertifikasinya."
+          title="Biaya dirinci, bukan disembunyikan"
+          body="Pelatihan dan sertifikasi dibayarkan ke lembaga pelatihan. Biaya keberangkatan dihitung terpisah dan bisa ditanggung dulu lewat dana talang."
           icon="check"
           tone="ok"
         />
