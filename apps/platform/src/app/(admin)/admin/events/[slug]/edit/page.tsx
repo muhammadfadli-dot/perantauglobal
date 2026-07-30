@@ -15,6 +15,7 @@ type EventRow = {
   timezone: string;
   platform: string;
   join_url: string | null;
+  cover_image: string | null;
   capacity: number | null;
   content: {
     tagline?: string | null;
@@ -41,7 +42,7 @@ export default async function EditEventPage({
   const { data } = await supabase
     .from("events")
     .select(
-      "slug, title, kind, status, starts_at, timezone, platform, join_url, capacity, content",
+      "slug, title, kind, status, starts_at, timezone, platform, join_url, cover_image, capacity, content",
     )
     .eq("slug", slug)
     .maybeSingle();
@@ -58,6 +59,7 @@ export default async function EditEventPage({
     timezone: ev.timezone,
     platform: ev.platform,
     join_url: ev.join_url,
+    cover_image: ev.cover_image,
     capacity: ev.capacity,
     tagline: ev.content?.tagline ?? null,
     intro: ev.content?.intro ?? null,

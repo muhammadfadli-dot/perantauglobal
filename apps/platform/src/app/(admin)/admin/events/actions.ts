@@ -31,6 +31,7 @@ export type EventInput = {
   timezone: string;
   platform: string;
   join_url?: string | null;
+  cover_image?: string | null;
   capacity?: number | null;
   tagline?: string | null;
   intro?: string | null;
@@ -94,6 +95,7 @@ export async function createEvent(
     timezone: input.timezone,
     platform: input.platform,
     join_url: input.join_url?.trim() || null,
+    cover_image: input.cover_image?.trim() || null,
     capacity: input.capacity ?? null,
     content: buildContent({}, input) as never,
   } as never);
@@ -153,6 +155,7 @@ export async function updateEvent(
       timezone: input.timezone,
       platform: input.platform,
       join_url: input.join_url?.trim() || null,
+      cover_image: input.cover_image?.trim() || null,
       capacity: input.capacity ?? null,
       content: buildContent(base, input) as never,
     } as never)

@@ -27,6 +27,7 @@ export type EventInitial = {
   timezone: string;
   platform: string;
   join_url: string | null;
+  cover_image: string | null;
   capacity: number | null;
   tagline: string | null;
   intro: string | null;
@@ -57,6 +58,7 @@ export default function EventForm({
       timezone: String(fd.get("timezone") ?? "Asia/Jakarta"),
       platform: String(fd.get("platform") ?? "").trim() || "Zoom",
       join_url: (fd.get("join_url") as string) || null,
+      cover_image: (fd.get("cover_image") as string) || null,
       capacity: capRaw ? Number(capRaw) : null,
       tagline: (fd.get("tagline") as string) || null,
       intro: (fd.get("intro") as string) || null,
@@ -169,12 +171,32 @@ export default function EventForm({
       </div>
 
       <div className="mt-4">
-        <Field label="Join URL" help="Link Zoom/meeting. Dikirim ke pendaftar.">
+        <Field
+          label="Join URL"
+          help="Link Zoom/meeting. Hanya dikirim ke pendaftar, tidak tampil di halaman publik."
+        >
           <input
             name="join_url"
             type="url"
             defaultValue={initial?.join_url ?? ""}
             placeholder="https://zoom.us/j/…"
+            className={INPUT_CLASS}
+          />
+        </Field>
+
+        {/* Tanpa field ini, poster event cuma bisa dipasang developer, dan itu
+            sebabnya Webinar Barista tayang tanpa satu pun visual sampai 30 Jul
+            2026. Isi dengan URL gambar; halaman event memakainya untuk poster
+            hero sekaligus gambar preview waktu link dibagikan di WhatsApp. */}
+        <Field
+          label="Poster event"
+          help="URL gambar poster. Dipakai di hero halaman event + preview link WhatsApp. Rasio tegak (2:3) paling pas."
+        >
+          <input
+            name="cover_image"
+            type="url"
+            defaultValue={initial?.cover_image ?? ""}
+            placeholder="https://…/poster.jpg"
             className={INPUT_CLASS}
           />
         </Field>

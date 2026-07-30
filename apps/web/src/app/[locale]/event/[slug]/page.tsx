@@ -566,17 +566,23 @@ function DefaultHero({
           </div>
         </div>
 
+        {/* Poster used to be desktop-only (`hidden md:block`), which meant the
+            page had zero visuals for the audience that actually reads it: these
+            are barista candidates on phones. On mobile the grid stacks it after
+            the CTA, so the button still comes first and the poster acts as the
+            detail people screenshot and forward. */}
         {poster && (
-          <div className="hidden md:block">
+          <div>
             <div
-              className="rounded-2xl overflow-hidden mx-auto max-w-[360px]"
+              className="rounded-2xl overflow-hidden mx-auto max-w-[300px] md:max-w-[360px]"
               style={{ boxShadow: "0 24px 60px rgba(0,0,0,0.4)", border: "1px solid rgba(255,255,255,0.14)" }}
             >
               <Image
                 src={poster}
-                alt={ev.title}
-                width={1200}
-                height={1584}
+                alt={`Poster ${ev.title}`}
+                width={1003}
+                height={1568}
+                sizes="(min-width: 768px) 360px, 300px"
                 className="w-full h-auto"
                 priority
               />
