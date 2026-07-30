@@ -207,11 +207,16 @@ function FlowSection({ flow, feeNote }: { flow: ProgramFlowStep[]; feeNote?: str
               <FeePoint>
                 Mendaftar di halaman ini <b className="text-pg-ink-900">gratis</b>.
               </FeePoint>
-              <FeePoint>Biaya program baru dibahas setelah kamu lolos screening.</FeePoint>
-              <FeePoint>Pembayaran langsung ke lembaga pelatihan, bukan ke Perantau Global.</FeePoint>
               <FeePoint>
-                Biaya keberangkatan dihitung terpisah dari biaya program, dan bisa ditanggung dulu
-                lewat dana talang.
+                Sertifikat Perantau itu <b className="text-pg-ink-900">satu paket</b>: pelatihan,
+                sertifikasi, sampai kesempatan masuk tahap screening penempatan.
+              </FeePoint>
+              <FeePoint>
+                <b className="text-pg-ink-900">Commitment fee</b>-nya baru dibahas setelah kamu lolos
+                screening, dan dibayarkan ke lembaga pelatihan, bukan ke Perantau Global.
+              </FeePoint>
+              <FeePoint>
+                Biaya keberangkatan dihitung terpisah, dan bisa ditanggung dulu lewat dana talang.
               </FeePoint>
             </div>
             {feeNote && (
@@ -264,6 +269,21 @@ function FeePoint({ children }: { children: React.ReactNode }) {
 
 /* ----------------------------------------------------------------- trust */
 
+const PARTNERS = [
+  {
+    src: "/images/logos/mitra-lemkasi-ui.jpg",
+    alt: "Lembaga Vokasi Universitas Indonesia",
+    role: "Pelatihan",
+    body: "Lemkasi UI menyusun dan menjalankan pelatihan kompetensinya.",
+  },
+  {
+    src: "/images/logos/mitra-lsp-ui.jpg",
+    alt: "Lembaga Sertifikasi Profesi Universitas Indonesia",
+    role: "Sertifikasi",
+    body: "LSP UI yang menguji dan menerbitkan sertifikat kompetensinya.",
+  },
+] as const;
+
 function TrustSection() {
   return (
     <Section className="bg-pg-cream" border="top">
@@ -274,18 +294,37 @@ function TrustSection() {
         Lembaga resmi, jalur resmi, biaya yang jujur.
       </h2>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5 mt-5">
-        {/* The partner's own logo is deliberately not shown yet: the DayaSkill
-            catalog and the file we were sent name different certifying bodies,
-            and the wrong seal on a page selling certification is not a small
-            mistake. The named institution carries the credibility until that
-            is confirmed. */}
-        <TrustCard
-          title="Lembaga Vokasi Universitas Indonesia"
-          body="Mitra pelatihan dan sertifikasi kompetensi untuk semua program Sertifikat Perantau."
-          icon="star"
-          tone="gold"
-        />
+      {/* The two bodies were ambiguous until Ifa (PO) locked them on 30 Jul 2026
+          and sent the marks: Lemkasi UI trains, LSP UI certifies. "Lemkasi" is
+          simply the abbreviation of Lembaga Vokasi UI, which is why the earlier
+          copy naming only Lembaga Vokasi UI was not wrong, just incomplete.
+          Each mark is labelled with what that body actually does, because a
+          seal without a role is the kind of thing a candidate reads as an
+          endorsement of the job rather than of the training. */}
+      <div className="grid sm:grid-cols-2 gap-3.5 mt-5">
+        {PARTNERS.map((p) => (
+          <div
+            key={p.src}
+            className="rounded-2xl bg-white border border-pg-ink-200 p-4 flex flex-col gap-3"
+          >
+            <div className="relative w-full h-[52px]">
+              <Image
+                src={p.src}
+                alt={p.alt}
+                fill
+                sizes="(min-width: 640px) 360px, 90vw"
+                className="object-contain object-left"
+              />
+            </div>
+            <div className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-pg-gold-700">
+              {p.role}
+            </div>
+            <p className="text-[12.5px] leading-relaxed text-pg-ink-500 m-0">{p.body}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid sm:grid-cols-2 gap-3.5 mt-3.5">
         <TrustCard
           title="Jalur penempatan resmi P3MI"
           body="Penempatan kerja lewat izin resmi Kemnaker, bukan calo. Kamu diarahkan ke lowongan Perantau Global."
@@ -301,7 +340,7 @@ function TrustSection() {
             to. */}
         <TrustCard
           title="Biaya dirinci, bukan disembunyikan"
-          body="Pelatihan dan sertifikasi dibayarkan ke lembaga pelatihan. Biaya keberangkatan dihitung terpisah dan bisa ditanggung dulu lewat dana talang."
+          body="Yang kamu bayar untuk masuk program disebut commitment fee, dibayarkan ke lembaga pelatihan. Biaya keberangkatan dihitung terpisah dan bisa ditanggung dulu lewat dana talang."
           icon="check"
           tone="ok"
         />
