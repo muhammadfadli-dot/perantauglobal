@@ -32,25 +32,48 @@ export default async function CandidatesListPage({
   // displayed TABLE in agreement. The old code counted globally but filtered only the
   // current 25-row page, so "Sudah qualified (359)" rendered a near-empty table.
   // A small paginator over a per-call thunk keeps each table's builder correctly typed.
+  async function paginateRows<T>(
+    run: (from: number, to: number) => PromiseLike<{ data: T[] | null }>,
+  ): Promise<T[]> {
+    const rows: T[] = [];
+    for (let f = 0; ; f += 1000) {
+      const { data } = await run(f, f + 999);
+      const batch = data ?? [];
+      rows.push(...batch);
+      if (batch.length < 1000) break;
+    }
+    return rows;
+  }
+
   async function paginateIds(
     run: (from: number, to: number) => PromiseLike<{ data: { candidate_id: string | null }[] | null }>,
   ): Promise<Set<string>> {
     const set = new Set<string>();
-    for (let f = 0; ; f += 1000) {
-      const { data } = await run(f, f + 999);
-      const batch = data ?? [];
-      for (const r of batch) if (r.candidate_id) set.add(r.candidate_id);
-      if (batch.length < 1000) break;
-    }
+    for (const r of await paginateRows(run)) if (r.candidate_id) set.add(r.candidate_id);
     return set;
   }
 
-  const [qualifiedIds, pendingDocIds, appliedIds] = await Promise.all([
-    paginateIds((f, t) =>
+  // "Sudah qualified" = at least one application where BOTH hold on the SAME
+  // application row: hard_pass (qualifying answers) AND a graded CV fit > 60
+  // (application_cv_fit.status = 'ok'; 'skipped' = no CV, so it never counts).
+  // hard_pass alone overstated readiness — 866 candidates showed qualified while
+  // their CV fit said otherwise (bug report Zalfa 2026-08-03). Cross-position
+  // mixing (form pass on position A + fit pass on position B) must NOT qualify,
+  // hence the intersect on application_id, not candidate_id.
+  const [hardPassApps, fitPassApps, pendingDocIds, appliedIds] = await Promise.all([
+    paginateRows<{ candidate_id: string | null; application_id: string | null }>((f, t) =>
       supabase
         .from("application_readiness_view")
-        .select("candidate_id")
+        .select("candidate_id, application_id")
         .eq("hard_pass", true)
+        .range(f, t),
+    ),
+    paginateRows<{ application_id: string | null }>((f, t) =>
+      supabase
+        .from("application_cv_fit")
+        .select("application_id")
+        .eq("status", "ok")
+        .gt("fit_score", 60)
         .range(f, t),
     ),
     paginateIds((f, t) =>
@@ -65,6 +88,15 @@ export default async function CandidatesListPage({
       supabase.from("applications").select("candidate_id").range(f, t),
     ),
   ]);
+
+  const fitPassIds = new Set<string>();
+  for (const r of fitPassApps) if (r.application_id) fitPassIds.add(r.application_id);
+  const qualifiedIds = new Set<string>();
+  for (const r of hardPassApps) {
+    if (r.candidate_id && r.application_id && fitPassIds.has(r.application_id)) {
+      qualifiedIds.add(r.candidate_id);
+    }
+  }
 
   // Optional ?position= membership (powers "Pull dari talent pool" from a job order).
   let positionName: string | null = null;
@@ -227,7 +259,7 @@ export default async function CandidatesListPage({
             label="Sudah qualified"
             value={qualifiedCount}
             valueColor="var(--pg-ok-soft-fg)"
-            sub="Lolos syarat min. 1 posisi"
+            sub="Lolos syarat + fit CV >60 di 1 posisi"
           />
           <StatCard
             label="Belum lamar"
@@ -386,7 +418,7 @@ export default async function CandidatesListPage({
                             color: "var(--pg-ok-soft-fg)",
                             fontFamily: "var(--font-mono)",
                           }}
-                          title="Lolos syarat min. 1 posisi"
+                          title="Lolos syarat + fit CV >60 pada lamaran yang sama"
                         >
                           <Icon name="check" size={10} stroke={2.4} /> Qual
                         </span>
