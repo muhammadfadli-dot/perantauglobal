@@ -269,7 +269,11 @@ export function ApplyForm({
     const attemptId =
       typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : pendingId;
     setPendingId(attemptId);
-    const res = await uploadPendingCv(attemptId, file, positionSlug);
+    const res = await uploadPendingCv(
+      attemptId,
+      file,
+      `/api/lowongan/${positionSlug}/cv-upload-url`,
+    );
     if (res.ok) {
       setCvPath(res.path);
       setCvMime(res.mime);

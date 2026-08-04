@@ -7,6 +7,7 @@ import { Icon, type IconName } from "@/components/pg/Icon";
 import { Section } from "@/components/pg/primitives";
 import { WhatsAppFab } from "@/components/pg/WhatsAppFab";
 import { AkademiCatalog, type CatalogCard } from "@/components/pg/akademi/AkademiCatalog";
+import { PartnerMarks } from "@/components/pg/akademi/PartnerMarks";
 import { ProgramFlow } from "@/components/pg/akademi/ProgramFlow";
 import { waLink } from "@/lib/contact";
 import {
@@ -270,21 +271,6 @@ function FeePoint({ children }: { children: React.ReactNode }) {
 
 /* ----------------------------------------------------------------- trust */
 
-const PARTNERS = [
-  {
-    src: "/images/logos/mitra-lemkasi-ui.jpg",
-    alt: "Lembaga Vokasi Universitas Indonesia",
-    role: "Pelatihan",
-    body: "Lemkasi UI menyusun dan menjalankan pelatihan kompetensinya.",
-  },
-  {
-    src: "/images/logos/mitra-lsp-ui.jpg",
-    alt: "Lembaga Sertifikasi Profesi Universitas Indonesia",
-    role: "Sertifikasi",
-    body: "LSP UI yang menguji dan menerbitkan sertifikat kompetensinya.",
-  },
-] as const;
-
 function TrustSection() {
   return (
     <Section className="bg-pg-cream" border="top">
@@ -295,34 +281,10 @@ function TrustSection() {
         Lembaga resmi, jalur resmi, biaya yang jujur.
       </h2>
 
-      {/* The two bodies were ambiguous until Ifa (PO) locked them on 30 Jul 2026
-          and sent the marks: Lemkasi UI trains, LSP UI certifies. "Lemkasi" is
-          simply the abbreviation of Lembaga Vokasi UI, which is why the earlier
-          copy naming only Lembaga Vokasi UI was not wrong, just incomplete.
-          Each mark is labelled with what that body actually does, because a
-          seal without a role is the kind of thing a candidate reads as an
-          endorsement of the job rather than of the training. */}
-      <div className="grid sm:grid-cols-2 gap-3.5 mt-5">
-        {PARTNERS.map((p) => (
-          <div
-            key={p.src}
-            className="rounded-2xl bg-white border border-pg-ink-200 p-4 flex flex-col gap-3"
-          >
-            <div className="relative w-full h-[52px]">
-              <Image
-                src={p.src}
-                alt={p.alt}
-                fill
-                sizes="(min-width: 640px) 360px, 90vw"
-                className="object-contain object-left"
-              />
-            </div>
-            <div className="font-mono text-[11px] font-bold uppercase tracking-[0.14em] text-pg-gold-700">
-              {p.role}
-            </div>
-            <p className="text-[12.5px] leading-relaxed text-pg-ink-500 m-0">{p.body}</p>
-          </div>
-        ))}
+      {/* Mark + peran tiap lembaga hidup di PartnerMarks, dipakai bersama
+          halaman detail program. Alasan pasangan logo-dan-peran ada di sana. */}
+      <div className="mt-5">
+        <PartnerMarks />
       </div>
 
       <div className="grid sm:grid-cols-2 gap-3.5 mt-3.5">

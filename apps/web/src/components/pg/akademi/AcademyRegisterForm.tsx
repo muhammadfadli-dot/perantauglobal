@@ -5,8 +5,30 @@ import { Icon } from "@/components/pg/Icon";
 import { Button, Field, Input, Textarea } from "@/components/pg/primitives";
 import { trackEvent, generateEventId, getMetaCookies } from "@/lib/tracking";
 import { ACADEMY_CONSENT_TEXT, ACADEMY_CONSENT_REQUIRED_MSG } from "@/lib/academy-consent";
+import {
+  uploadPendingCv,
+  validateCvFile,
+  isCvUploadConfigured,
+} from "@/lib/supabase-storage-anon";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.perantauglobal.com";
+
+/**
+ * Nilai gender WAJIB salah satu dari CHECK di `candidates.gender`
+ * ('male','female','other','prefer_not_to_say', migration 0001). Trigger
+ * `handle_new_auth_user` menulis `form_data->>'gender'` langsung ke kolom itu
+ * TANPA blok EXCEPTION, jadi label Indonesia yang bocor ke payload bukan cuma
+ * bikin data kotor, tapi menggagalkan seluruh pendaftaran di detik verifikasi
+ * email. Label di sini untuk manusia, `value` untuk basis data.
+ */
+const GENDER_OPTIONS = [
+  { value: "male", label: "Laki-laki" },
+  { value: "female", label: "Perempuan" },
+] as const;
+
+/** Rentang lahir yang masuk akal untuk kandidat kerja, dipakai sebagai batas input. */
+const BIRTH_MIN = "1950-01-01";
+const BIRTH_MAX = "2010-12-31";
 
 export interface AcademyRegField {
   field_key: string;
@@ -22,9 +44,20 @@ type Identity = {
   email: string;
   whatsapp: string;
   city: string;
+  gender: string;
+  birthDate: string;
 };
 
-const EMPTY: Identity = { fullName: "", email: "", whatsapp: "", city: "" };
+const EMPTY: Identity = {
+  fullName: "",
+  email: "",
+  whatsapp: "",
+  city: "",
+  gender: "",
+  birthDate: "",
+};
+
+type CvStatus = "idle" | "uploading" | "uploaded" | "error";
 
 /**
  * Akademi Perantau web registration form. Mirrors the job ApplyForm account-
@@ -63,12 +96,69 @@ export function AcademyRegisterForm({
   const [errorMsg, setErrorMsg] = useState("");
   const [submittedEmail, setSubmittedEmail] = useState("");
 
+  // CV di depan funnel, sama polanya dengan lamaran kerja: file diunggah anon ke
+  // `pending-cv/pending/<pendingId>/cv.*` SEBELUM akun ada, dan `pendingId`
+  // dipakai lagi sebagai PK pending_submissions supaya trigger bisa
+  // menyambungkan file ke kandidat. Tanpa kesamaan id itu, filenya jadi orphan
+  // dan kepurge dalam 48 jam tanpa ada yang tahu.
+  const [pendingId, setPendingId] = useState<string>(() =>
+    typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : "",
+  );
+  const cvUploadAvailable = isCvUploadConfigured();
+  const [cvStatus, setCvStatus] = useState<CvStatus>("idle");
+  const [cvFileName, setCvFileName] = useState("");
+  const [cvPath, setCvPath] = useState("");
+  const [cvMime, setCvMime] = useState("");
+  const [cvSize, setCvSize] = useState(0);
+  const [cvError, setCvError] = useState("");
+
   function setId<K extends keyof Identity>(key: K, value: Identity[K]) {
     setIdentity((p) => ({ ...p, [key]: value }));
   }
   function setAnswer(key: string, value: string | string[]) {
     setAnswers((p) => ({ ...p, [key]: value }));
   }
+  async function handleCvPick(file: File | null) {
+    if (!file) return;
+    setCvError("");
+    const v = validateCvFile(file);
+    if (!v.ok) {
+      setCvError(v.error);
+      setCvStatus("error");
+      return;
+    }
+    setCvFileName(file.name);
+    setCvStatus("uploading");
+
+    // UUID baru tiap percobaan. Path pending-cv deterministic dan bucket menolak
+    // timpa, jadi mengunggah ulang ke path yang sama balikin 409. File percobaan
+    // sebelumnya jadi orphan lalu kepurge otomatis dalam 48 jam.
+    const attemptId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : pendingId;
+    if (!attemptId) {
+      setCvError("Browser kamu tidak mendukung unggah CV. Lanjut tanpa CV dulu ya.");
+      setCvStatus("error");
+      return;
+    }
+    setPendingId(attemptId);
+
+    const res = await uploadPendingCv(
+      attemptId,
+      file,
+      `/api/akademi/${programSlug}/cv-upload-url`,
+    );
+    if (res.ok) {
+      setCvPath(res.path);
+      setCvMime(res.mime);
+      setCvSize(res.size);
+      setCvStatus("uploaded");
+      trackEvent("cv_upload_success", { program: programSlug });
+    } else {
+      setCvError(res.error);
+      setCvStatus("error");
+    }
+  }
+
   function toggleMulti(key: string, optValue: string) {
     setAnswers((p) => {
       const cur = Array.isArray(p[key]) ? (p[key] as string[]) : [];
@@ -87,6 +177,31 @@ export function AcademyRegisterForm({
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(identity.email)) {
       setErrorMsg("Format email tidak valid.");
+      return;
+    }
+    if (!identity.gender) {
+      setErrorMsg("Pilih dulu jenis kelamin.");
+      return;
+    }
+    if (!identity.birthDate) {
+      setErrorMsg("Isi dulu tanggal lahir.");
+      return;
+    }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(identity.birthDate)) {
+      setErrorMsg("Tanggal lahir belum lengkap.");
+      return;
+    }
+    // Batas ini bukan soal rapi-rapian: tanggal lahir dicast ke DATE oleh
+    // trigger saat verifikasi email, jadi nilai yang aneh baru meledak jauh di
+    // belakang, di tempat yang tidak dilihat pendaftar.
+    if (identity.birthDate < BIRTH_MIN || identity.birthDate > BIRTH_MAX) {
+      setErrorMsg("Tanggal lahir tidak masuk akal. Cek lagi ya.");
+      return;
+    }
+    // CV yang gagal diunggah tidak boleh diam-diam ikut submit: pendaftar
+    // mengira CV-nya terkirim padahal tidak ada apa pun di bucket.
+    if (cvStatus === "uploading") {
+      setErrorMsg("CV kamu masih diunggah. Tunggu sebentar ya.");
       return;
     }
     const missingQ = fields.filter((f) => f.required && isEmpty(answers[f.field_key]));
@@ -118,8 +233,15 @@ export function AcademyRegisterForm({
       whatsapp: identity.whatsapp,
       email: cleanedEmail,
       city: identity.city || null,
+      gender: identity.gender,
+      birth_date: identity.birthDate,
       password,
       answers,
+      // Pointer CV yang sudah di-stage. `pending_id` WAJIB ikut supaya PK
+      // pending_submissions sama dengan folder tempat filenya diunggah.
+      ...(cvStatus === "uploaded" && cvPath
+        ? { pending_id: pendingId, cv: { path: cvPath, mime: cvMime, size: cvSize } }
+        : {}),
       source_url: typeof window !== "undefined" ? window.location.href : "",
       // PDP: the ticked box travels with the payload. The route rejects the
       // submit when this is absent, so no consent row is ever written by default.
@@ -229,11 +351,95 @@ export function AcademyRegisterForm({
               value={identity.whatsapp} onChange={(e) => setId("whatsapp", e.target.value)} />
           </Field>
         </div>
-        <Field label="Kota tinggal" htmlFor="ak-city">
-          <Input id="ak-city" type="text" placeholder="Jakarta (opsional)"
-            value={identity.city} onChange={(e) => setId("city", e.target.value)} />
-        </Field>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Tanggal lahir" required htmlFor="ak-birthDate">
+            <Input id="ak-birthDate" type="date" required
+              min={BIRTH_MIN} max={BIRTH_MAX} autoComplete="bday"
+              value={identity.birthDate} onChange={(e) => setId("birthDate", e.target.value)} />
+          </Field>
+          <Field label="Kota tinggal" htmlFor="ak-city">
+            <Input id="ak-city" type="text" placeholder="Jakarta (opsional)"
+              value={identity.city} onChange={(e) => setId("city", e.target.value)} />
+          </Field>
+        </div>
+
+        <div>
+          <div className="text-[14px] font-bold leading-snug">
+            Jenis kelamin<span style={{ color: "var(--pg-err)" }}> *</span>
+          </div>
+          <div className="grid grid-cols-2 gap-2 mt-2">
+            {GENDER_OPTIONS.map((o) => {
+              const selected = identity.gender === o.value;
+              return (
+                <label key={o.value}
+                  className="flex items-center gap-3 px-3.5 py-3 min-h-[48px] rounded-xl border-[1.5px] cursor-pointer bg-pg-white border-pg-ink-200"
+                  style={selected
+                    ? { borderColor: "var(--pa-amber-500)", background: "var(--pa-amber-100)" }
+                    : undefined}>
+                  <input type="radio" name="ak-gender" checked={selected}
+                    onChange={() => setId("gender", o.value)} className="sr-only" />
+                  <div className="w-5 h-5 rounded-full border-2 grid place-items-center shrink-0"
+                    style={{ borderColor: selected ? "var(--pa-amber-600)" : "var(--pg-ink-300)" }}>
+                    {selected && <div className="w-2.5 h-2.5 rounded-full" style={{ background: "var(--pa-amber-600)" }} />}
+                  </div>
+                  <span className={`text-[15px] flex-1 ${selected ? "font-bold" : "font-medium"}`}>
+                    {o.label}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </div>
       </div>
+
+      {/* CV opsional dan sengaja begitu. Kandidat barista sering belum punya CV
+          rapi, dan menjadikannya wajib akan memotong pendaftar di titik paling
+          rapuh. Yang lolos screening tetap bisa dimintai CV lewat WhatsApp. */}
+      {cvUploadAvailable && (
+        <div className="mt-5">
+          <div className="text-[14px] font-bold leading-snug">
+            CV kamu <span className="font-medium text-pg-ink-500">(opsional)</span>
+          </div>
+          <div className="text-[12.5px] text-pg-ink-500 mt-0.5 leading-relaxed">
+            PDF atau foto, maksimal 5MB. Belum punya CV? Lewati saja, tidak mengurangi peluang.
+          </div>
+
+          <label
+            className="mt-2 flex items-center gap-3 px-3.5 py-3 min-h-[48px] rounded-xl border-[1.5px] border-dashed cursor-pointer bg-pg-white"
+            style={{
+              borderColor:
+                cvStatus === "uploaded" ? "var(--pa-amber-500)" : "var(--pg-ink-300)",
+              background: cvStatus === "uploaded" ? "var(--pa-amber-100)" : undefined,
+            }}
+          >
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,.heic,.heif,.webp"
+              className="sr-only"
+              onChange={(e) => {
+                void handleCvPick(e.target.files?.[0] ?? null);
+                e.target.value = "";
+              }}
+            />
+            <span style={{ color: "var(--pa-amber-700)" }}>
+              <Icon name={cvStatus === "uploaded" ? "check" : "doc"} size={18} stroke={2.2} />
+            </span>
+            <span className="text-[14px] flex-1 text-pg-ink-700">
+              {cvStatus === "uploading"
+                ? "Mengunggah CV…"
+                : cvStatus === "uploaded"
+                  ? cvFileName || "CV terlampir"
+                  : "Pilih file CV"}
+            </span>
+          </label>
+
+          {cvError && (
+            <div className="text-[12.5px] mt-1.5" style={{ color: "var(--pg-err)" }}>
+              {cvError}
+            </div>
+          )}
+        </div>
+      )}
 
       {fields.length > 0 && (
         <div className="mt-5 grid gap-4">

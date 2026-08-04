@@ -80,12 +80,12 @@ function friendlyUploadError(msg: string): string {
 
 /** Ask the server to mint a signed upload URL for this pending path (WS-5). */
 async function mintSignedUpload(
-  slug: string,
+  endpoint: string,
   pendingId: string,
   ext: string,
 ): Promise<{ token: string; path: string } | null> {
   try {
-    const res = await fetch(`/api/lowongan/${slug}/cv-upload-url`, {
+    const res = await fetch(endpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ pending_id: pendingId, ext }),
@@ -105,15 +105,22 @@ async function mintSignedUpload(
  * dengan PK pending_submissions yang nanti dibikin server (path === PK), biar
  * trigger + cv-materialize bisa nyambungin.
  *
- * WS-5: pakai signed upload URL yang di-mint server (rate-limited) kalau `slug`
- * ada + route-nya aktif. Kalau nggak (dev/preview tanpa secret, atau error),
- * fallback ke direct anon upload. Setelah policy anon-INSERT dicabut (0099),
- * jalur signed URL yang jadi satu-satunya yang works.
+ * WS-5: pakai signed upload URL yang di-mint server (rate-limited) kalau
+ * `uploadUrlEndpoint` ada + route-nya aktif. Kalau nggak (dev/preview tanpa
+ * secret, atau error), fallback ke direct anon upload. Setelah policy
+ * anon-INSERT dicabut (0099), jalur signed URL yang jadi satu-satunya yang works.
+ *
+ * `uploadUrlEndpoint` diminta sebagai path penuh, bukan slug. Sebelumnya
+ * fungsi ini merakit sendiri `/api/lowongan/<slug>/cv-upload-url`, yang
+ * diam-diam mengunci fungsinya ke satu funnel; begitu pendaftaran akademi ikut
+ * mengunggah CV (permintaan Ifa 3 Agu 2026), slug akademi akan dirakit jadi URL
+ * lowongan yang tidak ada dan uploadnya jatuh ke jalur fallback tanpa ada yang
+ * sadar. Pemanggil sekarang menyebut endpointnya terang-terangan.
  */
 export async function uploadPendingCv(
   pendingId: string,
   file: File,
-  slug?: string,
+  uploadUrlEndpoint?: string,
 ): Promise<CvUploadResult> {
   const v = validateCvFile(file);
   if (!v.ok) return v;
@@ -125,8 +132,8 @@ export async function uploadPendingCv(
   const path = `pending/${pendingId}/cv.${ext}`;
 
   // Preferred path: server-minted signed URL (no open anon INSERT).
-  if (slug) {
-    const signed = await mintSignedUpload(slug, pendingId, ext);
+  if (uploadUrlEndpoint) {
+    const signed = await mintSignedUpload(uploadUrlEndpoint, pendingId, ext);
     if (signed) {
       const { error } = await c.storage
         .from(PENDING_CV_BUCKET)

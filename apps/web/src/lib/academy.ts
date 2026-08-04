@@ -18,6 +18,12 @@ export interface ProgramCurriculumItem {
   detail?: string;
 }
 
+export interface ProgramFeeLine {
+  label: string;
+  amount: string;
+  note?: string;
+}
+
 export interface ProgramContent {
   intro?: string;
   benefits?: string[];
@@ -25,6 +31,16 @@ export interface ProgramContent {
   curriculum?: ProgramCurriculumItem[];
   flow?: ProgramFlowStep[];
   fee_note?: string;
+  /**
+   * Rincian biaya baris per baris, ditampilkan di atas `fee_note`.
+   *
+   * Angkanya sengaja disimpan sebagai string sudah terformat, bukan integer:
+   * satu-satunya sumbernya adalah daftar harga yang dikirim PIC, dan
+   * memformat ulang dari angka mentah membuka celah pembulatan pada nilai
+   * yang harus terbaca persis (Ifa 3 Agu 2026 sempat menulis Rp5.275.000
+   * untuk 30% dari Rp17.585.000, yang tepatnya Rp5.275.500).
+   */
+  fee_breakdown?: ProgramFeeLine[];
   doc_checklist?: { label: string; note?: string }[];
 }
 

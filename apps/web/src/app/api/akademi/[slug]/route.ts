@@ -117,6 +117,48 @@ function validateAnswers(
   return { ok: true, answers };
 }
 
+/**
+ * Nilai sah `candidates.gender` (CHECK di migration 0001).
+ *
+ * Trigger `handle_new_auth_user` menulis `form_data->>'gender'` LANGSUNG ke
+ * kolom itu tanpa blok EXCEPTION, jadi nilai di luar daftar ini menggagalkan
+ * seluruh materialisasi kandidat pada saat verifikasi email, jauh setelah
+ * pendaftar melihat layar sukses. Divalidasi di sini, bukan cuma di form.
+ */
+const GENDER_VALUES = new Set(["male", "female", "other", "prefer_not_to_say"]);
+
+/** Tanggal lahir dicast ke DATE oleh trigger yang sama, dengan risiko sama. */
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const BIRTH_MIN = "1950-01-01";
+const BIRTH_MAX = "2010-12-31";
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/** Pointer CV yang di-stage anon sebelum akun ada. */
+interface StagedCv {
+  path?: string;
+  mime?: string;
+  size?: number;
+}
+
+/**
+ * Terima pointer CV hanya kalau pathnya benar-benar milik pending ini.
+ *
+ * Tanpa pengikatan path ke `pending_id`, sebuah POST bisa menunjuk folder
+ * pending orang lain dan menempelkan CV milik kandidat lain ke kandidat sendiri.
+ */
+function sanitizeCv(raw: unknown, pendingId: string | null): StagedCv | null {
+  if (!raw || typeof raw !== "object" || !pendingId) return null;
+  const cv = raw as StagedCv;
+  const path = typeof cv.path === "string" ? cv.path : "";
+  if (!path.startsWith(`pending/${pendingId}/`)) return null;
+  const mime = typeof cv.mime === "string" && cv.mime.length <= 100 ? cv.mime : null;
+  const size =
+    typeof cv.size === "number" && Number.isFinite(cv.size) && cv.size > 0
+      ? Math.floor(cv.size)
+      : null;
+  return { path, ...(mime ? { mime } : {}), ...(size ? { size } : {}) };
+}
+
 interface AcademyRegisterPayload {
   full_name: string;
   whatsapp: string;
@@ -126,6 +168,10 @@ interface AcademyRegisterPayload {
   gender?: string | null;
   education?: string;
   password: string;
+  /** PK pending_submissions, sama dengan folder tempat CV diunggah. */
+  pending_id?: string;
+  /** Pointer CV yang sudah di-stage di bucket pending-cv. */
+  cv?: StagedCv;
   /** Registration-field answers, keyed by program_registration_fields.field_key. */
   answers?: Record<string, string | string[]>;
   /**
@@ -214,6 +260,26 @@ export async function POST(
       );
     }
 
+    // Gender + tanggal lahir masuk kolom kandidat yang dijaga CHECK dan cast
+    // DATE di trigger, yang tidak punya penanganan error. Nilai buruk yang lolos
+    // dari sini tidak gagal sekarang, tapi nanti saat pendaftar mengklik link
+    // verifikasi, dan waktu itu tidak ada satu pun layar yang bisa memberitahunya.
+    if (body.gender && !GENDER_VALUES.has(body.gender)) {
+      return NextResponse.json({ error: "Pilihan jenis kelamin tidak valid." }, { status: 400 });
+    }
+    if (body.birth_date) {
+      const bd = body.birth_date;
+      const parsed = new Date(`${bd}T00:00:00Z`);
+      if (
+        !ISO_DATE_RE.test(bd) ||
+        Number.isNaN(parsed.getTime()) ||
+        bd < BIRTH_MIN ||
+        bd > BIRTH_MAX
+      ) {
+        return NextResponse.json({ error: "Tanggal lahir tidak valid." }, { status: 400 });
+      }
+    }
+
     // PDP UU 27/2022 Pasal 20: consent must be affirmative. Re-checked here so a
     // client that skips the checkbox (or posts straight to the API) cannot have
     // a consent row written on its behalf.
@@ -269,9 +335,20 @@ export async function POST(
 
     // Step 1: stage the academy pending. Trigger materializes the enrollment on
     // email_confirmed_at flip.
+    // CV staged (permintaan Ifa 3 Agu). `pendingId` harus dipakai sebagai PK
+    // supaya sama dengan `pending/<id>/` tempat filenya diunggah; kalau tidak,
+    // trigger tidak akan pernah menemukan filenya dan purge orphan 48 jam
+    // menghapusnya diam-diam.
+    const pendingId =
+      typeof body.pending_id === "string" && UUID_RE.test(body.pending_id)
+        ? body.pending_id
+        : null;
+    const stagedCv = sanitizeCv(body.cv, pendingId);
+
     const writeResult = await writePendingSubmission(
       {
         intent: "academy",
+        ...(pendingId ? { pendingId } : {}),
         program_slug: slug,
         email,
         phone: body.whatsapp,
@@ -286,6 +363,10 @@ export async function POST(
           program_slug: slug,
           source_url: body.source_url ?? null,
           answers: validated.answers,
+          // Kunci 'cv' inilah yang dibaca blok CV di trigger. Blok itu tidak
+          // melihat intent, jadi pendaftaran akademi ikut menghasilkan baris
+          // candidate_documents seperti lamaran kerja, tanpa perubahan skema.
+          ...(stagedCv ? { cv: stagedCv } : {}),
         },
         consents: [
           {

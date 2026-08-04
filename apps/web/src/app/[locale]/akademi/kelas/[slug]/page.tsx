@@ -9,6 +9,7 @@ import {
   AcademyRegisterForm,
   type AcademyRegField,
 } from "@/components/pg/akademi/AcademyRegisterForm";
+import { PartnerMarks } from "@/components/pg/akademi/PartnerMarks";
 import { ProgramFlow } from "@/components/pg/akademi/ProgramFlow";
 import { supabaseV2 } from "@/lib/supabase-v2";
 import { countryLabel, priceLabel, type ProgramContent } from "@/lib/academy";
@@ -233,7 +234,7 @@ export default async function AcademyClassPage({
                 </div>
               )}
 
-              {content.fee_note && (
+              {(content.fee_note || (content.fee_breakdown?.length ?? 0) > 0) && (
                 <div
                   className="rounded-2xl p-5"
                   style={{
@@ -247,12 +248,62 @@ export default async function AcademyClassPage({
                     </span>
                     Soal biaya, biar jelas dari awal
                   </div>
-                  <p
-                    className="text-[13.5px] leading-relaxed mt-2.5 m-0"
-                    style={{ color: "var(--pa-amber-700)" }}
-                  >
-                    {content.fee_note}
-                  </p>
+
+                  {/* Angka lebih dulu, paragraf sesudahnya. Permintaan Ifa 3 Agu
+                      adalah biaya "dicantumkan secara eksplisit", dan satu
+                      paragraf panjang membuat nominal harus dicari dulu. Baris
+                      terpisah bikin totalnya, uang mukanya, dan sisanya
+                      terbaca sekali lihat. */}
+                  {content.fee_breakdown && content.fee_breakdown.length > 0 && (
+                    <div className="mt-3.5 flex flex-col gap-2">
+                      {content.fee_breakdown.map((line) => (
+                        <div
+                          key={line.label}
+                          className="bg-pg-white rounded-xl px-3.5 py-3"
+                          style={{ border: "1px solid var(--pa-amber-200)" }}
+                        >
+                          <div className="flex items-baseline justify-between gap-3">
+                            <span className="text-[13.5px] font-bold text-pg-ink-900">
+                              {line.label}
+                            </span>
+                            <span
+                              className="font-mono text-[14px] font-extrabold whitespace-nowrap"
+                              style={{ color: "var(--pa-amber-700)" }}
+                            >
+                              {line.amount}
+                            </span>
+                          </div>
+                          {line.note && (
+                            <p className="text-[12px] leading-relaxed text-pg-ink-500 mt-1 m-0">
+                              {line.note}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {content.fee_note && (
+                    <p
+                      className="text-[13.5px] leading-relaxed mt-3 m-0"
+                      style={{ color: "var(--pa-amber-700)" }}
+                    >
+                      {content.fee_note}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Lembaga di balik sertifikatnya. Cuma untuk produk yang memang
+                  disertifikasi mitra: kelas gratis tidak boleh ikut memakai
+                  mark UI. Ifa melaporkan 3 Agu logonya belum muncul di halaman
+                  ini padahal sudah tayang di /akademi. */}
+              {program.credential_issuer === "Lembaga Vokasi UI" && (
+                <div>
+                  <SubHeading>Lembaga di balik sertifikatnya</SubHeading>
+                  <div className="mt-3.5">
+                    <PartnerMarks accent="amber" />
+                  </div>
                 </div>
               )}
 
