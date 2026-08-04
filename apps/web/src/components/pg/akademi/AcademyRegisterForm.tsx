@@ -105,6 +105,15 @@ export function AcademyRegisterForm({
     typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : "",
   );
   const cvUploadAvailable = isCvUploadConfigured();
+  // CV wajib di program screening (permintaan Ifa 4 Agu): tanpa berkasnya di
+  // depan, tim harus mengejar CV satu per satu lewat WhatsApp dan screening
+  // berhenti di situ. Masterclass gratis sengaja tidak ikut, CV tidak dipakai
+  // sama sekali di sana.
+  //
+  // Digandeng ke `cvUploadAvailable` bukan karena rapi-rapian: kalau env unggah
+  // tidak terpasang, blok CV di bawah tidak dirender sama sekali, jadi
+  // mewajibkannya akan mengunci form pada syarat yang tidak punya kolom isian.
+  const cvRequired = isScreened && cvUploadAvailable;
   const [cvStatus, setCvStatus] = useState<CvStatus>("idle");
   const [cvFileName, setCvFileName] = useState("");
   const [cvPath, setCvPath] = useState("");
@@ -202,6 +211,10 @@ export function AcademyRegisterForm({
     // mengira CV-nya terkirim padahal tidak ada apa pun di bucket.
     if (cvStatus === "uploading") {
       setErrorMsg("CV kamu masih diunggah. Tunggu sebentar ya.");
+      return;
+    }
+    if (cvRequired && cvStatus !== "uploaded") {
+      setErrorMsg("Unggah dulu CV kamu. Boleh PDF atau foto CV, maksimal 5MB.");
       return;
     }
     const missingQ = fields.filter((f) => f.required && isEmpty(answers[f.field_key]));
@@ -392,16 +405,22 @@ export function AcademyRegisterForm({
         </div>
       </div>
 
-      {/* CV opsional dan sengaja begitu. Kandidat barista sering belum punya CV
-          rapi, dan menjadikannya wajib akan memotong pendaftar di titik paling
-          rapuh. Yang lolos screening tetap bisa dimintai CV lewat WhatsApp. */}
+      {/* Wajib di program screening, opsional di masterclass. Yang wajib
+          menanggung ongkosnya: sebagian kandidat berhenti persis di sini karena
+          belum punya CV rapi, jadi teksnya sengaja menurunkan ambang ("foto CV
+          juga boleh") alih-alih cuma menuntut. */}
       {cvUploadAvailable && (
         <div className="mt-5">
           <div className="text-[14px] font-bold leading-snug">
-            CV kamu <span className="font-medium text-pg-ink-500">(opsional)</span>
+            CV kamu{" "}
+            <span className="font-medium text-pg-ink-500">
+              {cvRequired ? "(wajib)" : "(opsional)"}
+            </span>
           </div>
           <div className="text-[12.5px] text-pg-ink-500 mt-0.5 leading-relaxed">
-            PDF atau foto, maksimal 5MB. Belum punya CV? Lewati saja, tidak mengurangi peluang.
+            {cvRequired
+              ? "PDF atau foto, maksimal 5MB. Belum punya CV rapi? Foto CV tulis tangan atau berkas lama tetap kami terima."
+              : "PDF atau foto, maksimal 5MB. Belum punya CV? Lewati saja, tidak mengurangi peluang."}
           </div>
 
           <label

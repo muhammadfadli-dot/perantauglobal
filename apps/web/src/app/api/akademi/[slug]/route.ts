@@ -26,10 +26,15 @@ import {
  */
 async function lookupPublishedProgram(
   slug: string,
-): Promise<{ title: string; category: string; is_free: boolean } | null> {
+): Promise<{
+  title: string;
+  category: string;
+  is_free: boolean;
+  delivery_mode: string | null;
+} | null> {
   const { data, error } = await supabaseV2()
     .from("academy_programs")
-    .select("title, category, is_free")
+    .select("title, category, is_free, delivery_mode")
     .eq("slug", slug)
     .eq("status", "published")
     .maybeSingle();
@@ -187,6 +192,24 @@ interface AcademyRegisterPayload {
   fbc?: string;
 }
 
+/**
+ * CV wajib atau tidak, diputuskan dari bentuk programnya, bukan dari kata
+ * klien. Definisinya sama persis dengan `isScreened` di halaman kelas: berbayar
+ * dan tidak dijalankan di dalam aplikasi, artinya ada panggilan screening yang
+ * memang membutuhkan berkasnya. Masterclass gratis tidak pernah ikut.
+ *
+ * Syarat env-nya bukan formalitas: unggah CV memakai kunci NEXT_PUBLIC yang
+ * di-inline saat build, jadi kalau kunci itu tidak ada, tombol unggahnya tidak
+ * dirender di browser. Mewajibkan CV dalam keadaan itu akan menolak SETIAP
+ * pendaftaran dengan alasan yang tidak bisa dipenuhi siapa pun.
+ */
+function cvWajibUntuk(program: { is_free: boolean; delivery_mode: string | null }): boolean {
+  const unggahHidup = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL_V2 && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY_V2,
+  );
+  return unggahHidup && !program.is_free && program.delivery_mode !== "in_app";
+}
+
 function validatePasswordServer(pw: string): boolean {
   return (
     pw.length >= 10 && /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /[0-9]/.test(pw)
@@ -298,6 +321,28 @@ export async function POST(
       return NextResponse.json({ error: validated.error }, { status: 400 });
     }
 
+    // CV staged (permintaan Ifa 3 Agu). `pendingId` harus dipakai sebagai PK
+    // supaya sama dengan `pending/<id>/` tempat filenya diunggah; kalau tidak,
+    // trigger tidak akan pernah menemukan filenya dan purge orphan 48 jam
+    // menghapusnya diam-diam.
+    const pendingId =
+      typeof body.pending_id === "string" && UUID_RE.test(body.pending_id)
+        ? body.pending_id
+        : null;
+    const stagedCv = sanitizeCv(body.cv, pendingId);
+
+    // Wajibnya CV ditegakkan di sini, bukan cuma di formulir. Tanpa ini, POST
+    // langsung ke endpoint tetap menghasilkan pendaftaran tanpa berkas, dan
+    // tim screening baru tahu kekurangannya saat kandidatnya sudah masuk daftar.
+    // Sengaja sebelum rate limit supaya penolakan bentuk payload tidak ikut
+    // membakar jatah percobaan pendaftar.
+    if (cvWajibUntuk(program) && !stagedCv) {
+      return NextResponse.json(
+        { error: "CV wajib diunggah untuk mendaftar kelas ini." },
+        { status: 400 },
+      );
+    }
+
     const email = body.email.toLowerCase().trim();
 
     const clientIp =
@@ -332,18 +377,6 @@ export async function POST(
     } catch {
       // ignore - fail open
     }
-
-    // Step 1: stage the academy pending. Trigger materializes the enrollment on
-    // email_confirmed_at flip.
-    // CV staged (permintaan Ifa 3 Agu). `pendingId` harus dipakai sebagai PK
-    // supaya sama dengan `pending/<id>/` tempat filenya diunggah; kalau tidak,
-    // trigger tidak akan pernah menemukan filenya dan purge orphan 48 jam
-    // menghapusnya diam-diam.
-    const pendingId =
-      typeof body.pending_id === "string" && UUID_RE.test(body.pending_id)
-        ? body.pending_id
-        : null;
-    const stagedCv = sanitizeCv(body.cv, pendingId);
 
     const writeResult = await writePendingSubmission(
       {
