@@ -8,6 +8,15 @@ import {
   PRIVACY_POLICY_URL,
 } from "@/lib/consent";
 
+import {
+  COUNTRIES,
+  SECTORS,
+  QUANTITIES,
+  TIMELINES,
+  timelineLabel,
+  type InquiryPayload,
+} from "@/lib/inquiry";
+
 type Field =
   | "company" | "country" | "sector" | "roles" | "quantity" | "timeline"
   | "name" | "email" | "mapsLink" | "social" | "notes";
@@ -16,35 +25,17 @@ const EMPTY: Record<Field, string> = {
   name: "", email: "", mapsLink: "", social: "", notes: "",
 };
 
-const COUNTRIES = ["Saudi Arabia", "United Arab Emirates", "Kuwait", "Qatar", "Bahrain", "Oman", "Other"];
-const SECTORS = ["Healthcare", "Hospitality", "Wellness", "Other"];
-const QUANTITIES = [
-  { value: "1-5", label: "1 to 5" },
-  { value: "6-20", label: "6 to 20" },
-  { value: "21-50", label: "21 to 50" },
-  { value: "50+", label: "More than 50" },
-];
-// Placement runs about two months. Asking upfront surfaces a mismatch before
-// BD spends a call on it, and tells them which inquiries to work first.
-const TIMELINES = [
-  { value: "asap", label: "As soon as possible" },
-  { value: "1-3m", label: "Within 1 to 3 months" },
-  { value: "3-6m", label: "Within 3 to 6 months" },
-  { value: "planning", label: "Planning ahead, no fixed date" },
-];
-
 const link = waLink();
-
-// The WhatsApp handoff carries the label BD reads, not the form's value token.
-function timelineLabel(value: string): string {
-  return TIMELINES.find((t) => t.value === value)?.label ?? value;
-}
 
 export function Contact() {
   const ref = useRef<HTMLElement>(null);
   const [form, setForm] = useState<Record<Field, string>>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  // Whether /api/inquiry confirmed the lead is stored. Drives which success
+  // copy shows: "recorded" only when it is true, never on hope.
+  const [saved, setSaved] = useState(false);
   // PDP UU 27/2022: affirmative consent, default UNCHECKED. Gates the handoff.
   const [agree, setAgree] = useState(false);
   const [consentError, setConsentError] = useState(false);
@@ -72,8 +63,11 @@ export function Contact() {
     setErrors((e) => ({ ...e, [name]: undefined }));
   };
 
-  const submitForm = (e: FormEvent<HTMLFormElement>) => {
+  const submitForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    // Honeypot is an uncontrolled hidden input; read it before any await while
+    // e.currentTarget is still the live form element.
+    const honeypot = String(new FormData(e.currentTarget).get("website") || "");
     const errs: Partial<Record<Field, string>> = {};
     if (!form.company.trim()) errs.company = "Enter your company";
     if (!form.country) errs.country = "Select a country";
@@ -94,9 +88,9 @@ export function Contact() {
     }
     setConsentError(false);
     setErrors({});
-    // Hand the inquiry to the confirmed BD WhatsApp channel with the details
-    // prefilled, so no lead is silently dropped. (A server-side BD-inbox/CRM
-    // endpoint can replace this later; see the project brief section 11.)
+    // WhatsApp stays the BD conversation channel: open it with the details
+    // prefilled, synchronously in the click gesture (popup blockers reject a
+    // window.open that happens after an await).
     const lines = [
       "Hello Daya Talenta Global, we would like to hire Indonesian talent.",
       "",
@@ -112,6 +106,28 @@ export function Contact() {
       `Contact: ${form.name} (${form.email})`,
     ].filter(Boolean);
     window.open(waLink(lines.join("\n")), "_blank", "noopener,noreferrer");
+    // Store the lead server-side so it survives a visitor who never presses
+    // send in WhatsApp. keepalive lets the request finish even if they leave.
+    setSending(true);
+    let ok = false;
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
+      const payload: InquiryPayload = { ...form, consent: agree, website: honeypot };
+      const res = await fetch("/api/inquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      ok = res.ok;
+    } catch {
+      ok = false; // WhatsApp handoff already happened; success copy degrades honestly
+    }
+    setSaved(ok);
+    setSending(false);
     setSubmitted(true);
   };
 
@@ -119,6 +135,7 @@ export function Contact() {
     setForm(EMPTY);
     setErrors({});
     setSubmitted(false);
+    setSaved(false);
     // A fresh inquiry needs a fresh tick - carrying the old one over would make
     // the consent apply to data the visitor has not entered yet.
     setAgree(false);
@@ -149,6 +166,12 @@ export function Contact() {
         <div className="anim ar" style={{ background: "#F3EEE1", border: "1px solid #DCD3BE", borderRadius: 12, padding: "36px 40px", maxWidth: 820, margin: "0 auto", boxShadow: "0 22px 50px rgba(0,0,0,.28)", animationDelay: ".4s" }}>
           {!submitted ? (
             <form onSubmit={submitForm} noValidate>
+              {/* Honeypot: visually hidden, out of the tab order. Humans never
+                  see or fill it; bots that do get a fake success server-side. */}
+              <div aria-hidden="true" style={{ position: "absolute", left: -9999, width: 1, height: 1, overflow: "hidden" }}>
+                <label htmlFor="f-website">Website</label>
+                <input id="f-website" name="website" type="text" tabIndex={-1} autoComplete="off" defaultValue="" />
+              </div>
               <div className="g-form">
                 <div>
                   <label className="lbl" htmlFor="f-company">COMPANY *</label>
@@ -266,8 +289,8 @@ export function Contact() {
               </div>
 
               <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 22, flexWrap: "wrap" }}>
-                <button type="submit" className="btn-terra" style={{ flex: "none", background: "#A8452F", color: "#F3EEE1", border: "none", cursor: "pointer", fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 700, padding: "15px 34px", borderRadius: 8, transition: "background .15s, transform .15s", boxShadow: "0 12px 26px rgba(168,69,47,.26)" }}>Send Inquiry</button>
-                <span className="form-help" style={{ fontSize: 12, lineHeight: 1.5, color: "#6E6752", maxWidth: 240 }}>We open WhatsApp with your details so our BD team can reply within one business day.</span>
+                <button type="submit" disabled={sending} className="btn-terra" style={{ flex: "none", background: "#A8452F", color: "#F3EEE1", border: "none", cursor: sending ? "wait" : "pointer", opacity: sending ? 0.7 : 1, fontFamily: "var(--font-sans)", fontSize: 15, fontWeight: 700, padding: "15px 34px", borderRadius: 8, transition: "background .15s, transform .15s", boxShadow: "0 12px 26px rgba(168,69,47,.26)" }}>{sending ? "Sending..." : "Send Inquiry"}</button>
+                <span className="form-help" style={{ fontSize: 12, lineHeight: 1.5, color: "#6E6752", maxWidth: 240 }}>We record your inquiry for our BD team and open WhatsApp with your details prefilled.</span>
               </div>
             </form>
           ) : (
@@ -277,8 +300,14 @@ export function Contact() {
                 <span style={{ position: "absolute", inset: 14, border: "1.6px solid #4A5A32", transform: "rotate(45deg)", display: "block" }} />
                 <svg width="20" height="20" fill="none" stroke="#4A5A32" strokeWidth="2.4" style={{ position: "absolute", left: 21, top: 21 }}><path d="m3 10 4 4 8-9" strokeLinecap="round" strokeLinejoin="round" /></svg>
               </span>
-              <div style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 28, color: "#20301F", marginBottom: 10 }}>Almost there. Send us your message.</div>
-              <p style={{ margin: "0 auto 24px", fontSize: 14.5, lineHeight: 1.65, color: "#6E6752", maxWidth: 420 }}>We opened WhatsApp with your details prefilled. Send that message and our Business Development team will reply within one business day. If WhatsApp did not open, tap below.</p>
+              {/* Two honest variants: "received" only when /api/inquiry confirmed
+                  the row; otherwise WhatsApp is still the only path, say so. */}
+              <div style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 28, color: "#20301F", marginBottom: 10 }}>{saved ? "Inquiry received." : "Almost there. Send us your message."}</div>
+              <p style={{ margin: "0 auto 24px", fontSize: 14.5, lineHeight: 1.65, color: "#6E6752", maxWidth: 420 }}>
+                {saved
+                  ? "Your inquiry is recorded with our Business Development team, who reply within one business day. We also opened WhatsApp with the same details prefilled - sending that message is the fastest way to start the conversation."
+                  : "We opened WhatsApp with your details prefilled. Send that message and our Business Development team will reply within one business day. If WhatsApp did not open, tap below."}
+              </p>
               <a href={link} target="_blank" rel="noopener noreferrer" className="wa-btn" style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "#4A5A32", color: "#F3EEE1", textDecoration: "none", fontSize: 13.5, fontWeight: 700, padding: "11px 22px", borderRadius: 8, transition: "background .15s, transform .15s" }}>
                 <svg width="17" height="17" fill="none" stroke="#F3EEE1" strokeWidth="1.7"><path d="M8.5 2.5a6 6 0 0 0-5.1 9.1L2.5 15l3.4-.9A6 6 0 1 0 8.5 2.5Z" strokeLinejoin="round" /></svg>
                 Open WhatsApp

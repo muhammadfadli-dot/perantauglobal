@@ -3,10 +3,11 @@ import { createServerClient } from "@perantauglobal/db";
 /**
  * Server-side anon Supabase client for the public marketing site.
  *
- * Anon key only. Every read must satisfy RLS. NEVER import the service-role
- * client here - this app ships to the public web. Used by the talent-pool
- * counter once the live counter (migration 0094) is wired; until then the
- * counter runs on a placeholder and this file is unused-but-ready.
+ * Anon key only. Every write must satisfy RLS. NEVER import the service-role
+ * client here - this app ships to the public web. Used by /api/inquiry
+ * (employer lead capture, anon INSERT under migration 0008 RLS). The
+ * talent-pool counter will also read through here once the live counter
+ * (migration 0094) is wired.
  */
 export function supabaseAnon() {
   const url = process.env.SUPABASE_URL_V2;

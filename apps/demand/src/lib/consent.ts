@@ -1,26 +1,22 @@
 /**
  * Single source of truth for the employer-inquiry consent (UU PDP 27/2022).
  *
- * Deliberately worded for what this form ACTUALLY does today: it does not POST
- * anywhere and nothing is persisted by us. `submitForm` builds a prefilled
- * WhatsApp message and hands it to the visitor's own WhatsApp client, so the
- * only transfer is the one they choose to send. Promising storage-and-processing
- * here would misdescribe the flow in the other direction.
+ * Worded for what the form ACTUALLY does since v2026-08-04: `submitForm` opens
+ * the prefilled WhatsApp handoff AND POSTs to /api/inquiry, which stores the
+ * lead in the `employer_inquiries` table (Supabase, Singapore region). The
+ * text therefore covers both transfers: our storage-and-processing, and the
+ * WhatsApp message the visitor chooses to send. The consent version + grant
+ * timestamp are recorded on the stored row (additional_requirements block);
+ * the verbatim text for each version lives in this file's git history.
  *
  * The Privacy Policy this text points at is this site's own (/privacy), written
- * for the employer audience and describing the same WhatsApp handoff. The two
- * move together: changing the flow means changing both.
- *
- * When the inquiry is wired to the `employer_inquiries` table (the column
- * already exists in Supabase, migration 0008), this text MUST be rewritten to
- * cover storage + regional hosting, its version bumped, the consent logged
- * server-side the way the candidate-side forms do it, and /privacy sections 4
- * and 10 (what the form does, retention) corrected to match.
+ * for the employer audience and describing the same stored-then-WhatsApp flow.
+ * The two move together: changing the flow means changing both in one commit.
  */
 export const INQUIRY_CONSENT_TEXT =
-  "I agree that the details above may be sent to the Daya Talenta Global team via WhatsApp and used to respond to this inquiry, in line with our Privacy Policy and Indonesia's Personal Data Protection Law (UU 27/2022).";
+  "I agree that Daya Talenta Global may store the details above and process them to respond to this inquiry, including sending them to our team via WhatsApp and contacting me by email or WhatsApp, in line with our Privacy Policy and Indonesia's Personal Data Protection Law (UU 27/2022).";
 
-export const INQUIRY_CONSENT_VERSION = "2026-07-21";
+export const INQUIRY_CONSENT_VERSION = "2026-08-04";
 
 export const INQUIRY_CONSENT_REQUIRED_MSG = "Please agree before sending";
 

@@ -80,9 +80,10 @@ export default function TermsPage() {
 
       <LegalSection n={4} title="Inquiries and how we respond">
         <p>
-          The inquiry form opens WhatsApp on your own device with your details already written out. It does
-          not submit anything to us until you send that message yourself. What happens to your data after that
-          is set out in our <Link href="/privacy">Privacy Policy</Link>.
+          Submitting the inquiry form stores your inquiry with our Business Development team and opens
+          WhatsApp on your own device with the same details already written out, so you can start the
+          conversation directly. What happens to your data is set out in our{" "}
+          <Link href="/privacy">Privacy Policy</Link>.
         </p>
         <p>
           We aim to reply within one business day. That is a service commitment, not a contractual deadline.

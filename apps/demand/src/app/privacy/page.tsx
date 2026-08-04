@@ -8,18 +8,19 @@ import { INQUIRY_CONSENT_TEXT, INQUIRY_CONSENT_VERSION } from "@/lib/consent";
  * Demand-side privacy policy, written for the employer audience and grounded in
  * what this app actually does, not in what a recruitment site usually does:
  *
- *  - the inquiry form does not POST anywhere (Contact.tsx `submitForm` opens a
- *    prefilled wa.me link), so there is no server-side store to describe here;
- *  - nothing in this app reads or writes Supabase today (talent-pool.ts returns
- *    a hardcoded snapshot, supabase.ts is unused-but-ready), so the database is
- *    described as the candidate platform's, not this site's;
+ *  - the inquiry form POSTs to /api/inquiry, which stores the lead in the
+ *    `employer_inquiries` table (Supabase, Singapore), then opens a prefilled
+ *    wa.me link; both transfers are described in section 4;
+ *  - Supabase writes = inquiry rows only. Nothing in this app READS candidate
+ *    data (talent-pool.ts returns a hardcoded snapshot), so the candidate
+ *    database is still described as the candidate platform's;
  *  - the only script loaded is Vercel Web Analytics (layout.tsx). GTM / GA /
  *    Meta are whitelisted in the CSP but not loaded, so they are not claimed.
  *
  * Any of those three changing means this page changes in the same commit.
  */
 
-const EFFECTIVE = "21 July 2026";
+const EFFECTIVE = "4 August 2026";
 const MAIL = "halo@perantauglobal.com";
 
 export const metadata: Metadata = {
@@ -86,7 +87,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong>Your consent</strong>: the tick box you must select before the form will do anything, and
-            the version of the wording shown to you.
+            the version of the wording shown to you, which we log together with your inquiry.
           </li>
         </ul>
         <p>
@@ -96,26 +97,27 @@ export default function PrivacyPage() {
       </LegalSection>
 
       <LegalSection n={4} title="How the inquiry form works, and where your details go">
-        <p>This is the part worth reading closely, because it is unusual:</p>
+        <p>Submitting the form does two things, and only after you tick the consent box:</p>
         <ul>
           <li>
-            When you submit the form, <strong>nothing is posted to a server of ours</strong>. The page checks
-            your entries, then opens WhatsApp on your own device with a message already written out from what
-            you typed.
+            <strong>It stores your inquiry with us.</strong> The details you typed are saved as a lead record
+            in our database, hosted on Supabase in Singapore, together with the version of the consent wording
+            you agreed to and the time you agreed. Access is limited to the Business Development and
+            operations staff who follow up on inquiries.
           </li>
           <li>
-            Nothing leaves your device until you press send inside WhatsApp. If you close WhatsApp without
-            sending, we never receive the inquiry, and no copy is kept, by us or in your browser.
+            <strong>It opens WhatsApp on your device</strong> with the same details already written out. That
+            message only leaves your device if you press send inside WhatsApp, and sending it is the fastest
+            way to start the conversation.
           </li>
           <li>
-            If you do send it, the message reaches the Daya Talenta Global WhatsApp Business line. Our
-            Business Development team then reads it, replies, and may record the inquiry in our internal
-            systems so it can be followed up.
+            If WhatsApp does not open, or you choose not to send the message, your inquiry has still reached
+            us through the stored record, and our team replies to the work email you gave.
           </li>
         </ul>
         <p>
-          Because the form transmits nothing to us, we hold no server-side log of your consent. The wording
-          you agree to before the handoff, version {INQUIRY_CONSENT_VERSION}, reads in full:
+          The wording you agree to before any of this happens, version {INQUIRY_CONSENT_VERSION}, reads in
+          full:
         </p>
         <p className="legal-quote">{INQUIRY_CONSENT_TEXT}</p>
       </LegalSection>
@@ -155,9 +157,10 @@ export default function PrivacyPage() {
       <LegalSection n={6} title="Who else is involved">
         <ul>
           <li>
-            <strong>WhatsApp (Meta Platforms)</strong> carries your inquiry. The message passes through and is
-            processed by WhatsApp under its own terms and privacy policy, on infrastructure we do not control.
-            If you would rather not use WhatsApp, do not submit the form; email us instead.
+            <strong>WhatsApp (Meta Platforms)</strong> carries the message you choose to send. It passes
+            through and is processed by WhatsApp under its own terms and privacy policy, on infrastructure we
+            do not control. If you would rather not use WhatsApp, simply do not send the prefilled message;
+            we reply to the work email on your inquiry instead.
           </li>
           <li>
             <strong>Vercel</strong> hosts this website and serves it from its Singapore region. It handles
@@ -165,8 +168,9 @@ export default function PrivacyPage() {
             and provides the aggregate analytics described in section 7.
           </li>
           <li>
-            <strong>Supabase</strong> hosts the Perantau Global candidate database in Singapore. As section 8
-            explains, this website does not read from or write to it.
+            <strong>Supabase</strong> hosts our database in Singapore. This website writes your inquiry record
+            to it, as section 4 describes. The Perantau Global candidate database lives on the same
+            infrastructure, but as section 8 explains, this website does not read candidate data from it.
           </li>
         </ul>
         <p>
@@ -228,7 +232,11 @@ export default function PrivacyPage() {
           27/2022 require us to say where:
         </p>
         <ul>
-          <li>Your inquiry travels through WhatsApp and Meta infrastructure located outside Indonesia.</li>
+          <li>Your inquiry record is stored on Supabase infrastructure in Singapore.</li>
+          <li>
+            The WhatsApp message you choose to send travels through WhatsApp and Meta infrastructure located
+            outside Indonesia.
+          </li>
           <li>This website is hosted and served from Singapore.</li>
           <li>The Perantau Global candidate database is hosted in Singapore.</li>
           <li>
@@ -246,8 +254,9 @@ export default function PrivacyPage() {
       <LegalSection n={10} title="How long we keep data">
         <ul>
           <li>
-            <strong>Inquiry conversations and lead records</strong>: while the opportunity is live, and up to
-            24 months after our last contact with you, unless you ask us to delete them sooner.
+            <strong>Inquiry records and conversations</strong>: the record stored when you submit the form,
+            and the conversation that follows: while the opportunity is live, and up to 24 months after our
+            last contact with you, unless you ask us to delete them sooner.
           </li>
           <li>
             <strong>Placement records</strong>, once a job order is signed: for as long as our obligations as
@@ -289,9 +298,10 @@ export default function PrivacyPage() {
       <LegalSection n={12} title="Security">
         <p>
           Traffic to this site is encrypted in transit with HTTPS, and every response carries standard browser
-          security headers. Because the site keeps no database of its own and stores nothing in your browser,
-          there is no store of inquiries here to breach. Once your message reaches us, access is limited to
-          the Business Development staff who need it.
+          security headers. Inquiry records are stored in a database protected by row-level access rules: the
+          public site can only add a record, never read one back, and reading them requires an authenticated
+          staff role. The site stores nothing in your browser. Access on our side is limited to the Business
+          Development and operations staff who need it.
         </p>
         <p>
           Two things worth stating plainly: a WhatsApp message is only as private as the device and account
