@@ -85,6 +85,10 @@ export const AUDIT_ACTIONS = {
   // Akademi payment operations
   mark_enrollment_paid: { label: "Tandai pembayaran lunas", tone: "ok" },
   waive_enrollment_fee: { label: "Bebaskan biaya (waive)", tone: "info" },
+  // Pulling every enrollment's name, contact and screening answers at once is a
+  // bigger PII egress than opening one document, so it is tracked at least as
+  // closely. Tone matches export_candidates_csv.
+  export_enrollments_csv: { label: "Export CSV pendaftar akademi", tone: "warn" },
 } as const satisfies Record<string, { label: string; tone: AuditActionTone }>;
 
 export type AuditAction = keyof typeof AUDIT_ACTIONS;

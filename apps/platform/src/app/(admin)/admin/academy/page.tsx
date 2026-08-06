@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createServerClient } from "@/lib/supabase-server";
 import { EnrollmentPaymentActions } from "@/components/admin/EnrollmentPaymentActions";
+import DocViewButton from "../candidates/[id]/DocViewButton";
+import { loadFieldMeta, decodeAnswers } from "@/lib/academy-answers";
 
 export const dynamic = "force-dynamic";
 
@@ -30,9 +32,23 @@ type Row = {
   paid_at: string | null;
   status: string;
   enrolled_at: string;
+  answers: Record<string, unknown> | null;
+  candidate_id: string;
   candidates: { full_name: string | null; email: string | null; phone: string | null } | null;
   academy_programs: { title: string; price: number | null; is_free: boolean } | null;
 };
+
+/** Keeps the other filter in the URL instead of silently resetting it. */
+function buatHref(
+  params: { bayar?: string; program?: string },
+  base = "/admin/academy",
+): string {
+  const q = new URLSearchParams();
+  if (params.bayar) q.set("bayar", params.bayar);
+  if (params.program) q.set("program", params.program);
+  const s = q.toString();
+  return s ? `${base}?${s}` : base;
+}
 
 const rupiah = (n: number | null | undefined) =>
   n == null ? "—" : `Rp${n.toLocaleString("id-ID")}`;
@@ -40,21 +56,22 @@ const rupiah = (n: number | null | undefined) =>
 export default async function AdminAcademyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ bayar?: string }>;
+  searchParams: Promise<{ bayar?: string; program?: string }>;
 }) {
-  const { bayar } = await searchParams;
+  const { bayar, program } = await searchParams;
   const filter = FILTERS.some((f) => f.key === bayar) ? (bayar as string) : "all";
   const supabase = await createServerClient();
 
   const base = supabase
     .from("academy_enrollments")
     .select(
-      "id, program_slug, payment_status, payment_amount, payment_ref, payment_channel, paid_at, status, enrolled_at, candidates(full_name, email, phone), academy_programs(title, price, is_free)",
+      "id, program_slug, payment_status, payment_amount, payment_ref, payment_channel, paid_at, status, enrolled_at, answers, candidate_id, candidates(full_name, email, phone), academy_programs(title, price, is_free)",
     )
     .order("enrolled_at", { ascending: false })
     .limit(500);
+  const withProgram = program ? base.eq("program_slug", program) : base;
   const { data, error } =
-    filter === "all" ? await base : await base.eq("payment_status", filter);
+    filter === "all" ? await withProgram : await withProgram.eq("payment_status", filter);
 
   if (error) {
     return (
@@ -67,6 +84,37 @@ export default async function AdminAcademyPage({
       </main>
     );
   }
+
+  // Which registrants have a CV. One extra round trip beats a per-row query,
+  // and the file itself is only fetched behind the audited signed-URL action.
+  const rowsForCv = ((data ?? []) as unknown as Row[]).map((r) => r.candidate_id).filter(Boolean);
+  const cvByCandidate = new Map<string, string>();
+  if (rowsForCv.length > 0) {
+    const { data: docs } = await supabase
+      .from("candidate_documents")
+      .select("candidate_id, file_path, uploaded_at")
+      .eq("doc_type", "cv")
+      .in("candidate_id", [...new Set(rowsForCv)])
+      .order("uploaded_at", { ascending: false });
+    // Newest first, so the first write per candidate is the newest CV.
+    for (const d of (docs ?? []) as { candidate_id: string; file_path: string }[]) {
+      if (!cvByCandidate.has(d.candidate_id)) cvByCandidate.set(d.candidate_id, d.file_path);
+    }
+  }
+
+  // Program list for the filter comes from the catalog, so a program stays
+  // selectable even when the current payment filter hides all of its rows.
+  const { data: programList } = await supabase
+    .from("academy_programs")
+    .select("slug, title")
+    .order("title");
+
+  // Question wording + option labels, so the table shows what the candidate
+  // actually answered instead of the stored option value.
+  const fieldMeta = await loadFieldMeta(
+    supabase,
+    ((data ?? []) as unknown as Row[]).map((r) => r.program_slug),
+  );
 
   const [paidC, pendingC, unpaidC, paidRows] = await Promise.all([
     supabase.from("academy_enrollments").select("*", { count: "exact", head: true }).eq("payment_status", "paid"),
@@ -102,14 +150,42 @@ export default async function AdminAcademyPage({
         <Kpi label="Pendapatan (lunas)" value={rupiah(revenue)} tone="var(--pg-red-600)" />
       </div>
 
+      {/* Program filter: Ifa menilai per kelas, jadi export perlu bisa disempitkan */}
+      {(programList ?? []).length > 1 && (
+        <div className="mt-6 flex flex-wrap gap-2 items-center">
+          <span className="text-[11px] font-bold uppercase tracking-wide text-pg-ink-500 mr-1">
+            Program
+          </span>
+          {[{ slug: undefined as string | undefined, title: "Semua" }, ...(programList ?? [])].map(
+            (p) => {
+              const active = (p.slug ?? undefined) === (program ?? undefined);
+              return (
+                <Link
+                  key={p.slug ?? "all"}
+                  href={buatHref({ bayar: filter === "all" ? undefined : filter, program: p.slug })}
+                  className="px-3 py-1.5 rounded-full text-[12px] font-semibold no-underline transition-colors"
+                  style={{
+                    background: active ? "var(--pg-ink-900)" : "var(--pg-white)",
+                    color: active ? "#fff" : "var(--pg-ink-secondary)",
+                    border: active ? "1px solid var(--pg-ink-900)" : "1px solid var(--pg-ink-200)",
+                  }}
+                >
+                  {p.title}
+                </Link>
+              );
+            },
+          )}
+        </div>
+      )}
+
       {/* Filter tabs */}
-      <div className="mt-6 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         {FILTERS.map((f) => {
           const active = f.key === filter;
           return (
             <Link
               key={f.key}
-              href={f.key === "all" ? "/admin/academy" : `/admin/academy?bayar=${f.key}`}
+              href={buatHref({ bayar: f.key === "all" ? undefined : f.key, program })}
               className="px-3.5 py-2 rounded-full text-[12.5px] font-bold no-underline transition-colors"
               style={{
                 background: active ? "var(--pg-red-600)" : "var(--pg-white)",
@@ -121,7 +197,25 @@ export default async function AdminAcademyPage({
             </Link>
           );
         })}
+        <a
+          href={buatHref(
+            { bayar: filter === "all" ? undefined : filter, program },
+            "/admin/academy/export",
+          )}
+          className="ml-auto px-3.5 py-2 rounded-full text-[12.5px] font-bold no-underline transition-colors"
+          style={{
+            background: "var(--pg-white)",
+            color: "var(--pg-ink-secondary)",
+            border: "1px solid var(--pg-ink-200)",
+          }}
+        >
+          Export CSV (buka di Excel)
+        </a>
       </div>
+      <p className="text-[11.5px] text-pg-ink-400 mt-2">
+        Export mengikuti filter yang aktif dan memuat jawaban screening sebagai kolom
+        terpisah. Setiap export tercatat di log audit karena berisi data pribadi.
+      </p>
 
       {/* Table */}
       <div className="mt-5 bg-pg-white border border-pg-ink-100 rounded-2xl overflow-hidden">
@@ -134,11 +228,13 @@ export default async function AdminAcademyPage({
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse min-w-[760px]">
+            <table className="w-full border-collapse min-w-[1080px]">
               <thead>
                 <tr style={{ background: "var(--pg-ink-50)" }}>
                   <Th>Kandidat</Th>
                   <Th>Program</Th>
+                  <Th>Jawaban screening</Th>
+                  <Th>CV</Th>
                   <Th>Pembayaran</Th>
                   <Th>Nominal</Th>
                   <Th>Daftar</Th>
@@ -152,6 +248,8 @@ export default async function AdminAcademyPage({
                   const needsAction =
                     isPaidProgram && (r.payment_status === "unpaid" || r.payment_status === "pending");
                   const amount = r.payment_amount ?? r.academy_programs?.price ?? null;
+                  const jawaban = decodeAnswers(r.answers, fieldMeta.get(r.program_slug));
+                  const cvPath = cvByCandidate.get(r.candidate_id) ?? null;
                   return (
                     <tr key={r.id} style={{ borderTop: "1px solid var(--pg-ink-100)" }}>
                       <Td>
@@ -170,6 +268,27 @@ export default async function AdminAcademyPage({
                           <div className="text-[10.5px] font-mono text-pg-ink-400 truncate max-w-[220px]">
                             {r.payment_ref}
                           </div>
+                        )}
+                      </Td>
+                      <Td>
+                        {jawaban.length === 0 ? (
+                          <span className="text-[11.5px] text-pg-ink-400">Tidak ada jawaban</span>
+                        ) : (
+                          <dl className="space-y-0.5 max-w-[260px]">
+                            {jawaban.map((a) => (
+                              <div key={a.key} className="text-[11.5px] leading-snug">
+                                <dt className="text-pg-ink-500">{a.label}</dt>
+                                <dd className="text-pg-ink-800 break-words font-medium">{a.value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        )}
+                      </Td>
+                      <Td>
+                        {cvPath ? (
+                          <DocViewButton filePath={cvPath} />
+                        ) : (
+                          <span className="text-[11.5px] text-pg-ink-400">Belum upload</span>
                         )}
                       </Td>
                       <Td>
