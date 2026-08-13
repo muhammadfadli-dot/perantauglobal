@@ -777,6 +777,61 @@ export async function createApplicationField(positionSlug: string, input: Applic
   await notifyWebRevalidate(positionSlug);
 }
 
+export type FieldChangeImpact = {
+  totalAnswered: number;
+  shapeBroken: number;
+  valueUnknown: number;
+};
+
+/**
+ * How many ALREADY-SUBMITTED applications a pending field edit would damage.
+ *
+ * Read-only. The editor calls this right before saving and puts the numbers in
+ * a confirm dialog, so the consequence is on screen before the click instead of
+ * being discovered days later.
+ *
+ * Why this exists (2026-08-12): a bulk screening-field cleanup across a dozen
+ * positions produced two failures nobody could see from the editor.
+ *   - Changing a field's TYPE (radio <-> multiselect) changes the shape answers
+ *     are expected to have; answers already stored keep the old shape. Nine such
+ *     answers took /admin/applications down completely (migration 0122).
+ *   - Renaming an option's `value` code silently orphans every answer holding
+ *     the old code. On truck-driver-jepang the SIM options went a / b1 / b2 ->
+ *     sim_a / sim_b1 / sim_b2, all three qualifying, and 166 candidates who
+ *     genuinely hold that licence flipped to "Belum lolos". The labels on
+ *     screen never changed, so nothing looked wrong.
+ * The second one is the more dangerous of the two precisely because it breaks
+ * nothing visibly: the page still loads, only the numbers are wrong.
+ */
+export async function previewFieldChangeImpact(
+  positionSlug: string,
+  fieldKey: string,
+  nextType: ApplicationFieldInput["field_type"],
+  nextOptions: { value: string; label: string; qualifying?: boolean }[] | null,
+): Promise<FieldChangeImpact> {
+  await assertAdmin();
+  const supabase = await createServerClient();
+  const { data, error } = await supabase.rpc("preview_field_change_impact", {
+    p_position_slug: positionSlug,
+    p_field_key: fieldKey,
+    p_next_type: nextType,
+    p_next_options: nextOptions,
+  });
+  if (error) throw new Error(error.message);
+  const row = (Array.isArray(data) ? data[0] : data) as
+    | {
+        total_menjawab: number | string;
+        bentuk_tidak_cocok: number | string;
+        nilai_tak_dikenal: number | string;
+      }
+    | undefined;
+  return {
+    totalAnswered: Number(row?.total_menjawab ?? 0),
+    shapeBroken: Number(row?.bentuk_tidak_cocok ?? 0),
+    valueUnknown: Number(row?.nilai_tak_dikenal ?? 0),
+  };
+}
+
 export async function updateApplicationField(
   id: string,
   positionSlug: string,

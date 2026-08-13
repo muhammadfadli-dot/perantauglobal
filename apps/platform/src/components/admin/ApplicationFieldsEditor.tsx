@@ -6,9 +6,11 @@ import { Button } from "@/components/pg/primitives";
 import {
   createApplicationField,
   deleteApplicationField,
+  previewFieldChangeImpact,
   reorderApplicationField,
   updateApplicationField,
   type ApplicationFieldInput,
+  type FieldChangeImpact,
 } from "../../app/(admin)/admin/positions/actions";
 import { fieldScreens } from "@/lib/position-readiness";
 
@@ -472,6 +474,45 @@ type FieldFormProps =
 
 type OptionRow = { value: string; label: string; qualifying?: boolean };
 
+/**
+ * Shows what an edit will do to applications that are ALREADY submitted, and
+ * asks before doing it. Returns true when there is nothing to warn about or the
+ * admin chose to continue.
+ *
+ * Born from 12 Agu 2026: a screening cleanup across a dozen positions renamed
+ * option value codes (SIM a / b1 / b2 -> sim_a / sim_b1 / sim_b2) and switched
+ * field types. The labels on screen stayed identical, so the edit looked
+ * cosmetic. It was not: 166 candidates holding a qualifying SIM flipped to
+ * "Belum lolos", and a type switch on another position took the whole Lamaran
+ * page down. Neither was visible from this editor.
+ */
+function confirmImpact(impact: FieldChangeImpact): boolean {
+  const rusak = impact.shapeBroken + impact.valueUnknown;
+  if (rusak === 0) return true;
+
+  const baris = [
+    `Perubahan ini menyentuh ${impact.totalAnswered} lamaran yang sudah menjawab pertanyaan ini.`,
+    "",
+  ];
+  if (impact.shapeBroken > 0) {
+    baris.push(
+      `• ${impact.shapeBroken} jawaban lama bentuknya tidak cocok lagi dengan jenis pertanyaan yang baru. Jawaban itu tidak akan dinilai oleh syarat kelolosan.`,
+    );
+  }
+  if (impact.valueUnknown > 0) {
+    baris.push(
+      `• ${impact.valueUnknown} jawaban nilainya tidak ada di daftar pilihan yang baru. Kandidatnya akan terbaca "Belum lolos" padahal jawabannya tidak berubah.`,
+    );
+  }
+  baris.push(
+    "",
+    "Kalau kamu cuma memperbaiki tulisan pilihan, pastikan kode nilainya tetap sama supaya jawaban lama tetap terbaca.",
+    "",
+    "Tetap simpan?",
+  );
+  return window.confirm(baris.join("\n"));
+}
+
 function FieldForm(props: FieldFormProps) {
   const { mode, positionSlug, onClose } = props;
   const initial = mode === "edit" ? props.initial : null;
@@ -589,6 +630,16 @@ function FieldForm(props: FieldFormProps) {
         if (mode === "add") {
           await createApplicationField(positionSlug, payload);
         } else {
+          // Ganti jenis pertanyaan atau kode pilihan bisa memutus jawaban yang
+          // SUDAH masuk. Tunjukkan jumlahnya sekarang, jangan biarkan ketahuan
+          // berhari-hari kemudian lewat angka yang salah.
+          const impact = await previewFieldChangeImpact(
+            positionSlug,
+            initial!.field_key,
+            payload.field_type,
+            payload.options ?? null,
+          );
+          if (!confirmImpact(impact)) return;
           const { field_key: _ignored, ...patch } = payload;
           void _ignored;
           await updateApplicationField(initial!.id, positionSlug, patch);

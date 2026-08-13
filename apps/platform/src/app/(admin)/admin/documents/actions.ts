@@ -1,11 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  createServerClient,
-  createServiceRoleClient,
-  requireAdmin,
-} from "@/lib/supabase-server";
+import { createServerClient, requireAdmin } from "@/lib/supabase-server";
 import { logAdminAction } from "@/lib/audit-log";
 
 async function assertAdmin() {
@@ -66,10 +62,25 @@ export type DocUrlResult =
  * the crash admins saw for CVs whose storage object was missing (2026-07-23).
  *
  * A CV that never materialized still points at the pending-cv staging bucket
- * (path "pending/<id>/cv.*"). Admin sessions can't SELECT there, so those sign
- * with the service role. Everything else lives in candidate-documents where the
- * admin's own session suffices (storage RLS `docs_storage_select_own_or_admin`,
- * migration 0010).
+ * (path "pending/<id>/cv.*"); everything else lives in candidate-documents.
+ * BOTH are signed with the ADMIN'S OWN SESSION. Storage RLS already allows it
+ * on both buckets: `docs_storage_select_own_or_admin` (migration 0010) and
+ * `pending_cv_admin_all` — FOR ALL ... USING (bucket_id = 'pending-cv' AND
+ * is_admin()) — migration 0078.
+ *
+ * The pending branch used to call createServiceRoleClient(). That was wrong on
+ * two counts, and it is what admins actually hit (2026-08-10, Zalfa):
+ *   1. Factually stale. The claim "admin sessions can't SELECT there" stopped
+ *      being true the moment migration 0078 added pending_cv_admin_all.
+ *   2. It THREW instead of returning a message. createServiceRoleClient()
+ *      raises when SUPABASE_SERVICE_ROLE_KEY is absent, and that key is not set
+ *      on the platform's Vercel project. The throw escaped this function's
+ *      careful ok:false contract and surfaced to the admin as the opaque
+ *      "An error occurred in the Server Components render" (7 occurrences,
+ *      route /admin/candidates/[id], 27 Jul - 11 Agu). KTP and formal photo on
+ *      the same profile opened fine because they never take this branch.
+ * Using the admin session removes the secret from this path entirely: least
+ * privilege, and one less environment variable that can silently be missing.
  *
  * PDP-critical: every call writes an admin_audit_log entry naming the admin,
  * the file_path requested, and request metadata (IP, UA). Audit insert
@@ -83,9 +94,7 @@ export async function getDocumentSignedUrl(
 
   const isPending = filePath.startsWith("pending/");
   const bucket = isPending ? "pending-cv" : "candidate-documents";
-  const client = isPending
-    ? createServiceRoleClient()
-    : await createServerClient();
+  const client = await createServerClient();
 
   const { data, error } = await client.storage
     .from(bucket)

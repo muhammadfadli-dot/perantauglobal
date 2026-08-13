@@ -3,6 +3,7 @@ import { createServerClient } from "@/lib/supabase-server";
 import AdminTopBar from "@/components/admin/TopBar";
 import CandidateFilters from "@/components/admin/CandidateFilters";
 import { Icon } from "@/components/pg/Icon";
+import { fetchAllRows } from "@/lib/fetch-all-rows";
 import { countryLabelFromDb } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
@@ -32,24 +33,23 @@ export default async function CandidatesListPage({
   // displayed TABLE in agreement. The old code counted globally but filtered only the
   // current 25-row page, so "Sudah qualified (359)" rendered a near-empty table.
   // A small paginator over a per-call thunk keeps each table's builder correctly typed.
-  async function paginateRows<T>(
-    run: (from: number, to: number) => PromiseLike<{ data: T[] | null }>,
-  ): Promise<T[]> {
-    const rows: T[] = [];
-    for (let f = 0; ; f += 1000) {
-      const { data } = await run(f, f + 999);
-      const batch = data ?? [];
-      rows.push(...batch);
-      if (batch.length < 1000) break;
-    }
-    return rows;
-  }
+  // Pakai fetchAllRows bersama, jangan salin ulang paginatornya. Salinan lokal
+  // yang lama membuang `error` dan mengembalikan array kosong, sehingga query
+  // yang gagal terbaca sebagai "0 qualified" tanpa peringatan apa pun.
+  const paginateRows = fetchAllRows;
 
   async function paginateIds(
-    run: (from: number, to: number) => PromiseLike<{ data: { candidate_id: string | null }[] | null }>,
+    run: (
+      from: number,
+      to: number,
+    ) => PromiseLike<{
+      data: { candidate_id: string | null }[] | null;
+      error?: { message: string } | null;
+    }>,
+    label?: string,
   ): Promise<Set<string>> {
     const set = new Set<string>();
-    for (const r of await paginateRows(run)) if (r.candidate_id) set.add(r.candidate_id);
+    for (const r of await fetchAllRows(run, label)) if (r.candidate_id) set.add(r.candidate_id);
     return set;
   }
 

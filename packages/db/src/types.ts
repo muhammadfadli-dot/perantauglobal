@@ -1755,6 +1755,19 @@ export type Database = {
         }
         Returns: string
       }
+      preview_field_change_impact: {
+        Args: {
+          p_field_key: string
+          p_next_options: Json
+          p_next_type: Database["public"]["Enums"]["form_field_type"]
+          p_position_slug: string
+        }
+        Returns: {
+          bentuk_tidak_cocok: number
+          nilai_tak_dikenal: number
+          total_menjawab: number
+        }[]
+      }
       validate_referral_code: { Args: { p_code: string }; Returns: boolean }
     }
     Enums: {

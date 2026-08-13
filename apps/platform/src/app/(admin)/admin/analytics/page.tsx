@@ -4,6 +4,7 @@ import AdminTopBar from "@/components/admin/TopBar";
 import { KpiStat, Sparkline } from "@/components/admin/Sparkline";
 import { isAcceptedStage } from "@/lib/applicationStatus";
 import { jakartaDayKey } from "@/lib/datetime";
+import { fetchAllRows } from "@/lib/fetch-all-rows";
 import { countryLabelFromDb } from "@perantauglobal/db/country";
 
 export const dynamic = "force-dynamic";
@@ -77,19 +78,9 @@ export default async function AnalyticsPage({
   const since = rangeToDate(range);
   const supabase = await createServerClient();
 
-  // Paginate past PostgREST's 1000-row cap for full-table fetches.
-  async function fetchAllRows<T>(
-    run: (from: number, to: number) => PromiseLike<{ data: T[] | null }>,
-  ): Promise<T[]> {
-    const out: T[] = [];
-    for (let f = 0; ; f += 1000) {
-      const { data } = await run(f, f + 999);
-      const batch = data ?? [];
-      out.push(...batch);
-      if (batch.length < 1000) break;
-    }
-    return out;
-  }
+  // Paginator-nya dipakai bersama dari @/lib/fetch-all-rows. Salinan lokal yang
+  // dulu ada di sini membuang `error`, jadi query yang gagal terbaca sebagai
+  // angka nol yang meyakinkan di seluruh KPI halaman ini.
 
   const now = new Date();
   const twelveWeeksAgoIso = new Date(
