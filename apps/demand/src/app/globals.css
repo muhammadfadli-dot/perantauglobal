@@ -1396,6 +1396,21 @@ textarea::placeholder {
 .corp-home-insight-body b a { color:inherit; text-decoration:none; }
 .corp-home-insight-body b i { margin-left:8px; font-style:normal; font-size:13px; }
 @media (max-width:800px) { .corp-home-insight-list { grid-template-columns:1fr; }.corp-home-insight-image { height:190px; }.corp-home-insight-body p { font-size:20px; } }
+
+/* Market catalog cards: image-first cards with concise market descriptions. */
+.corp-regions .region-cards { grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+.corp-regions .region-card { min-height:0; padding:0; overflow:hidden; border:1px solid rgba(36,33,36,.14); border-radius:18px; background:#fff; color:var(--ink); transition:transform .22s ease,box-shadow .22s ease; }
+.corp-regions .region-card:hover { transform:translateY(-6px); box-shadow:0 18px 30px rgba(36,33,36,.14); }
+.corp-regions .region-card::after { display:none; }
+.region-card-image { height:235px; background-position:center; background-size:cover; }
+.market-card-gcc .region-card-image { background-image:linear-gradient(180deg,rgba(24,12,8,.04),rgba(18,14,10,.18)),url('/images/hero-arches.jpg'); }
+.market-card-europe .region-card-image { background-image:linear-gradient(180deg,rgba(8,27,44,.04),rgba(8,27,44,.18)),url('/images/europe-hero.png'); }
+.market-card-japan .region-card-image { background-image:linear-gradient(180deg,rgba(18,28,50,.04),rgba(18,28,50,.18)),url('/images/japan-hero.png'); }
+.region-card-content { display:flex; min-height:190px; flex-direction:column; align-items:flex-start; padding:21px 20px 20px; }
+.region-card-content h3 { margin:0; color:var(--ink); font-size:clamp(24px,2.6vw,36px); letter-spacing:-.06em; line-height:.95; }
+.region-card-content p { margin:14px 0 0; color:#666; font-size:12px; line-height:1.55; }
+.region-card-content span { margin-top:auto; color:var(--red); font-size:11px; font-weight:800; }
+@media (max-width:800px) { .corp-regions .region-cards { grid-template-columns:1fr; }.region-card-image { height:220px; }.region-card-content { min-height:155px; } }
 @media (max-width:800px) { .corp-trustbar { justify-content:flex-start; gap:0; font-size:7px; }.corp-trustbar span+span::before { margin-right:12px; } .corp-perantau-banner { justify-content:space-between; gap:8px; min-height:40px; padding:7px 20px; font-size:10px; }.corp-perantau-banner span { max-width:170px; }.corp-perantau-banner b { white-space:nowrap; } }
 
 /* --- phone tap targets: everything interactive clears 44px --- */
