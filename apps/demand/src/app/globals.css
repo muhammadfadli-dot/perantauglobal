@@ -1471,6 +1471,16 @@ textarea::placeholder {
 .corp-language-menu button>b { margin-left:auto; color:#63a55f; font-size:16px; }
 @media (max-width:800px) { .corp-language-trigger { min-width:126px; height:42px; }.corp-language-menu { right:-5px; min-width:205px; } }
 
+/* Contact map dummy: a lightweight visual map treatment pending confirmed office data. */
+.corp-map-dummy { position:relative; width:100%; height:100%; min-height:380px; overflow:hidden; background-color:#242123; background-image:linear-gradient(27deg,transparent 0 47%,rgba(255,255,255,.11) 47.2% 48%,transparent 48.2%),linear-gradient(116deg,transparent 0 58%,rgba(255,255,255,.08) 58.2% 59%,transparent 59.2%),linear-gradient(165deg,transparent 0 30%,rgba(216,185,120,.16) 30.2% 30.8%,transparent 31%); }
+.corp-map-dummy::before,.corp-map-dummy::after { position:absolute; border:1px solid rgba(255,255,255,.1); border-radius:50%; content:""; }
+.corp-map-dummy::before { top:-70px; right:-30px; width:280px; height:280px; }.corp-map-dummy::after { bottom:-130px; left:-80px; width:330px; height:330px; }
+.map-road { position:absolute; display:block; height:2px; background:rgba(255,255,255,.18); transform-origin:left center; }
+.map-road-one { top:36%; left:-5%; width:110%; transform:rotate(18deg); }.map-road-two { top:68%; left:-8%; width:115%; transform:rotate(-22deg); }.map-road-three { top:5%; left:57%; width:92%; transform:rotate(92deg); }
+.map-pin { position:absolute; top:47%; left:51%; display:grid; width:48px; height:48px; place-items:center; border:3px solid #fff3d8; border-radius:50% 50% 50% 0; background:var(--red); color:var(--yellow); font-size:17px; box-shadow:0 8px 18px rgba(0,0,0,.25); transform:rotate(-45deg); }.map-pin::first-letter { transform:rotate(45deg); }
+.map-label,.map-location,.map-note { position:absolute; left:calc(51% + 38px); color:#fff; }.map-label { top:42%; font:800 10px var(--font-ibm-plex-mono),monospace; letter-spacing:.14em; }.map-location { top:48%; font-size:13px; font-weight:700; }.map-note { right:18px; bottom:16px; left:auto; color:rgba(255,255,255,.52); font-size:9px; letter-spacing:.08em; text-transform:uppercase; }
+@media (max-width:800px) { .corp-map-dummy { min-height:290px; }.map-label,.map-location { left:calc(51% + 28px); } }
+
 /* Navigation interaction and compact sticky header. */
 .corp-nav { position:sticky; top:0; z-index:60; background:rgba(255,255,255,.97); box-shadow:0 6px 18px rgba(36,33,36,.06); backdrop-filter:blur(10px); }
 .corp-nav-links a { padding-right:5px; padding-left:5px; transition:color .2s ease,background .2s ease; }
