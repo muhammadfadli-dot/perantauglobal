@@ -1634,3 +1634,20 @@ textarea::placeholder {
 @media (max-width:800px) { .corp-candidate-strip { display:grid; gap:16px; padding:28px 24px; }.contact-audience-choice { grid-template-columns:1fr; }.contact-candidate-route { padding:25px; } }
 .market-europe #why,.market-europe #sectors,.market-europe #clients,.market-europe #faq { background:#f5f8fa !important; }.market-europe #pool,.market-europe #credentials,.market-europe #process { background:#e2edf3 !important; }.market-europe #guarantee,.market-europe #contact,.market-europe footer { background:#11243a !important; }.market-europe .g-why>div:first-child,.market-europe .g-cred4 { background-color:#173451 !important; }.market-europe .g-why>div:nth-child(2)>div,.market-europe .card,.market-europe .ctile,.market-europe .tcard { border-color:#c6d7e1 !important; }.market-europe .g-why>div:nth-child(2)>div,.market-europe .card,.market-europe .ctile,.market-europe .tcard { background:#fff !important; }.market-europe .g-why>div:first-child [style*="color"],.market-europe #guarantee [style*="color"],.market-europe #contact [style*="color"],.market-europe footer [style*="color"] { color:#dcecf3 !important; }.market-europe .g-why>div:first-child [style*="font-family"],.market-europe #guarantee [style*="font-family"] { color:#f1b19c !important; }
 .market-japan #why,.market-japan #sectors,.market-japan #clients,.market-japan #faq { background:#f8f4ed !important; }.market-japan #pool,.market-japan #credentials,.market-japan #process { background:#eee7dc !important; }.market-japan #guarantee,.market-japan #contact,.market-japan footer { background:#18243a !important; }.market-japan .g-why>div:first-child,.market-japan .g-cred4 { background-color:#283b63 !important; }.market-japan .g-why>div:nth-child(2)>div,.market-japan .card,.market-japan .ctile,.market-japan .tcard { border-color:#ddd2c3 !important; }.market-japan .g-why>div:nth-child(2)>div,.market-japan .card,.market-japan .ctile,.market-japan .tcard { background:#fffdf9 !important; }.market-japan .g-why>div:first-child [style*="color"],.market-japan #guarantee [style*="color"],.market-japan #contact [style*="color"],.market-japan footer [style*="color"] { color:#f5e9dc !important; }.market-japan .g-why>div:first-child [style*="font-family"],.market-japan #guarantee [style*="font-family"] { color:#e8a08f !important; }
+.corp { --red:#B71927; --red-deep:#72131B; --red-dark:#550F16; --yellow:#D8B978; --off:#F7F6F4; --line:rgba(36,33,36,.18); }
+.corp-trustbar { background:#FAF9F6; color:#5d5a56; }
+.corp-perantau-banner { background:var(--red); font-weight:700; }
+.corp-perantau-banner b { color:#fff3d8; }
+.corp-perantau-banner:hover { background:var(--red-deep); }
+.corp-nav { border-bottom:3px solid var(--red); }
+.corp-brand-logo { padding:8px 0; }
+.corp-nav-links a { font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+.corp-nav-cta { border-radius:4px; background:var(--red); box-shadow:0 5px 0 var(--red-deep); transition:transform .18s ease,box-shadow .18s ease,background .18s ease; }
+.corp-nav-cta:hover { background:#D5383C; box-shadow:0 2px 0 var(--red-deep); transform:translateY(3px); }
+.corp-button,.corp-nav-cta,.corp-footer-perantau,.corp-partnership-banner>a { border-radius:4px; }
+.corp-footer { background:#1d1b1c; }
+.corp-footer-links a { transition:color .18s ease,transform .18s ease; }
+.corp-footer-links a:hover { color:#fff3d8; transform:translateX(3px); }
+.corp-footer-bottom { border-top-color:rgba(255,255,255,.24); }
+.corp-section-heading h2,.corp-regions-title h2,.corp-clients-heading h2,.corp-home-insights h2 { font-weight:800; }
+.corp-region-list .market-card,.corp-regions .region-card,.corp-logo-grid>div,.corp-home-insight-list article { border-radius:3px; }
