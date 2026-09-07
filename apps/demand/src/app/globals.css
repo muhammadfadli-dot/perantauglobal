@@ -1471,6 +1471,17 @@ textarea::placeholder {
 .corp-language-menu button>b { margin-left:auto; color:#63a55f; font-size:16px; }
 @media (max-width:800px) { .corp-language-trigger { min-width:126px; height:42px; }.corp-language-menu { right:-5px; min-width:205px; } }
 
+/* Navigation interaction and compact sticky header. */
+.corp-nav { position:sticky; top:0; z-index:60; background:rgba(255,255,255,.97); box-shadow:0 6px 18px rgba(36,33,36,.06); backdrop-filter:blur(10px); }
+.corp-nav-links a { padding-right:5px; padding-left:5px; transition:color .2s ease,background .2s ease; }
+.corp-nav-links a:hover { border-radius:4px; background:#fff1ef; color:var(--red); }
+.corp-nav-links a::after { right:5px; left:5px; bottom:22px; height:3px; border-radius:4px; }
+.corp-nav-cta { border-radius:8px; background:var(--red); box-shadow:0 5px 0 var(--red-deep); transition:transform .18s ease,box-shadow .18s ease,background .18s ease; }
+.corp-nav-cta:hover { background:#d5383c; box-shadow:0 2px 0 var(--red-deep); transform:translateY(3px); }
+.corp-language-trigger .language-trigger-flag,.corp-language-menu .language-option-flag { display:inline-flex; align-items:center; justify-content:center; overflow:hidden; border-radius:50%; }
+.corp-language-trigger .language-trigger-flag { width:19px; height:19px; font-size:16px; }
+.corp-language-menu .language-option-flag { width:26px; height:26px; font-size:21px; }
+
 /* Internal page Heroes follow the Articles editorial treatment; homepage remains bespoke. */
 .corp-inner-hero { position:relative; overflow:hidden; padding:70px max(7vw,24px) 88px; background:#211c1d; background-image:radial-gradient(circle at 0 100%,rgba(232,192,116,.18) 0 110px,transparent 112px),radial-gradient(circle at 92% 76%,rgba(255,255,255,.12) 0 150px,transparent 152px); color:#fff; }
 .corp-inner-hero::after { position:absolute; right:8%; bottom:-95px; width:240px; height:240px; border:1px solid rgba(255,255,255,.1); border-radius:50%; content:""; }

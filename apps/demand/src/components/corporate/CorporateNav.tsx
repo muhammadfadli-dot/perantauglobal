@@ -5,8 +5,6 @@ import { LanguageSwitch } from "./LanguageSwitch";
 export function CorporateNav() {
   return (
     <>
-      <div className="corp-trustbar"><span>Licensed Indonesian P3MI</span><span>Part of Dayalima Group</span><span>Employer-first workforce partnership</span></div>
-      <a className="corp-perantau-banner" href="https://www.perantauglobal.com/" target="_blank" rel="noreferrer"><span>Untuk kandidat: peluang dan persiapan karier global</span><b>Kunjungi Perantau Global ↗</b></a>
       <nav className="corp-nav" aria-label="Primary navigation">
         <Link href="/" className="corp-brand-logo" aria-label="Daya Talenta Global home"><Image src="/images/logo-dtg-navbar.webp" alt="Daya Talenta Global" width={170} height={68} priority /></Link>
         <div className="corp-nav-links">
