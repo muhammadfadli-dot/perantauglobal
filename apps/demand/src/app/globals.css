@@ -1471,6 +1471,18 @@ textarea::placeholder {
 .corp-language-menu button>b { margin-left:auto; color:#63a55f; font-size:16px; }
 @media (max-width:800px) { .corp-language-trigger { min-width:126px; height:42px; }.corp-language-menu { right:-5px; min-width:205px; } }
 
+/* Internal page Heroes follow the Articles editorial treatment; homepage remains bespoke. */
+.corp-inner-hero { position:relative; overflow:hidden; padding:70px max(7vw,24px) 88px; background:#211c1d; background-image:radial-gradient(circle at 0 100%,rgba(232,192,116,.18) 0 110px,transparent 112px),radial-gradient(circle at 92% 76%,rgba(255,255,255,.12) 0 150px,transparent 152px); color:#fff; }
+.corp-inner-hero::after { position:absolute; right:8%; bottom:-95px; width:240px; height:240px; border:1px solid rgba(255,255,255,.1); border-radius:50%; content:""; }
+.corp-inner-hero .corp-kicker { position:relative; z-index:1; color:var(--yellow); }
+.corp-inner-hero h1 { position:relative; z-index:1; max-width:900px; font-size:clamp(50px,6vw,80px); line-height:.98; letter-spacing:-.065em; }
+.corp-inner-hero h1 em { color:var(--yellow); }
+.corp-inner-hero>p:last-child { position:relative; z-index:1; max-width:620px; margin:18px 0 0; color:rgba(255,255,255,.72); font-size:17px; line-height:1.65; }
+.corp-inner-hero.corp-inner-dark { background:#211c1d; }
+.corp-inner-hero.corp-inner-dark .corp-kicker { color:var(--yellow); }
+.corp-inner-hero.corp-inner-dark>p:last-child { color:rgba(255,255,255,.72); }
+@media (max-width:800px) { .corp-inner-hero { padding:52px 24px 60px; }.corp-inner-hero h1 { font-size:clamp(46px,12vw,68px); }.corp-inner-hero>p:last-child { font-size:15px; } }
+
 /* Expanded employer-facing Services and Resources sections. */
 .corp-process-overview { display:grid; grid-template-columns:.8fr 1.2fr; gap:9vw; padding:108px clamp(24px,10vw,160px); background:#fff; }
 .corp-process-overview .corp-kicker,.corp-resource-guide .corp-kicker { color:var(--red); }
