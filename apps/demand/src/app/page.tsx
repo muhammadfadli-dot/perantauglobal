@@ -34,7 +34,7 @@ export default function HomePage() {
 
       <section className="corp-home-insights"><div className="corp-insights-intro"><p className="corp-kicker">ARTICLES</p><h2>Perspectives on people<br />and <em>global work.</em></h2><Link href="/articles">View all articles →</Link></div><div className="corp-home-insight-list"><article><span>01</span><p>Responsible recruitment starts long before the interview.</p><b>Read article <i>↗</i></b></article><article><span>02</span><p>What employers need from a cross-border talent partner.</p><b>Read article <i>↗</i></b></article><article><span>03</span><p>Designing a better first 90 days for international talent.</p><b>Read article <i>↗</i></b></article></div></section>
 
-      <section className="corp-contact" id="contact"><p className="corp-kicker">EMPLOYER INQUIRY</p><h2>Build your next workforce<br /><em>with clarity.</em></h2><Link href="/contact" className="corp-button">Discuss Your Workforce Needs →</Link><p className="corp-contact-note">For employers, authorized demand-side intermediaries, and institutional conversations.</p></section>
+      <section className="corp-contact" id="contact"><div className="corp-contact-decoration" aria-hidden="true"><span>ROLE FIT</span><i /><span>MARKET ROUTE</span><i /><span>AFTERCARE</span></div><p className="corp-kicker">EMPLOYER INQUIRY</p><h2>Build your next workforce<br /><em>with clarity.</em></h2><Link href="/contact" className="corp-button">Discuss Your Workforce Needs <span>→</span></Link><p className="corp-contact-note">For employers, authorized demand-side intermediaries, and institutional conversations.</p></section>
 
       <CorporateFooter />
     </main>
