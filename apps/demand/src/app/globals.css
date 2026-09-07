@@ -1404,6 +1404,10 @@ textarea::placeholder {
 .corp-hero-trust { display:flex; flex-wrap:wrap; gap:9px 18px; margin-top:30px; color:rgba(255,255,255,.7); font:700 9px var(--font-ibm-plex-mono),monospace; letter-spacing:.12em; text-transform:uppercase; }
 .corp-hero-trust span { display:inline-flex; align-items:center; gap:8px; }
 .corp-hero-trust span::before { width:6px; height:6px; border-radius:50%; background:var(--yellow); content:""; }
+.corp-hero-floating-card { position:absolute; z-index:3; right:clamp(20px,4vw,58px); bottom:clamp(24px,6vw,78px); display:flex; min-width:215px; flex-direction:column; gap:7px; padding:17px 18px; border:1px solid rgba(255,255,255,.38); border-radius:12px; background:rgba(255,255,255,.94); color:var(--ink); box-shadow:0 18px 35px rgba(22,5,7,.24); backdrop-filter:blur(10px); }
+.corp-hero-floating-card small { color:var(--red); font:800 9px var(--font-ibm-plex-mono),monospace; letter-spacing:.14em; }
+.corp-hero-floating-card strong { font-size:17px; letter-spacing:-.04em; }
+.corp-hero-floating-card span { color:#666; font-size:11px; }
 @media (max-width:800px) { .corp-hero { min-height:650px; grid-template-columns:1fr; }.corp-hero-trust { margin-top:24px; }.corp-hero-statement { min-height:250px; } }
 @media (max-width:800px) { .corp-trustbar { justify-content:flex-start; gap:0; font-size:7px; }.corp-trustbar span+span::before { margin-right:12px; } .corp-perantau-banner { justify-content:space-between; gap:8px; min-height:40px; padding:7px 20px; font-size:10px; }.corp-perantau-banner span { max-width:170px; }.corp-perantau-banner b { white-space:nowrap; } }
 
