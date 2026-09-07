@@ -1396,6 +1396,15 @@ textarea::placeholder {
 .corp-home-insight-body b a { color:inherit; text-decoration:none; }
 .corp-home-insight-body b i { margin-left:8px; font-style:normal; font-size:13px; }
 @media (max-width:800px) { .corp-home-insight-list { grid-template-columns:1fr; }.corp-home-insight-image { height:190px; }.corp-home-insight-body p { font-size:20px; } }
+
+/* Hero refinement: stronger split composition inspired by the supplied reference visuals. */
+.corp-hero { grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr); min-height:680px; }
+.corp-hero-copy { padding-right:clamp(28px,7vw,116px); }
+.corp-hero-statement { border-left-color:rgba(255,255,255,.28); }
+.corp-hero-trust { display:flex; flex-wrap:wrap; gap:9px 18px; margin-top:30px; color:rgba(255,255,255,.7); font:700 9px var(--font-ibm-plex-mono),monospace; letter-spacing:.12em; text-transform:uppercase; }
+.corp-hero-trust span { display:inline-flex; align-items:center; gap:8px; }
+.corp-hero-trust span::before { width:6px; height:6px; border-radius:50%; background:var(--yellow); content:""; }
+@media (max-width:800px) { .corp-hero { min-height:650px; grid-template-columns:1fr; }.corp-hero-trust { margin-top:24px; }.corp-hero-statement { min-height:250px; } }
 @media (max-width:800px) { .corp-trustbar { justify-content:flex-start; gap:0; font-size:7px; }.corp-trustbar span+span::before { margin-right:12px; } .corp-perantau-banner { justify-content:space-between; gap:8px; min-height:40px; padding:7px 20px; font-size:10px; }.corp-perantau-banner span { max-width:170px; }.corp-perantau-banner b { white-space:nowrap; } }
 
 /* --- phone tap targets: everything interactive clears 44px --- */
