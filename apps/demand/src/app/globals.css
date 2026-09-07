@@ -1398,8 +1398,9 @@ textarea::placeholder {
 @media (max-width:800px) { .corp-home-insight-list { grid-template-columns:1fr; }.corp-home-insight-image { height:190px; }.corp-home-insight-body p { font-size:20px; } }
 
 /* Hero refinement: stronger split composition inspired by the supplied reference visuals. */
-.corp-hero { grid-template-columns:minmax(0,1.08fr) minmax(340px,.92fr); min-height:680px; }
+.corp-hero { grid-template-columns:minmax(0,40%) minmax(0,60%); min-height:680px; }
 .corp-hero-copy { padding-right:clamp(28px,7vw,116px); }
+.corp-hero-primary { width:100%; }
 .corp-hero-statement { border-left-color:rgba(255,255,255,.28); }
 .corp-hero-trust { display:flex; flex-wrap:wrap; gap:9px 18px; margin-top:30px; color:rgba(255,255,255,.7); font:700 9px var(--font-ibm-plex-mono),monospace; letter-spacing:.12em; text-transform:uppercase; }
 .corp-hero-trust span { display:inline-flex; align-items:center; gap:8px; }
