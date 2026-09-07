@@ -1470,6 +1470,25 @@ textarea::placeholder {
 .corp-language-menu .language-option-flag { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; font-size:20px; line-height:1; }
 .corp-language-menu button>b { margin-left:auto; color:#63a55f; font-size:16px; }
 @media (max-width:800px) { .corp-language-trigger { min-width:126px; height:42px; }.corp-language-menu { right:-5px; min-width:205px; } }
+
+/* Expanded employer-facing Services and Resources sections. */
+.corp-process-overview { display:grid; grid-template-columns:.8fr 1.2fr; gap:9vw; padding:108px clamp(24px,10vw,160px); background:#fff; }
+.corp-process-overview .corp-kicker,.corp-resource-guide .corp-kicker { color:var(--red); }
+.corp-process-overview h2,.corp-resource-guide h2 { max-width:560px; font-size:clamp(40px,4.8vw,68px); }
+.corp-process-overview h2 em,.corp-resource-guide h2 em { color:var(--red); font-style:normal; }
+.corp-process-overview>div>p:not(.corp-kicker) { max-width:470px; color:#666; font-size:14px; line-height:1.8; }
+.corp-process-steps { border-top:2px solid var(--ink); }
+.corp-process-steps article { display:grid; grid-template-columns:52px 1fr; gap:18px; padding:22px 0; border-bottom:1px solid var(--line); }
+.corp-process-steps article>span { color:var(--red); font:800 11px var(--font-ibm-plex-mono),monospace; }
+.corp-process-steps h3 { margin:0 0 7px; font-size:20px; letter-spacing:-.04em; }
+.corp-process-steps p { margin:0; color:#666; font-size:12px; line-height:1.65; }
+.corp-resource-guide { display:grid; grid-template-columns:.8fr 1.2fr; gap:9vw; padding:108px clamp(24px,10vw,160px); background:var(--grey); }
+.corp-resource-guide-list { border-top:2px solid var(--ink); }
+.corp-resource-guide-list article { display:grid; grid-template-columns:50px 1fr; gap:18px; padding:24px 0; border-bottom:1px solid var(--line); }
+.corp-resource-guide-list article>b { color:var(--red); font:800 11px var(--font-ibm-plex-mono),monospace; }
+.corp-resource-guide-list h3 { margin:0 0 7px; font-size:19px; letter-spacing:-.04em; }
+.corp-resource-guide-list p { margin:0; max-width:500px; color:#666; font-size:12px; line-height:1.65; }
+@media (max-width:800px) { .corp-process-overview,.corp-resource-guide { grid-template-columns:1fr; gap:38px; padding:76px 24px; }.corp-process-overview h2,.corp-resource-guide h2 { font-size:clamp(39px,11vw,58px); } }
 @media (max-width:800px) { .corp-trustbar { justify-content:flex-start; gap:0; font-size:7px; }.corp-trustbar span+span::before { margin-right:12px; } .corp-perantau-banner { justify-content:space-between; gap:8px; min-height:40px; padding:7px 20px; font-size:10px; }.corp-perantau-banner span { max-width:170px; }.corp-perantau-banner b { white-space:nowrap; } }
 
 /* --- phone tap targets: everything interactive clears 44px --- */
