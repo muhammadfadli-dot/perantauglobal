@@ -1455,6 +1455,21 @@ textarea::placeholder {
 .hero-variant-floating-card strong { font-size:18px; letter-spacing:-.04em; }
 .hero-variant-floating-card span { color:#66746d; font-size:11px; }
 @media (max-width:800px) { .hero-variant { grid-template-columns:1fr; }.hero-variant-copy { padding:82px 24px 54px; }.hero-variant-image { min-height:360px; }.hero-variant-label { top:18px; left:24px; }.hero-variant-image-copy { right:24px; bottom:48px; }.hero-variant-floating-card { right:20px; bottom:35px; } }
+
+/* Language switch: soft pastel dropdown with flag rows and active check. */
+.corp-language { position:relative; }
+.corp-language-trigger { min-width:142px; height:44px; justify-content:flex-start; gap:9px; padding:0 13px !important; border:1px solid #d6c9ca !important; border-radius:10px; background:#fff8f6 !important; color:#262326 !important; box-shadow:0 5px 14px rgba(74,32,33,.08); }
+.corp-language-trigger .language-trigger-flag { font-size:17px; line-height:1; }
+.corp-language-trigger b { font-size:11px; letter-spacing:.01em; }
+.corp-language-trigger i { margin-left:auto; color:#777; font-size:13px; transition:transform .2s ease; }
+.corp-language-trigger[aria-expanded="true"] i { transform:rotate(180deg); }
+.corp-language-menu { top:calc(100% + 9px); right:0; min-width:224px; padding:10px 0 7px; border:1px solid #f0d8d5; border-radius:13px; background:linear-gradient(180deg,#fff7f3 0%,#f8dddd 100%); box-shadow:0 16px 35px rgba(74,32,33,.2); overflow:hidden; }
+.corp-language-menu>p { margin:2px 18px 8px; color:#5f5354; font-size:11px; font-weight:700; letter-spacing:.04em; }
+.corp-language-menu button { display:flex; align-items:center; gap:12px; width:100%; min-height:48px; padding:8px 18px !important; border:0; background:transparent !important; color:#493f40 !important; font-size:12px !important; font-weight:600 !important; }
+.corp-language-menu button:hover,.corp-language-menu button.is-selected { background:rgba(255,255,255,.56) !important; }
+.corp-language-menu .language-option-flag { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; font-size:20px; line-height:1; }
+.corp-language-menu button>b { margin-left:auto; color:#63a55f; font-size:16px; }
+@media (max-width:800px) { .corp-language-trigger { min-width:126px; height:42px; }.corp-language-menu { right:-5px; min-width:205px; } }
 @media (max-width:800px) { .corp-trustbar { justify-content:flex-start; gap:0; font-size:7px; }.corp-trustbar span+span::before { margin-right:12px; } .corp-perantau-banner { justify-content:space-between; gap:8px; min-height:40px; padding:7px 20px; font-size:10px; }.corp-perantau-banner span { max-width:170px; }.corp-perantau-banner b { white-space:nowrap; } }
 
 /* --- phone tap targets: everything interactive clears 44px --- */
