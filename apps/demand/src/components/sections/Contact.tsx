@@ -30,6 +30,7 @@ const link = waLink();
 export function Contact() {
   const ref = useRef<HTMLElement>(null);
   const [form, setForm] = useState<Record<Field, string>>(EMPTY);
+  const [audience, setAudience] = useState<"employer" | "candidate">("employer");
   const [errors, setErrors] = useState<Partial<Record<Field, string>>>({});
   const [submitted, setSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
@@ -155,7 +156,7 @@ export function Contact() {
           <span className="anim aw" style={{ display: "inline-block", animationDelay: ".14s" }}>Tell us who</span>{" "}
           <span className="anim aw" style={{ display: "inline-block", fontStyle: "italic", fontWeight: 400, color: "#E1C583", animationDelay: ".26s" }}>you need.</span>
         </h2>
-        <p className="anim ar" style={{ margin: "0 auto 26px", fontSize: 15.5, lineHeight: 1.6, color: "#B9C4A6", maxWidth: 520, animationDelay: ".4s", textWrap: "pretty" }}>A Business Development consultant replies within one business day. No obligation, no mailing lists.</p>
+        <p className="anim ar" style={{ margin: "0 auto 26px", fontSize: 15.5, lineHeight: 1.6, color: "#B9C4A6", maxWidth: 520, animationDelay: ".4s", textWrap: "pretty" }}>Share your requirement and our Business Development team will review its relevance to DTG&apos;s current market focus.</p>
         <a className="anim ar wa-btn" href={link} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "#4A5A32", color: "#F3EEE1", textDecoration: "none", fontSize: 14, fontWeight: 700, padding: "12px 24px", borderRadius: 8, transition: "background .15s, transform .15s", animationDelay: ".5s" }}>
           <svg width="18" height="18" fill="none" stroke="#F3EEE1" strokeWidth="1.7" style={{ display: "block" }}><path d="M9 2.5a6.3 6.3 0 0 0-5.4 9.6L2.7 15.5l3.5-.9A6.3 6.3 0 1 0 9 2.5Z" strokeLinejoin="round" /></svg>
           WhatsApp Business · {CONTACT.whatsappDisplay}
@@ -164,7 +165,10 @@ export function Contact() {
 
       <div style={{ padding: "0 40px 90px", marginTop: -84 }}>
         <div className="anim ar" style={{ background: "#F3EEE1", border: "1px solid #DCD3BE", borderRadius: 12, padding: "36px 40px", maxWidth: 820, margin: "0 auto", boxShadow: "0 22px 50px rgba(0,0,0,.28)", animationDelay: ".4s" }}>
-          {!submitted ? (
+          <div className="contact-audience-choice" aria-label="Choose your enquiry route"><button type="button" className={audience === "employer" ? "is-selected" : ""} onClick={() => setAudience("employer")}>I am an employer or authorised intermediary</button><button type="button" className={audience === "candidate" ? "is-selected" : ""} onClick={() => setAudience("candidate")}>I am looking for work abroad</button></div>
+          {audience === "candidate" ? (
+            <div className="contact-candidate-route"><p className="lbl">CANDIDATE ROUTE</p><h3>Your application journey is managed by Perantau Global.</h3><p>Visit Perantau Global to explore career information, opportunities, applications, and candidate preparation.</p><a href="https://www.perantauglobal.com/" target="_blank" rel="noopener noreferrer">Explore Perantau Global →</a></div>
+          ) : !submitted ? (
             <form onSubmit={submitForm} noValidate>
               {/* Honeypot: visually hidden, out of the tab order. Humans never
                   see or fill it; bots that do get a fake success server-side. */}
@@ -305,8 +309,8 @@ export function Contact() {
               <div style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 28, color: "#20301F", marginBottom: 10 }}>{saved ? "Inquiry received." : "Almost there. Send us your message."}</div>
               <p style={{ margin: "0 auto 24px", fontSize: 14.5, lineHeight: 1.65, color: "#6E6752", maxWidth: 420 }}>
                 {saved
-                  ? "Your inquiry is recorded with our Business Development team, who reply within one business day. We also opened WhatsApp with the same details prefilled - sending that message is the fastest way to start the conversation."
-                  : "We opened WhatsApp with your details prefilled. Send that message and our Business Development team will reply within one business day. If WhatsApp did not open, tap below."}
+                  ? "Your inquiry is recorded with our Business Development team. We also opened WhatsApp with the same details prefilled; sending that message is the fastest way to begin the conversation."
+                  : "We opened WhatsApp with your details prefilled. Send that message to begin the conversation. If WhatsApp did not open, tap below."}
               </p>
               <a href={link} target="_blank" rel="noopener noreferrer" className="wa-btn" style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "#4A5A32", color: "#F3EEE1", textDecoration: "none", fontSize: 13.5, fontWeight: 700, padding: "11px 22px", borderRadius: 8, transition: "background .15s, transform .15s" }}>
                 <svg width="17" height="17" fill="none" stroke="#F3EEE1" strokeWidth="1.7"><path d="M8.5 2.5a6 6 0 0 0-5.1 9.1L2.5 15l3.4-.9A6 6 0 1 0 8.5 2.5Z" strokeLinejoin="round" /></svg>

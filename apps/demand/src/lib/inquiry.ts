@@ -14,10 +14,13 @@ export const COUNTRIES = [
   "Qatar",
   "Bahrain",
   "Oman",
-  "Other",
+  "Japan",
+  "Bulgaria",
+  "Other Europe",
+  "Other market",
 ] as const;
 
-export const SECTORS = ["Healthcare", "Hospitality", "Wellness", "Other"] as const;
+export const SECTORS = ["Healthcare", "Hospitality & F&B", "Industrial & Automotive Maintenance", "Manufacturing & Skilled Production", "Caregiving", "Logistics", "Other"] as const;
 
 export const QUANTITIES = [
   { value: "1-5", label: "1 to 5" },

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Fraunces, IBM_Plex_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Fraunces, IBM_Plex_Mono, Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SITE, CONTACT, CREDENTIALS } from "@/lib/site-config";
@@ -29,6 +29,12 @@ const ibmPlexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-ibm-plex-mono",
+  display: "swap",
+});
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
   display: "swap",
 });
 
@@ -78,7 +84,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${plusJakarta.variable} ${fraunces.variable} ${ibmPlexMono.variable}`}
+      className={`${plusJakarta.variable} ${fraunces.variable} ${ibmPlexMono.variable} ${montserrat.variable}`}
     >
       <body className="antialiased">
         <script

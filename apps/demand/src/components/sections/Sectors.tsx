@@ -57,7 +57,22 @@ const SECTORS = [
   },
 ];
 
-export function Sectors() {
+const MARKET_SECTORS = {
+  gcc: SECTORS,
+  europe: [
+    { ...SECTORS[0], title: "Healthcare & care", subtitle: "For hospitals, care providers, and senior-living partners.", roles: ["Registered nurses", "Care assistants", "Allied health professionals"], cta: "Discuss healthcare talent" },
+    { ...SECTORS[1], title: "Hospitality", subtitle: "For hotels, restaurants, and guest-experience operators.", roles: ["F&B service", "Housekeeping", "Culinary professionals"], cta: "Discuss hospitality talent" },
+    { ...SECTORS[2], title: "Technical services", subtitle: "For manufacturing, facilities, and operations-led organisations.", roles: ["Technicians", "Maintenance teams", "Skilled operators"], cta: "Discuss technical talent" },
+  ],
+  japan: [
+    { ...SECTORS[0], title: "Manufacturing", subtitle: "For production and skilled operational workforce conversations.", roles: ["Skilled production", "Technical operators", "Quality support"], cta: "Discuss manufacturing talent" },
+    { ...SECTORS[1], title: "Caregiving", subtitle: "For care providers assessing a role-specific workforce need.", roles: ["Caregiving roles", "Care support", "Readiness-led selection"], cta: "Discuss caregiving talent" },
+    { ...SECTORS[2], title: "Service & logistics", subtitle: "For food service, automotive maintenance, and logistics operations.", roles: ["Food service", "Automotive maintenance", "Logistics operations"], cta: "Discuss this workforce need" },
+  ],
+} as const;
+
+export function Sectors({ market = "gcc" }: { market?: keyof typeof MARKET_SECTORS }) {
+  const sectors = MARKET_SECTORS[market];
   return (
     <Reveal id="sectors" style={{ background: "#F5F1E6", padding: "96px 0", scrollMarginTop: 74 }}>
       <div style={{ maxWidth: 1240, margin: "0 auto", padding: "0 40px" }}>
@@ -73,7 +88,7 @@ export function Sectors() {
           <line x1="0" y1="4" x2="200" y2="4" stroke="#B28A48" strokeWidth="1.4" strokeDasharray="200" strokeDashoffset="200" />
         </svg>
         <div className="g-3">
-          {SECTORS.map((s, i) => (
+          {sectors.map((s, i) => (
             <div key={s.title} className="anim ar card" style={{ animationDelay: `${0.3 + i * 0.1}s` }}>
               <div className="imgslot">
                 <div className="imgclip">

@@ -2,7 +2,16 @@ import Image from "next/image";
 import { Count } from "@/components/Count";
 import { CREDENTIALS } from "@/lib/site-config";
 
-export function Hero() {
+const COPY = {
+  gcc: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · SAUDI ARABIA & GCC", lines: ["Your registered gateway to", "screened Indonesian talent", "in the Gulf."], lede: "Approved by the Saudi authorities, licensed in Indonesia, and backed by Dayalima Group. We deliver screened, work-ready talent in about two months, with a 3-month written guarantee." },
+  europe: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · EUROPE", lines: ["A considered route to", "Indonesian talent", "for Europe."], lede: "A market-specific workforce conversation for European employers, starting with the role, readiness requirements, and the appropriate documented route." },
+  japan: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · JAPAN", lines: ["A considered route to", "Indonesian talent", "for Japan."], lede: "A role-specific workforce conversation for Japanese employers, starting with the requirement, practical readiness, and the appropriate documented route." },
+} as const;
+
+export function Hero({ market = "gcc" }: { market?: keyof typeof COPY }) {
+  const copy = COPY[market];
+  const heroImage = market === "europe" ? "/images/europe-hero.png" : market === "japan" ? "/images/japan-hero.png" : "/images/hero-arches.jpg";
+  const heroAlt = market === "europe" ? "Indonesian professionals in a European city" : market === "japan" ? "Indonesian professionals in a contemporary Japanese city" : "";
   return (
     <header
       id="top"
@@ -20,22 +29,14 @@ export function Hero() {
             away entirely, so mobile gets a portrait frame of its own. */}
         <Image
           className="hero-img-wide"
-          src="/images/hero-arches.jpg"
-          alt=""
+          src={heroImage}
+          alt={heroAlt}
           fill
           priority
           sizes="100vw"
           style={{ objectFit: "cover", objectPosition: "center" }}
         />
-        <Image
-          className="hero-img-tall"
-          src="/images/hero-arch-mobile.jpg"
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectFit: "cover", objectPosition: "center 55%" }}
-        />
+        {market === "gcc" && <Image className="hero-img-tall" src="/images/hero-arch-mobile.jpg" alt="" fill priority sizes="100vw" style={{ objectFit: "cover", objectPosition: "center 55%" }} />}
         <div className="hero-scrim" style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,rgba(16,27,16,.74) 0%,rgba(16,27,16,.5) 38%,rgba(16,27,16,.56) 72%,rgba(16,27,16,.9) 100%)" }} />
         <div style={{ position: "absolute", inset: 0, backgroundImage: "repeating-linear-gradient(45deg,rgba(216,185,120,.035) 0,rgba(216,185,120,.035) 1px,transparent 1px,transparent 26px),repeating-linear-gradient(-45deg,rgba(216,185,120,.035) 0,rgba(216,185,120,.035) 1px,transparent 1px,transparent 26px)" }} />
       </div>
@@ -48,22 +49,22 @@ export function Hero() {
           <span style={{ position: "absolute", inset: 26, background: "#B28A48", transform: "rotate(45deg)", display: "block" }} />
         </span>
         <div className="anim ar hero-eyebrow" style={{ fontFamily: "var(--font-mono)", fontSize: 11.5, letterSpacing: ".22em", color: "#E1C583", marginBottom: 26, animationDelay: ".12s" }}>
-          REGISTERED INDONESIAN TALENT PARTNER &nbsp;·&nbsp; SAUDI ARABIA &amp; GCC
+          {copy.eyebrow}
         </div>
         <h1 className="hero-h1" style={{ margin: "0 auto", maxWidth: 900, fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "clamp(40px,4.8vw,66px)", lineHeight: 1.03, letterSpacing: "-.018em", color: "#F5F1E6", textShadow: "0 2px 30px rgba(10,18,10,.5)" }}>
           {/* Desktop breaks these by hand, one line per span. Mobile reflows them
               inline, so the spaces between spans have to be real text nodes or
               the words run together. Between block elements they collapse. */}
-          <span className="anim aw" style={{ display: "block", animationDelay: ".22s" }}>Your registered gateway to</span>{" "}
-          <span className="anim aw" style={{ display: "block", animationDelay: ".36s" }}>screened Indonesian talent</span>{" "}
-          <span className="anim aw" style={{ display: "block", fontStyle: "italic", fontWeight: 400, color: "#E1C583", animationDelay: ".5s" }}>in the Gulf.</span>
+          <span className="anim aw" style={{ display: "block", animationDelay: ".22s" }}>{copy.lines[0]}</span>{" "}
+          <span className="anim aw" style={{ display: "block", animationDelay: ".36s" }}>{copy.lines[1]}</span>{" "}
+          <span className="anim aw" style={{ display: "block", fontStyle: "italic", fontWeight: 400, color: "#E1C583", animationDelay: ".5s" }}>{copy.lines[2]}</span>
         </h1>
         <p className="anim af hero-lede" style={{ margin: "26px auto 36px", fontSize: 17, lineHeight: 1.62, color: "#E4E0CC", maxWidth: 610, animationDelay: ".66s", textWrap: "pretty", textShadow: "0 1px 16px rgba(10,18,10,.5)" }}>
-          Approved by the Saudi authorities, licensed in Indonesia, and backed by Dayalima Group. We deliver screened, work-ready talent in about two months, with a 3-month written guarantee.
+          {copy.lede}
         </p>
         <div className="anim ar hero-cta" style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap", animationDelay: ".76s" }}>
           <a href="#contact" className="btn-terra" style={{ background: "#A8452F", color: "#F3EEE1", textDecoration: "none", fontSize: 15.5, fontWeight: 700, padding: "16px 34px", borderRadius: 8, boxShadow: "0 14px 34px rgba(168,69,47,.44)", transition: "background .15s, transform .15s" }}>
-            Request Talent
+            Discuss Your Workforce Needs
           </a>
           <a href="#pool" className="btn-ghost" style={{ color: "#F5F1E6", textDecoration: "none", fontSize: 15.5, fontWeight: 600, padding: "15px 32px", borderRadius: 8, border: "1px solid rgba(216,185,120,.6)", background: "rgba(16,27,16,.28)", transition: "background .15s, border-color .15s" }}>
             See Our Talent Pool
