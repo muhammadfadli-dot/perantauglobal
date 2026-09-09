@@ -20,7 +20,7 @@ export const CONTACT = {
   // and a dead channel costs more trust than a missing one.
   whatsappDigits: "6285211415104",
   whatsappDisplay: "+62 852 1141 5104",
-  office: "Kuningan business district, South Jakarta",
+  office: "Alamanda Tower Lantai 23, Jl. TB Simatupang No. 22-26 (Kav. 23-24), RT.1/RW.1, Cilandak Barat, Kecamatan Cilandak, Kota Jakarta Selatan, DKI Jakarta 12430",
 } as const;
 
 export function waLink(
