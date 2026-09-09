@@ -1837,3 +1837,8 @@ textarea::placeholder {
 .corp-nav-cta:hover,.corp-contact .corp-button:hover,.corp-footer-perantau:hover { background:#d5383c; color:#fff; border-color:#d5383c; transform:translateY(-2px); box-shadow:0 8px 20px rgba(36,10,10,.18); }
 .corp-nav-cta span,.corp-contact .corp-button span,.corp-footer .corp-footer-perantau span { color:var(--yellow); }
 .corp-nav-actions .corp-nav-cta,.corp-nav-actions .corp-nav-cta:hover { color:#fff; }
+
+/* Dayalima brand guideline alignment: 60% primary red, 30% neutral grey,
+   10% yellow accent. Montserrat is the closest available web-safe substitute
+   for the prescribed TSTAR Pro family. */
+.corp { --red:#A21F21; --red-deep:#771617; --red-dark:#550F10; --yellow:#FFCC05; --grey:#D9D9D9; --off:#F7F6F4; --cream:#F7F6F4; --ink:#242124; font-family:var(--font-montserrat),Arial,sans-serif; }
