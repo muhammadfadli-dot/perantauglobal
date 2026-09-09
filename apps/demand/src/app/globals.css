@@ -1843,3 +1843,8 @@ textarea::placeholder {
    10% yellow accent. Montserrat is the closest available web-safe substitute
    for the prescribed TSTAR Pro family. */
 .corp { --red:#A21F21; --red-deep:#771617; --red-dark:#550F10; --yellow:#FFCC05; --grey:#D9D9D9; --off:#F7F6F4; --cream:#F7F6F4; --ink:#242124; font-family:var(--font-montserrat),Arial,sans-serif; }
+.corp-image-note { position:absolute; right:18px; bottom:14px; left:18px; z-index:2; color:rgba(255,255,255,.78); font-size:11px; line-height:1.4; text-shadow:0 1px 4px rgba(0,0,0,.7); }
+.corp-resource-note { display:flex; gap:28px; align-items:flex-start; padding:28px clamp(24px,5vw,76px); background:var(--off); border-top:1px solid rgba(36,33,36,.12); border-bottom:1px solid rgba(36,33,36,.12); }
+.corp-resource-note .corp-kicker { flex:none; margin:3px 0 0; }
+.corp-resource-note p:last-child { max-width:720px; margin:0; font-size:14px; line-height:1.65; color:var(--ink); }
+@media (max-width:700px){.corp-resource-note{display:block}.corp-resource-note .corp-kicker{margin-bottom:10px}.corp-image-note{font-size:10px}}
