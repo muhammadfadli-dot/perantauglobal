@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { LanguageSwitch } from "./LanguageSwitch";
+import { waLink } from "@/lib/site-config";
 
 export function CorporateNav() {
   return (
@@ -15,7 +16,7 @@ export function CorporateNav() {
           <Link href="/articles">Articles</Link>
           <Link href="/contact">Contact</Link>
         </div>
-        <div className="corp-nav-actions"><Link className="corp-nav-talent" href="/for-candidates">For candidates</Link><LanguageSwitch /><Link className="corp-nav-cta" href="/contact">Discuss your needs <span>→</span></Link></div>
+        <div className="corp-nav-actions"><Link className="corp-nav-talent" href="/for-candidates">For candidates</Link><LanguageSwitch /><a className="corp-nav-cta" href={waLink("Hello DTG, I would like to discuss an employer workforce need.")} target="_blank" rel="noreferrer">Discuss your needs <span>→</span></a></div>
       </nav>
     </>
   );

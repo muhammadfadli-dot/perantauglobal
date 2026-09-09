@@ -1825,6 +1825,11 @@ textarea::placeholder {
 .corp-many-faces-copy h2 { max-width:560px; font-size:clamp(40px,4.8vw,68px); }
 .corp-many-faces-copy h2 em { color:var(--red); }
 .corp-many-faces-copy>p:not(.corp-kicker) { max-width:500px; margin:28px 0 0; font-size:14px; line-height:1.8; }
-.corp-many-faces-sectors { display:flex; flex-wrap:wrap; gap:8px; margin-top:30px; }
-.corp-many-faces-sectors span { padding:9px 11px; border:1px solid var(--line); color:var(--ink); font:800 10px var(--font-ibm-plex-mono),monospace; letter-spacing:.04em; }
+.corp-readiness-points { display:flex; flex-wrap:wrap; gap:8px; margin-top:27px; }
+.corp-readiness-points span { padding:8px 10px; color:var(--red); border:1px solid rgba(167,31,39,.35); font:800 9px var(--font-ibm-plex-mono),monospace; letter-spacing:.04em; text-transform:uppercase; }
+.corp-many-faces-sectors { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:22px; }
+.corp-many-faces-sectors article { min-height:95px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; border:1px solid var(--line); background:#fff; }
+.corp-many-faces-sectors strong { font-size:12px; line-height:1.2; }
+.corp-many-faces-sectors span { font-size:10px; line-height:1.4; color:#625b5a; }
+@media (max-width:800px) { .corp-many-faces-sectors { grid-template-columns:1fr; } }
 @media (max-width:800px) { .corp-many-faces { grid-template-columns:1fr; }.corp-many-faces-copy { padding:75px 24px; }.corp-many-faces-visual { min-height:290px; } }

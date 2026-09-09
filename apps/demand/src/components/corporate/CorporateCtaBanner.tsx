@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { waLink } from "@/lib/site-config";
 
 type CorporateCtaBannerProps = {
   label: string;
@@ -14,7 +15,7 @@ export function CorporateCtaBanner({
   label,
   title,
   description,
-  href = "/contact",
+  href = waLink("Hello DTG, I would like to discuss an employer workforce need."),
   cta = "Discuss Your Workforce Needs",
   id,
 }: CorporateCtaBannerProps) {
@@ -25,7 +26,7 @@ export function CorporateCtaBanner({
       </div>
       <p className="corp-kicker">{label}</p>
       <h2>{title}</h2>
-      <Link href={href} className="corp-button">{cta} <span>→</span></Link>
+      {href.startsWith("http") ? <a href={href} className="corp-button" target="_blank" rel="noreferrer">{cta} <span>→</span></a> : <Link href={href} className="corp-button">{cta} <span>→</span></Link>}
       <p className="corp-contact-note">{description}</p>
     </section>
   );

@@ -18,8 +18,8 @@ export const CONTACT = {
   // WhatsApp Business line for the BD GCC funnel. Digits only for wa.me.
   // No email here on purpose: info@dayatalentaglobal.com has no live inbox yet,
   // and a dead channel costs more trust than a missing one.
-  whatsappDigits: "6285110555561",
-  whatsappDisplay: "+62 851 1055 5561",
+  whatsappDigits: "6285211415104",
+  whatsappDisplay: "+62 852 1141 5104",
   office: "Kuningan business district, South Jakarta",
 } as const;
 
