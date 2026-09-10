@@ -1838,7 +1838,7 @@ textarea::placeholder {
 .corp-nav-cta:hover,.corp-contact .corp-button:hover,.corp-footer-perantau:hover { background:#d5383c; color:#fff; border-color:#d5383c; transform:translateY(-2px); box-shadow:0 8px 20px rgba(36,10,10,.18); }
 .corp-nav-cta span,.corp-contact .corp-button span,.corp-footer .corp-footer-perantau span { color:var(--yellow); }
 .corp-nav-actions .corp-nav-cta,.corp-nav-actions .corp-nav-cta:hover { color:#fff; }
-.corp-language-trigger img.language-trigger-flag,.corp-language-menu img.language-option-flag { display:block; object-fit:cover; flex:none; }
+.corp-language-trigger img.language-trigger-flag,.corp-language-menu img.language-option-flag { display:block; object-fit:cover; flex:none; border:1px solid rgba(36,33,36,.16); }
 
 /* Dayalima brand guideline alignment: 60% primary red, 30% neutral grey,
    10% yellow accent. Montserrat is the closest available web-safe substitute
