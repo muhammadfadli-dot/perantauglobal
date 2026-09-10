@@ -1841,6 +1841,18 @@ textarea::placeholder {
 .corp-many-faces-sectors span { font-size:10px; line-height:1.4; color:#625b5a; }
 @media (max-width:800px) { .corp-many-faces-sectors { grid-template-columns:1fr; } }
 @media (max-width:800px) { .corp-many-faces { grid-template-columns:1fr; gap:36px; padding:78px 24px 72px; border-top-width:8px; }.corp-many-faces::before { top:38px; left:24px; width:56px; }.corp-many-faces-copy { order:1; padding:0; }.corp-many-faces-visual { order:2; min-height:0; aspect-ratio:4/3; border-radius:12px; }.corp-many-faces-visual span { top:18px; left:18px; }.corp-many-faces-visual .corp-image-note { right:18px; bottom:16px; left:18px; } }
+
+/* Employer challenge: content-led planning section, deliberately image-free. */
+.corp-solution-visual { display:block; min-height:0; padding:clamp(84px,9vw,138px) clamp(24px,7vw,112px); background:var(--grey); }
+.corp-solution-copy { max-width:1180px; margin:0 auto; padding:0; }
+.corp-solution-copy h2 { max-width:760px; }
+.corp-solution-copy>p:not(.corp-kicker) { max-width:640px; }
+.corp-solution-points { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; margin-top:54px; border-top:1px solid var(--line); }
+.corp-solution-points div { min-height:156px; flex-direction:column; gap:16px; padding:24px 0; }
+.corp-solution-points b { font-size:11px; }
+.corp-solution-points strong { font-size:17px; }
+.corp-solution-points small { max-width:320px; font-size:12px; }
+@media (max-width:800px) { .corp-solution-visual { padding:76px 24px; }.corp-solution-copy { padding:0; }.corp-solution-points { grid-template-columns:1fr; gap:0; margin-top:34px; }.corp-solution-points div { min-height:0; padding:22px 0; }.corp-solution-copy h2 { font-size:clamp(38px,11vw,56px); } }
 .corp-nav-cta,.corp-contact .corp-button,.corp-footer-perantau { border-radius:8px; background:var(--red); color:#fff; border:1px solid var(--red); box-shadow:0 8px 20px rgba(36,10,10,.18); transition:background .2s ease,color .2s ease,border-color .2s ease,transform .2s ease,box-shadow .2s ease; }
 .corp-nav-cta:hover,.corp-contact .corp-button:hover,.corp-footer-perantau:hover { background:#d5383c; color:#fff; border-color:#d5383c; transform:translateY(-2px); box-shadow:0 8px 20px rgba(36,10,10,.18); }
 .corp-nav-cta span,.corp-contact .corp-button span,.corp-footer .corp-footer-perantau span { color:var(--yellow); }
