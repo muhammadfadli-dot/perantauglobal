@@ -1821,12 +1821,14 @@ textarea::placeholder {
 .corp-contact .corp-button:hover { background:#D5383C; box-shadow:0 3px 0 var(--red-deep); transform:translateY(4px); }
 .corp-contact .corp-button span { color:#fff3d8; font-size:17px; }
 @media (max-width:800px) { .corp-home-insight-list { grid-template-columns:1fr; }.corp-home-insight-list article,.corp-home-insight-list article:hover { min-height:190px; padding:22px; }.corp-contact-decoration { flex-wrap:wrap; gap:9px; font-size:8px; }.corp-contact-decoration i { width:16px; }.corp-contact::before { right:-260px; }.corp-contact::after { left:-240px; } }
-.corp-many-faces { display:grid; grid-template-columns:1fr 1fr; min-height:520px; background:var(--grey); }
-.corp-many-faces-visual { position:relative; min-height:420px; overflow:hidden; background:#211c1d; }
-.corp-many-faces-visual::after { position:absolute; inset:0; background:linear-gradient(90deg,rgba(33,28,29,.2),rgba(33,28,29,.6)); content:""; }
+.corp-many-faces { position:relative; display:grid; grid-template-columns:minmax(0,.9fr) minmax(420px,1.1fr); gap:clamp(48px,7vw,112px); align-items:center; min-height:0; padding:clamp(88px,8vw,132px) clamp(24px,6vw,96px); border-top:12px solid #fff; background:var(--off); }
+.corp-many-faces::before { position:absolute; top:clamp(40px,4vw,64px); left:clamp(24px,6vw,96px); width:72px; height:4px; background:var(--red); content:""; }
+.corp-many-faces-visual { position:relative; order:2; min-height:0; aspect-ratio:4/3; overflow:hidden; border-radius:18px; background:#211c1d; box-shadow:0 26px 48px rgba(36,33,36,.18); }
+.corp-many-faces-visual::after { position:absolute; inset:0; background:linear-gradient(180deg,rgba(33,28,29,.08) 45%,rgba(33,28,29,.76) 100%); content:""; }
 .corp-many-faces-visual img { object-fit:cover; filter:saturate(.72) contrast(1.04); }
-.corp-many-faces-visual span { position:absolute; left:clamp(24px,5vw,76px); bottom:28px; z-index:1; color:#fff; font:800 10px var(--font-ibm-plex-mono),monospace; letter-spacing:.16em; }
-.corp-many-faces-copy { padding:94px clamp(24px,7vw,112px); }
+.corp-many-faces-visual span { position:absolute; top:24px; left:26px; z-index:2; color:#fff; font:800 10px var(--font-ibm-plex-mono),monospace; letter-spacing:.16em; }
+.corp-many-faces-visual .corp-image-note { right:26px; bottom:22px; left:26px; }
+.corp-many-faces-copy { order:1; padding:0; }
 .corp-many-faces-copy .corp-kicker { color:var(--red); }
 .corp-many-faces-copy h2 { max-width:560px; font-size:clamp(40px,4.8vw,68px); }
 .corp-many-faces-copy h2 em { color:var(--red); }
@@ -1838,7 +1840,7 @@ textarea::placeholder {
 .corp-many-faces-sectors strong { font-size:12px; line-height:1.2; }
 .corp-many-faces-sectors span { font-size:10px; line-height:1.4; color:#625b5a; }
 @media (max-width:800px) { .corp-many-faces-sectors { grid-template-columns:1fr; } }
-@media (max-width:800px) { .corp-many-faces { grid-template-columns:1fr; }.corp-many-faces-copy { padding:75px 24px; }.corp-many-faces-visual { min-height:290px; } }
+@media (max-width:800px) { .corp-many-faces { grid-template-columns:1fr; gap:36px; padding:78px 24px 72px; border-top-width:8px; }.corp-many-faces::before { top:38px; left:24px; width:56px; }.corp-many-faces-copy { order:1; padding:0; }.corp-many-faces-visual { order:2; min-height:0; aspect-ratio:4/3; border-radius:12px; }.corp-many-faces-visual span { top:18px; left:18px; }.corp-many-faces-visual .corp-image-note { right:18px; bottom:16px; left:18px; } }
 .corp-nav-cta,.corp-contact .corp-button,.corp-footer-perantau { border-radius:8px; background:var(--red); color:#fff; border:1px solid var(--red); box-shadow:0 8px 20px rgba(36,10,10,.18); transition:background .2s ease,color .2s ease,border-color .2s ease,transform .2s ease,box-shadow .2s ease; }
 .corp-nav-cta:hover,.corp-contact .corp-button:hover,.corp-footer-perantau:hover { background:#d5383c; color:#fff; border-color:#d5383c; transform:translateY(-2px); box-shadow:0 8px 20px rgba(36,10,10,.18); }
 .corp-nav-cta span,.corp-contact .corp-button span,.corp-footer .corp-footer-perantau span { color:var(--yellow); }
