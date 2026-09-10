@@ -1820,7 +1820,6 @@ textarea::placeholder {
 .corp-many-faces-visual { position:relative; min-height:420px; overflow:hidden; background:#211c1d; }
 .corp-many-faces-visual::after { position:absolute; inset:0; background:linear-gradient(90deg,rgba(33,28,29,.2),rgba(33,28,29,.6)); content:""; }
 .corp-many-faces-visual img { object-fit:cover; filter:saturate(.72) contrast(1.04); }
-.corp-many-faces-context { position:absolute; top:24px; right:24px; z-index:1; display:grid; gap:6px; }.corp-many-faces-context i { padding:6px 8px; border:1px solid rgba(255,255,255,.42); background:rgba(33,28,29,.42); color:#fff; font:800 8px var(--font-ibm-plex-mono),monospace; font-style:normal; letter-spacing:.13em; text-align:center; }
 .corp-many-faces-visual span { position:absolute; left:clamp(24px,5vw,76px); bottom:28px; z-index:1; color:#fff; font:800 10px var(--font-ibm-plex-mono),monospace; letter-spacing:.16em; }
 .corp-many-faces-copy { padding:94px clamp(24px,7vw,112px); }
 .corp-many-faces-copy .corp-kicker { color:var(--red); }
