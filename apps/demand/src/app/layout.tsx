@@ -44,12 +44,12 @@ export const metadata: Metadata = {
     default: `${SITE.brandName} - Registered Indonesian Talent Partner`,
     template: `%s - ${SITE.brandName}`,
   },
-  description: SITE.tagline,
+  description: "Employer-first workforce solutions connecting international employers with Indonesian talent, readiness evidence, documented mobility, and aftercare.",
   openGraph: {
     type: "website",
     siteName: SITE.brandName,
     title: `${SITE.brandName} - Registered Indonesian Talent Partner`,
-    description: SITE.tagline,
+    description: "Employer-first workforce solutions connecting international employers with Indonesian talent, readiness evidence, documented mobility, and aftercare.",
     url: `https://${SITE.domain}`,
     locale: "en_US",
   },
@@ -67,7 +67,7 @@ const orgJsonLd = {
   logo: `https://${SITE.domain}/images/dtg-logo.png`,
   description: SITE.tagline,
   parentOrganization: { "@type": "Organization", name: SITE.group.name },
-  address: { "@type": "PostalAddress", addressLocality: "South Jakarta", addressCountry: "ID" },
+  address: { "@type": "PostalAddress", streetAddress: "Alamanda Tower Lantai 23, Jl. TB Simatupang No. 22-26 (Kav. 23-24), RT.1/RW.1, Cilandak Barat", addressLocality: "Jakarta Selatan", addressRegion: "DKI Jakarta", postalCode: "12430", addressCountry: "ID" },
   identifier: [
     { "@type": "PropertyValue", name: "P3MI License", value: CREDENTIALS.p3miLicenseNo },
     { "@type": "PropertyValue", name: "Saudi MOFA Registration", value: CREDENTIALS.mofaApprovalDisplay },
@@ -76,7 +76,7 @@ const orgJsonLd = {
     "@type": "ContactPoint",
     contactType: "sales",
     telephone: `+${CONTACT.whatsappDigits}`,
-    availableLanguage: ["en", "id", "ar"],
+    availableLanguage: ["en", "id"],
   },
 };
 

@@ -6,8 +6,8 @@ import { CorporateCtaBanner } from "@/components/corporate/CorporateCtaBanner";
 const resources = [
   ["01", "DTG Company Profile", "A concise employer-facing introduction to DTG, its role in the Dayalima Group, market focus, and accountable workforce approach.", "Company profile", "Ready as a web preview"],
   ["02", "How DTG Works", "A clear engagement journey from qualified workforce need and job detail through selection support, mobilisation coordination, and aftercare.", "View the process", "Ready as a web preview"],
-  ["03", "Employer Guides", "Market-specific guides for Saudi & GCC, Japan, and Bulgaria-led Europe. Regulatory and market claims will be added only after review.", "Explore the guides", "In content development"],
-  ["04", "Illustrative Assessment & Readiness Report", "A future employer-facing sample using a fictional candidate profile, role-specific criteria, evidence status, strengths, gaps, and review notes.", "View report framework", "Awaiting assessment mapping"],
+  ["03", "Employer Guides", "Market-specific guides for Saudi & GCC, Japan, and Bulgaria-led Europe. Regulatory and market claims will be added only after review.", "Explore the guides", "NEED APPROVAL"],
+  ["04", "Illustrative Assessment & Readiness Report", "A future employer-facing sample using a fictional candidate profile, role-specific criteria, evidence status, strengths, gaps, and review notes.", "View report framework", "NEED APPROVAL"],
 ] as const;
 
 export default function ResourcesPage() {
