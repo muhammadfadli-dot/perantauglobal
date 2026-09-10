@@ -3,6 +3,7 @@ import { Plus_Jakarta_Sans, Fraunces, IBM_Plex_Mono, Montserrat } from "next/fon
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { SITE, CONTACT, CREDENTIALS } from "@/lib/site-config";
+import { PageIntroLoader } from "@/components/corporate/PageIntroLoader";
 
 // Gate indexing until the public launch is signed off (see robots.ts).
 const allowIndex = process.env.NEXT_PUBLIC_ALLOW_INDEX === "true";
@@ -87,6 +88,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${plusJakarta.variable} ${fraunces.variable} ${ibmPlexMono.variable} ${montserrat.variable}`}
     >
       <body className="antialiased">
+        <PageIntroLoader />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
