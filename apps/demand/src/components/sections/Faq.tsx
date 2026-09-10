@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 const FAQS = [
   {
     q: "Do you actually have ready candidates?",
-    a: "Yes. Around 1,300 professionals are in our active pool, with 550+ ready for Saudi and GCC roles. We re-verify availability against your requirements before presenting anyone.",
+    a: "[NEED APPROVAL] Around 1,300 professionals are stated to be in the active pool, with 550+ stated as ready for Saudi and GCC roles. These figures require source, period, definition, and approval confirmation. Availability is re-verified against your requirements before presenting anyone.",
   },
   {
     q: "How long does the process take?",

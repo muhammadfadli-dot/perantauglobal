@@ -38,14 +38,14 @@ export function Credentials() {
             ))}
           </div>
           <div className="anim ar g-cred4" style={{ background: "#20301F", backgroundImage: "repeating-linear-gradient(45deg,rgba(216,185,120,.045) 0,rgba(216,185,120,.045) 1px,transparent 1px,transparent 22px),repeating-linear-gradient(-45deg,rgba(216,185,120,.045) 0,rgba(216,185,120,.045) 1px,transparent 1px,transparent 22px)", borderRadius: 12, padding: "30px 40px", margin: "6px 0 34px", animationDelay: ".42s" }}>
-            <div style={{ textAlign: "center", borderRight: "1px solid rgba(216,185,120,.18)" }}><div style={{ fontFamily: "var(--font-mono)", fontSize: 32, fontWeight: 600, color: "#F3EEE1" }}><Count target={1300} suffix="+" /></div><div style={{ fontSize: 11.5, color: "#9FAE8E", marginTop: 6 }}>active talent pool</div></div>
-            <div style={{ textAlign: "center", borderRight: "1px solid rgba(216,185,120,.18)" }}><div style={{ fontFamily: "var(--font-mono)", fontSize: 32, fontWeight: 600, color: "#F3EEE1" }}><Count target={550} suffix="+" /></div><div style={{ fontSize: 11.5, color: "#9FAE8E", marginTop: 6 }}>ready for Saudi &amp; GCC</div></div>
-            <div style={{ textAlign: "center", borderRight: "1px solid rgba(216,185,120,.18)" }}><div style={{ fontFamily: "var(--font-mono)", fontSize: 32, fontWeight: 600, color: "#F3EEE1" }}>7</div><div style={{ fontSize: 11.5, color: "#9FAE8E", marginTop: 6 }}>active markets</div></div>
+            <div style={{ textAlign: "center", borderRight: "1px solid rgba(216,185,120,.18)" }}><div style={{ fontFamily: "var(--font-mono)", fontSize: 32, fontWeight: 600, color: "#F3EEE1" }}><Count target={1300} suffix="+" /></div><div style={{ fontSize: 11.5, color: "#9FAE8E", marginTop: 6 }}>active talent pool<br /><b style={{ color: "#D8B978" }}>[NEED APPROVAL]</b></div></div>
+            <div style={{ textAlign: "center", borderRight: "1px solid rgba(216,185,120,.18)" }}><div style={{ fontFamily: "var(--font-mono)", fontSize: 32, fontWeight: 600, color: "#F3EEE1" }}><Count target={550} suffix="+" /></div><div style={{ fontSize: 11.5, color: "#9FAE8E", marginTop: 6 }}>ready for Saudi &amp; GCC<br /><b style={{ color: "#D8B978" }}>[NEED APPROVAL]</b></div></div>
+            <div style={{ textAlign: "center", borderRight: "1px solid rgba(216,185,120,.18)" }}><div style={{ fontFamily: "var(--font-mono)", fontSize: 32, fontWeight: 600, color: "#F3EEE1" }}>7</div><div style={{ fontSize: 11.5, color: "#9FAE8E", marginTop: 6 }}>active markets<br /><b style={{ color: "#D8B978" }}>[NEED APPROVAL]</b></div></div>
             <div style={{ textAlign: "center" }}><div style={{ fontFamily: "var(--font-mono)", fontSize: 32, fontWeight: 600, color: "#D8B978" }}>3 mo</div><div style={{ fontSize: 11.5, color: "#9FAE8E", marginTop: 6 }}>written guarantee</div></div>
           </div>
           <div className="anim ar" style={{ animationDelay: ".54s" }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: "#20301F", marginBottom: 8 }}>Trusted by employers across the Gulf</div>
-            <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: "#6E6752", maxWidth: 640 }}>A growing portfolio across healthcare, hospitality, and wellness. Client names and logos are shared during consultation, with their written permission.</p>
+            <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: "#6E6752", maxWidth: 640 }}>Referenced organisations, relationship categories, and display permissions remain subject to verification before publication.</p>
           </div>
         </div>
       </div>
