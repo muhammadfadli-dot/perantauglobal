@@ -71,8 +71,24 @@ const MARKET_SECTORS = {
   ],
 } as const;
 
+const MARKET_INTRO = {
+  gcc: {
+    title: "Three sectors. Deep benches.",
+    body: "Focused pools mean faster shortlists and better fits. Tell us the roles, we bring the people.",
+  },
+  europe: {
+    title: "Relevant role contexts for Europe.",
+    body: "These are employer conversation areas, not a claim of live availability. Role fit and market requirements are confirmed against your brief. [NEED APPROVAL]",
+  },
+  japan: {
+    title: "Relevant role contexts for Japan.",
+    body: "These are employer conversation areas, not a claim of live availability. Role fit and market requirements are confirmed against your brief. [NEED APPROVAL]",
+  },
+} as const;
+
 export function Sectors({ market = "gcc" }: { market?: keyof typeof MARKET_SECTORS }) {
   const sectors = MARKET_SECTORS[market];
+  const intro = MARKET_INTRO[market];
   return (
     <Reveal id="sectors" style={{ background: "#F5F1E6", padding: "96px 0", scrollMarginTop: 74 }}>
       <div style={{ maxWidth: 1240, margin: "0 auto", padding: "0 40px" }}>
@@ -81,8 +97,8 @@ export function Sectors({ market = "gcc" }: { market?: keyof typeof MARKET_SECTO
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: ".18em", color: "#8A6D2E" }}>SECTORS</span>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 48, flexWrap: "wrap", marginBottom: 20 }}>
-          <h2 className="anim aw" style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "clamp(30px,6vw,44px)", lineHeight: 1.08, letterSpacing: "-.01em", color: "#20301F", maxWidth: 560, animationDelay: ".12s" }}>Three sectors. Deep benches.</h2>
-          <p className="anim ar" style={{ margin: "0 0 6px", fontSize: 15.5, lineHeight: 1.6, color: "#6E6752", maxWidth: 400, animationDelay: ".22s", textWrap: "pretty" }}>Focused pools mean faster shortlists and better fits. Tell us the roles, we bring the people.</p>
+          <h2 className="anim aw" style={{ margin: 0, fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "clamp(30px,6vw,44px)", lineHeight: 1.08, letterSpacing: "-.01em", color: "#20301F", maxWidth: 560, animationDelay: ".12s" }}>{intro.title}</h2>
+          <p className="anim ar" style={{ margin: "0 0 6px", fontSize: 15.5, lineHeight: 1.6, color: "#6E6752", maxWidth: 400, animationDelay: ".22s", textWrap: "pretty" }}>{intro.body}</p>
         </div>
         <svg className="anim adraw" width="200" height="8" style={{ display: "block", margin: "0 0 46px", overflow: "visible" }}>
           <line x1="0" y1="4" x2="200" y2="4" stroke="#B28A48" strokeWidth="1.4" strokeDasharray="200" strokeDashoffset="200" />

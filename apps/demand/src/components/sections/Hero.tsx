@@ -8,6 +8,21 @@ const COPY = {
   japan: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · JAPAN", lines: ["A considered route to", "Indonesian talent", "for Japan."], lede: "A role-specific workforce conversation for Japanese employers, starting with the requirement, practical readiness, and the appropriate documented route." },
 } as const;
 
+const MARKET_TRUST = {
+  europe: [
+    ["Employer-first conversation", "ROLE, CONTEXT & CAPABILITY"],
+    ["Readiness made clearer", "EVIDENCE BEFORE COMMITMENT"],
+    ["Documented route", "MARKET REQUIREMENTS · [NEED APPROVAL]"],
+    ["Aftercare scope", "TO BE AGREED · [NEED APPROVAL]"],
+  ],
+  japan: [
+    ["Role-specific planning", "OPERATING CONTEXT FIRST"],
+    ["Practical readiness", "EVIDENCE BEFORE COMMITMENT"],
+    ["Documented route", "MARKET REQUIREMENTS · [NEED APPROVAL]"],
+    ["Aftercare scope", "TO BE AGREED · [NEED APPROVAL]"],
+  ],
+} as const;
+
 export function Hero({ market = "gcc" }: { market?: keyof typeof COPY }) {
   const copy = COPY[market];
   const heroImage = market === "europe" ? "/images/europe-hero.png" : market === "japan" ? "/images/japan-hero.png" : "/images/hero-arches.jpg";
@@ -77,7 +92,7 @@ export function Hero({ market = "gcc" }: { market?: keyof typeof COPY }) {
 
       {/* trust strip */}
       <div className="anim af hero-trust" style={{ position: "relative", zIndex: 10, marginTop: 38, borderTop: "1px solid rgba(216,185,120,.2)", background: "rgba(16,27,16,.66)", backdropFilter: "blur(3px)", animationDelay: ".95s" }}>
-        <div className="g-trust" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+        {market === "gcc" ? <div className="g-trust" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
           <div style={{ padding: "26px 30px", display: "flex", alignItems: "center", gap: 14 }}>
             <svg width="26" height="26" fill="none" stroke="#B28A48" strokeWidth="1.5" style={{ display: "block", flex: "none" }}><path d="M13 3 21 6v5.4c0 5-3.6 8.6-8 10-4.4-1.4-8-5-8-10V6Z" /><path d="m9.4 12.6 2.6 2.6 4.8-5.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
             <div><div style={{ fontSize: 13.5, fontWeight: 700, color: "#F3EEE1" }}>Saudi MOFA Approved</div><div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".1em", color: "#9FAE8E", marginTop: 3 }}>REG. NO. {CREDENTIALS.mofaApprovalDisplay}</div></div>
@@ -94,7 +109,12 @@ export function Hero({ market = "gcc" }: { market?: keyof typeof COPY }) {
             <svg width="26" height="26" fill="none" stroke="#B28A48" strokeWidth="1.5" style={{ display: "block", flex: "none" }}><circle cx="13" cy="13" r="9.5" /><path d="M3.5 13h19" /><ellipse cx="13" cy="13" rx="4.2" ry="9.5" /></svg>
             <div><div style={{ fontSize: 13.5, fontWeight: 700, color: "#F3EEE1" }}><Count target={1300} suffix="+" /> in the pool <small style={{ color: "#D8B978" }}>[NEED APPROVAL]</small></div><div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".1em", color: "#9FAE8E", marginTop: 3 }}>3-MONTH WRITTEN GUARANTEE</div></div>
           </div>
-        </div>
+        </div> : <div className="g-trust" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
+          {MARKET_TRUST[market].map(([title, note], index) => <div key={title} style={{ padding: "26px 30px", display: "flex", alignItems: "center", gap: 14, borderLeft: index ? "1px solid rgba(216,185,120,.14)" : undefined }}>
+            <svg width="26" height="26" fill="none" stroke="#B28A48" strokeWidth="1.5" style={{ display: "block", flex: "none" }}><circle cx="13" cy="13" r="9.5" /><path d="M13 7v12M7 13h12" strokeLinecap="round" /></svg>
+            <div><div style={{ fontSize: 13.5, fontWeight: 700, color: "#F3EEE1" }}>{title}</div><div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".1em", color: "#9FAE8E", marginTop: 3 }}>{note}</div></div>
+          </div>)}
+        </div>}
       </div>
     </header>
   );
