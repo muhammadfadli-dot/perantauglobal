@@ -1836,10 +1836,22 @@ textarea::placeholder {
 .corp-readiness-points { display:flex; flex-wrap:wrap; gap:8px; margin-top:27px; }
 .corp-readiness-points span { padding:8px 10px; color:var(--red); border:1px solid rgba(167,31,39,.35); font:800 9px var(--font-ibm-plex-mono),monospace; letter-spacing:.04em; text-transform:uppercase; }
 .corp-many-faces-sectors { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:22px; }
-.corp-many-faces-sectors article { min-height:95px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; border:1px solid var(--line); background:#fff; }
+.corp-many-faces-sectors button { min-height:95px; padding:12px; display:flex; flex-direction:column; justify-content:space-between; color:var(--ink); border:1px solid var(--line); background:#fff; font:inherit; text-align:left; cursor:pointer; transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease; }
+.corp-many-faces-sectors button:hover,.corp-many-faces-sectors button:focus-visible { border-color:var(--red); box-shadow:0 10px 20px rgba(36,33,36,.1); outline:none; transform:translateY(-3px); }
 .corp-many-faces-sectors strong { font-size:12px; line-height:1.2; }
 .corp-many-faces-sectors span { font-size:10px; line-height:1.4; color:#625b5a; }
-@media (max-width:800px) { .corp-many-faces-sectors { grid-template-columns:1fr; } }
+.corp-sector-dialog-backdrop { position:fixed; z-index:100; inset:0; display:grid; place-items:center; padding:24px; background:rgba(36,33,36,.62); }
+.corp-sector-dialog { position:relative; width:min(100%,560px); max-height:calc(100vh - 48px); overflow:auto; padding:42px; border-top:5px solid var(--red); background:#fff; box-shadow:0 26px 80px rgba(0,0,0,.28); }
+.corp-sector-dialog .corp-kicker { color:var(--red); }
+.corp-sector-dialog h3 { margin:14px 36px 16px 0; font-size:clamp(32px,4vw,46px); letter-spacing:-.06em; }
+.corp-sector-dialog>p:not(.corp-kicker) { margin:0; color:#514b4a; font-size:15px; line-height:1.75; }
+.corp-sector-dialog-close { position:absolute; top:18px; right:18px; display:grid; width:34px; height:34px; place-items:center; border:1px solid var(--line); background:#fff; color:var(--ink); font-size:26px; line-height:1; cursor:pointer; }
+.corp-sector-dialog-close:hover,.corp-sector-dialog-close:focus-visible { border-color:var(--red); color:var(--red); outline:none; }
+.corp-sector-dialog-points { margin-top:28px; padding:20px; background:var(--off); }
+.corp-sector-dialog-points h4 { margin:0 0 12px; font-size:13px; }
+.corp-sector-dialog-points ul { display:grid; gap:8px; margin:0; padding-left:18px; color:#514b4a; font-size:13px; line-height:1.5; }
+.corp-sector-dialog small { display:block; margin-top:24px; color:#777; font-size:10px; line-height:1.5; }
+@media (max-width:800px) { .corp-many-faces-sectors { grid-template-columns:1fr; }.corp-sector-dialog-backdrop { padding:16px; }.corp-sector-dialog { max-height:calc(100vh - 32px); padding:34px 24px 28px; }.corp-sector-dialog h3 { font-size:34px; }.corp-sector-dialog>p:not(.corp-kicker) { font-size:14px; } }
 @media (max-width:800px) { .corp-many-faces { grid-template-columns:1fr; gap:36px; padding:78px 24px 72px; border-top-width:8px; }.corp-many-faces::before { top:38px; left:24px; width:56px; }.corp-many-faces-copy { order:1; padding:0; }.corp-many-faces-visual { order:2; min-height:0; aspect-ratio:4/3; border-radius:12px; }.corp-many-faces-visual span { top:18px; left:18px; }.corp-many-faces-visual .corp-image-note { right:18px; bottom:16px; left:18px; } }
 
 /* Employer challenge: content-led planning section, deliberately image-free. */
