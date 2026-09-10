@@ -9,6 +9,7 @@ type CorporateCtaBannerProps = {
   href?: string;
   cta?: string;
   id?: string;
+  signals?: [string, string, string];
 };
 
 export function CorporateCtaBanner({
@@ -18,11 +19,12 @@ export function CorporateCtaBanner({
   href = waLink("Hello DTG, I would like to discuss an employer workforce need."),
   cta = "Discuss Your Workforce Needs",
   id,
+  signals = ["ROLE FIT", "MARKET ROUTE", "AFTERCARE"],
 }: CorporateCtaBannerProps) {
   return (
     <section className="corp-contact" id={id}>
       <div className="corp-contact-decoration" aria-hidden="true">
-        <span>ROLE FIT</span><i /><span>MARKET ROUTE</span><i /><span>AFTERCARE</span>
+        <span>{signals[0]}</span><i /><span>{signals[1]}</span><i /><span>{signals[2]}</span>
       </div>
       <p className="corp-kicker">{label}</p>
       <h2>{title}</h2>

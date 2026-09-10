@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { CorporateFooter } from "@/components/corporate/CorporateFooter";
 import { CorporateNav } from "@/components/corporate/CorporateNav";
+import { CorporateCtaBanner } from "@/components/corporate/CorporateCtaBanner";
 import { articles } from "@/lib/articles";
 import { waLink } from "@/lib/site-config";
 
@@ -26,7 +27,14 @@ export default function HomePage() {
 
       <section className="corp-regions" id="regions"><div className="corp-regions-title"><p className="corp-kicker">MARKET CONVERSATIONS</p><h2>Indonesia expertise.<br /><em>Market-aware delivery.</em></h2></div><div className="region-cards"><Link href="/saudi-gcc" className="region-card market-card-gcc"><h3>Saudi Arabia<br />&amp; GCC</h3><span>Discuss your workforce need <b>→</b></span></Link><Link href="/europe" className="region-card market-card-europe"><h3>Europe</h3><span>Explore employer relevance <b>→</b></span></Link><Link href="/japan" className="region-card market-card-japan"><h3>Japan</h3><span>Explore employer relevance <b>→</b></span></Link></div></section>
 
-      <section className="corp-talent-bridge"><div className="corp-talent-copy"><p className="corp-kicker">FOR CANDIDATES</p><h2>Your global career journey belongs with <em>Perantau Global.</em></h2><p>Job information, candidate preparation, applications, and candidate support are managed by Perantau Global.</p><Link href="/for-candidates">Explore the candidate route →</Link></div><div className="corp-talent-visual-stack"><div className="corp-candidate-visual"><Image src="/images/global-workforce-hero.png" alt="Indonesian and international professionals moving toward global careers" fill sizes="(max-width: 800px) 100vw, 42vw" /><span>FROM INDONESIA · TO THE WORLD</span></div><div className="corp-bridge-cards"><span>Career information</span><span>Applications</span><span>Preparation</span><span>Stories</span><span>Candidate support</span></div></div></section>
+      <CorporateCtaBanner
+        label="FOR CANDIDATES"
+        title={<>Your global career journey belongs with <em>Perantau Global.</em></>}
+        description="Candidate information and applications are managed through Perantau Global."
+        href="/for-candidates"
+        cta="Explore Perantau Global"
+        signals={["INDONESIA", "PERANTAU GLOBAL", "GLOBAL CAREERS"]}
+      />
 
       <section className="corp-home-insights"><div className="corp-insights-intro"><p className="corp-kicker">ARTICLES</p><h2>Perspectives on people<br />and <em>global work.</em></h2><Link href="/articles">View all articles</Link></div><div className="corp-home-insight-list">{articles.slice(0, 3).map((article, index) => <article key={article.slug}><Link className="corp-home-insight-image" href={`/articles/${article.slug}`} aria-label={`Read ${article.title}`}><Image src={article.cover} alt="" fill sizes="(max-width: 800px) 100vw, 31vw" /></Link><div className="corp-home-insight-body"><span>{String(index + 1).padStart(2, "0")}</span><small>{article.category}</small><p>{article.title}</p><b><Link href={`/articles/${article.slug}`}>Read article</Link></b></div></article>)}</div></section>
 
