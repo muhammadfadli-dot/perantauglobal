@@ -94,18 +94,18 @@ export default function TermsPage() {
         <p>We publish in good faith and keep this site current. Three things are worth stating plainly:</p>
         <ul>
           <li>
-            <strong>Talent pool figures are rounded snapshots</strong>, rounded down so they never overstate,
-            with the audit date shown on the page. Availability is re-verified against your specific
-            requirement before anyone is presented to you.
+            <strong>Talent pool figures marked NEED APPROVAL are internal snapshots</strong> and must not be
+            treated as verified public evidence until their source, reporting period, definition, and approval
+            owner have been confirmed. Availability is re-verified against each employer requirement.
           </li>
           <li>
-            <strong>Talent stories currently shown on the site are labelled previews</strong>, not verified
-            testimonials. They will be replaced with the words of placed professionals once those individuals
-            have given permission to publish them.
+            <strong>No testimonial is published without verification and permission</strong> from the quoted
+            individual and the relevant publication owner.
           </li>
           <li>
-            <strong>Client logos are shown with the permission</strong> of the businesses concerned, and
-            remain their property.
+            <strong>Organisation names and logos marked NEED APPROVAL are references under review.</strong>
+            Their relationship category and display permission must be confirmed before public use, and all
+            marks remain the property of their respective owners.
           </li>
         </ul>
         <p>
