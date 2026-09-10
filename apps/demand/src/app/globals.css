@@ -1856,5 +1856,5 @@ textarea::placeholder {
 .corp-approval-list b { color:#a21f21; font-size:10px; letter-spacing:.12em; }
 .corp-approval-list h3 { margin:12px 0 8px; font-size:19px; }
 .corp-approval-list p { margin:0; color:#5f5a5a; font-size:13px; line-height:1.6; }
-@media (max-width:850px){.corp-approval-questions{display:block}.corp-approval-list{margin-top:28px}}
+@media (max-width:850px){.corp-approval-questions{display:block}.corp-approval-list{margin-top:28px}.corp-map-placeholder iframe{min-height:290px}}
 @media (max-width:700px){.corp-resource-note{display:block}.corp-resource-note .corp-kicker{margin-bottom:10px}.corp-image-note{font-size:10px}}

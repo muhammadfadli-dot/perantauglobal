@@ -8,6 +8,8 @@ const resources = [
   ["02", "How DTG Works", "A clear engagement journey from qualified workforce need and job detail through selection support, mobilisation coordination, and aftercare.", "View the process", "Ready as a web preview"],
   ["03", "Employer Guides", "Market-specific guides for Saudi & GCC, Japan, and Bulgaria-led Europe. Regulatory and market claims will be added only after review.", "Explore the guides", "NEED APPROVAL"],
   ["04", "Illustrative Assessment & Readiness Report", "A future employer-facing sample using a fictional candidate profile, role-specific criteria, evidence status, strengths, gaps, and review notes.", "View report framework", "NEED APPROVAL"],
+  ["05", "Illustrative Aftercare Framework", "A draft operating framework for employer check-ins, issue logging, escalation, and close-out. It does not represent a final DTG service commitment.", "View framework", "NEED APPROVAL"],
+  ["06", "Approval-ready Evidence Pack", "A structured placeholder for case studies, partner references, placement evidence, and performance metrics once their source and publication permission are confirmed.", "Review requirements", "NEED APPROVAL"],
 ] as const;
 
 export default function ResourcesPage() {
