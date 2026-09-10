@@ -10,7 +10,11 @@ const LEGAL_LINKS = [
   { href: "/terms", label: "Terms of Use" },
 ];
 
-export function Footer() {
+export function Footer({ market = "gcc" }: { market?: "gcc" | "europe" | "japan" }) {
+  const isGcc = market === "gcc";
+  const description = isGcc
+    ? "Helping global healthcare, hospitality, and wellness businesses access skilled Indonesian talent. Legally, reliably, and with a written guarantee."
+    : "We help international employers assess fit and readiness in Indonesian talent, then support a considered route from workforce need through aftercare.";
   return (
     <footer style={{ background: "#16220F", borderTop: "1px solid rgba(216,185,120,.22)", padding: "60px 0 0" }}>
       <div className="g-foot" style={{ maxWidth: 1240, margin: "0 auto", padding: "0 40px 48px" }}>
@@ -22,14 +26,12 @@ export function Footer() {
               <span style={{ fontFamily: "var(--font-mono)", fontSize: 8.5, letterSpacing: ".22em", color: "#8A9781" }}>PART OF DAYALIMA GROUP</span>
             </span>
           </div>
-          <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.7, color: "#8A9781", maxWidth: 340, textWrap: "pretty" }}>Helping global healthcare, hospitality, and wellness businesses access skilled Indonesian talent. Legally, reliably, and with a written guarantee.</p>
+          <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.7, color: "#8A9781", maxWidth: 340, textWrap: "pretty" }}>{description}</p>
         </div>
         <div>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, letterSpacing: ".18em", color: "#B28A48", marginBottom: 18 }}>CREDENTIALS</div>
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, letterSpacing: ".18em", color: "#B28A48", marginBottom: 18 }}>{isGcc ? "CREDENTIALS" : "MARKET STATUS"}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 11, fontSize: 13, lineHeight: 1.5, color: "#B9C4A6" }}>
-            <span>Saudi MOFA Approved Agent · Reg. {CREDENTIALS.mofaApprovalDisplay}</span>
-            <span>Licensed P3MI · No. {CREDENTIALS.p3miLicenseNo}</span>
-            <span>Part of Dayalima Group · 26+ years</span>
+            {isGcc ? <><span>Saudi MOFA Approved Agent · Reg. {CREDENTIALS.mofaApprovalDisplay}</span><span>Licensed P3MI · No. {CREDENTIALS.p3miLicenseNo}</span><span>Part of Dayalima Group · 26+ years</span></> : <><span>Employer-first market conversation</span><span>Specific market requirements · [NEED APPROVAL]</span><span>Part of Dayalima Group</span></>}
           </div>
         </div>
         <div>
