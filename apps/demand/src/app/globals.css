@@ -1847,6 +1847,7 @@ textarea::placeholder {
 .corp-resource-note { display:flex; gap:28px; align-items:flex-start; padding:28px clamp(24px,5vw,76px); background:var(--off); border-top:1px solid rgba(36,33,36,.12); border-bottom:1px solid rgba(36,33,36,.12); }
 .corp-resource-note .corp-kicker { flex:none; margin:3px 0 0; }
 .corp-resource-note p:last-child { max-width:720px; margin:0; font-size:14px; line-height:1.65; color:var(--ink); }
+.corp-map-placeholder iframe { display:block; width:100%; min-height:380px; border:0; filter:saturate(.82) contrast(.96); }
 .corp-approval-questions { display:grid; grid-template-columns:minmax(220px,.7fr) 1.3fr; gap:52px; padding:86px clamp(24px,5vw,76px); background:#fff; }
 .corp-approval-questions h2 { margin:12px 0 16px; max-width:430px; font-size:clamp(32px,4vw,52px); line-height:.98; letter-spacing:-.06em; }
 .corp-approval-questions>div>p:last-child { max-width:420px; font-size:15px; line-height:1.7; color:#5f5a5a; }
