@@ -2007,6 +2007,10 @@ textarea::placeholder {
 .corp-insights-intro { display:grid; width:100%; place-items:center; gap:18px; text-align:center; }
 .corp-insights-intro .corp-kicker { margin:0; }
 .corp-insights-intro h2 { max-width:1100px; margin:0; line-height:.98; }
+.corp-regions-title .corp-kicker,
+.corp-regions-title h2,
+.corp-insights-intro .corp-kicker,
+.corp-insights-intro h2 { justify-self:center; text-align:center; }
 .corp-insights-cta { display:inline-flex; align-items:center; justify-content:center; min-height:50px; padding:0 22px; border:1px solid var(--red); border-radius:8px; background:var(--red); color:#fff !important; font-size:12px; font-weight:800; text-decoration:none; box-shadow:0 8px 20px rgba(36,10,10,.14); transition:background .2s ease,transform .2s ease; }
 .corp-insights-cta:hover { background:#d5383c; transform:translateY(-2px); }
 .corp-insights-cta span { color:var(--yellow); font-size:17px; }
