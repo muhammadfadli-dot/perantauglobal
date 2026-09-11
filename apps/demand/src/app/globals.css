@@ -1997,6 +1997,21 @@ textarea::placeholder {
 .corp-footer-contact a { color:#fff3d8; font-size:13px; font-weight:700; text-decoration:none; }
 .corp-footer-contact address { margin:0; max-width:480px; color:rgba(255,255,255,.65); font-size:11px; font-style:normal; line-height:1.6; }
 
+/* Final Home layout refinements from content review. */
+.corp-nav { border-bottom:0; }
+.corp-hero-visual { opacity:.82; filter:saturate(1.02) contrast(1.05); }
+.corp-hero-statement::after { background:linear-gradient(180deg,rgba(65,7,10,.06),rgba(30,5,6,.46)); }
+.corp-regions-title { display:grid; place-items:center; gap:16px; margin-inline:auto; margin-bottom:52px; text-align:center; }
+.corp-regions-title .corp-kicker { margin:0; }
+.corp-regions-title h2 { max-width:880px; }
+.corp-insights-intro { display:grid; place-items:center; gap:16px; text-align:center; }
+.corp-insights-intro .corp-kicker { margin:0; }
+.corp-insights-intro h2 { margin:0; }
+.corp-insights-cta { display:inline-flex; align-items:center; justify-content:center; gap:10px; min-height:50px; padding:0 22px; border:1px solid var(--red); border-radius:8px; background:var(--red); color:#fff; font-size:12px; font-weight:800; text-decoration:none; box-shadow:0 8px 20px rgba(36,10,10,.14); transition:background .2s ease,transform .2s ease; }
+.corp-insights-cta:hover { background:#d5383c; transform:translateY(-2px); }
+.corp-insights-cta span { color:var(--yellow); font-size:17px; }
+.corp-contact h2 { max-width:1200px; font-size:clamp(42px,5vw,76px); }
+
 @media (max-width:800px) {
   .corp-logo-grid { grid-template-columns:1fr; gap:26px; padding-top:0; }
   .corp-logo-grid::before { top:12px; bottom:12px; left:18px; width:2px; height:auto; background:linear-gradient(var(--red),#e7a2a4 85%,var(--red)); }
@@ -2006,6 +2021,8 @@ textarea::placeholder {
   .corp-footer { grid-template-columns:1fr; }
   .corp-footer-links { grid-template-columns:repeat(2,minmax(0,1fr)); }
   .corp-footer-links>div:last-child { grid-column:1/-1; }
+  .corp-regions-title,.corp-insights-intro { place-items:start; text-align:left; }
+  .corp-contact h2 { max-width:780px; }
 }
 
 /* Global route-loading screen: the supplied geometric loader, aligned to the
