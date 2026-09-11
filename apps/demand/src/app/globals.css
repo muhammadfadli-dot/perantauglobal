@@ -1918,12 +1918,27 @@ textarea::placeholder {
 
 /* Home refinements: fit the employer proposition into the first desktop view. */
 @media (min-width:801px) {
-  .corp-hero { height:calc(100svh - 70px); min-height:560px; max-height:760px; aspect-ratio:auto; }
-  .corp-hero-copy { padding:clamp(30px,3.5vw,54px) clamp(32px,5.5vw,88px); }
-  .corp-hero h1 { max-width:660px; font-size:clamp(48px,4.45vw,70px); line-height:.91; }
-  .corp-hero .corp-lede { margin:clamp(18px,2vw,28px) 0; font-size:clamp(13px,1vw,15px); line-height:1.62; }
-  .corp-hero .corp-actions { gap:18px; }
-  .corp-hero-trust { margin-top:clamp(16px,2vw,26px); }
+  .corp-hero {
+    height:calc(100svh - 70px);
+    min-height:560px;
+    max-height:760px;
+    aspect-ratio:auto;
+    grid-template-columns:minmax(0,60%) minmax(0,40%);
+  }
+  .corp-hero-copy {
+    min-height:0;
+    max-width:none;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:clamp(28px,3.25vw,50px) clamp(42px,5.5vw,88px);
+  }
+  .corp-hero h1 { max-width:770px; font-size:clamp(46px,4.15vw,68px); line-height:.91; }
+  .corp-hero .corp-lede { max-width:640px; margin:clamp(16px,1.75vw,24px) 0; font-size:clamp(13px,.96vw,15px); line-height:1.58; }
+  .corp-hero .corp-actions { flex-wrap:nowrap; gap:18px; }
+  .corp-hero-trust { margin-top:clamp(14px,1.6vw,22px); }
+  .corp-hero-statement { min-height:0; padding:0; }
+  .corp-hero-floating-card { right:clamp(20px,2.6vw,40px); bottom:clamp(20px,3vw,42px); }
 }
 
 /* Business outcome is a clear left-to-right employer journey. */
