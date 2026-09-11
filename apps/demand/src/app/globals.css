@@ -2013,6 +2013,12 @@ textarea::placeholder {
 .corp-insights-intro h2 { justify-self:center; text-align:center; }
 .corp-regions-title .corp-kicker,
 .corp-regions-title h2 { width:100%; }
+.corp-regions-title,
+.corp-insights-intro { place-items:start; text-align:left; }
+.corp-regions-title .corp-kicker,
+.corp-regions-title h2,
+.corp-insights-intro .corp-kicker,
+.corp-insights-intro h2 { justify-self:start; text-align:left; }
 .g-clients { grid-template-columns:repeat(auto-fit,minmax(150px,180px)); justify-content:center; }
 .market-contact { padding:110px clamp(24px,8vw,128px); background:#20301f; color:#f5f1e6; text-align:center; }
 .market-contact>p { margin:0 0 18px; color:#d8b978; font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.16em; }
