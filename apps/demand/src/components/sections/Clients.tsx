@@ -26,7 +26,7 @@ export function Clients() {
       <div style={{ maxWidth: 1240, margin: "0 auto", padding: "0 40px", textAlign: "center" }}>
         <div className="anim ar" style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
           <span style={{ width: 7, height: 7, background: "#B28A48", transform: "rotate(45deg)", display: "block" }} />
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: ".18em", color: "#8A6D2E" }}>REFERENCED ORGANISATIONS · [NEED APPROVAL]</span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: ".18em", color: "#8A6D2E" }}>REFERENCED ORGANISATIONS</span>
         </div>
         <h2 className="anim aw" style={{ margin: "0 auto 10px", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "clamp(26px,5vw,38px)", lineHeight: 1.1, color: "#20301F", maxWidth: 620, animationDelay: ".1s" }}>
           Organisations referenced for relationship review.
