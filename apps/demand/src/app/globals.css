@@ -1916,6 +1916,40 @@ textarea::placeholder {
   .corp-language-menu { right:0; }
 }
 
+/* Home refinements: fit the employer proposition into the first desktop view. */
+@media (min-width:801px) {
+  .corp-hero { height:calc(100svh - 70px); min-height:560px; max-height:760px; aspect-ratio:auto; }
+  .corp-hero-copy { padding:clamp(30px,3.5vw,54px) clamp(32px,5.5vw,88px); }
+  .corp-hero h1 { max-width:660px; font-size:clamp(48px,4.45vw,70px); line-height:.91; }
+  .corp-hero .corp-lede { margin:clamp(18px,2vw,28px) 0; font-size:clamp(13px,1vw,15px); line-height:1.62; }
+  .corp-hero .corp-actions { gap:18px; }
+  .corp-hero-trust { margin-top:clamp(16px,2vw,26px); }
+}
+
+/* Business outcome is a clear left-to-right employer journey. */
+.corp-logo-grid { grid-template-columns:repeat(6,minmax(0,1fr)); gap:20px; align-items:stretch; padding-top:18px; }
+.corp-logo-grid>div { min-height:178px; overflow:visible; }
+.corp-logo-grid>div:not(:last-child)::after { position:absolute; z-index:2; top:50%; right:-17px; width:14px; height:14px; border-top:1px solid var(--red); border-right:1px solid var(--red); content:""; transform:translateY(-50%) rotate(45deg); }
+.corp-logo-grid>div:not(:last-child)::before { position:absolute; top:50%; right:-21px; width:20px; height:1px; background:var(--red); content:""; transform:translateY(-50%); }
+.corp-logo-grid>div:last-child { border-color:var(--red); background:rgba(162,31,33,.08); }
+.corp-logo-grid>div:last-child strong { color:var(--red); }
+
+/* Market cards now use contextual Indonesia-at-work photography. */
+.corp-regions .market-card-europe { background-image:linear-gradient(180deg,rgba(8,27,44,.08),rgba(8,27,44,.8)),url('/images/europe-market-workers-v2.png'); background-position:center; }
+.corp-regions .market-card-japan { background-image:linear-gradient(180deg,rgba(18,28,50,.08),rgba(18,28,50,.82)),url('/images/japan-market-workers-v2.png'); background-position:center; }
+
+/* Article cards retain one stable editorial appearance on hover. */
+.corp-home-insight-list article,.corp-home-insight-list article:hover { padding:24px; border-color:rgba(36,33,36,.16); background:#fff; box-shadow:none; transform:none; }
+.corp-home-insight-list article:hover .corp-home-insight-image img { transform:none; }
+.corp-home-insight-list article:hover b { background:#f4e1e1; color:var(--red); }
+
+@media (max-width:800px) {
+  .corp-logo-grid { grid-template-columns:1fr; gap:12px; padding-top:0; }
+  .corp-logo-grid>div { min-height:118px; }
+  .corp-logo-grid>div:not(:last-child)::after { top:auto; right:50%; bottom:-15px; transform:translateX(50%) rotate(135deg); }
+  .corp-logo-grid>div:not(:last-child)::before { top:auto; right:50%; bottom:-10px; transform:translateX(50%) rotate(90deg); }
+}
+
 /* Global route-loading screen: the supplied geometric loader, aligned to the
    Dayalima primary red and the site's neutral loading surface. */
 .dtg-loading-page { min-height:100dvh; display:grid; place-items:center; background:#F7F6F4; }
