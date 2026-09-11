@@ -10,7 +10,7 @@ export function CorporateNav() {
       <nav className="corp-nav" aria-label="Primary navigation">
         <Link href="/" className="corp-brand-logo" aria-label="Daya Talenta Global home"><Image src="/images/logo-dtg-navbar.webp" alt="Daya Talenta Global" width={170} height={68} priority /></Link>
         <div className="corp-nav-links">
-          <Link href="/about">About DTG</Link>
+          <Link href="/about">About Us</Link>
           <Link href="/services">Workforce solutions</Link>
           <Link href="/resources">Employer resources</Link>
           <Link href="/regions">Markets</Link>

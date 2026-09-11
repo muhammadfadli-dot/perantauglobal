@@ -11,6 +11,20 @@ export type Article = {
 
 export const articles: Article[] = [
   {
+    slug: "memahami-langkah-awal-menuju-karier-global",
+    category: "Career Guide",
+    title: "Memahami Langkah Awal Menuju Karier Global",
+    excerpt: "Sebelum memilih peluang kerja di luar negeri, kandidat perlu memahami arah karier, kebutuhan persiapan, dan sumber informasi yang dapat dipercaya.",
+    date: "28 August 2026",
+    readTime: "4 min read",
+    cover: "/images/sector-wellness.jpg",
+    body: [
+      { text: "Karier global dimulai dari keputusan yang terinformasi. Menyusun arah, memahami peran, dan menyiapkan dokumen sejak awal membantu setiap langkah terasa lebih jelas." },
+      { heading: "Mulai dari tujuan", text: "Kenali bidang kerja, negara tujuan, dan kemampuan yang ingin dikembangkan sebelum memilih jalur persiapan." },
+      { heading: "Siapkan informasi yang tepat", text: "Gunakan sumber yang jelas untuk memahami proses, kualifikasi, dan dukungan yang tersedia pada setiap tahap." },
+    ],
+  },
+  {
     slug: "memulai-karier-global-dengan-persiapan-yang-tepat",
     category: "Career Readiness",
     title: "Memulai Karier Global dengan Persiapan yang Tepat",
