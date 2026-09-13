@@ -11,7 +11,7 @@ type Sector = {
 
 const sectors: Sector[] = [
   {
-    title: "Healthcare & care",
+    title: "Healthcare",
     summary: "Service quality and continuity.",
     detail: "For organisations managing service quality and continuity in hospitals, clinics, care facilities, and senior-living contexts.",
     points: [
