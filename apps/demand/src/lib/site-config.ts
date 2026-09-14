@@ -15,11 +15,11 @@ export const SITE = {
 } as const;
 
 export const CONTACT = {
-  // WhatsApp Business line for the BD GCC funnel. Digits only for wa.me.
+  // WhatsApp Business line for all employer contact routes. Digits only for wa.me.
   // No email here on purpose: info@dayatalentaglobal.com has no live inbox yet,
   // and a dead channel costs more trust than a missing one.
-  whatsappDigits: "6285211415104",
-  whatsappDisplay: "+62 852 1141 5104",
+  whatsappDigits: "6285110555561",
+  whatsappDisplay: "0851 1055 5561",
   office: "Alamanda Tower Lantai 23, Jl. TB Simatupang No. 22-26 (Kav. 23-24), RT.1/RW.1, Cilandak Barat, Kecamatan Cilandak, Kota Jakarta Selatan, DKI Jakarta 12430",
 } as const;
 
