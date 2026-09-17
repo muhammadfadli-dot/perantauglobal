@@ -25,7 +25,7 @@ const MARKET_TRUST = {
 
 export function Hero({ market = "gcc" }: { market?: keyof typeof COPY }) {
   const copy = COPY[market];
-  const heroImage = market === "europe" ? "/images/europe-hero.png" : market === "japan" ? "/images/japan-hero.png" : "/images/hero-arches.jpg";
+  const heroImage = market === "europe" ? "/images/europe-market-workers-v2.png" : market === "japan" ? "/images/japan-market-indonesian-day-v5.png" : "/images/hero-arches.jpg";
   const heroAlt = market === "europe" ? "Indonesian professionals in a European city" : market === "japan" ? "Indonesian professionals in a contemporary Japanese city" : "";
   return (
     <header
