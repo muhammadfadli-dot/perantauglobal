@@ -35,6 +35,12 @@ export function Nav({ market = "gcc" }: { market?: Market }) {
   }, []);
 
   useEffect(() => {
+    const translatedLocale = new URLSearchParams(window.location.search).get("_x_tr_tl") as Locale | null;
+    if (translatedLocale && locales.some(({ value }) => value === translatedLocale)) {
+      setLocale(translatedLocale);
+      document.documentElement.lang = translatedLocale;
+      return;
+    }
     const saved = window.localStorage.getItem(`dtg-market-language-${market}`) as Locale | null;
     if (saved && locales.some(({ value }) => value === saved)) setLocale(saved);
   }, [market, locales]);
@@ -43,6 +49,12 @@ export function Nav({ market = "gcc" }: { market?: Market }) {
     setLocale(value);
     window.localStorage.setItem(`dtg-market-language-${market}`, value);
     document.documentElement.lang = value;
+    if (value === "en") {
+      window.location.assign(`https://www.dayatalentaglobal.com${window.location.pathname}`);
+      return;
+    }
+    const params = new URLSearchParams({ _x_tr_sl: "en", _x_tr_tl: value, _x_tr_hl: value, _x_tr_pto: "wapp" });
+    window.location.assign(`https://www-dayatalentaglobal-com.translate.goog${window.location.pathname}?${params.toString()}`);
   };
 
   const linkColor = solid ? "#413E33" : "#E4E0CC";
