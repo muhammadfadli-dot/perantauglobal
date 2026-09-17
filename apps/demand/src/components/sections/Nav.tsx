@@ -4,16 +4,28 @@ import { useEffect, useState } from "react";
 import { LogoMark } from "@/components/LogoMark";
 import { MobileMenu } from "@/components/MobileMenu";
 
-const NAV_LINKS = [
-  { href: "#why", label: "Why DTG" },
-  { href: "#pool", label: "Talent Pool" },
-  { href: "#sectors", label: "Sectors" },
-  { href: "#process", label: "Process" },
-  { href: "#credentials", label: "Credentials" },
-];
+type Market = "gcc" | "europe" | "japan";
+type Locale = "en" | "id" | "ar" | "bg" | "ja";
 
-export function Nav() {
+const MARKET_LOCALES: Record<Market, { value: Locale; label: string }[]> = {
+  gcc: [{ value: "en", label: "English" }, { value: "id", label: "Indonesia" }, { value: "ar", label: "العربية" }],
+  europe: [{ value: "en", label: "English" }, { value: "id", label: "Indonesia" }, { value: "bg", label: "Български" }],
+  japan: [{ value: "en", label: "English" }, { value: "id", label: "Indonesia" }, { value: "ja", label: "日本語" }],
+};
+
+const NAV_COPY: Record<Locale, { home: string; why: string; pool: string; sectors: string; process: string; credentials: string; request: string }> = {
+  en: { home: "Home", why: "Why DTG", pool: "Talent Pool", sectors: "Sectors", process: "Process", credentials: "Credentials", request: "Request Talent" },
+  id: { home: "Beranda", why: "Mengapa DTG", pool: "Talenta", sectors: "Sektor", process: "Proses", credentials: "Kredensial", request: "Diskusikan Kebutuhan" },
+  ar: { home: "الرئيسية", why: "لماذا DTG", pool: "المواهب", sectors: "القطاعات", process: "العملية", credentials: "الاعتمادات", request: "اطلب المواهب" },
+  bg: { home: "Начало", why: "Защо DTG", pool: "Таланти", sectors: "Сектори", process: "Процес", credentials: "Акредитации", request: "Заявете таланти" },
+  ja: { home: "ホーム", why: "DTGについて", pool: "人材", sectors: "分野", process: "プロセス", credentials: "認定", request: "人材を相談する" },
+};
+
+export function Nav({ market = "gcc" }: { market?: Market }) {
   const [solid, setSolid] = useState(false);
+  const [locale, setLocale] = useState<Locale>("en");
+  const locales = MARKET_LOCALES[market];
+  const copy = NAV_COPY[locale];
 
   useEffect(() => {
     const onScroll = () => setSolid(window.scrollY > 40);
@@ -21,6 +33,17 @@ export function Nav() {
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(`dtg-market-language-${market}`) as Locale | null;
+    if (saved && locales.some(({ value }) => value === saved)) setLocale(saved);
+  }, [market, locales]);
+
+  const chooseLocale = (value: Locale) => {
+    setLocale(value);
+    window.localStorage.setItem(`dtg-market-language-${market}`, value);
+    document.documentElement.lang = value;
+  };
 
   const linkColor = solid ? "#413E33" : "#E4E0CC";
   const brand1 = solid ? "#20301F" : "#F3EEE1";
@@ -51,12 +74,24 @@ export function Nav() {
           </span>
         </a>
         <div className="navlinks" style={{ display: "flex", alignItems: "center", gap: 30 }}>
-          {NAV_LINKS.map((l) => (
+          {[
+            { href: "/", label: copy.home },
+            { href: "#why", label: copy.why },
+            { href: "#pool", label: copy.pool },
+            { href: "#sectors", label: copy.sectors },
+            { href: "#process", label: copy.process },
+            { href: "#credentials", label: copy.credentials },
+          ].map((l) => (
             <a key={l.href} className="navlink" href={l.href} style={{ color: linkColor }}>
               {l.label}
             </a>
           ))}
         </div>
+        <label style={{ display: "flex", alignItems: "center", border: `1px solid ${solid ? "rgba(65,62,51,.26)" : "rgba(243,238,225,.45)"}`, borderRadius: 7, padding: "0 9px", height: 40, color: linkColor }}>
+          <select value={locale} onChange={(event) => chooseLocale(event.target.value as Locale)} aria-label="Select market language" style={{ appearance: "none", border: 0, outline: 0, background: "transparent", color: "inherit", font: "600 12px var(--font-sans)", cursor: "pointer", paddingRight: 4 }}>
+            {locales.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
         <a
           href="#contact"
           className="navcta"
@@ -72,7 +107,7 @@ export function Nav() {
             whiteSpace: "nowrap",
           }}
         >
-          Request Talent
+          {copy.request}
         </a>
         <MobileMenu dark={solid} />
       </div>
