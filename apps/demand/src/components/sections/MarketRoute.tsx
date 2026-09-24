@@ -1,72 +1,65 @@
+"use client";
+
+import { useState } from "react";
 import { Reveal } from "@/components/Reveal";
 
 type Market = "europe" | "japan";
 
 const ROUTES = {
   europe: {
-    label: "EUROPE · EMPLOYER-FIRST MARKET CONVERSATION",
-    title: "Clarify the need before you commit.",
+    label: "EUROPE · BALKAN EMPLOYER CONVERSATIONS",
+    title: "Make cross-border hiring easier to plan.",
     introduction:
-      "A considered conversation starts with the role context, relevant experience, demonstrated readiness, and any gaps that need preparation.",
+      "Start with the priority sector, destination, and operational need. DTG then helps make candidate fit, readiness, and the next route clearer before a hiring decision.",
     principles: [
-      ["Role and context", "We begin with the work to be done, the operating environment, and the capability your team needs."],
-      ["Evidence before commitment", "Relevant experience and demonstrated readiness are made clearer before a hiring decision."],
-      ["Market route", "Country-specific requirements and the documented route are confirmed with the appropriate parties. [NEED APPROVAL]"],
+      ["Employer brief", "We begin with the role, sector, destination, operating context, and timeline your team needs."],
+      ["Candidate readiness", "Relevant experience, practical capability, language readiness, and preparation gaps are reviewed against the brief."],
+      ["Country-aware route", "Documentation and mobility requirements are considered by destination and confirmed with the appropriate parties. [NEED APPROVAL]"],
     ],
-    poolTitle: "Availability is confirmed against your brief.",
+    poolTitle: "Start with the role, sector, and destination.",
     poolBody:
-      "DTG does not publish unverified pool numbers for Europe. A role-led conversation determines whether sourcing, readiness review, and the route are relevant to your requirement.",
+      "DTG does not publish standing pool numbers for Europe. A focused conversation determines whether sourcing, readiness review, and the appropriate route are relevant to your requirement.",
     steps: [
-      ["Requirements review", "Agree the role, operating context, timeline, and the evidence needed to assess fit."],
-      ["Focused sourcing", "Identify relevant talent against the agreed brief; availability is confirmed before presentation."],
-      ["Readiness review", "Make experience, practical readiness, and remaining preparation gaps visible."],
-      ["Documented route", "Confirm the applicable documentation and mobility coordination with the appropriate parties. [NEED APPROVAL]"],
-      ["Aftercare plan", "Agree the support rhythm, owners, and escalation route before deployment. [NEED APPROVAL]"],
-    ],
-    evidenceTitle: "Evidence that supports a more informed decision.",
-    evidence: [
-      ["Relevant experience", "Role history and context are reviewed against the employer brief."],
-      ["Demonstrated readiness", "The assessment format, criteria, and evidence owner are to be confirmed. [NEED APPROVAL]"],
-      ["Route and support", "Documentation, mobility, and aftercare scope are confirmed for the specific requirement. [NEED APPROVAL]"],
+      ["Employer consultation", "Agree the role, sector, destination, timeline, and the evidence needed to assess fit."],
+      ["Candidate selection", "Identify relevant talent against the agreed brief; availability is confirmed before presentation."],
+      ["Readiness preparation", "Review experience, practical capability, language readiness, and any preparation gaps."],
+      ["Documentation coordination", "Confirm the applicable country requirements and responsibilities with the appropriate parties. [NEED APPROVAL]"],
+      ["Placement support", "Agree the support rhythm, owners, and escalation route before deployment. [NEED APPROVAL]"],
     ],
     faqs: [
-      ["Can DTG support a Europe workforce requirement?", "DTG first reviews the role, business context, and market relevance. Any support scope is agreed only after the applicable route and responsibilities are confirmed."],
+      ["Can DTG support a Europe workforce requirement?", "DTG begins by reviewing the role, priority sector, destination, business context, and timeline. Support scope is agreed only after the applicable route and responsibilities are confirmed."],
       ["Do you have talent ready to present?", "Availability is not assumed or published as a standing number. DTG verifies relevance and readiness against your brief before presenting a profile."],
-      ["Which documents are managed?", "Documentation requirements depend on the country, role, and route. The responsible parties and scope need to be confirmed for each engagement. [NEED APPROVAL]"],
+      ["Which sectors can be discussed?", "Europe conversations may cover hospitality, manufacturing, agriculture, logistics, construction, and healthcare, subject to the destination, role, and route. [NEED APPROVAL]"],
+      ["Which documents are managed?", "Documentation requirements depend on the country, role, and route. The responsible parties and scope are confirmed for each engagement. [NEED APPROVAL]"],
       ["What does aftercare include?", "Aftercare is agreed with the employer before deployment, including duration, check-in rhythm, owners, and escalation path. [NEED APPROVAL]"],
     ],
   },
   japan: {
-    label: "JAPAN · EMPLOYER-FIRST MARKET CONVERSATION",
-    title: "Build operational confidence, role by role.",
+    label: "JAPAN · ROLE READINESS CONVERSATIONS",
+    title: "Prepare talent for Japan workplace standards.",
     introduction:
-      "A considered conversation starts with the role, the work environment, practical readiness, and the preparation needed for a sustainable workforce decision.",
+      "A considered conversation starts with the role, workplace context, language and skill readiness, and the preparation needed before deployment.",
     principles: [
-      ["Role-specific brief", "We begin with the work to be done, shift pattern, operational context, and capability your team needs."],
-      ["Readiness made visible", "Relevant experience, demonstrated readiness, and remaining preparation gaps are clarified before commitment."],
-      ["Controlled coordination", "Country- and role-specific requirements are confirmed with the appropriate parties before the journey proceeds. [NEED APPROVAL]"],
+      ["Role-specific brief", "We begin with the work to be done, shift pattern, workplace context, and capability your team needs."],
+      ["Language and skill readiness", "Language level, sector skills, workplace communication, and remaining preparation gaps are reviewed before commitment."],
+      ["Japan route coordination", "The applicable route, including SSW where relevant, and the required documentation are confirmed with the appropriate parties. [NEED APPROVAL]"],
     ],
-    poolTitle: "A role-led conversation, not a pipeline claim.",
+    poolTitle: "Readiness is assessed before a profile is presented.",
     poolBody:
-      "DTG does not publish unverified Japan pipeline numbers. Sourcing relevance, readiness review, and the appropriate documented route are assessed against your actual requirement.",
+      "DTG does not publish standing Japan pipeline numbers. Sourcing relevance, language and skill readiness, and the appropriate documented route are assessed against your actual requirement.",
     steps: [
       ["Operational brief", "Agree the role, workplace context, timeline, and the evidence required to assess suitability."],
       ["Focused sourcing", "Identify relevant talent against the agreed brief; availability is confirmed before presentation."],
-      ["Readiness review", "Review relevant experience, practical readiness, and remaining preparation gaps."],
-      ["Documented route", "Confirm the applicable documentation and mobility coordination with the appropriate parties. [NEED APPROVAL]"],
-      ["Aftercare plan", "Agree the support rhythm, owners, and escalation route before deployment. [NEED APPROVAL]"],
-    ],
-    evidenceTitle: "Clarity for the work your team needs done.",
-    evidence: [
-      ["Relevant experience", "Role history and operating context are reviewed against the employer brief."],
-      ["Practical readiness", "The assessment format, criteria, and evidence owner are to be confirmed. [NEED APPROVAL]"],
-      ["Preparation gaps", "Language, workplace preparation, documentation, and any training gaps are made explicit where relevant. [NEED APPROVAL]"],
+      ["Language, skill, and culture preparation", "Review language ability, sector skills, workplace communication, and cultural preparation for the role."],
+      ["Documented Japan route", "Confirm the applicable route, including SSW where relevant, documentation, and mobility coordination. [NEED APPROVAL]"],
+      ["Arrival and ongoing support", "Agree the support rhythm, emergency contact route, owners, and escalation path before deployment. [NEED APPROVAL]"],
     ],
     faqs: [
       ["Can DTG support a Japan workforce requirement?", "DTG first reviews the role, operating context, and market relevance. Any support scope is agreed only after the applicable route and responsibilities are confirmed."],
       ["Do you have talent ready to present?", "Availability is not assumed or published as a standing number. DTG verifies relevance and readiness against your brief before presenting a profile."],
-      ["How are language and workplace readiness assessed?", "The criteria, assessment format, and preparation requirements are agreed for the specific role. [NEED APPROVAL]"],
-      ["What does aftercare include?", "Aftercare is agreed with the employer before deployment, including duration, check-in rhythm, owners, and escalation path. [NEED APPROVAL]"],
+      ["How are language and workplace readiness assessed?", "For relevant roles, readiness may include formal Japanese language and sector-skill evidence, supported by role-specific communication and interview preparation. [NEED APPROVAL]"],
+      ["What route is used for Japan placement?", "The appropriate route is confirmed for each role and may include the Specified Skilled Worker (SSW) pathway where relevant, alongside required documentation and partner coordination. [NEED APPROVAL]"],
+      ["What does aftercare include?", "Aftercare is agreed with the employer before deployment and may include an emergency contact route, check-in rhythm, owners, and escalation path. [NEED APPROVAL]"],
     ],
   },
 } as const;
@@ -124,29 +117,14 @@ export function MarketRoute({ market }: { market: Market }) {
         </div>
       </Reveal>
 
-      <Reveal id="credentials" style={{ background: "#EDE7D9", padding: "96px 0", scrollMarginTop: 74 }}>
-        <div style={{ maxWidth: 1180, margin: "0 auto", padding: "0 40px" }}>
-          <div style={{ background: "#FBF8F0", border: "1px solid #DCD3BE", borderRadius: 16, padding: "48px 52px" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: ".18em", color: "#8A6D2E", marginBottom: 14 }}>DECISION EVIDENCE · [NEED APPROVAL]</div>
-            <h2 style={{ margin: "0 0 32px", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "clamp(30px,5vw,42px)", lineHeight: 1.08, color: "#20301F" }}>{route.evidenceTitle}</h2>
-            <div className="g-cred3">
-              {route.evidence.map(([title, body], index) => (
-                <article key={title} style={{ padding: index === 0 ? "0 28px 0 0" : "0 28px", borderLeft: index === 0 ? "none" : "1px solid #DCD3BE" }}>
-                  <h3 style={{ margin: "0 0 10px", fontSize: 16, color: "#20301F" }}>{title}</h3>
-                  <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.6, color: "#6E6752" }}>{body}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </div>
-      </Reveal>
-
       <MarketFaq market={market} faqs={route.faqs} />
     </>
   );
 }
 
 function MarketFaq({ market, faqs }: { market: Market; faqs: readonly (readonly [string, string])[] }) {
+  const [open, setOpen] = useState(0);
+
   return (
     <Reveal id="faq" style={{ background: "#F5F1E6", padding: "96px 0", scrollMarginTop: 74 }}>
       <div className="g-faq" style={{ maxWidth: 1240, margin: "0 auto", padding: "0 40px" }}>
@@ -156,12 +134,20 @@ function MarketFaq({ market, faqs }: { market: Market; faqs: readonly (readonly 
           <p style={{ margin: "18px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "#6E6752" }}>Specific market commitments are confirmed with the appropriate parties for each requirement.</p>
         </div>
         <div>
-          {faqs.map(([question, answer], index) => (
-            <article key={question} style={{ borderTop: index === 0 ? "1px solid #20301F" : "1px solid #DCD3BE", padding: "20px 4px" }}>
-              <h3 style={{ margin: "0 0 10px", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 20, color: "#20301F" }}>{question}</h3>
-              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#4A4636" }}>{answer}</p>
-            </article>
-          ))}
+          {faqs.map(([question, answer], index) => {
+            const isOpen = open === index;
+            return (
+              <article key={question} style={{ borderTop: index === 0 ? "1px solid #20301F" : "1px solid #DCD3BE", borderBottom: index === faqs.length - 1 ? "1px solid #DCD3BE" : undefined, padding: index === 0 ? "22px 4px" : "20px 4px" }}>
+                <button type="button" aria-expanded={isOpen} aria-controls={`market-faq-${market}-${index}`} onClick={() => setOpen(isOpen ? -1 : index)} style={{ all: "unset", boxSizing: "border-box", width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 18, cursor: "pointer" }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 20, color: "#20301F" }}>{question}</span>
+                  <span aria-hidden style={{ width: 22, height: 22, border: `1px solid ${isOpen ? "#B28A48" : "#C9BD9E"}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: isOpen ? "#B28A48" : "#8A857A", fontSize: isOpen ? 14 : 15, flex: "none" }}>{isOpen ? "−" : "+"}</span>
+                </button>
+                <div id={`market-faq-${market}-${index}`} style={{ maxHeight: isOpen ? 240 : 0, overflow: "hidden", transition: "max-height .3s ease, opacity .3s ease, margin .3s ease", opacity: isOpen ? 1 : 0, marginTop: isOpen ? 12 : 0 }}>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#4A4636" }}>{answer}</p>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </Reveal>

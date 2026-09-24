@@ -4,8 +4,8 @@ import { CREDENTIALS } from "@/lib/site-config";
 
 const COPY = {
   gcc: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · SAUDI ARABIA & GCC", lines: ["Your registered gateway to", "screened Indonesian talent", "in the Gulf."], lede: "Approved by the Saudi authorities, licensed in Indonesia, and backed by Dayalima Group. We deliver screened, work-ready talent in about two months, with a 3-month written guarantee." },
-  europe: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · EUROPE", lines: ["A considered route to", "Indonesian talent", "for Europe."], lede: "A market-specific workforce conversation for European employers, starting with the role, readiness requirements, and the appropriate documented route." },
-  japan: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · JAPAN", lines: ["A considered route to", "Indonesian talent", "for Japan."], lede: "A role-specific workforce conversation for Japanese employers, starting with the requirement, practical readiness, and the appropriate documented route." },
+  europe: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · EUROPE", lines: ["A clearer route to", "Indonesian talent", "for Europe."], lede: "For employers planning workforce needs across the Balkans, DTG begins with the role, sector, candidate readiness, and the route relevant to the destination." },
+  japan: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · JAPAN", lines: ["Prepared for the", "standards of", "Japan's workplaces."], lede: "For Japan workforce requirements, DTG aligns role fit with language, skill, workplace preparation, and the appropriate documented route." },
 } as const;
 
 const MARKET_TRUST = {
@@ -107,7 +107,7 @@ export function Hero({ market = "gcc" }: { market?: keyof typeof COPY }) {
           </div>
           <div style={{ padding: "26px 30px", display: "flex", alignItems: "center", gap: 14, borderLeft: "1px solid rgba(216,185,120,.14)" }}>
             <svg width="26" height="26" fill="none" stroke="#B28A48" strokeWidth="1.5" style={{ display: "block", flex: "none" }}><circle cx="13" cy="13" r="9.5" /><path d="M3.5 13h19" /><ellipse cx="13" cy="13" rx="4.2" ry="9.5" /></svg>
-            <div><div style={{ fontSize: 13.5, fontWeight: 700, color: "#F3EEE1" }}><Count target={1300} suffix="+" /> in the pool <small style={{ color: "#D8B978" }}>[NEED APPROVAL]</small></div><div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".1em", color: "#9FAE8E", marginTop: 3 }}>3-MONTH WRITTEN GUARANTEE</div></div>
+            <div><div style={{ fontSize: 13.5, fontWeight: 700, color: "#F3EEE1" }}><Count target={1300} suffix="+" /> in the pool</div><div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".1em", color: "#9FAE8E", marginTop: 3 }}>3-MONTH WRITTEN GUARANTEE</div></div>
           </div>
         </div> : <div className="g-trust" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
           {MARKET_TRUST[market].map(([title, note], index) => <div key={title} style={{ padding: "26px 30px", display: "flex", alignItems: "center", gap: 14, borderLeft: index ? "1px solid rgba(216,185,120,.14)" : undefined }}>
