@@ -10,16 +10,16 @@ const COPY = {
 
 const MARKET_TRUST = {
   europe: [
+    ["Licensed P3MI", `NO. ${CREDENTIALS.p3miLicenseNo}`],
+    ["Dayalima Group", "26+ YEARS IN HUMAN CAPITAL"],
     ["Employer-first conversation", "ROLE, CONTEXT & CAPABILITY"],
-    ["Readiness made clearer", "EVIDENCE BEFORE COMMITMENT"],
     ["Documented route", "MARKET REQUIREMENTS · [NEED APPROVAL]"],
-    ["Aftercare scope", "TO BE AGREED · [NEED APPROVAL]"],
   ],
   japan: [
-    ["Role-specific planning", "OPERATING CONTEXT FIRST"],
-    ["Practical readiness", "EVIDENCE BEFORE COMMITMENT"],
-    ["Documented route", "MARKET REQUIREMENTS · [NEED APPROVAL]"],
-    ["Aftercare scope", "TO BE AGREED · [NEED APPROVAL]"],
+    ["Licensed P3MI", `NO. ${CREDENTIALS.p3miLicenseNo}`],
+    ["Dayalima Group", "26+ YEARS IN HUMAN CAPITAL"],
+    ["Language & skill readiness", "ROLE-SPECIFIC PREPARATION"],
+    ["Documented Japan route", "SSW WHERE RELEVANT · [NEED APPROVAL]"],
   ],
 } as const;
 
