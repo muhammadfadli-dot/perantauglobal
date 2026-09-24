@@ -27,34 +27,34 @@ const MARKET_CONTENT: Record<Market, MarketContent> = {
     summary: "Referenced organisations reflect established relationships across the Gulf market.",
   },
   europe: {
-    title: "A structured route for Europe workforce decisions.",
+    title: "A clearer path for Europe workforce planning.",
     registrations: [
-      { label: "EUROPE MARKET FOCUS", value: "ROLE-LED", note: "Conversations begin with the employer requirement" },
-      { label: "DOCUMENTED ROUTE", value: "COUNTRY-SPECIFIC", note: "Requirements are reviewed with the appropriate parties" },
+      { label: "BALKAN MARKET FOCUS", value: "EMPLOYER-LED", note: "Planning starts with the priority sector and destination" },
+      { label: "ROLE & READINESS", value: "SCREENED", note: "Candidate fit is reviewed against the employer brief" },
       { label: "PART OF DAYALIMA GROUP", value: "26+ YEARS", note: "Human capital consulting since 1999" },
     ],
     metrics: [
-      { value: "ROLE FIT", label: "employer requirement first" },
-      { value: "READINESS", label: "evidence before commitment" },
-      { value: "ROUTE", label: "country-specific planning", accent: true },
+      { value: "BRIEF", label: "sector and destination first" },
+      { value: "READINESS", label: "fit before presentation" },
+      { value: "ROUTE", label: "country-aware planning", accent: true },
     ],
-    summaryTitle: "A considered market conversation",
-    summary: "Each Europe workforce requirement is reviewed for role fit, readiness, and the applicable route.",
+    summaryTitle: "Clearer decisions before mobilisation",
+    summary: "Each Europe workforce requirement is reviewed for role fit, candidate readiness, and the route relevant to the destination.",
   },
   japan: {
-    title: "Readiness that supports Japan workplace needs.",
+    title: "Preparation for Japan workforce requirements.",
     registrations: [
       { label: "JAPAN MARKET FOCUS", value: "ROLE-SPECIFIC", note: "Workforce planning begins with the role and workplace context" },
-      { label: "PRACTICAL READINESS", value: "PREPARED", note: "Readiness is reviewed against the employer requirement" },
+      { label: "LANGUAGE & SKILL", value: "ROLE-LED", note: "Readiness is reviewed against the employer requirement" },
       { label: "PART OF DAYALIMA GROUP", value: "26+ YEARS", note: "Human capital consulting since 1999" },
     ],
     metrics: [
-      { value: "ROLE", label: "workplace context first" },
-      { value: "READINESS", label: "practical preparation" },
+      { value: "LANGUAGE", label: "workplace communication" },
+      { value: "SKILL", label: "role preparation" },
       { value: "SUPPORT", label: "planned after placement", accent: true },
     ],
     summaryTitle: "Preparation before placement",
-    summary: "Japan workforce requirements are assessed around role context, practical readiness, and appropriate support.",
+    summary: "Japan workforce requirements are assessed around role context, language and skill readiness, workplace preparation, and appropriate support.",
   },
 };
 

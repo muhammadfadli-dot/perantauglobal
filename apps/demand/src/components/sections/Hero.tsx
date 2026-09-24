@@ -4,8 +4,8 @@ import { CREDENTIALS } from "@/lib/site-config";
 
 const COPY = {
   gcc: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · SAUDI ARABIA & GCC", lines: ["Your registered gateway to", "screened Indonesian talent", "in the Gulf."], lede: "Approved by the Saudi authorities, licensed in Indonesia, and backed by Dayalima Group. We deliver screened, work-ready talent in about two months, with a 3-month written guarantee." },
-  europe: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · EUROPE", lines: ["A considered route to", "Indonesian talent", "for Europe."], lede: "A market-specific workforce conversation for European employers, starting with the role, readiness requirements, and the appropriate documented route." },
-  japan: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · JAPAN", lines: ["A considered route to", "Indonesian talent", "for Japan."], lede: "A role-specific workforce conversation for Japanese employers, starting with the requirement, practical readiness, and the appropriate documented route." },
+  europe: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · EUROPE", lines: ["A clearer route to", "Indonesian talent", "for Europe."], lede: "For employers planning workforce needs across the Balkans, DTG begins with the role, sector, candidate readiness, and the route relevant to the destination." },
+  japan: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · JAPAN", lines: ["Prepared for the", "standards of", "Japan's workplaces."], lede: "For Japan workforce requirements, DTG aligns role fit with language, skill, workplace preparation, and the appropriate documented route." },
 } as const;
 
 const MARKET_TRUST = {
