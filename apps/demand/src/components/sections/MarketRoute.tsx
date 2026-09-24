@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { Reveal } from "@/components/Reveal";
 
 type Market = "europe" | "japan";
@@ -147,6 +150,8 @@ export function MarketRoute({ market }: { market: Market }) {
 }
 
 function MarketFaq({ market, faqs }: { market: Market; faqs: readonly (readonly [string, string])[] }) {
+  const [open, setOpen] = useState(0);
+
   return (
     <Reveal id="faq" style={{ background: "#F5F1E6", padding: "96px 0", scrollMarginTop: 74 }}>
       <div className="g-faq" style={{ maxWidth: 1240, margin: "0 auto", padding: "0 40px" }}>
@@ -156,12 +161,20 @@ function MarketFaq({ market, faqs }: { market: Market; faqs: readonly (readonly 
           <p style={{ margin: "18px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "#6E6752" }}>Specific market commitments are confirmed with the appropriate parties for each requirement.</p>
         </div>
         <div>
-          {faqs.map(([question, answer], index) => (
-            <article key={question} style={{ borderTop: index === 0 ? "1px solid #20301F" : "1px solid #DCD3BE", padding: "20px 4px" }}>
-              <h3 style={{ margin: "0 0 10px", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 20, color: "#20301F" }}>{question}</h3>
-              <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#4A4636" }}>{answer}</p>
-            </article>
-          ))}
+          {faqs.map(([question, answer], index) => {
+            const isOpen = open === index;
+            return (
+              <article key={question} style={{ borderTop: index === 0 ? "1px solid #20301F" : "1px solid #DCD3BE", borderBottom: index === faqs.length - 1 ? "1px solid #DCD3BE" : undefined, padding: index === 0 ? "22px 4px" : "20px 4px" }}>
+                <button type="button" aria-expanded={isOpen} aria-controls={`market-faq-${market}-${index}`} onClick={() => setOpen(isOpen ? -1 : index)} style={{ all: "unset", boxSizing: "border-box", width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 18, cursor: "pointer" }}>
+                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 500, fontSize: 20, color: "#20301F" }}>{question}</span>
+                  <span aria-hidden style={{ width: 22, height: 22, border: `1px solid ${isOpen ? "#B28A48" : "#C9BD9E"}`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", color: isOpen ? "#B28A48" : "#8A857A", fontSize: isOpen ? 14 : 15, flex: "none" }}>{isOpen ? "−" : "+"}</span>
+                </button>
+                <div id={`market-faq-${market}-${index}`} style={{ maxHeight: isOpen ? 240 : 0, overflow: "hidden", transition: "max-height .3s ease, opacity .3s ease, margin .3s ease", opacity: isOpen ? 1 : 0, marginTop: isOpen ? 12 : 0 }}>
+                  <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#4A4636" }}>{answer}</p>
+                </div>
+              </article>
+            );
+          })}
         </div>
       </div>
     </Reveal>

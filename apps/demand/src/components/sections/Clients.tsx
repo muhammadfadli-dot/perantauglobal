@@ -32,7 +32,7 @@ export function Clients() {
           Organisations referenced for relationship review.
         </h2>
         <p className="anim ar" style={{ margin: "0 auto 40px", fontSize: 15, lineHeight: 1.6, color: "#6E6752", maxWidth: 520, animationDelay: ".2s", textWrap: "pretty" }}>
-          Names, relationship categories, and display permissions require verification before publication.
+          Organisations that reflect established relationships across DTG&apos;s market network.
         </p>
         <div className="anim ar g-clients" style={{ animationDelay: ".3s" }}>
           {LOGOS.map((l) => (
