@@ -4,16 +4,16 @@ import { useEffect, useRef, useState } from "react";
 
 const FAQS = [
   {
-    q: "Do you actually have ready candidates?",
-    a: "Around 1,300 professionals are in our active pool, with 550+ ready for Saudi and GCC roles. Availability is confirmed against your requirements before presenting anyone.",
+    q: "How do we begin a Saudi Arabia workforce requirement?",
+    a: "Start with the occupation, sector, number of roles, intended start date, and current visa-slot status. DTG then confirms the next discussion and relevant requirements.",
   },
   {
-    q: "How long does the process take?",
-    a: "About two months from signed job order to arrival. That is the timeline of a fully legal cross-border placement, and it is why you can rely on it.",
+    q: "How is candidate readiness assessed?",
+    a: "Relevant experience, skills, language, and readiness are reviewed against the agreed employer brief before a profile is presented.",
   },
   {
-    q: "Do you handle documents and visas?",
-    a: "Yes, end to end. Contracts, permits, medical checks, and visa processing are managed by our team on both sides of the route.",
+    q: "What happens after a candidate joins?",
+    a: "Written six-month protection and the applicable support process are set out in the placement agreement.",
   },
   {
     q: "Are you a registered agent?",

@@ -1,9 +1,8 @@
 import Image from "next/image";
-import { Count } from "@/components/Count";
 import { CREDENTIALS } from "@/lib/site-config";
 
 const COPY = {
-  gcc: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · SAUDI ARABIA & GCC", lines: ["Your registered gateway to", "screened Indonesian talent", "in the Gulf."], lede: "Approved by the Saudi authorities, licensed in Indonesia, and backed by Dayalima Group. We deliver screened, work-ready talent in about two months, with a 3-month written guarantee." },
+  gcc: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · SAUDI ARABIA & GCC", lines: ["Hire Indonesian Talent", "With Confidence.", "Protected for 6 Months."], lede: "DTG supports Saudi and GCC employers from workforce requirements and candidate shortlisting through documentation, mobilisation, and aftercare." },
   europe: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · EUROPE", lines: ["A clearer route to", "Indonesian talent", "for Europe."], lede: "For employers planning workforce needs across the Balkans, DTG begins with the role, sector, candidate readiness, and the route relevant to the destination." },
   japan: { eyebrow: "REGISTERED INDONESIAN TALENT PARTNER · JAPAN", lines: ["Prepared for the", "standards of", "Japan's workplaces."], lede: "For Japan workforce requirements, DTG aligns role fit with language, skill, workplace preparation, and the appropriate documented route." },
 } as const;
@@ -13,13 +12,13 @@ const MARKET_TRUST = {
     ["Licensed P3MI", `NO. ${CREDENTIALS.p3miLicenseNo}`],
     ["Dayalima Group", "26+ YEARS IN HUMAN CAPITAL"],
     ["Employer-first conversation", "ROLE, CONTEXT & CAPABILITY"],
-    ["Documented route", "MARKET REQUIREMENTS · [NEED APPROVAL]"],
+    ["Documented route", "REQUIREMENTS CONFIRMED PER DESTINATION"],
   ],
   japan: [
     ["Licensed P3MI", `NO. ${CREDENTIALS.p3miLicenseNo}`],
     ["Dayalima Group", "26+ YEARS IN HUMAN CAPITAL"],
     ["Language & skill readiness", "ROLE-SPECIFIC PREPARATION"],
-    ["Documented Japan route", "SSW WHERE RELEVANT · [NEED APPROVAL]"],
+    ["Documented Japan route", "ROUTE CONFIRMED PER REQUIREMENT"],
   ],
 } as const;
 
@@ -81,8 +80,8 @@ export function Hero({ market = "gcc" }: { market?: keyof typeof COPY }) {
           <a href="#contact" className="btn-terra" style={{ background: "#A8452F", color: "#F3EEE1", textDecoration: "none", fontSize: 15.5, fontWeight: 700, padding: "16px 34px", borderRadius: 8, boxShadow: "0 14px 34px rgba(168,69,47,.44)", transition: "background .15s, transform .15s" }}>
             Discuss Your Workforce Needs
           </a>
-          <a href="#pool" className="btn-ghost" style={{ color: "#F5F1E6", textDecoration: "none", fontSize: 15.5, fontWeight: 600, padding: "15px 32px", borderRadius: 8, border: "1px solid rgba(216,185,120,.6)", background: "rgba(16,27,16,.28)", transition: "background .15s, border-color .15s" }}>
-            See Our Talent Pool
+          <a href={market === "gcc" ? "#sectors" : "#pool"} className="btn-ghost" style={{ color: "#F5F1E6", textDecoration: "none", fontSize: 15.5, fontWeight: 600, padding: "15px 32px", borderRadius: 8, border: "1px solid rgba(216,185,120,.6)", background: "rgba(16,27,16,.28)", transition: "background .15s, border-color .15s" }}>
+            {market === "gcc" ? "See Available Talent Sectors" : "See Our Talent Pool"}
           </a>
         </div>
         <svg className="anim adraw hero-rule" width="1" height="46" style={{ display: "block", margin: "44px auto 0", overflow: "visible" }}>
@@ -107,7 +106,7 @@ export function Hero({ market = "gcc" }: { market?: keyof typeof COPY }) {
           </div>
           <div style={{ padding: "26px 30px", display: "flex", alignItems: "center", gap: 14, borderLeft: "1px solid rgba(216,185,120,.14)" }}>
             <svg width="26" height="26" fill="none" stroke="#B28A48" strokeWidth="1.5" style={{ display: "block", flex: "none" }}><circle cx="13" cy="13" r="9.5" /><path d="M3.5 13h19" /><ellipse cx="13" cy="13" rx="4.2" ry="9.5" /></svg>
-            <div><div style={{ fontSize: 13.5, fontWeight: 700, color: "#F3EEE1" }}><Count target={1300} suffix="+" /> in the pool</div><div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".1em", color: "#9FAE8E", marginTop: 3 }}>3-MONTH WRITTEN GUARANTEE</div></div>
+            <div><div style={{ fontSize: 13.5, fontWeight: 700, color: "#F3EEE1" }}>Protected for 6 months</div><div style={{ fontFamily: "var(--font-mono)", fontSize: 10, letterSpacing: ".1em", color: "#9FAE8E", marginTop: 3 }}>WRITTEN PROTECTION AFTER JOINING</div></div>
           </div>
         </div> : <div className="g-trust" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 40px" }}>
           {MARKET_TRUST[market].map(([title, note], index) => <div key={title} style={{ padding: "26px 30px", display: "flex", alignItems: "center", gap: 14, borderLeft: index ? "1px solid rgba(216,185,120,.14)" : undefined }}>

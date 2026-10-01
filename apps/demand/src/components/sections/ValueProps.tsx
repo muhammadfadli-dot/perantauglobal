@@ -3,7 +3,7 @@ import { Reveal } from "@/components/Reveal";
 const REASONS = [
   {
     title: "Legal and compliant",
-    body: "Approved by Saudi MOFA and licensed as a P3MI. Contract to visa, the full legal route.",
+    body: "Approved by Saudi MOFA and licensed as a P3MI. Documentation and mobilisation are coordinated with the relevant parties.",
     icon: (
       <svg width="30" height="30" fill="none" stroke="#4A5A32" strokeWidth="1.5" style={{ flex: "none" }}>
         <path d="M15 3 25 6.5v6.5c0 6-4.3 10.3-10 12-5.7-1.7-10-6-10-12V6.5Z" />
@@ -64,10 +64,6 @@ export function ValueProps() {
               </div>
             ))}
           </div>
-        </div>
-        <div className="anim ar" style={{ marginTop: 26, display: "flex", alignItems: "center", gap: 12, fontSize: 14, color: "#6E6752", animationDelay: ".6s" }}>
-          <span style={{ width: 6, height: 6, background: "#B28A48", transform: "rotate(45deg)", display: "block", flex: "none" }} />
-          From signed job order to arrival in about two months. <a href="#process" style={{ color: "#8A6D2E", fontWeight: 600 }}>See how the process works</a>
         </div>
       </div>
     </Reveal>

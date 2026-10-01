@@ -44,10 +44,10 @@ export function Guarantee() {
           </span>
           <div className="anim ar" style={{ fontFamily: "var(--font-mono)", fontSize: 11.5, letterSpacing: ".2em", color: "#B28A48", marginBottom: 18, animationDelay: ".2s" }}>OUR GUARANTEE</div>
           <h2 style={{ margin: "0 0 24px", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "clamp(38px,4.6vw,56px)", lineHeight: 1.05, letterSpacing: "-.01em", color: "#F5F1E6" }}>
-            <span className="anim aw" style={{ display: "inline-block", animationDelay: ".3s" }}>Three months.</span>{" "}
+            <span className="anim aw" style={{ display: "inline-block", animationDelay: ".3s" }}>Six months.</span>{" "}
             <span className="anim aw" style={{ display: "inline-block", fontStyle: "italic", fontWeight: 400, color: "#E1C583", animationDelay: ".44s" }}>In writing.</span>
           </h2>
-          <p className="anim ar" style={{ margin: "0 auto 38px", fontSize: 16.5, lineHeight: 1.7, color: "#B9C4A6", maxWidth: 600, animationDelay: ".56s", textWrap: "pretty" }}>If a placed candidate resigns or does not meet the agreed standard within the first three months, we replace them. That commitment is written into your placement agreement, not offered as a verbal promise.</p>
+          <p className="anim ar" style={{ margin: "0 auto 38px", fontSize: 16.5, lineHeight: 1.7, color: "#B9C4A6", maxWidth: 600, animationDelay: ".56s", textWrap: "pretty" }}>Employers receive written protection for six months after a candidate joins. The applicable terms and support process are set out in the placement agreement.</p>
           <div style={{ display: "flex", justifyContent: "center", gap: 14, flexWrap: "wrap", paddingTop: 32, borderTop: "1px solid rgba(216,185,120,.25)" }}>
             {PILLS.map((p, i) => (
               <span key={p} className="atick" style={{ display: "flex", alignItems: "center", gap: 9, background: "rgba(216,185,120,.08)", border: "1px solid rgba(216,185,120,.28)", borderRadius: 100, padding: "9px 18px", fontSize: 13, fontWeight: 600, color: "#E4E0CC", animationDelay: `${0.68 + i * 0.1}s` }}>

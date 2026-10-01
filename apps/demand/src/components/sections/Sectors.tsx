@@ -55,6 +55,16 @@ const SECTORS = [
       </svg>
     ),
   },
+  {
+    num: "04",
+    title: "Manufacturing",
+    subtitle: "For production and operations workforce conversations.",
+    img: "/images/dtg-many-faces-group-v2.png",
+    alt: "Indonesian professionals across operational workforce contexts",
+    roles: ["Production operators", "Technical support", "Quality and maintenance roles"],
+    cta: "Discuss manufacturing talent",
+    medallion: <svg width="26" height="26" fill="none" stroke="#D8B978" strokeWidth="1.5"><path d="M4 22h18M6 22V11l5-4v15M13 22V5l5 3v14" /><path d="M16 12h2M16 16h2" strokeLinecap="round" /></svg>,
+  },
 ];
 
 const MARKET_SECTORS = {
@@ -73,16 +83,16 @@ const MARKET_SECTORS = {
 
 const MARKET_INTRO = {
   gcc: {
-    title: "Three sectors. Deep benches.",
-    body: "Focused pools mean faster shortlists and better fits. Tell us the roles, we bring the people.",
+    title: "Relevant sectors for Saudi Arabia & GCC.",
+    body: "Tell us the role, sector, and workplace context so the next conversation can focus on the right requirement.",
   },
   europe: {
     title: "Relevant role contexts for Europe.",
-    body: "These are employer conversation areas, not a claim of live availability. Role fit and market requirements are confirmed against your brief. [NEED APPROVAL]",
+    body: "These are employer conversation areas, not a claim of live availability. Role fit and market requirements are confirmed against your brief.",
   },
   japan: {
     title: "Relevant role contexts for Japan.",
-    body: "These are employer conversation areas, not a claim of live availability. Role fit and market requirements are confirmed against your brief. [NEED APPROVAL]",
+    body: "These are employer conversation areas, not a claim of live availability. Role fit and market requirements are confirmed against your brief.",
   },
 } as const;
 

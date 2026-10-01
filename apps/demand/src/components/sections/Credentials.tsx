@@ -1,5 +1,4 @@
 import { Reveal } from "@/components/Reveal";
-import { Count } from "@/components/Count";
 import { CREDENTIALS } from "@/lib/site-config";
 import type { ReactNode } from "react";
 
@@ -19,12 +18,12 @@ const MARKET_CONTENT: Record<Market, MarketContent> = {
     title: "Credentials that support confident hiring.",
     registrations: REGISTRATIONS,
     metrics: [
-      { value: <Count target={1300} suffix="+" />, label: "active talent pool" },
-      { value: <Count target={550} suffix="+" />, label: "ready for Saudi & GCC" },
-      { value: "3 mo", label: "written guarantee", accent: true },
+      { value: "P3MI", label: "licensed in Indonesia" },
+      { value: "MOFA", label: "Saudi approval recorded" },
+      { value: "6 mo", label: "written protection", accent: true },
     ],
     summaryTitle: "Trusted by employers across the Gulf",
-    summary: "Referenced organisations reflect established relationships across the Gulf market.",
+    summary: "Legal credentials and written protection help employers start a workforce conversation with clearer accountability.",
   },
   europe: {
     title: "A clearer path for Europe workforce planning.",

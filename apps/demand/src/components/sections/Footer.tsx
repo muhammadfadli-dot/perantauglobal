@@ -13,7 +13,7 @@ const LEGAL_LINKS = [
 export function Footer({ market = "gcc" }: { market?: "gcc" | "europe" | "japan" }) {
   const isGcc = market === "gcc";
   const description = isGcc
-    ? "Helping global healthcare, hospitality, and wellness businesses access skilled Indonesian talent. Legally, reliably, and with a written guarantee."
+    ? "Helping Saudi and GCC employers discuss workforce needs across healthcare, hospitality, wellness, and manufacturing."
     : "We help international employers assess fit and readiness in Indonesian talent, then support a considered route from workforce need through aftercare.";
   return (
     <footer style={{ background: "#16220F", borderTop: "1px solid rgba(216,185,120,.22)", padding: "60px 0 0" }}>
@@ -31,7 +31,7 @@ export function Footer({ market = "gcc" }: { market?: "gcc" | "europe" | "japan"
         <div>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 600, letterSpacing: ".18em", color: "#B28A48", marginBottom: 18 }}>{isGcc ? "CREDENTIALS" : "MARKET STATUS"}</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 11, fontSize: 13, lineHeight: 1.5, color: "#B9C4A6" }}>
-            {isGcc ? <><span>Saudi MOFA Approved Agent · Reg. {CREDENTIALS.mofaApprovalDisplay}</span><span>Licensed P3MI · No. {CREDENTIALS.p3miLicenseNo}</span><span>Part of Dayalima Group · 26+ years</span></> : <><span>Employer-first market conversation</span><span>Specific market requirements · [NEED APPROVAL]</span><span>Part of Dayalima Group</span></>}
+            {isGcc ? <><span>Saudi MOFA Approved Agent · Reg. {CREDENTIALS.mofaApprovalDisplay}</span><span>Licensed P3MI · No. {CREDENTIALS.p3miLicenseNo}</span><span>Protected for 6 months</span></> : <><span>Employer-first market conversation</span><span>Requirements confirmed per engagement</span><span>Part of Dayalima Group</span></>}
           </div>
         </div>
         <div>
