@@ -1,10 +1,9 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/lib/site-config";
 
-// Keep the site out of search indexes until the public launch is explicitly
-// enabled (set NEXT_PUBLIC_ALLOW_INDEX=true on the production project). This
-// prevents pre-launch / preview deploys and unverified content from being
-// indexed before the domain cutover is signed off.
+// Search indexing is controlled per deployment environment. Production sets
+// NEXT_PUBLIC_ALLOW_INDEX=true; previews remain blocked unless explicitly
+// enabled, so pre-release content is not indexed by search engines.
 const ALLOW = process.env.NEXT_PUBLIC_ALLOW_INDEX === "true";
 
 export default function robots(): MetadataRoute.Robots {
