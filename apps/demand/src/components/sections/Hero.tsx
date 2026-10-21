@@ -84,6 +84,9 @@ export function Hero({ market = "gcc" }: { market?: keyof typeof COPY }) {
             {market === "gcc" ? "See Available Talent Sectors" : "See Our Talent Pool"}
           </a>
         </div>
+        {market === "gcc" && <a href="#guarantee" className="anim af hero-guarantee" style={{ display: "inline-flex", alignItems: "center", marginTop: 18, color: "#E1C583", fontSize: 13.5, fontWeight: 700, textDecoration: "none", animationDelay: ".86s" }}>
+          Six-month written protection after joining.
+        </a>}
         <svg className="anim adraw hero-rule" width="1" height="46" style={{ display: "block", margin: "44px auto 0", overflow: "visible" }}>
           <line x1="0.5" y1="0" x2="0.5" y2="46" stroke="#B28A48" strokeWidth="1.4" strokeDasharray="46" strokeDashoffset="46" />
         </svg>
