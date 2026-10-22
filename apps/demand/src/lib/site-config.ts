@@ -32,5 +32,4 @@ export function waLink(
 export const CREDENTIALS = {
   p3miLicenseNo: "1810240237512001", // KNOWN
   mofaApprovalDisplay: "321",
-  guaranteeMonths: 3,
 } as const;

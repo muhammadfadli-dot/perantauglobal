@@ -29,8 +29,8 @@ export const QUANTITIES = [
   { value: "50+", label: "More than 50" },
 ] as const;
 
-// Placement runs about two months. Asking upfront surfaces a mismatch before
-// BD spends a call on it, and tells them which inquiries to work first.
+// Timing is confirmed per employer requirement because route and documentation
+// requirements vary by occupation and destination.
 export const TIMELINES = [
   { value: "asap", label: "As soon as possible" },
   { value: "1-3m", label: "Within 1 to 3 months" },

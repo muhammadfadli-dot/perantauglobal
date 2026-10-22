@@ -1,9 +1,9 @@
 import { Reveal } from "@/components/Reveal";
 
 const PILLS = [
-  "Written into every agreement",
-  "Replacement managed by us",
-  "Support through the period",
+  "Written terms set out in the agreement",
+  "Support and recovery process agreed in writing",
+  "Support through the agreed period",
 ];
 
 const CORNERS: Record<string, React.CSSProperties> = {

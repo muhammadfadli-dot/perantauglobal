@@ -11,5 +11,5 @@ import { Footer } from "@/components/sections/Footer";
 import { StickyCta } from "@/components/StickyCta";
 
 export default function SaudiGccPage() {
-  return <div className="gcc-page"><Nav market="gcc" /><main><Hero /><ValueProps /><Sectors /><Process /><Guarantee /><Credentials /><Faq /><MarketContact /></main><Footer /><StickyCta /></div>;
+  return <div className="gcc-page"><Nav market="gcc" /><main><Hero /><ValueProps /><Sectors /><Process /><Guarantee /><Credentials /><Faq /><MarketContact /></main><Footer market="gcc" /><StickyCta /></div>;
 }

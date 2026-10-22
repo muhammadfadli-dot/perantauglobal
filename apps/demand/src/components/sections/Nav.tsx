@@ -7,10 +7,12 @@ import { MobileMenu } from "@/components/MobileMenu";
 type Market = "gcc" | "europe" | "japan";
 type Locale = "en" | "id" | "ar" | "bg" | "ja";
 
-const MARKET_LOCALES: Record<Market, { value: Locale; label: string }[]> = {
-  gcc: [{ value: "en", label: "English" }, { value: "id", label: "Indonesia" }, { value: "ar", label: "العربية" }],
-  europe: [{ value: "en", label: "English" }, { value: "id", label: "Indonesia" }, { value: "bg", label: "Български" }],
-  japan: [{ value: "en", label: "English" }, { value: "id", label: "Indonesia" }, { value: "ja", label: "日本語" }],
+type MarketLocale = { value: Locale; label: string; flagSrc: string; country: string };
+
+const MARKET_LOCALES: Record<Market, MarketLocale[]> = {
+  gcc: [{ value: "en", label: "English", flagSrc: "/images/flag-us.svg", country: "United States" }, { value: "id", label: "Indonesia", flagSrc: "/images/flag-id.svg", country: "Indonesia" }, { value: "ar", label: "العربية", flagSrc: "/images/flag-sa.svg", country: "Saudi Arabia" }],
+  europe: [{ value: "en", label: "English", flagSrc: "/images/flag-us.svg", country: "United States" }, { value: "id", label: "Indonesia", flagSrc: "/images/flag-id.svg", country: "Indonesia" }, { value: "bg", label: "Български", flagSrc: "/images/flag-bg.svg", country: "Bulgaria" }],
+  japan: [{ value: "en", label: "English", flagSrc: "/images/flag-us.svg", country: "United States" }, { value: "id", label: "Indonesia", flagSrc: "/images/flag-id.svg", country: "Indonesia" }, { value: "ja", label: "日本語", flagSrc: "/images/flag-jp.svg", country: "Japan" }],
 };
 
 const NAV_COPY: Record<Locale, { home: string; why: string; pool: string; sectors: string; process: string; credentials: string; request: string }> = {
@@ -24,8 +26,10 @@ const NAV_COPY: Record<Locale, { home: string; why: string; pool: string; sector
 export function Nav({ market = "gcc" }: { market?: Market }) {
   const [solid, setSolid] = useState(false);
   const [locale, setLocale] = useState<Locale>("en");
+  const [languageOpen, setLanguageOpen] = useState(false);
   const locales = MARKET_LOCALES[market];
   const copy = NAV_COPY[locale];
+  const activeLocale = locales.find(({ value }) => value === locale) ?? locales[0];
 
   useEffect(() => {
     const onScroll = () => setSolid(window.scrollY > 40);
@@ -47,6 +51,7 @@ export function Nav({ market = "gcc" }: { market?: Market }) {
 
   const chooseLocale = (value: Locale) => {
     setLocale(value);
+    setLanguageOpen(false);
     window.localStorage.setItem(`dtg-market-language-${market}`, value);
     document.documentElement.lang = value;
     if (value === "en") {
@@ -99,11 +104,31 @@ export function Nav({ market = "gcc" }: { market?: Market }) {
             </a>
           ))}
         </div>
-        <label style={{ display: "flex", alignItems: "center", border: `1px solid ${solid ? "rgba(65,62,51,.26)" : "rgba(243,238,225,.45)"}`, borderRadius: 7, padding: "0 9px", height: 40, color: linkColor }}>
-          <select value={locale} onChange={(event) => chooseLocale(event.target.value as Locale)} aria-label="Select market language" style={{ appearance: "none", border: 0, outline: 0, background: "transparent", color: "inherit", font: "600 12px var(--font-sans)", cursor: "pointer", paddingRight: 4 }}>
-            {locales.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
-          </select>
-        </label>
+        <div className="market-language">
+          <button
+            type="button"
+            className="market-language-trigger"
+            aria-label={`Select language, currently ${activeLocale.label}`}
+            aria-expanded={languageOpen}
+            aria-haspopup="listbox"
+            onClick={() => setLanguageOpen((open) => !open)}
+            style={{ color: linkColor, borderColor: solid ? "rgba(65,62,51,.26)" : "rgba(243,238,225,.45)" }}
+          >
+            <span className="market-language-flag" aria-hidden><img src={activeLocale.flagSrc} alt="" /></span>
+            <span className="market-language-label">{activeLocale.label}</span>
+            <svg aria-hidden width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="m4 6 4 4 4-4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
+          {languageOpen && <div className="market-language-menu" role="listbox" aria-label="Choose market language">
+            <span className="market-language-menu-label">MARKET LANGUAGE</span>
+            {locales.map((item) => (
+              <button key={item.value} type="button" role="option" aria-selected={locale === item.value} onClick={() => chooseLocale(item.value)}>
+                <span className="market-language-flag" aria-hidden><img src={item.flagSrc} alt="" /></span>
+                <span><b>{item.label}</b><small>{item.country}</small></span>
+                {locale === item.value && <span className="market-language-check" aria-hidden>✓</span>}
+              </button>
+            ))}
+          </div>}
+        </div>
         <a
           href="#contact"
           className="navcta"

@@ -93,32 +93,23 @@ export default function TermsPage() {
       <LegalSection n={5} title="Accuracy of the information here">
         <p>We publish in good faith and keep this site current. Three things are worth stating plainly:</p>
         <ul>
-          <li>
-            <strong>Talent pool figures marked NEED APPROVAL are internal snapshots</strong> and must not be
-            treated as verified public evidence until their source, reporting period, definition, and approval
-            owner have been confirmed. Availability is re-verified against each employer requirement.
-          </li>
+          <li><strong>Availability is confirmed for each employer requirement.</strong> We do not treat a published page as evidence that a particular candidate, route, or timeframe is available.</li>
           <li>
             <strong>No testimonial is published without verification and permission</strong> from the quoted
             individual and the relevant publication owner.
           </li>
           <li>
-            <strong>Organisation names and logos marked NEED APPROVAL are references under review.</strong>
-            Their relationship category and display permission must be confirmed before public use, and all
-            marks remain the property of their respective owners.
+            <strong>Third-party organisation names and logos are displayed only where their relationship and
+            display permission have been confirmed.</strong> All marks remain the property of their respective owners.
           </li>
         </ul>
-        <p>
-          Placement timelines, including the roughly two-month figure we quote, are typical rather than
-          guaranteed, because visa and regulatory steps sit with authorities in two countries.
-        </p>
       </LegalSection>
 
-      <LegalSection n={6} title="The placement guarantee">
+      <LegalSection n={6} title="Written placement protection">
         <p>
-          The {CREDENTIALS.guaranteeMonths}-month guarantee described on this site is real. Its exact scope,
-          conditions, and remedy are set out in the placement agreement you sign, and that document is the
-          operative version. The summary here is a summary.
+          Where a placement includes written protection, its duration, scope, eligibility, and support or
+          recovery process are set out in the placement agreement you sign. That agreement is the operative
+          version and this website does not extend or replace its terms.
         </p>
       </LegalSection>
 

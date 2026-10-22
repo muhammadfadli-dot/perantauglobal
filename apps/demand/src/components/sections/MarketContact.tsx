@@ -4,8 +4,8 @@ const MARKET_CONTACT = {
   gcc: {
     label: "SAUDI ARABIA & GCC",
     title: "Start your Saudi Arabia & GCC workforce conversation.",
-    description: "Tell us the role, sector, and timing. Our team will guide the next discussion around your GCC workforce requirement.",
-    message: "Hello Daya Talenta Global, I would like to discuss an Indonesian talent requirement for Saudi Arabia and the GCC.",
+    description: "To prepare the next discussion, share the occupation, sector, number of roles, target start date, and current visa-slot status if known. Our team will then confirm the relevant route and responsibilities.",
+    message: "Hello Daya Talenta Global, I would like to discuss a Saudi Arabia & GCC workforce requirement.\n\nOccupation / role:\nSector:\nNumber of hires:\nTarget start date:\nCurrent visa-slot status (if known):",
   },
   europe: {
     label: "EUROPE",

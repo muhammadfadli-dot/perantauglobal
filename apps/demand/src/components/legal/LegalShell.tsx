@@ -8,8 +8,8 @@ import { Footer } from "@/components/sections/Footer";
  *
  * The site Nav is a scroll-spy header whose links are all same-page anchors
  * (#why, #sectors, ...), so it is dead weight on a standalone route. This is a
- * static header in the same lockup, a dark hero band lifted from the Contact
- * section, and a paper card in the Credentials treatment. No scroll-reveal
+ * static header in the same lockup, a neutral brand hero, and a paper card.
+ * No scroll-reveal
  * classes: legal copy must render even with scripting off.
  *
  * Prose typography lives in globals.css under `.legal` rather than inline, the
@@ -17,7 +17,7 @@ import { Footer } from "@/components/sections/Footer";
  */
 
 const HERO_TEXTURE =
-  "radial-gradient(900px 440px at 50% -20%,rgba(178,138,72,.16),transparent 60%),repeating-linear-gradient(45deg,rgba(216,185,120,.04) 0,rgba(216,185,120,.04) 1px,transparent 1px,transparent 26px),repeating-linear-gradient(-45deg,rgba(216,185,120,.04) 0,rgba(216,185,120,.04) 1px,transparent 1px,transparent 26px)";
+  "radial-gradient(900px 440px at 50% -20%,rgba(177,31,43,.2),transparent 60%),repeating-linear-gradient(45deg,rgba(255,255,255,.035) 0,rgba(255,255,255,.035) 1px,transparent 1px,transparent 26px),repeating-linear-gradient(-45deg,rgba(255,255,255,.035) 0,rgba(255,255,255,.035) 1px,transparent 1px,transparent 26px)";
 
 export function LegalShell({
   title,
@@ -48,33 +48,33 @@ export function LegalShell({
       </header>
 
       <main>
-        <div style={{ background: "#20301F", backgroundImage: HERO_TEXTURE, padding: "72px clamp(16px,4vw,40px) 96px" }}>
+        <div style={{ background: "#252223", backgroundImage: HERO_TEXTURE, padding: "72px clamp(16px,4vw,40px) 96px" }}>
           <div style={{ maxWidth: 860, margin: "0 auto" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 9, marginBottom: 16 }}>
               <span style={{ width: 7, height: 7, background: "#B28A48", transform: "rotate(45deg)", display: "block" }} />
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: ".18em", color: "#D8B978" }}>LEGAL</span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: ".18em", color: "#E1B6A9" }}>LEGAL</span>
             </div>
             <h1 style={{ margin: "0 0 16px", fontFamily: "var(--font-display)", fontWeight: 500, fontSize: "clamp(32px,4.4vw,50px)", lineHeight: 1.06, letterSpacing: "-.012em", color: "#F5F1E6" }}>
               {title}
             </h1>
-            <p style={{ margin: "0 0 22px", fontSize: 15.5, lineHeight: 1.65, color: "#B9C4A6", maxWidth: 640, textWrap: "pretty" }}>{lede}</p>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: ".14em", color: "#8A9781" }}>
+            <p style={{ margin: "0 0 22px", fontSize: 15.5, lineHeight: 1.65, color: "#DDD7D1", maxWidth: 640, textWrap: "pretty" }}>{lede}</p>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, letterSpacing: ".14em", color: "#B8ADA6" }}>
               EFFECTIVE {effective.toUpperCase()}
             </div>
           </div>
         </div>
 
-        <div style={{ background: "#EDE7D9", padding: "0 clamp(16px,4vw,40px) 90px" }}>
+        <div style={{ background: "#F0EEEA", padding: "0 clamp(16px,4vw,40px) 90px" }}>
           <div
             className="legal"
-            style={{ background: "#F3EEE1", border: "1px solid #DCD3BE", borderRadius: 14, padding: "44px clamp(24px,5vw,52px)", maxWidth: 860, margin: "0 auto", marginTop: -56, boxShadow: "0 18px 50px rgba(32,48,31,.09)" }}
+            style={{ background: "#FFFDF9", border: "1px solid #DDD8D1", borderRadius: 14, padding: "44px clamp(24px,5vw,52px)", maxWidth: 860, margin: "0 auto", marginTop: -56, boxShadow: "0 18px 50px rgba(37,34,35,.09)" }}
           >
             {children}
           </div>
         </div>
       </main>
 
-      <Footer />
+      <Footer market="global" />
     </>
   );
 }
