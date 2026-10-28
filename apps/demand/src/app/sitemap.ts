@@ -3,7 +3,7 @@ import { SITE } from "@/lib/site-config";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const corporateRoutes = ["/about", "/services", "/resources", "/regions", "/articles", "/contact", "/for-candidates"];
-  const marketRoutes = ["/saudi-gcc", "/ar/saudi-gcc"];
+  const marketRoutes = ["/en/saudi-gcc", "/ar/saudi-gcc"];
   return [
     {
       url: `https://${SITE.domain}/`,

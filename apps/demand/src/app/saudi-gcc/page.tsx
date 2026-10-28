@@ -1,15 +1,7 @@
-import { Nav } from "@/components/sections/Nav";
-import { Hero } from "@/components/sections/Hero";
-import { ValueProps } from "@/components/sections/ValueProps";
-import { Sectors } from "@/components/sections/Sectors";
-import { Process } from "@/components/sections/Process";
-import { Guarantee } from "@/components/sections/Guarantee";
-import { Credentials } from "@/components/sections/Credentials";
-import { Faq } from "@/components/sections/Faq";
-import { MarketContact } from "@/components/sections/MarketContact";
-import { Footer } from "@/components/sections/Footer";
-import { StickyCta } from "@/components/StickyCta";
+import { permanentRedirect } from "next/navigation";
 
-export default function SaudiGccPage() {
-  return <div className="gcc-page"><Nav market="gcc" /><main><Hero /><ValueProps /><Sectors /><Process /><Guarantee /><Credentials /><Faq /><MarketContact /></main><Footer market="gcc" /><StickyCta /></div>;
+// Preserve previously distributed GCC links while making English the canonical
+// default under the new language-first URL structure.
+export default function SaudiGccLegacyRoute() {
+  permanentRedirect("/en/saudi-gcc");
 }

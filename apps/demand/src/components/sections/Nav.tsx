@@ -71,7 +71,7 @@ export function Nav({ market = "gcc", initialLocale = "en" }: { market?: Market;
       return;
     }
     if (market === "gcc" && value === "en") {
-      window.location.assign("/saudi-gcc");
+      window.location.assign("/en/saudi-gcc");
       return;
     }
     if (value === "en") {

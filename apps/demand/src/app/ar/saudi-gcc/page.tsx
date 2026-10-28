@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     "توظيف عمالة من إندونيسيا للشركات",
     "إجراءات توظيف العمالة للشركات",
   ],
-  alternates: { canonical: "/ar/saudi-gcc", languages: { en: "/saudi-gcc", ar: "/ar/saudi-gcc" } },
+  alternates: { canonical: "/ar/saudi-gcc", languages: { en: "/en/saudi-gcc", ar: "/ar/saudi-gcc" } },
   openGraph: {
     title: "توظيف الكفاءات الإندونيسية للسعودية والخليج | DTG",
     description: "مسار توظيف واضح للكفاءات الإندونيسية في الضيافة والرعاية الصحية.",
