@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   description: "Employer-first workforce solutions for Saudi Arabia and GCC, connecting businesses with Indonesian talent through a documented recruitment route and written post-joining protection.",
   alternates: {
     canonical: "/en/saudi-gcc",
-    languages: { en: "/en/saudi-gcc", ar: "/ar/saudi-gcc" },
+    languages: { en: "/en/saudi-gcc", id: "/id/saudi-gcc", ar: "/ar/saudi-gcc" },
   },
   openGraph: {
     title: "Hire Indonesian Talent for Saudi Arabia & GCC | DTG",

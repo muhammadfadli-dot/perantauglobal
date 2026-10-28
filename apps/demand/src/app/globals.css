@@ -1913,6 +1913,9 @@ textarea::placeholder {
 /* GCC Arabic market page: authored Arabic copy, not browser translation. */
 .gcc-ar-page { --gcc-ink:#20301f; --gcc-gold:#b28a48; --gcc-paper:#f5f1e6; --gcc-muted:#6e6752; font-family:Tahoma,Arial,sans-serif; background:var(--gcc-paper); color:var(--gcc-ink); }
 .gcc-ar-page h1,.gcc-ar-page h2,.gcc-ar-page h3 { font-family:Tahoma,Arial,sans-serif; letter-spacing:0; }
+.gcc-id-page { font-family:var(--font-plus-jakarta-sans),Arial,sans-serif; direction:ltr; }
+.gcc-id-page h1,.gcc-id-page h2,.gcc-id-page h3 { font-family:var(--font-plus-jakarta-sans),Arial,sans-serif; }
+.gcc-id-page .gcc-ar-card-body li:before { margin-right:10px; margin-left:0; }
 .gcc-ar-shell { width:min(1160px,calc(100% - 48px)); margin:0 auto; }
 .gcc-ar-hero { position:relative; min-height:760px; overflow:hidden; background:#182618; color:#f5f1e6; }
 .gcc-ar-hero-overlay { position:absolute; inset:0; background:linear-gradient(180deg,rgba(16,27,16,.72),rgba(16,27,16,.6) 48%,rgba(16,27,16,.92)); }

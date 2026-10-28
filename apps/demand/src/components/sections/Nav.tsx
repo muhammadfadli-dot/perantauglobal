@@ -66,6 +66,10 @@ export function Nav({ market = "gcc", initialLocale = "en" }: { market?: Market;
     window.localStorage.setItem(`dtg-market-language-${market}`, value);
     document.documentElement.lang = value;
     document.documentElement.dir = value === "ar" ? "rtl" : "ltr";
+    if (market === "gcc" && value === "id") {
+      window.location.assign("/id/saudi-gcc");
+      return;
+    }
     if (market === "gcc" && value === "ar") {
       window.location.assign("/ar/saudi-gcc");
       return;
