@@ -23,9 +23,9 @@ const NAV_COPY: Record<Locale, { home: string; why: string; pool: string; sector
   ja: { home: "ホーム", why: "DTGについて", pool: "人材", sectors: "分野", process: "プロセス", credentials: "認定", request: "人材を相談する" },
 };
 
-export function Nav({ market = "gcc" }: { market?: Market }) {
+export function Nav({ market = "gcc", initialLocale = "en" }: { market?: Market; initialLocale?: Locale }) {
   const [solid, setSolid] = useState(false);
-  const [locale, setLocale] = useState<Locale>("en");
+  const [locale, setLocale] = useState<Locale>(initialLocale);
   const [languageOpen, setLanguageOpen] = useState(false);
   const locales = MARKET_LOCALES[market];
   const copy = NAV_COPY[locale];
@@ -39,21 +39,41 @@ export function Nav({ market = "gcc" }: { market?: Market }) {
   }, []);
 
   useEffect(() => {
+    if (initialLocale !== "en") {
+      setLocale(initialLocale);
+      document.documentElement.lang = initialLocale;
+      document.documentElement.dir = initialLocale === "ar" ? "rtl" : "ltr";
+      return;
+    }
     const translatedLocale = new URLSearchParams(window.location.search).get("_x_tr_tl") as Locale | null;
     if (translatedLocale && locales.some(({ value }) => value === translatedLocale)) {
       setLocale(translatedLocale);
       document.documentElement.lang = translatedLocale;
+      document.documentElement.dir = translatedLocale === "ar" ? "rtl" : "ltr";
       return;
     }
     const saved = window.localStorage.getItem(`dtg-market-language-${market}`) as Locale | null;
-    if (saved && locales.some(({ value }) => value === saved)) setLocale(saved);
-  }, [market, locales]);
+    if (saved && locales.some(({ value }) => value === saved)) {
+      setLocale(saved);
+      document.documentElement.lang = saved;
+      document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
+    }
+  }, [initialLocale, market, locales]);
 
   const chooseLocale = (value: Locale) => {
     setLocale(value);
     setLanguageOpen(false);
     window.localStorage.setItem(`dtg-market-language-${market}`, value);
     document.documentElement.lang = value;
+    document.documentElement.dir = value === "ar" ? "rtl" : "ltr";
+    if (market === "gcc" && value === "ar") {
+      window.location.assign("/ar/saudi-gcc");
+      return;
+    }
+    if (market === "gcc" && value === "en") {
+      window.location.assign("/saudi-gcc");
+      return;
+    }
     if (value === "en") {
       window.location.assign(`https://www.dayatalentaglobal.com${window.location.pathname}`);
       return;
