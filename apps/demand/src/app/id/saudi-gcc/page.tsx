@@ -13,6 +13,8 @@ export const metadata: Metadata = {
     "rekrutmen tenaga kerja Indonesia GCC",
     "barista Indonesia untuk kafe Saudi Arabia",
     "perawat Indonesia untuk rumah sakit Saudi Arabia",
+    "tenaga manufaktur Indonesia Saudi Arabia",
+    "operator produksi Indonesia Saudi Arabia",
     "solusi rekrutmen perusahaan Saudi Arabia",
     "penyedia tenaga kerja Indonesia untuk perusahaan",
   ],
@@ -25,6 +27,11 @@ export const metadata: Metadata = {
     description: "Jalur rekrutmen yang jelas bagi employer Saudi Arabia dan GCC untuk merekrut talenta Indonesia.",
     url: "/id/saudi-gcc",
     locale: "id_ID",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rekrut Talenta Indonesia untuk Saudi Arabia & GCC | DTG",
+    description: "Jalur rekrutmen yang jelas bagi employer Saudi Arabia dan GCC untuk merekrut talenta Indonesia.",
   },
 };
 
@@ -44,6 +51,14 @@ const sectors = [
     image: "/images/sector-hospitality.jpg",
     alt: "Barista Indonesia menyiapkan kopi di kafe hotel",
     keyword: "Rekrut Barista Indonesia untuk Saudi Arabia",
+  },
+  {
+    title: "Manufaktur",
+    text: "Untuk perusahaan manufaktur dan operasional yang membutuhkan tenaga produksi Indonesia berdasarkan kebutuhan peran, keselamatan kerja, dan konteks fasilitas.",
+    roles: ["Operator produksi", "Dukungan teknis", "Quality control dan maintenance"],
+    image: "/images/sector-manufacturing-v2.png",
+    alt: "Profesional manufaktur Indonesia berkolaborasi di lini produksi modern",
+    keyword: "Rekrut tenaga manufaktur Indonesia untuk Saudi Arabia",
   },
 ];
 
@@ -67,7 +82,7 @@ const indonesiaSeoJsonLd = {
     {
       "@type": "Service",
       name: "Rekrut Talenta Indonesia untuk Saudi Arabia dan GCC",
-      description: "Solusi rekrutmen bagi perusahaan Saudi Arabia dan GCC untuk merekrut Barista dan Perawat Indonesia, dari kebutuhan tenaga kerja hingga dukungan setelah kandidat bergabung.",
+      description: "Solusi rekrutmen bagi perusahaan Saudi Arabia dan GCC untuk merekrut Barista, Perawat, dan tenaga manufaktur Indonesia, dari kebutuhan tenaga kerja hingga dukungan setelah kandidat bergabung.",
       url: `https://${SITE.domain}/id/saudi-gcc`,
       serviceType: "Solusi rekrutmen internasional untuk perusahaan",
       areaServed: [{ "@type": "Country", name: "Saudi Arabia" }, { "@type": "Place", name: "Gulf Cooperation Council" }],
@@ -121,7 +136,7 @@ export default function SaudiGccIndonesianPage() {
 
         <section id="why" className="gcc-ar-section gcc-ar-paper"><div className="gcc-ar-shell gcc-ar-two-column"><div><SectionLabel>MENGAPA DTG</SectionLabel><h2>Keputusan rekrutmen yang lebih jelas,<br /><em>dengan jalur yang bertanggung jawab.</em></h2></div><div className="gcc-ar-copy"><p>DTG membantu perusahaan Saudi Arabia menyelaraskan kebutuhan tenaga kerja dengan pengalaman relevan, kesiapan kerja, serta jalur penempatan yang sesuai. Pembahasan dimulai dari pekerjaan yang dibutuhkan, bukan dari daftar kandidat umum.</p><p>Solusi rekrutmen perusahaan mencakup penjelasan persyaratan peran, peninjauan kandidat, serta koordinasi dokumen dan mobilisasi dalam batas tanggung jawab yang disepakati.</p></div></div></section>
 
-        <section id="sectors" className="gcc-ar-section gcc-ar-offwhite"><div className="gcc-ar-shell"><SectionLabel>SEKTOR</SectionLabel><div className="gcc-ar-section-intro"><h2>Sektor yang relevan untuk Saudi Arabia dan GCC.</h2><p>Penyediaan Barista Indonesia untuk kafe dan Perawat Indonesia untuk rumah sakit dimulai dari pemahaman peran, konteks kerja, dan kebutuhan employer.</p></div><div className="gcc-ar-sector-grid">{sectors.map((sector) => <article className="gcc-ar-sector-card" key={sector.title}><div className="gcc-ar-image"><Image src={sector.image} alt={sector.alt} fill sizes="(max-width: 800px) 100vw, 50vw" style={{ objectFit: "cover" }} /></div><div className="gcc-ar-card-body"><p className="gcc-ar-keyword">{sector.keyword}</p><h3>{sector.title}</h3><p>{sector.text}</p><ul>{sector.roles.map((role) => <li key={role}>{role}</li>)}</ul><a href="#contact">Diskusikan kebutuhan sektor ini</a></div></article>)}</div></div></section>
+        <section id="sectors" className="gcc-ar-section gcc-ar-offwhite"><div className="gcc-ar-shell"><SectionLabel>SEKTOR</SectionLabel><div className="gcc-ar-section-intro"><h2>Sektor yang relevan untuk Saudi Arabia dan GCC.</h2><p>Penyediaan Barista Indonesia untuk kafe, Perawat Indonesia untuk rumah sakit, dan tenaga manufaktur dimulai dari pemahaman peran, konteks kerja, dan kebutuhan employer.</p></div><div className="gcc-ar-sector-grid">{sectors.map((sector) => <article className="gcc-ar-sector-card" key={sector.title}><div className="gcc-ar-image"><Image src={sector.image} alt={sector.alt} fill sizes="(max-width: 800px) 100vw, 50vw" style={{ objectFit: "cover" }} /></div><div className="gcc-ar-card-body"><p className="gcc-ar-keyword">{sector.keyword}</p><h3>{sector.title}</h3><p>{sector.text}</p><ul>{sector.roles.map((role) => <li key={role}>{role}</li>)}</ul><a href="#contact">Diskusikan kebutuhan sektor ini</a></div></article>)}</div></div></section>
 
         <section id="process" className="gcc-ar-section gcc-ar-paper"><div className="gcc-ar-shell"><SectionLabel>JALUR REKRUTMEN</SectionLabel><div className="gcc-ar-section-intro"><h2>Perjalanan yang jelas dari kebutuhan hingga dukungan.</h2><p>Penempatan tenaga kerja Indonesia untuk perusahaan dibahas berdasarkan peran, dokumen yang diperlukan, dan tanggung jawab yang terdokumentasi.</p></div><ol className="gcc-ar-process">{process.map(([title, body], index) => <li key={title}><b>{String(index + 1).padStart(2, "0")}</b><div><h3>{title}</h3><p>{body}</p></div></li>)}</ol></div></section>
 

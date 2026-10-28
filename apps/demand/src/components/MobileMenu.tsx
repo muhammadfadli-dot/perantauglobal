@@ -2,21 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 
-const LINKS = [
-  { href: "#why", label: "Why DTG" },
-  { href: "#pool", label: "Talent Pool" },
-  { href: "#sectors", label: "Sectors" },
-  { href: "#process", label: "Process" },
-  { href: "#credentials", label: "Credentials" },
-  { href: "#faq", label: "FAQ" },
-];
+export type MobileMenuCopy = {
+  menu: string;
+  openMenu: string;
+  closeMenu: string;
+  request: string;
+  links: Array<{ href: string; label: string }>;
+};
 
 /**
  * Phone navigation. The desktop nav links are hidden below 920px, so without
  * this the only way to reach a section on a phone is to scroll the whole page.
  * Button and close target are both 44px so they clear the tap-target minimum.
  */
-export function MobileMenu({ dark }: { dark: boolean }) {
+export function MobileMenu({ dark, copy }: { dark: boolean; copy: MobileMenuCopy }) {
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -43,7 +42,7 @@ export function MobileMenu({ dark }: { dark: boolean }) {
       <button
         type="button"
         className="navburger"
-        aria-label="Open menu"
+        aria-label={copy.openMenu}
         aria-expanded={open}
         onClick={() => setOpen(true)}
         style={{
@@ -72,12 +71,12 @@ export function MobileMenu({ dark }: { dark: boolean }) {
           if (e.target === e.currentTarget) setOpen(false);
         }}
       >
-        <div ref={panelRef} className="mmenu-panel" role="dialog" aria-modal="true" aria-label="Menu">
+        <div ref={panelRef} className="mmenu-panel" role="dialog" aria-modal="true" aria-label={copy.menu}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 30 }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: ".2em", color: "#8A6D2E" }}>MENU</span>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10.5, letterSpacing: ".2em", color: "#8A6D2E" }}>{copy.menu}</span>
             <button
               type="button"
-              aria-label="Close menu"
+              aria-label={copy.closeMenu}
               onClick={() => setOpen(false)}
               style={{ width: 44, height: 44, marginRight: -10, background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}
             >
@@ -88,7 +87,7 @@ export function MobileMenu({ dark }: { dark: boolean }) {
           </div>
 
           <nav style={{ display: "flex", flexDirection: "column" }}>
-            {LINKS.map((l) => (
+            {copy.links.map((l) => (
               <a key={l.href} href={l.href} className="mmenu-link" onClick={() => setOpen(false)}>
                 <span className="mmenu-dia" />
                 <span>{l.label}</span>
@@ -97,7 +96,7 @@ export function MobileMenu({ dark }: { dark: boolean }) {
           </nav>
 
           <a href="#contact" className="mmenu-cta" onClick={() => setOpen(false)}>
-            Request Talent
+            {copy.request}
           </a>
         </div>
       </div>

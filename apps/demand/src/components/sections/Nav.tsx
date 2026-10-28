@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { LogoMark } from "@/components/LogoMark";
-import { MobileMenu } from "@/components/MobileMenu";
+import { MobileMenu, type MobileMenuCopy } from "@/components/MobileMenu";
 
 type Market = "gcc" | "europe" | "japan";
 type Locale = "en" | "id" | "ar" | "bg" | "ja";
@@ -15,12 +15,12 @@ const MARKET_LOCALES: Record<Market, MarketLocale[]> = {
   japan: [{ value: "en", label: "English", flagSrc: "/images/flag-us.svg", country: "United States" }, { value: "id", label: "Indonesia", flagSrc: "/images/flag-id.svg", country: "Indonesia" }, { value: "ja", label: "日本語", flagSrc: "/images/flag-jp.svg", country: "Japan" }],
 };
 
-const NAV_COPY: Record<Locale, { home: string; why: string; pool: string; sectors: string; process: string; credentials: string; request: string }> = {
-  en: { home: "Home", why: "Why DTG", pool: "Talent Pool", sectors: "Sectors", process: "Process", credentials: "Credentials", request: "Request Talent" },
-  id: { home: "Beranda", why: "Mengapa DTG", pool: "Talenta", sectors: "Sektor", process: "Proses", credentials: "Kredensial", request: "Diskusikan Kebutuhan" },
-  ar: { home: "الرئيسية", why: "لماذا DTG", pool: "المواهب", sectors: "القطاعات", process: "العملية", credentials: "الاعتمادات", request: "اطلب المواهب" },
-  bg: { home: "Начало", why: "Защо DTG", pool: "Таланти", sectors: "Сектори", process: "Процес", credentials: "Акредитации", request: "Заявете таланти" },
-  ja: { home: "ホーム", why: "DTGについて", pool: "人材", sectors: "分野", process: "プロセス", credentials: "認定", request: "人材を相談する" },
+const NAV_COPY: Record<Locale, { home: string; why: string; pool: string; sectors: string; process: string; credentials: string; faq: string; request: string; menu: string; openMenu: string; closeMenu: string }> = {
+  en: { home: "Home", why: "Why DTG", pool: "Talent Pool", sectors: "Sectors", process: "Process", credentials: "Credentials", faq: "FAQ", request: "Request Talent", menu: "MENU", openMenu: "Open menu", closeMenu: "Close menu" },
+  id: { home: "Beranda", why: "Mengapa DTG", pool: "Talenta", sectors: "Sektor", process: "Proses", credentials: "Kredensial", faq: "Pertanyaan", request: "Diskusikan Kebutuhan", menu: "MENU", openMenu: "Buka menu", closeMenu: "Tutup menu" },
+  ar: { home: "الرئيسية", why: "لماذا DTG", pool: "المواهب", sectors: "القطاعات", process: "العملية", credentials: "الاعتمادات", faq: "الأسئلة الشائعة", request: "اطلب المواهب", menu: "القائمة", openMenu: "فتح القائمة", closeMenu: "إغلاق القائمة" },
+  bg: { home: "Начало", why: "Защо DTG", pool: "Таланти", sectors: "Сектори", process: "Процес", credentials: "Акредитации", faq: "Въпроси", request: "Заявете таланти", menu: "МЕНЮ", openMenu: "Отвори менюто", closeMenu: "Затвори менюто" },
+  ja: { home: "ホーム", why: "DTGについて", pool: "人材", sectors: "分野", process: "プロセス", credentials: "認定", faq: "よくある質問", request: "人材を相談する", menu: "メニュー", openMenu: "メニューを開く", closeMenu: "メニューを閉じる" },
 };
 
 export function Nav({ market = "gcc", initialLocale = "en" }: { market?: Market; initialLocale?: Locale }) {
@@ -30,6 +30,21 @@ export function Nav({ market = "gcc", initialLocale = "en" }: { market?: Market;
   const locales = MARKET_LOCALES[market];
   const copy = NAV_COPY[locale];
   const activeLocale = locales.find(({ value }) => value === locale) ?? locales[0];
+  const showPool = !(market === "gcc" && initialLocale !== "en");
+  const sectionLinks = [
+    { href: "#why", label: copy.why },
+    ...(showPool ? [{ href: "#pool", label: copy.pool }] : []),
+    { href: "#sectors", label: copy.sectors },
+    { href: "#process", label: copy.process },
+    { href: "#credentials", label: copy.credentials },
+  ];
+  const mobileCopy: MobileMenuCopy = {
+    menu: copy.menu,
+    openMenu: copy.openMenu,
+    closeMenu: copy.closeMenu,
+    request: copy.request,
+    links: [...sectionLinks, { href: "#faq", label: copy.faq }],
+  };
 
   useEffect(() => {
     const onScroll = () => setSolid(window.scrollY > 40);
@@ -115,14 +130,7 @@ export function Nav({ market = "gcc", initialLocale = "en" }: { market?: Market;
           </span>
         </a>
         <div className="navlinks" style={{ display: "flex", alignItems: "center", gap: 30 }}>
-          {[
-            { href: "/", label: copy.home },
-            { href: "#why", label: copy.why },
-            { href: "#pool", label: copy.pool },
-            { href: "#sectors", label: copy.sectors },
-            { href: "#process", label: copy.process },
-            { href: "#credentials", label: copy.credentials },
-          ].map((l) => (
+          {[{ href: "/", label: copy.home }, ...sectionLinks].map((l) => (
             <a key={l.href} className="navlink" href={l.href} style={{ color: linkColor }}>
               {l.label}
             </a>
@@ -170,7 +178,7 @@ export function Nav({ market = "gcc", initialLocale = "en" }: { market?: Market;
         >
           {copy.request}
         </a>
-        <MobileMenu dark={solid} />
+        <MobileMenu dark={solid} copy={mobileCopy} />
       </div>
     </nav>
   );
