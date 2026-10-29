@@ -194,8 +194,19 @@ export default function PrivacyPage() {
             no font provider sees your visit.
           </li>
           <li>
-            <strong>No Google Analytics, Google Tag Manager, or Meta Pixel is loaded on this site today.</strong>{" "}
-            If we add one, this page and the consent wording on the form will be updated before it goes live.
+            {process.env.NEXT_PUBLIC_GTM_ID ? (
+              <>
+                <strong>Google Tag Manager loads the site&apos;s tag container.</strong>{" "}
+                The current DTG container has no active Google Analytics or advertising measurement tags. If
+                measurement tags are enabled later, this notice and the relevant consent choices will be
+                updated first.
+              </>
+            ) : (
+              <>
+                <strong>No Google Analytics, Google Tag Manager, or Meta Pixel is loaded on this site today.</strong>{" "}
+                If we enable a measurement tag, this notice and the relevant consent choices will be updated first.
+              </>
+            )}
           </li>
           <li>
             <strong>Server request logs</strong> are kept by our hosting provider for a short period, for

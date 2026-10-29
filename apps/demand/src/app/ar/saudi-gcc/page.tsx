@@ -4,8 +4,8 @@ import { Nav } from "@/components/sections/Nav";
 import { SITE } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "توظيف باريستا وممرضات إندونيسيات في السعودية",
-  description: "حلول توظيف للشركات السعودية لاستقطاب باريستا وممرضات إندونيسيات، مع توضيح الاحتياج، اختيار المرشحين، المستندات، التنقل، والدعم بعد الانضمام.",
+  title: "توظيف باريستا وكوادر تمريض وتصنيع إندونيسية في السعودية والخليج | DTG",
+  description: "تدعم DTG أصحاب العمل في السعودية والخليج في توظيف باريستا وكوادر تمريض وعمال تصنيع من إندونيسيا، من تحديد الاحتياج إلى الاختيار والتوثيق والتنقل والرعاية بعد بدء العمل.",
   keywords: [
     "توظيف باريستا إندونيسي",
     "استقدام باريستا إندونيسي",
@@ -32,15 +32,15 @@ export const metadata: Metadata = {
   ],
   alternates: { canonical: "/ar/saudi-gcc", languages: { en: "/en/saudi-gcc", id: "/id/saudi-gcc", ar: "/ar/saudi-gcc" } },
   openGraph: {
-    title: "توظيف الكفاءات الإندونيسية للسعودية والخليج | DTG",
-    description: "مسار توظيف واضح للكفاءات الإندونيسية في الضيافة والرعاية الصحية.",
+    title: "توظيف باريستا وكوادر تمريض وتصنيع إندونيسية في السعودية والخليج | DTG",
+    description: "مسار توظيف واضح لأصحاب العمل في السعودية والخليج لتلبية احتياجات الضيافة والرعاية الصحية والتصنيع بكفاءات إندونيسية.",
     url: "/ar/saudi-gcc",
     locale: "ar_SA",
   },
   twitter: {
     card: "summary_large_image",
-    title: "توظيف الكفاءات الإندونيسية للسعودية والخليج | DTG",
-    description: "مسار توظيف واضح للكفاءات الإندونيسية في الضيافة والرعاية الصحية والتصنيع.",
+    title: "توظيف باريستا وكوادر تمريض وتصنيع إندونيسية في السعودية والخليج | DTG",
+    description: "مسار توظيف واضح لأصحاب العمل في السعودية والخليج لتلبية احتياجات الضيافة والرعاية الصحية والتصنيع بكفاءات إندونيسية.",
   },
 };
 
@@ -237,7 +237,7 @@ export default function SaudiGccArabicPage() {
             <SectionLabel>ابدأ المحادثة</SectionLabel>
             <h2>شاركنا احتياجك من القوى العاملة.</h2>
             <p>اذكر الدور والعدد وسياق مكان العمل والوقت المستهدف، وسيتواصل فريق DTG لمناقشة الخطوة المناسبة.</p>
-            <a className="gcc-ar-primary" href="https://wa.me/6285110555561?text=Halo%20DTG%2C%20saya%20ingin%20mendiskusikan%20kebutuhan%20tenaga%20kerja%20untuk%20Saudi%20Arabia%20dan%20GCC." target="_blank" rel="noreferrer">تواصل عبر واتساب</a>
+            <a className="gcc-ar-primary" href="https://wa.me/6285110555561?text=Hello%20Daya%20Talenta%20Global%2C%20I%20would%20like%20to%20discuss%20hiring%20Indonesian%20talent%20for%20Saudi%20Arabia%20and%20the%20GCC.%0A%0ARole%20or%20occupation%3A%0ASector%3A%0ANumber%20of%20hires%3A%0ATarget%20start%20date%3A%0ACurrent%20visa-slot%20status%20(if%20known)%3A" target="_blank" rel="noreferrer">تواصل عبر واتساب</a>
           </div>
         </section>
       </main>

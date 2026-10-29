@@ -4,8 +4,8 @@ import { Nav } from "@/components/sections/Nav";
 import { SITE } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "Rekrut Barista dan Perawat Indonesia untuk Saudi Arabia",
-  description: "Solusi rekrutmen bagi perusahaan Saudi Arabia dan GCC untuk merekrut Barista dan Perawat Indonesia, dari kebutuhan tenaga kerja, seleksi kandidat, dokumen, mobilisasi, hingga aftercare.",
+  title: "Rekrut Barista, Perawat & Tenaga Manufaktur | Saudi & GCC | DTG",
+  description: "DTG membantu perusahaan Saudi Arabia dan GCC merekrut Barista, Perawat, dan tenaga manufaktur Indonesia melalui seleksi kandidat, dokumen, mobilisasi, dan aftercare.",
   keywords: [
     "rekrut barista Indonesia Saudi Arabia",
     "rekrut perawat Indonesia Saudi Arabia",
@@ -23,15 +23,15 @@ export const metadata: Metadata = {
     languages: { en: "/en/saudi-gcc", id: "/id/saudi-gcc", ar: "/ar/saudi-gcc" },
   },
   openGraph: {
-    title: "Rekrut Talenta Indonesia untuk Saudi Arabia & GCC | DTG",
-    description: "Jalur rekrutmen yang jelas bagi employer Saudi Arabia dan GCC untuk merekrut talenta Indonesia.",
+    title: "Rekrut Barista, Perawat & Tenaga Manufaktur | Saudi & GCC | DTG",
+    description: "Jalur rekrutmen bagi perusahaan Saudi dan GCC untuk kebutuhan hospitality, kesehatan, dan manufaktur dengan talenta Indonesia.",
     url: "/id/saudi-gcc",
     locale: "id_ID",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rekrut Talenta Indonesia untuk Saudi Arabia & GCC | DTG",
-    description: "Jalur rekrutmen yang jelas bagi employer Saudi Arabia dan GCC untuk merekrut talenta Indonesia.",
+    title: "Rekrut Barista, Perawat & Tenaga Manufaktur | Saudi & GCC | DTG",
+    description: "Jalur rekrutmen bagi perusahaan Saudi dan GCC untuk kebutuhan hospitality, kesehatan, dan manufaktur dengan talenta Indonesia.",
   },
 };
 

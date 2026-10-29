@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Fraunces, IBM_Plex_Mono, Montserrat } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import "./globals.css";
 import { SITE, CONTACT, CREDENTIALS } from "@/lib/site-config";
 
 // Gate indexing until the public launch is signed off (see robots.ts).
 const allowIndex = process.env.NEXT_PUBLIC_ALLOW_INDEX === "true";
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
+const validGtmId = GTM_ID && /^GTM-[A-Z0-9]+$/.test(GTM_ID) ? GTM_ID : undefined;
 
 // Body / UI
 const plusJakarta = Plus_Jakarta_Sans({
@@ -90,6 +93,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${plusJakarta.variable} ${fraunces.variable} ${ibmPlexMono.variable} ${montserrat.variable}`}
     >
       <body className="antialiased">
+        {validGtmId ? (
+          <>
+            <Script
+              id="google-tag-manager"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!=='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${validGtmId}');`,
+              }}
+            />
+            <noscript>
+              <iframe
+                src={`https://www.googletagmanager.com/ns.html?id=${validGtmId}`}
+                height="0"
+                width="0"
+                style={{ display: "none", visibility: "hidden" }}
+                title="Google Tag Manager"
+              />
+            </noscript>
+          </>
+        ) : null}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}

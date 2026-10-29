@@ -20,6 +20,7 @@ const cspDirectives = [
   "font-src 'self' data:",
   "img-src 'self' data: blob: https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://www.facebook.com",
   "connect-src 'self' https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://graph.facebook.com https://vitals.vercel-insights.com",
+  "frame-src 'self' https://www.googletagmanager.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

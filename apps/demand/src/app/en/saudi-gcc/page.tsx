@@ -13,22 +13,22 @@ import { StickyCta } from "@/components/StickyCta";
 import { SITE } from "@/lib/site-config";
 
 export const metadata: Metadata = {
-  title: "Hire Indonesian Talent for Saudi Arabia & GCC",
-  description: "Employer-first workforce solutions for Saudi Arabia and GCC, connecting businesses with Indonesian talent through a documented recruitment route and written post-joining protection.",
+  title: "Recruit Indonesian Baristas, Nurses & Manufacturing Talent | Saudi & GCC",
+  description: "Recruit Indonesian baristas, nurses, and manufacturing talent for Saudi Arabia & GCC, with support for candidate selection, documentation, mobilization, and aftercare.",
   alternates: {
     canonical: "/en/saudi-gcc",
     languages: { en: "/en/saudi-gcc", id: "/id/saudi-gcc", ar: "/ar/saudi-gcc" },
   },
   openGraph: {
-    title: "Hire Indonesian Talent for Saudi Arabia & GCC | DTG",
-    description: "A clear recruitment route for Saudi and GCC employers hiring Indonesian talent.",
+    title: "Recruit Indonesian Baristas, Nurses & Manufacturing Talent | Saudi & GCC | DTG",
+    description: "A clear hiring route for Saudi and GCC employers seeking Indonesian talent in hospitality, healthcare, and manufacturing.",
     url: "/en/saudi-gcc",
     locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Hire Indonesian Talent for Saudi Arabia & GCC | DTG",
-    description: "A clear recruitment route for Saudi and GCC employers hiring Indonesian talent.",
+    title: "Recruit Indonesian Baristas, Nurses & Manufacturing Talent | Saudi & GCC | DTG",
+    description: "A clear hiring route for Saudi and GCC employers seeking Indonesian talent in hospitality, healthcare, and manufacturing.",
   },
 };
 
